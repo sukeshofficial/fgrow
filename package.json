@@ -1,0 +1,26 @@
+{
+  "name": "collazo-v0-new",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+    "build": "npm run build --prefix client",
+    "start": "npm run start --prefix server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sukeshofficial/collazo-v0.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/sukeshofficial/collazo-v0/issues"
+  },
+  "homepage": "https://github.com/sukeshofficial/collazo-v0#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
