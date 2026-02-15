@@ -4,6 +4,7 @@ import {
   resendVerifyOtp,
   loginUser,
   logoutUser,
+  getMe,
 } from "../../api/auth.api.js";
 
 import { AUTH_START, AUTH_SUCCESS, AUTH_FAIL, LOGOUT } from "./auth.types.js";
@@ -97,5 +98,27 @@ export const logout = async (dispatch) => {
     await logoutUser();
   } finally {
     dispatch({ type: LOGOUT });
+  }
+};
+
+/**
+ * Check Auth
+ */
+export const checkAuth = async (dispatch) => {
+  dispatch({ type: AUTH_START });
+
+  try {
+    const res = await getMe();
+    dispatch({
+      type: AUTH_SUCCESS,
+      payload: res.data.user,
+    });
+    return res.data;
+  } catch (err) {
+    dispatch({
+      type: AUTH_FAIL,
+      payload: null,
+    });
+    return null;
   }
 };

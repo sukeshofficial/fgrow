@@ -50,11 +50,19 @@ export const logoutUser = () => {
 };
 
 /**
- * GetMe
+ * userPreview
  * GET http://localhost:5000/api/v0/auth/user-preview?email=...
  */
-export const getMe = ({ email }) => {
+export const userPreview = ({ email }) => {
   return api.get("/auth/user-preview", {
     params: { email: form.email },
   });
+};
+
+/**
+ * getMe
+ * GET http://localhost:5000/api/v0/auth/me
+ */
+export const getMe = () => {
+  return api.get("/auth/me");
 };
