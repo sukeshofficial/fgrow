@@ -15,7 +15,6 @@ import {
 
 const router = Router();
 
-// Register accepts a single image file 'profile-avatar' (profile)
 router.post("/register", upload.single("profile-avatar"), registerUser);
 router.post("/verify-signup-otp", verifyOtp);
 router.post("/resend-verify-otp", resendSignupOtp);

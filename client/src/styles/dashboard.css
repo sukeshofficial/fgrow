@@ -1,0 +1,25 @@
+.dashboard {
+  padding: 20px;
+}
+
+.dashboard-title {
+  margin-bottom: 1rem;
+}
+
+.dashboard-user {
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.dashboard-logout {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #e74c3c;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.dashboard-logout:hover {
+  background-color: #c0392b;
+}

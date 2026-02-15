@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
 import "../styles/navbar.css";
 import logo from "/ForgeGrid.svg";
 
@@ -7,7 +8,12 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const escHandler = (e) => e.key === "Escape" && setMenuOpen(false);
+    const escHandler = (e) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+      }
+    };
+
     window.addEventListener("keydown", escHandler);
     return () => window.removeEventListener("keydown", escHandler);
   }, []);
@@ -42,10 +48,12 @@ export default function Navbar() {
           </nav>
 
           <div className="navbar-right">
-            <div className="user-area desktop-only"></div>
+            <div className="user-area desktop-only" />
+
             <button
+              type="button"
               className={`hamburger ${menuOpen ? "open" : ""}`}
-              onClick={() => setMenuOpen(!menuOpen)}
+              onClick={() => setMenuOpen((prev) => !prev)}
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
             >
@@ -78,10 +86,7 @@ export default function Navbar() {
 
           <div className="mobile-divider" />
 
-          <div className="mobile-user">
-
-          </div>
-
+          <div className="mobile-user" />
         </div>
       )}
     </>

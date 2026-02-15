@@ -9,7 +9,6 @@
 // - Each exported function has a short description of purpose, inputs, outputs,
 //   side effects (email sent, tokens set, DB writes), and example usage.
 
-
 import crypto from "crypto";
 import { User } from "../config/userModel.js";
 import sendEmail from "../utils/sendEmail.js";
@@ -42,8 +41,10 @@ const sendAuthSuccess = (res, user, payload = {}) => {
   const token = generateToken({ userId: user._id });
   res.cookie("auth_token", token, COOKIE_OPTIONS);
   // strip sensitive fields (User model has toJSON), but be explicit
-  const safe = (typeof user.toJSON === "function") ? user.toJSON() : { ...user };
-  return res.status(200).json({ message: "Logged-in successfully", user: safe, ...payload });
+  const safe = typeof user.toJSON === "function" ? user.toJSON() : { ...user };
+  return res
+    .status(200)
+    .json({ message: "Logged-in successfully", user: safe, ...payload });
 };
 
 /**
@@ -58,21 +59,27 @@ const sendAuthSuccess = (res, user, payload = {}) => {
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    if (!name || !email || !password) return res.status(400).json({ message: "name, email and password are required" });
-    if (!validator.isEmail(email)) return res.status(400).json({ message: "invalid email" });
+    if (!name || !email || !password)
+      return res
+        .status(400)
+        .json({ message: "name, email and password are required" });
+    if (!validator.isEmail(email))
+      return res.status(400).json({ message: "invalid email" });
 
     const username = await generateUsername(email);
-    const existing = await User.findOne({ $or: [{ email }, { username }] }).lean();
-    if (existing) return res.status(409).json({ message: "account already exists" });
+    const existing = await User.findOne({
+      $or: [{ email }, { username }],
+    }).lean();
+    if (existing)
+      return res.status(409).json({ message: "account already exists" });
 
     const newUser = new User({
       name: name,
       username,
       email,
-      profile_avatar: req.file ? req.file.path : ""
+      profile_avatar: req.file ? req.file.path : "",
     });
     newUser.password = password;
-
 
     const rawOtp = createNumericOtp();
     const hashedOtp = crypto.createHash("sha256").update(rawOtp).digest("hex");
@@ -88,7 +95,9 @@ export const registerUser = async (req, res) => {
     });
 
     const safeUser = newUser.toJSON();
-    return res.status(201).json({ message: "User registered successfully", user: safeUser });
+    return res
+      .status(201)
+      .json({ message: "User registered successfully", user: safeUser });
   } catch (err) {
     console.error("Register error:", err);
 
@@ -112,20 +121,27 @@ export const registerUser = async (req, res) => {
 export const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    if (!email || !otp) return res.status(400).json({ message: "email and otp required" });
+    if (!email || !otp)
+      return res.status(400).json({ message: "email and otp required" });
 
     const hashed = crypto.createHash("sha256").update(otp).digest("hex");
     const now = Date.now();
 
-    const user = await User.findOne({ email, reset_token: hashed, reset_token_expiry: { $gt: now } }).select("+password_hash");
-    if (!user) return res.status(400).json({ message: "invalid or expired otp" });
-
+    const user = await User.findOne({
+      email,
+      reset_token: hashed,
+      reset_token_expiry: { $gt: now },
+    }).select("+password_hash");
+    if (!user)
+      return res.status(400).json({ message: "invalid or expired otp" });
 
     user.reset_token = undefined;
     user.reset_token_expiry = undefined;
     await user.save({ validateBeforeSave: false });
 
-    return res.status(200).json({ message: "Email verified and authenticated successfully" });
+    return res
+      .status(200)
+      .json({ message: "Email verified and authenticated successfully" });
   } catch (err) {
     console.error("Verify-Otp error:", err);
     return res.status(500).json({ message: "internal server error" });
@@ -144,16 +160,23 @@ export const verifyOtp = async (req, res) => {
 export const resendSignupOtp = async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email || !validator.isEmail(email)) return res.status(400).json({ message: "valid email required" });
+    if (!email || !validator.isEmail(email))
+      return res.status(400).json({ message: "valid email required" });
 
     const user = await User.findOne({ email }).lean();
-    if (!user) return res.status(404).json({ message: "no account found for this email" });
+    if (!user)
+      return res
+        .status(404)
+        .json({ message: "no account found for this email" });
 
     const otp = createNumericOtp();
     const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
     const expiry = Date.now() + 5 * 60 * 1000;
 
-    await User.updateOne({ email }, { $set: { reset_token: hashedOtp, reset_token_expiry: expiry } });
+    await User.updateOne(
+      { email },
+      { $set: { reset_token: hashedOtp, reset_token_expiry: expiry } },
+    );
 
     await sendEmail({
       to: email,
@@ -187,19 +210,25 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password || !validator.isEmail(email)) {
-      return res.status(400).json({ message: 'email and password required' });
+      return res.status(400).json({ message: "email and password required" });
     }
 
-    const user = await User.findOne({ email }).select('+password_hash +failed_login_attempts +locked_until +lockout_level');
+    const user = await User.findOne({ email }).select(
+      "+password_hash +failed_login_attempts +locked_until +lockout_level",
+    );
     if (!user) {
-      return res.status(401).json({ message: 'invalid credentials' });
+      return res.status(401).json({ message: "invalid credentials" });
     }
 
     // Account locked check
     if (user.locked_until && user.locked_until.getTime() > Date.now()) {
       const remainingMs = user.locked_until.getTime() - Date.now();
       const remainingMinutes = Math.ceil(remainingMs / 60000);
-      return res.status(423).json({ message: `Account locked. Try again in ${remainingMinutes} minute(s)` });
+      return res
+        .status(423)
+        .json({
+          message: `Account locked. Try again in ${remainingMinutes} minute(s)`,
+        });
     }
 
     const valid = await user.comparePassword(password);
@@ -212,7 +241,6 @@ export const loginUser = async (req, res) => {
           user.locked_until = new Date(Date.now() + SHORT_LOCK_MS);
           user.failed_login_attempts = 0;
         } else if (user.lockout_level === 1) {
-
           user.lockout_level = 2;
           user.locked_until = new Date(Date.now() + LONG_LOCK_MS);
           user.failed_login_attempts = 0;
@@ -224,18 +252,17 @@ export const loginUser = async (req, res) => {
           // Build reset link using raw token (safe to include in email)
           const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${rawReset}&email=${encodeURIComponent(user.email)}`;
 
-
           // Notify user on long lock (recovery path)
           try {
             await sendEmail({
               to: user.email,
-              subject: 'Account temporarily locked - action required',
+              subject: "Account temporarily locked - action required",
               html: `<p>Your account has been locked for security reasons. To unlock, reset your password using the link below (valid for 1 hour):</p>
                      <p><a href="${resetLink}">${resetLink}</a></p>
-                     <p>If you did not attempt sign-in, please contact support.</p>`
+                     <p>If you did not attempt sign-in, please contact support.</p>`,
             });
           } catch (e) {
-            console.error('Failed to send lock notification email', e);
+            console.error("Failed to send lock notification email", e);
           }
         } else {
           // If lockout_level >=2, extend/keep long lock (optional)
@@ -245,7 +272,7 @@ export const loginUser = async (req, res) => {
       }
 
       await user.save({ validateBeforeSave: false });
-      return res.status(401).json({ message: 'invalid credentials' });
+      return res.status(401).json({ message: "invalid credentials" });
     }
 
     user.failed_login_attempts = 0;
@@ -256,8 +283,8 @@ export const loginUser = async (req, res) => {
 
     return sendAuthSuccess(res, user);
   } catch (err) {
-    console.error('Login User error', err);
-    return res.status(500).json({ message: 'internal server error' });
+    console.error("Login User error", err);
+    return res.status(500).json({ message: "internal server error" });
   }
 };
 
@@ -266,11 +293,19 @@ export const loginUser = async (req, res) => {
 export const resetPassword = async (req, res) => {
   try {
     const { email, token, newPassword } = req.body;
-    if (!email || !token || !newPassword) return res.status(400).json({ message: "email, token and new password required" });
+    if (!email || !token || !newPassword)
+      return res
+        .status(400)
+        .json({ message: "email, token and new password required" });
 
     const hashed = crypto.createHash("sha256").update(token).digest("hex");
-    const user = await User.findOne({ email, reset_token: hashed, reset_token_expiry: { $gt: Date.now() } }).select("+password_hash +locked_until +lockout_level");
-    if (!user) return res.status(400).json({ message: "invalid or expired token" });
+    const user = await User.findOne({
+      email,
+      reset_token: hashed,
+      reset_token_expiry: { $gt: Date.now() },
+    }).select("+password_hash +locked_until +lockout_level");
+    if (!user)
+      return res.status(400).json({ message: "invalid or expired token" });
 
     // set new password (virtual)
     user.password = newPassword;
@@ -284,7 +319,9 @@ export const resetPassword = async (req, res) => {
 
     await user.save();
 
-    return res.status(200).json({ message: "password reset successful — please login" });
+    return res
+      .status(200)
+      .json({ message: "password reset successful — please login" });
   } catch (err) {
     console.error("Reset Password error", err);
     return res.status(500).json({ message: "internal server error" });
@@ -317,9 +354,12 @@ export const getMe = async (req, res) => {
   try {
     // req.user is set by auth middleware
     const userId = req.user && req.user.id;
-    if (!userId) return res.status(401).json({ message: "missing user in request" });
+    if (!userId)
+      return res.status(401).json({ message: "missing user in request" });
 
-    const user = await User.findById(userId).select("-password_hash -reset_token -reset_token_expiry -locked_until");
+    const user = await User.findById(userId).select(
+      "-password_hash -reset_token -reset_token_expiry -locked_until",
+    );
     if (!user) return res.status(404).json({ message: "user not found" });
     return res.status(200).json({ message: "Your Details", user });
   } catch (err) {
@@ -336,8 +376,9 @@ export const userPreview = async (req, res) => {
       return res.status(400).json({ message: "missing email query param" });
     }
 
-    const user = await User.findOne({ email })
-      .select("name profile_avatar username email");
+    const user = await User.findOne({ email }).select(
+      "name profile_avatar username email",
+    );
 
     if (!user) {
       return res.status(404).json({ message: "user not found" });
@@ -345,14 +386,13 @@ export const userPreview = async (req, res) => {
 
     const preview = {
       username: user.name || user.username,
-      avatar: user.profile_avatar || ""
+      avatar: user.profile_avatar || "",
     };
 
     return res.status(200).json({
       message: "profile preview fetched",
-      preview
+      preview,
     });
-
   } catch (err) {
     console.error("User Preview error:", err);
     return res.status(500).json({ message: "internal server error" });
