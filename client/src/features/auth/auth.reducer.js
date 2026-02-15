@@ -52,6 +52,7 @@ export const authReducer = (state, action) => {
     case LOGOUT:
       return {
         ...initialAuthState,
+        isLoading: false,
       };
 
     default:
