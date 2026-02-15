@@ -66,6 +66,8 @@ const LoginForm = ({ onSuccess }) => {
     <form className="auth-form" onSubmit={handleSubmit}>
       <h2>Login</h2>
 
+      {error && <p className="form-error">{error}</p>}
+      
       <div className="email-field">
         <label className="input-label" htmlFor="email">
           Email
@@ -97,8 +99,6 @@ const LoginForm = ({ onSuccess }) => {
         onChange={handleChange}
         required
       />
-
-      {error && <p className="form-error">{error}</p>}
 
       <button type="submit" className="btn primary" disabled={isLoading}>
         {isLoading ? "Logging in..." : "Login"}

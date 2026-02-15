@@ -54,9 +54,14 @@ const RegisterForm = ({ onSuccess }) => {
       onSuccess(form.email);
     } catch (err) {
       const status = err?.response?.status;
-
+      const message = err?.response?.data?.message || "Registration failed";
       if (status === 409) {
-        navigate("/login", { replace: true });
+        setError(message);
+
+        setTimeout(() => {
+          navigate("/login", { replace: true });
+        }, 5000);
+
         return;
       }
 
@@ -73,6 +78,12 @@ const RegisterForm = ({ onSuccess }) => {
       aria-describedby="register-error"
     >
       <h2>Create your account</h2>
+      
+      {error && (
+        <div id="register-error" role="alert" className="form-error">
+          {error}
+        </div>
+      )}
 
       <label className="input-label" htmlFor="name">
         Full name
@@ -139,12 +150,6 @@ const RegisterForm = ({ onSuccess }) => {
         placeholder="Repeat password"
         required
       />
-
-      {error && (
-        <div id="register-error" role="alert" className="form-error">
-          {error}
-        </div>
-      )}
 
       <button type="submit" className="btn primary" disabled={isLoading}>
         {isLoading ? (
