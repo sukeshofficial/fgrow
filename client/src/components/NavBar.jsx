@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth.js";
+import { userPreview } from "../api/auth.api.js";
 
 import "../styles/navbar.css";
 import logo from "/ForgeGrid.svg";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const { user, avatar, username, logout } = useAuth();
 
   useEffect(() => {
     const escHandler = (e) => {
@@ -48,7 +52,16 @@ export default function Navbar() {
           </nav>
 
           <div className="navbar-right">
-            <div className="user-area desktop-only" />
+            <div className="user-area desktop-only">
+              <img src={avatar} alt="avatar" className="user-avatar" />
+              <span className="user-name">{user?.name ?? "Guest"}</span>
+
+              {user && (
+                <button className="logout-btn" onClick={logout}>
+                  Logout
+                </button>
+              )}
+            </div>
 
             <button
               type="button"
@@ -86,7 +99,26 @@ export default function Navbar() {
 
           <div className="mobile-divider" />
 
-          <div className="mobile-user" />
+          <div className="mobile-user">
+            <img src={avatar} alt="avatar" className="user-avatar" />
+
+            <div className="mobile-user-info">
+              <div className="mobile-user-name">{user?.name ?? "Guest"}</div>
+              {user ? (
+                <button className="mobile-logout" onClick={logout}>
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="mobile-login"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Login
+                </Link>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </>

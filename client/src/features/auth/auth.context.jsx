@@ -13,6 +13,7 @@ import {
   AUTH_FAIL,
   LOGOUT,
   SET_USER,
+  SET_AVATAR,
 } from "./auth.types.js";
 
 export const AuthContext = createContext(null);
@@ -24,6 +25,7 @@ export const AuthProvider = ({ children }) => {
   const authSuccess = (user) => dispatch({ type: AUTH_SUCCESS, payload: user });
   const setUser = (user) => dispatch({ type: SET_USER, payload: user });
   const authFail = (error) => dispatch({ type: AUTH_FAIL, payload: error });
+  const setAvatar = (user) => dispatch({ type: SET_AVATAR, payload: user });
   const logout = () => dispatch({ type: LOGOUT });
 
   return (
