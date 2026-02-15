@@ -1,17 +1,23 @@
 // middleware/auth.middleware.js
+// -----------------------------
+// Module purpose:
+// - Authenticate incoming requests by verifying JWT token provided either
+//   in cookie (auth_token) or Authorization header.
+// - Load fresh user document (safe fields) and attach `req.user` for handlers.
+//
+// Function-level documentation approach:
+// - The middleware verifies token, extracts userId, loads user from DB,
+//   checks for account lock, and attaches the minimal user object to request.
+// - If account is locked, returns 423 to prevent token use until unlock.
+
 import jwt from "jsonwebtoken";
 import { User } from "../config/userModel.js";
 
-/**
- * Auth middleware:
- * - Reads token from cookie or Authorization header
- * - Verifies JWT
- * - Loads user from DB (strips sensitive fields) and attaches to req.user
- */
 export default async function authMiddleware(req, res, next) {
   try {
     let token = null;
-    if (req.cookies && req.cookies.token) token = req.cookies.token;
+
+    if (req.cookies && req.cookies.auth_token) token = req.cookies.auth_token;
     else if (req.headers.authorization) {
       const authHeader = req.headers.authorization;
       token = authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : authHeader;
@@ -33,8 +39,10 @@ export default async function authMiddleware(req, res, next) {
     const user = await User.findById(userId).select("-password_hash -reset_token -reset_token_expiry -locked_until");
     if (!user) return res.status(401).json({ message: "unauthorized: user not found" });
 
-    // Optionally check if account is locked: (Nice to have: account lock handling)
-    // if (user.locked_until && user.locked_until > Date.now()) return res.status(403).json({ message: "account locked" });
+
+    if (user.locked_until && user.locked_until.getTime() > Date.now()) {
+      return res.status(423).json({ message: 'account locked' });
+    }
 
     req.user = { id: user._id, role: user.globalRole || user.role, data: user };
     next();
@@ -43,23 +51,3 @@ export default async function authMiddleware(req, res, next) {
     return res.status(500).json({ message: "internal server error" });
   }
 }
-
-/**
- * Role-check middleware factory
- * Usage: router.post('/admin-only', authMiddleware, requireRole('admin'), handler)
- */
-export const requireRole = (role) => (req, res, next) => {
-  try {
-    if (!req.user) return res.status(401).json({ message: "unauthorized" });
-    if (req.user.role !== role) return res.status(403).json({ message: "forbidden" });
-    next();
-  } catch (err) {
-    console.error("requireRole error:", err);
-    return res.status(500).json({ message: "internal server error" });
-  }
-};
-
-/* Nice to have:
- - Token rotation / refresh tokens to improve security for long sessions.
- - Better error codes + structured error objects.
-*/

@@ -7,18 +7,23 @@ import {
   registerUser,
   verifyOtp,
   resendSignupOtp,
+  resetPassword,
   logoutUser,
-  getMe
-} from "../controllers/auth.controller.js";
+  getMe,
+  userPreview,
+} from "../controller/auth.controller.js";
 
 const router = Router();
 
-// Register accepts a single image file 'avatar' (profile)
-router.post("/register", upload.single("avatar"), registerUser);
+// Register accepts a single image file 'profile-avatar' (profile)
+router.post("/register", upload.single("profile-avatar"), registerUser);
 router.post("/verify-signup-otp", verifyOtp);
 router.post("/resend-verify-otp", resendSignupOtp);
 router.post("/login", loginUser);
+router.post("/reset-password", resetPassword);
 router.get("/logout", authMiddleware, logoutUser);
 router.get("/me", authMiddleware, getMe);
+
+router.get("/user-preview", authMiddleware, userPreview);
 
 export default router;
