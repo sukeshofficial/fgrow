@@ -1,0 +1,106 @@
+/* ============================
+   Avatar Upload
+   ============================ */
+
+.avatar-upload-root {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  --avatar-size: 96px;
+}
+
+/* Dropzone */
+.avatar-dropzone {
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: 12px;
+  border: 1px dashed #e6e9ee;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.avatar-dropzone.drag-over {
+  background: #f6f8ff;
+  border-color: #6b5cff;
+  box-shadow: 0 6px 20px rgba(107, 92, 255, 0.08);
+}
+
+/* Preview */
+.avatar-preview {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+/* Placeholder */
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.avatar-placeholder-text {
+  font-weight: 500;
+}
+
+/* Controls */
+.avatar-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.avatar-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #e6e9ee;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.avatar-btn:hover {
+  background: #f8fafc;
+}
+
+.avatar-btn.clear {
+  color: #6b7280;
+}
+
+/* Error & Hint */
+.avatar-error {
+  margin-top: 4px;
+  color: #e11d48;
+  font-size: 0.85rem;
+}
+
+.avatar-hint {
+  margin-top: 2px;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

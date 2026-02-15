@@ -196,6 +196,7 @@
   top: 100px;
   right: 6%;
   width: 240px;
+  font-family: var(--font-base);
   background: none;
   backdrop-filter: blur(12px);
   background-color: rgba(89, 89, 89, 0.062);
@@ -404,7 +405,7 @@
 .mobile-links,
 .glass-navbar * {
   -webkit-user-select: none; /* Safari */
-  -moz-user-select: none;    /* Firefox */
-  -ms-user-select: none;     /* Old Edge */
-  user-select: none;         /* Standard */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Old Edge */
+  user-select: none; /* Standard */
 }
