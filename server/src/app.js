@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
 
 import authRoutes from "./routes/auth.routes.js";
 
@@ -15,12 +16,12 @@ app.use(
   }),
 );
 app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use("/api/v0/auth", authRoutes);
 
 app.get("/api/v0/health", (req, res) => {
   res.json({ status: "OK" });
 });
-
 
 export default app;

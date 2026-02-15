@@ -7,3 +7,5 @@ export const AUTH_SUCCESS = "AUTH_SUCCESS";
 export const AUTH_FAIL = "AUTH_FAIL";
 export const SET_USER = "SET_USER";
 export const LOGOUT = "LOGOUT";
+export const SET_AVATAR = "SET_AVATAR";
+export const SET_PROFILE_PREVIEW = "SET_PROFILE_PREVIEW";

@@ -9,10 +9,14 @@ import {
   AUTH_FAIL,
   SET_USER,
   LOGOUT,
+  SET_AVATAR,
+  SET_PROFILE_PREVIEW,
 } from "./auth.types";
 
 export const initialAuthState = {
   user: null,
+  avatar: null,
+  username: null,
   isAuthenticated: false,
   isLoading: true,
   error: null,
@@ -53,6 +57,19 @@ export const authReducer = (state, action) => {
       return {
         ...initialAuthState,
         isLoading: false,
+      };
+
+    case SET_AVATAR:
+      return {
+        ...state,
+        avatar: action.payload.profile_avatar.secure_url,
+      };
+
+    case SET_PROFILE_PREVIEW:
+      return {
+        ...state,
+        avatar: action.payload.avatar,
+        username: action.payload.username,
       };
 
     default:

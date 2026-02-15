@@ -53,9 +53,9 @@ export const logoutUser = () => {
  * userPreview
  * GET http://localhost:5000/api/v0/auth/user-preview?email=...
  */
-export const userPreview = ({ email }) => {
+export const userPreview = (email) => {
   return api.get("/auth/user-preview", {
-    params: { email: form.email },
+    params: { email },
   });
 };
 

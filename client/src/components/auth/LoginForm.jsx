@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth.js";
 import { login } from "../../features/auth/auth.actions.js";
-import { getMe } from "../../api/auth.api.js";
+import { userPreview } from "../../api/auth.api.js";
+import { SET_PROFILE_PREVIEW } from "../../features/auth/auth.types.js";
 
 const LoginForm = ({ onSuccess }) => {
   const { dispatch, isLoading } = useAuth();
@@ -26,25 +27,35 @@ const LoginForm = ({ onSuccess }) => {
 
     if (name === "email") {
       setError(null);
+      setAvatar(null);
     }
   };
 
   useEffect(() => {
-    const fetchAvatar = async () => {
-      if (!form.email || !form.email.includes("@")) {
-        setAvatar(null);
-        return;
-      }
+    if (!form.email || !form.email.includes("@")) {
+      setAvatar(null);
+      return;
+    }
 
+    const timer = setTimeout(async () => {
       try {
-        const res = await getMe(form.email);
-        setAvatar(res.data.avatar);
-      } catch {
+        const res = await userPreview(form.email);
+        dispatch({
+          type: SET_PROFILE_PREVIEW,
+          payload: {
+            avatar: res.data.preview.avatar,
+            username: res.data.preview.username,
+          },
+        });
+
+        setAvatar(res.data.preview.avatar);
+      } catch (err) {
+        console.error("Preview failed", err);
         setAvatar(null);
       }
-    };
+    }, 400);
 
-    fetchAvatar();
+    return () => clearTimeout(timer);
   }, [form.email]);
 
   const handleSubmit = async (e) => {
@@ -66,8 +77,14 @@ const LoginForm = ({ onSuccess }) => {
     <form className="auth-form" onSubmit={handleSubmit}>
       <h2>Login</h2>
 
+      {avatar && (
+        <div className="login-avatar-wrapper">
+          <img src={avatar} alt="User avatar" className="email-avatar" />
+        </div>
+      )}
+
       {error && <p className="form-error">{error}</p>}
-      
+
       <div className="email-field">
         <label className="input-label" htmlFor="email">
           Email
@@ -78,13 +95,10 @@ const LoginForm = ({ onSuccess }) => {
           type="email"
           placeholder="Email"
           className="input"
+          value={form.email}
           onChange={handleChange}
           required
         />
-
-        {avatar && (
-          <img src={avatar} alt="User avatar" className="email-avatar" />
-        )}
       </div>
 
       <label className="input-label" htmlFor="password">

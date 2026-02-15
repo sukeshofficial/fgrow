@@ -22,7 +22,6 @@ router.post("/login", loginUser);
 router.post("/reset-password", resetPassword);
 router.get("/logout", authMiddleware, logoutUser);
 router.get("/me", authMiddleware, getMe);
-
-router.get("/user-preview", authMiddleware, userPreview);
+router.get("/user-preview", userPreview);
 
 export default router;

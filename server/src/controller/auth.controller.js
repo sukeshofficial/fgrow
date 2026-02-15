@@ -17,7 +17,7 @@ import { User } from "../config/userModel.js";
 import sendEmail from "../utils/sendEmail.js";
 import { generateToken } from "../utils/jwt.js";
 import { createNumericOtp, generateUsername } from "../utils/helper.js";
-
+import { uploadToCloud } from "../utils/cloudinary.js";
 /**
  * Configurable constants
  */
@@ -60,41 +60,55 @@ const sendAuthSuccess = (res, user, payload = {}) => {
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-
-    if (!name || !email || !password) {
+    if (!name || !email || !password)
       return res
         .status(400)
         .json({ message: "name, email and password are required" });
-    }
-
-    if (!validator.isEmail(email)) {
+    if (!validator.isEmail(email))
       return res.status(400).json({ message: "invalid email" });
-    }
 
     const username = await generateUsername(email);
-
-    const existingUser = await User.findOne({
+    const existing = await User.findOne({
       $or: [{ email }, { username }],
     }).lean();
-
-    if (existingUser) {
+    if (existing)
       return res.status(409).json({ message: "account already exists" });
+
+    // Upload to Cloudinary
+    let avatarData = {
+      public_id: "",
+      secure_url: "",
+    };
+
+    if (req.file) {
+      const upload = await uploadToCloud(req.file.path);
+
+      if (!upload.success) {
+        return res.status(500).json({
+          message: "Image upload failed",
+          error: upload.error,
+        });
+      }
+
+      avatarData = {
+        public_id: upload.public_id,
+        secure_url: upload.secure_url,
+      };
     }
 
     const newUser = new User({
       name,
       username,
       email,
-      profile_avatar: req.file ? req.file.path : "",
+      profile_avatar: avatarData,
     });
 
     newUser.password = password;
 
     const rawOtp = createNumericOtp();
     const hashedOtp = crypto.createHash("sha256").update(rawOtp).digest("hex");
-
     newUser.reset_token = hashedOtp;
-    newUser.reset_token_expiry = Date.now() + 5 * 60 * 1000;
+    newUser.reset_token_expiry = Date.now() + 5 * 60 * 1000; // 5 minutes
 
     await newUser.save();
 
@@ -104,10 +118,10 @@ export const registerUser = async (req, res) => {
       html: `<p>Your verification code is: <strong>${rawOtp}</strong>. It expires in 5 minutes.</p>`,
     });
 
-    return res.status(201).json({
-      message: "User registered successfully",
-      user: newUser.toJSON(),
-    });
+    const safeUser = newUser.toJSON();
+    return res
+      .status(201)
+      .json({ message: "User registered successfully", user: safeUser });
   } catch (err) {
     console.error("Register error:", err);
 
@@ -115,7 +129,6 @@ export const registerUser = async (req, res) => {
       const field = Object.keys(err.keyValue || {})[0] || "field";
       return res.status(409).json({ message: `${field} already in use` });
     }
-
     return res.status(500).json({ message: "internal server error" });
   }
 };
@@ -398,7 +411,7 @@ export const userPreview = async (req, res) => {
       message: "profile preview fetched",
       preview: {
         username: user.name || user.username,
-        avatar: user.profile_avatar || "",
+        avatar: user.profile_avatar.secure_url,
       },
     });
   } catch (err) {
