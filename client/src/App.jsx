@@ -17,7 +17,17 @@ import Dashboard from "./pages/Dashboard";
 /* Routes */
 import ProtectedRoute from "./routes/ProtectedRoute";
 
+import { useEffect } from "react";
+import { useAuth } from "./hooks/useAuth";
+import { checkAuth } from "./features/auth/auth.actions";
+
 const App = () => {
+  const { dispatch } = useAuth();
+
+  useEffect(() => {
+    checkAuth(dispatch);
+  }, [dispatch]);
+
   return (
     <Routes>
       {/* Default route */}
