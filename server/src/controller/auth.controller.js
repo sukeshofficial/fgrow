@@ -163,8 +163,11 @@ export const verifyOtp = async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
+    const safeUser = user.toJSON();
+
     return res.status(200).json({
       message: "Email verified and authenticated successfully",
+      user: safeUser,
     });
   } catch (err) {
     console.error("Verify-Otp error:", err);

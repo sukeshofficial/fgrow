@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth.js";
-import { userPreview } from "../api/auth.api.js";
 
 import "../styles/navbar.css";
 import logo from "/ForgeGrid.svg";
@@ -57,7 +56,7 @@ export default function Navbar() {
               <span className="user-name">{user?.name ?? "Guest"}</span>
 
               {user && (
-                <button className="logout-btn" onClick={logout}>
+                <button className="logout-btn" onClick={() => logout()}>
                   Logout
                 </button>
               )}
@@ -105,7 +104,10 @@ export default function Navbar() {
             <div className="mobile-user-info">
               <div className="mobile-user-name">{user?.name ?? "Guest"}</div>
               {user ? (
-                <button className="mobile-logout" onClick={logout}>
+                <button
+                  className="mobile-logout"
+                  onClick={() => logout()}
+                >
                   Logout
                 </button>
               ) : (

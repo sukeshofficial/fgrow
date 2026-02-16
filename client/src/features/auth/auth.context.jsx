@@ -7,6 +7,7 @@
 
 import { createContext, useReducer } from "react";
 import { authReducer, initialAuthState } from "./auth.reducer.js";
+import { logout as logoutAction } from "./auth.actions.js";
 import {
   AUTH_START,
   AUTH_SUCCESS,
@@ -26,7 +27,7 @@ export const AuthProvider = ({ children }) => {
   const setUser = (user) => dispatch({ type: SET_USER, payload: user });
   const authFail = (error) => dispatch({ type: AUTH_FAIL, payload: error });
   const setAvatar = (user) => dispatch({ type: SET_AVATAR, payload: user });
-  const logout = () => dispatch({ type: LOGOUT });
+  const logout = async () => await logoutAction(dispatch);
 
   return (
     <AuthContext.Provider

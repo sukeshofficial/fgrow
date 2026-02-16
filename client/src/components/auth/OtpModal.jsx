@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 const OTP_LENGTH = 6;
 
-const OtpModal = ({ open, onClose, onVerify, onResend, email }) => {
+const OtpModal = ({ open, onClose, onVerify, onResend, email, isLoading = false, error = "" }) => {
   const [vals, setVals] = useState(Array(OTP_LENGTH).fill(""));
   const inputsRef = useRef([]);
 
@@ -87,6 +87,12 @@ const OtpModal = ({ open, onClose, onVerify, onResend, email }) => {
           Enter the 6-digit code sent to <strong>{email}</strong>
         </p>
 
+        {error && (
+          <div role="alert" className="form-error">
+            {error}
+          </div>
+        )}
+
         <div className="otp-inputs" onPaste={handlePaste}>
           {Array.from({ length: OTP_LENGTH }).map((_, i) => (
             <input
@@ -119,9 +125,9 @@ const OtpModal = ({ open, onClose, onVerify, onResend, email }) => {
               type="button"
               className="btn primary"
               onClick={submit}
-              disabled={vals.some((v) => !v)}
+              disabled={vals.some((v) => !v) || isLoading}
             >
-              Verify
+              {isLoading ? "Verifying..." : "Verify"}
             </button>
           </div>
         </div>

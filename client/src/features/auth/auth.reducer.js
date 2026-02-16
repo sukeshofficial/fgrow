@@ -37,6 +37,8 @@ export const authReducer = (state, action) => {
         isLoading: false,
         isAuthenticated: true,
         user: action.payload,
+        avatar: action.payload?.profile_avatar?.secure_url || null,
+        username: action.payload?.username || null,
       };
 
     case SET_USER:
@@ -50,6 +52,9 @@ export const authReducer = (state, action) => {
       return {
         ...state,
         isLoading: false,
+        isAuthenticated: false,
+        user: null,
+        avatar: null,
         error: action.payload,
       };
 
