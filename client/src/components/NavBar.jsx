@@ -24,9 +24,9 @@ export default function Navbar() {
 
   const navItems = [
     { label: "Home", to: "/" },
-    { label: "Team", to: "/team" },
-    { label: "Services", to: "/services" },
-    { label: "Product", to: "/product" },
+    { label: "Recordings", to: "/recordings" },
+    { label: "Rooms", to: "/rooms" },
+    { label: "Settings", to: "/settings" },
     { label: "Contact", to: "/contact" },
   ];
 
