@@ -54,3 +54,44 @@
   border-color: #7c5cff;
   box-shadow: 0 8px 24px rgba(124, 92, 255, 0.06);
 }
+
+/* OTP Alert */
+.otp-alert {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  background: rgba(255, 59, 48, 0.08);
+  border: 1px solid rgba(255, 59, 48, 0.35);
+  color: #ffd7d7;
+  align-items: flex-start;
+}
+
+.otp-alert--error {
+  background: rgba(255, 59, 48, 0.08);
+  border-color: rgba(255, 59, 48, 0.35);
+}
+
+.otp-alert__icon {
+  font-size: 18px;
+  line-height: 1.2;
+  color: #ff0d00;
+}
+
+.otp-alert__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.otp-alert__title {
+  font-weight: 600;
+  color: #ff5050;
+}
+
+.otp-alert__message {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #460101;
+}

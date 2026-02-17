@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-
+import warning from "../../assets/warning.svg";
 /**
  * Configuration
  */
 const OTP_LENGTH = 6;
+const OTP_EXPIRY_SECONDS = 5 * 60;
+const RESEND_LOCK_SECONDS = 30;
+
 
 /**
  * OtpModal
@@ -26,6 +29,10 @@ const OtpModal = ({
    */
   const [vals, setVals] = useState(Array(OTP_LENGTH).fill(""));
   const inputsRef = useRef([]);
+  const hasAutoResentRef = useRef(false);
+  const [timeLeft, setTimeLeft] = useState(OTP_EXPIRY_SECONDS);
+  const [resendLock, setResendLock] = useState(RESEND_LOCK_SECONDS);
+
 
   /**
    * Reset OTP state and focus first input when modal opens
@@ -43,18 +50,61 @@ const OtpModal = ({
   }, [open]);
 
   /**
-   * Close modal on ESC key
+   * Do not close modal on ESC key
    */
   useEffect(() => {
     const handler = (e) => {
       if (e.key === "Escape") {
-        onClose();
+        e.preventDefault();
       }
     };
 
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    setTimeLeft(OTP_EXPIRY_SECONDS);
+    setResendLock(RESEND_LOCK_SECONDS);
+    hasAutoResentRef.current = false;
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => Math.max(prev - 1, 0));
+      setResendLock((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [open]);
+
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    if (timeLeft === 0 && !hasAutoResentRef.current) {
+      hasAutoResentRef.current = true;
+
+      onResend(); // ✅ SAFE here
+      setTimeLeft(OTP_EXPIRY_SECONDS);
+      setResendLock(RESEND_LOCK_SECONDS);
+    }
+  }, [timeLeft, open, onResend]);
 
   if (!open) return null;
 
@@ -124,6 +174,16 @@ const OtpModal = ({
   };
 
   /**
+   * Format time left as MM:SS
+   */
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+
+  /**
    * Submit OTP for verification
    */
   const submit = () => {
@@ -133,9 +193,24 @@ const OtpModal = ({
   };
 
   return (
-    <div className="otp-overlay" role="dialog" aria-modal="true">
-      <div className="otp-modal">
+    <div
+      className="otp-overlay"
+      role="dialog"
+      aria-modal="true"
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+    >
+      <div
+        className="otp-modal"
+        onClick={(e) => { e.stopPropagation() }}
+      >
         <h3>Verify your email</h3>
+
+        <p className="otp-timer">
+          Code expires in <strong>{formatTime(timeLeft)}</strong>
+        </p>
+
 
         <p className="muted">
           Enter the 6-digit code sent to <strong>{email}</strong>
@@ -167,13 +242,30 @@ const OtpModal = ({
           ))}
         </div>
 
+        <div className="otp-alert otp-alert--error" role="alert">
+          <div className="otp-alert__icon"><img src={warning} alt="Warning icon" /></div>
+          <div className="otp-alert__content">
+            <div className="otp-alert__title">Verification required</div>
+            <div className="otp-alert__message">
+              Do not close this tab. If verification is not completed,
+              <strong> you will need to restart the registration process</strong>.
+            </div>
+
+          </div>
+        </div>
+
         <div className="row-between small-gap">
           <button
             type="button"
             className="link-btn"
             onClick={onResend}
+            disabled={isLoading || resendLock > 0}
           >
-            Resend code
+            {resendLock > 0
+              ? `Resend in ${resendLock}s`
+              : isLoading
+                ? "Sending..."
+                : "Resend code"}
           </button>
 
           <div className="otp-actions">
@@ -189,12 +281,17 @@ const OtpModal = ({
               type="button"
               className="btn primary"
               onClick={submit}
-              disabled={vals.some((v) => !v) || isLoading}
+              disabled={
+                vals.some((v) => !v) ||
+                isLoading ||
+                timeLeft === 0
+              }
             >
               {isLoading ? "Verifying..." : "Verify"}
             </button>
           </div>
         </div>
+
       </div>
     </div>
   );

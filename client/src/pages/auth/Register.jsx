@@ -65,8 +65,22 @@ const Register = () => {
     }
   };
 
-  const handleResendOtp = () => {
+  const handleResendOtp = async () => {
+    setOtpLoading(true);
+    setOtpError("");
 
+    try {
+      await resendOtp(dispatch, {
+        email: registeredEmail,
+      });
+    } catch (err) {
+      setOtpError(
+        err.response?.data?.message ||
+        "Failed to resend OTP. Please try again."
+      );
+    } finally {
+      setOtpLoading(false);
+    }
   };
 
   return (
@@ -92,9 +106,7 @@ const Register = () => {
           email={registeredEmail}
           onClose={() => setShowOtpModal(false)}
           onVerify={handleOtpVerify}
-          onResend={() => {
-            console.log("Resend OTP");
-          }}
+          onResend={handleResendOtp}
           isLoading={otpLoading}
           error={otpError}
         />
