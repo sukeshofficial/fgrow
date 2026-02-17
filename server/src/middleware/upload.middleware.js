@@ -1,40 +1,74 @@
 // middleware/upload.middleware.js
+/**
+ * File upload middleware
+ *
+ * Purpose:
+ * - Handle multipart file uploads using multer.
+ * - Store uploaded files on disk with safe filenames.
+ * - Restrict uploads to image files only.
+ */
+
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 
+// Uploads directory
 const uploadsDir = path.join(process.cwd(), "uploads");
-// ensure uploads dir exists
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
-// disk storage
+// Ensure uploads directory exists
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Disk storage configuration
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) => {
-    const safe = Date.now() + "-" + file.originalname.replace(/\s+/g, "-");
-    cb(null, safe);
+  destination: (_req, _file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (_req, file, cb) => {
+    const safeName =
+      Date.now() +
+      "-" +
+      file.originalname.replace(/\s+/g, "-");
+
+    cb(null, safeName);
   },
 });
 
-// file filter: allow images only (profile avatars)
-const fileFilter = (req, file, cb) => {
+// File filter: allow image files only
+const fileFilter = (_req, file, cb) => {
   const allowed = /jpeg|jpg|png|webp/;
   const ext = path.extname(file.originalname).toLowerCase();
-  if (allowed.test(ext) || allowed.test(file.mimetype)) {
+
+  if (
+    allowed.test(ext) ||
+    allowed.test(file.mimetype)
+  ) {
     cb(null, true);
   } else {
-    cb(new Error("Only image files are allowed (jpg, png, webp)"));
+    cb(
+      new Error(
+        "Only image files are allowed (jpg, png, webp)",
+      ),
+    );
   }
 };
 
-// limits
+// Upload limits
 const limits = {
   fileSize: 2 * 1024 * 1024, // 2 MB max
 };
 
-export const upload = multer({ storage, fileFilter, limits });
+// Export configured multer instance
+export const upload = multer({
+  storage,
+  fileFilter,
+  limits,
+});
 
-/* Nice to have:
- - S3 / cloud storage adapter (upload to S3 / GCS) for production.
- - Virus scan + image resizing pipeline.
+/*
+  Nice to have:
+  - Cloud storage adapter (S3 / GCS)
+  - Image resizing & optimization pipeline
+  - Virus scanning before persistence
 */
