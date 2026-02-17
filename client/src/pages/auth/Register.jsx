@@ -65,6 +65,10 @@ const Register = () => {
     }
   };
 
+  const handleResendOtp = () => {
+
+  };
+
   return (
     <div className="auth-page">
       {/* Left illustration */}

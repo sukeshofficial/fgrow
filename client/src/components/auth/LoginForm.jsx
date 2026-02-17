@@ -115,7 +115,7 @@ const LoginForm = ({ onSuccess }) => {
 
       <div className="email-field">
         <label className="input-label" htmlFor="email">
-          Email
+          Email <span className="star-red">*</span>
         </label>
 
         <input
@@ -131,7 +131,7 @@ const LoginForm = ({ onSuccess }) => {
       </div>
 
       <label className="input-label" htmlFor="password">
-        Password
+        Password <span className="star-red">*</span>
       </label>
 
       <input

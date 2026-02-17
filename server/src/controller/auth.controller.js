@@ -250,7 +250,7 @@ export const resendSignupOtp = async (req, res) => {
 
     await sendEmail({
       to: email,
-      subject: "Your verification code",
+      subject: "Your new verification code (resend)",
       html: `<p>Your verification code is: <strong>${otp}</strong>. It expires in 5 minutes.</p>`,
     });
 

@@ -96,6 +96,9 @@
   background: rgba(15, 23, 42, 0.03);
 }
 
+.star-red {
+  color: rgb(255, 57, 57);
+}
 /* -------------------------
    Checkbox and small row
    ------------------------- */

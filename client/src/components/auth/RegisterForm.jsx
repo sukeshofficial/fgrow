@@ -129,7 +129,7 @@ const RegisterForm = ({ onSuccess }) => {
       )}
 
       <label className="input-label" htmlFor="name">
-        Full name
+        Full name <span className="star-red">*</span>
       </label>
       <input
         id="name"
@@ -143,7 +143,7 @@ const RegisterForm = ({ onSuccess }) => {
       />
 
       <label className="input-label" htmlFor="email">
-        Email
+        Email <span className="star-red">*</span>
       </label>
       <input
         id="email"
@@ -164,7 +164,7 @@ const RegisterForm = ({ onSuccess }) => {
       />
 
       <label className="input-label" htmlFor="password">
-        Password
+        Password <span className="star-red">*</span>
       </label>
       <input
         id="password"
@@ -186,7 +186,7 @@ const RegisterForm = ({ onSuccess }) => {
       </div>
 
       <label className="input-label" htmlFor="confirm">
-        Confirm password
+        Confirm password <span className="star-red">*</span>
       </label>
       <input
         id="confirm"
