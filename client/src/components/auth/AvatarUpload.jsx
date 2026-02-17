@@ -1,20 +1,38 @@
 // src/components/auth/AvatarUpload.jsx
 import React, { useCallback, useRef, useState } from "react";
 
+/**
+ * Avatar upload constraints
+ */
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_BYTES = 5 * 1024 * 1024; // 5MB
 
+/**
+ * AvatarUpload
+ *
+ * Reusable component for uploading and previewing user avatar images.
+ * Supports click-to-upload, drag-and-drop, validation, and preview rendering.
+ */
 export default function AvatarUpload({
   onFileChange,
   initialUrl = null,
   size = 96,
 }) {
+  /**
+   * Component state
+   */
   const [preview, setPreview] = useState(initialUrl);
   const [error, setError] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
 
+  /**
+   * Hidden file input reference
+   */
   const inputRef = useRef(null);
 
+  /**
+   * Validates file, generates preview, and emits file to parent
+   */
   const emitFile = useCallback(
     (file) => {
       setError("");
@@ -35,18 +53,22 @@ export default function AvatarUpload({
       reader.onload = (e) => setPreview(e.target.result);
       reader.readAsDataURL(file);
 
-      if (onFileChange) {
-        onFileChange(file);
-      }
+      onFileChange?.(file);
     },
     [onFileChange],
   );
 
-  const onFileInput = (e) => {
+  /**
+   * Input file selection handler
+   */
+  const handleFileInput = (e) => {
     emitFile(e.target.files?.[0]);
   };
 
-  const onDrop = (e) => {
+  /**
+   * Drag-and-drop handler
+   */
+  const handleDrop = (e) => {
     e.preventDefault();
     setIsDragOver(false);
     emitFile(e.dataTransfer.files?.[0]);
@@ -57,13 +79,14 @@ export default function AvatarUpload({
       className="avatar-upload-root"
       style={{ "--avatar-size": `${size}px` }}
     >
+      {/* Upload dropzone */}
       <div
         className={`avatar-dropzone ${isDragOver ? "drag-over" : ""}`}
         role="button"
         tabIndex={0}
         aria-label="Upload profile picture"
         onClick={() => inputRef.current?.click()}
-        onDrop={onDrop}
+        onDrop={handleDrop}
         onDragOver={(e) => {
           e.preventDefault();
           setIsDragOver(true);
@@ -79,7 +102,11 @@ export default function AvatarUpload({
         }}
       >
         {preview ? (
-          <img src={preview} alt="Avatar preview" className="avatar-preview" />
+          <img
+            src={preview}
+            alt="Avatar preview"
+            className="avatar-preview"
+          />
         ) : (
           <div className="avatar-placeholder">
             <svg
@@ -109,15 +136,17 @@ export default function AvatarUpload({
         )}
       </div>
 
+      {/* Hidden file input */}
       <input
         ref={inputRef}
         type="file"
         accept="image/*"
         className="sr-only"
         aria-hidden
-        onChange={onFileInput}
+        onChange={handleFileInput}
       />
 
+      {/* Action buttons */}
       <div className="avatar-controls">
         <button
           type="button"
@@ -133,15 +162,17 @@ export default function AvatarUpload({
           onClick={() => {
             setPreview(null);
             setError("");
-            if (onFileChange) onFileChange(null);
+            onFileChange?.(null);
           }}
         >
           Remove
         </button>
       </div>
 
+      {/* Validation error */}
       {error && <div className="avatar-error">{error}</div>}
 
+      {/* File requirements hint */}
       <div className="avatar-hint">JPG/PNG/WEBP • max 5MB</div>
     </div>
   );

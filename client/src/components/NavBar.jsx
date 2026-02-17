@@ -1,15 +1,27 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+
 import { useAuth } from "../hooks/useAuth.js";
 
 import "../styles/navbar.css";
 import logo from "/ForgeGrid.svg";
 
+/**
+ * Navbar
+ *
+ * Global navigation bar with responsive desktop/mobile layouts,
+ * user menu handling, and authentication-aware actions.
+ */
 export default function Navbar() {
+  /**
+   * Mobile menu state
+   */
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, avatar, logout } = useAuth();
 
-  const { user, avatar, username, logout } = useAuth();
-
+  /**
+   * Close mobile menu on ESC key
+   */
   useEffect(() => {
     const escHandler = (e) => {
       if (e.key === "Escape") {
@@ -21,6 +33,9 @@ export default function Navbar() {
     return () => window.removeEventListener("keydown", escHandler);
   }, []);
 
+  /**
+   * Navigation links
+   */
   const navItems = [
     { label: "Home", to: "/" },
     { label: "Recordings", to: "/recordings" },
@@ -33,11 +48,17 @@ export default function Navbar() {
     <>
       <header className="glass-navbar">
         <div className="navbar-inner">
+          {/* Logo */}
           <div className="navbar-logo">
-            <img src={logo} alt="ForgeGrid" className="logo-img" />
+            <img
+              src={logo}
+              alt="ForgeGrid"
+              className="logo-img"
+            />
             <span className="logo-text">ForgeGrid</span>
           </div>
 
+          {/* Desktop navigation */}
           <nav className="navbar-links">
             {navItems.map((item) => (
               <Link
@@ -51,17 +72,29 @@ export default function Navbar() {
           </nav>
 
           <div className="navbar-right">
+            {/* Desktop user area */}
             <div className="user-area desktop-only">
-              <img src={avatar} alt="avatar" className="user-avatar" />
-              <span className="user-name">{user?.name ?? "Guest"}</span>
+              <img
+                src={avatar}
+                alt="User avatar"
+                className="user-avatar"
+              />
+              <span className="user-name">
+                {user?.name ?? "Guest"}
+              </span>
 
               {user && (
-                <button className="logout-btn" onClick={() => logout()}>
+                <button
+                  type="button"
+                  className="logout-btn"
+                  onClick={logout}
+                >
                   Logout
                 </button>
               )}
             </div>
 
+            {/* Mobile menu toggle */}
             <button
               type="button"
               className={`hamburger ${menuOpen ? "open" : ""}`}
@@ -77,12 +110,21 @@ export default function Navbar() {
         </div>
       </header>
 
+      {/* Background overlay */}
       {menuOpen && (
-        <div className="menu-overlay" onClick={() => setMenuOpen(false)} />
+        <div
+          className="menu-overlay"
+          onClick={() => setMenuOpen(false)}
+        />
       )}
 
+      {/* Mobile menu */}
       {menuOpen && (
-        <div className="mobile-menu" role="dialog" aria-modal="true">
+        <div
+          className="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+        >
           <div className="mobile-links">
             {navItems.map((item) => (
               <Link
@@ -99,14 +141,22 @@ export default function Navbar() {
           <div className="mobile-divider" />
 
           <div className="mobile-user">
-            <img src={avatar} alt="avatar" className="user-avatar" />
+            <img
+              src={avatar}
+              alt="User avatar"
+              className="user-avatar"
+            />
 
             <div className="mobile-user-info">
-              <div className="mobile-user-name">{user?.name ?? "Guest"}</div>
+              <div className="mobile-user-name">
+                {user?.name ?? "Guest"}
+              </div>
+
               {user ? (
                 <button
+                  type="button"
                   className="mobile-logout"
-                  onClick={() => logout()}
+                  onClick={logout}
                 >
                   Logout
                 </button>

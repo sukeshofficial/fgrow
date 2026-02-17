@@ -6,17 +6,31 @@ import { login } from "../../features/auth/auth.actions.js";
 import { userPreview } from "../../api/auth.api.js";
 import { SET_PROFILE_PREVIEW } from "../../features/auth/auth.types.js";
 
+/**
+ * LoginForm
+ *
+ * Handles user authentication, email-based profile preview,
+ * and login submission flow.
+ */
 const LoginForm = ({ onSuccess }) => {
+  /**
+   * Auth context
+   */
   const { dispatch, isLoading } = useAuth();
 
+  /**
+   * Form and UI state
+   */
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
-
   const [avatar, setAvatar] = useState(null);
   const [error, setError] = useState(null);
 
+  /**
+   * Input change handler
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -25,12 +39,16 @@ const LoginForm = ({ onSuccess }) => {
       [name]: value,
     }));
 
+    // Reset preview and errors when email changes
     if (name === "email") {
       setError(null);
       setAvatar(null);
     }
   };
 
+  /**
+   * Debounced email-based profile preview
+   */
   useEffect(() => {
     if (!form.email || !form.email.includes("@")) {
       setAvatar(null);
@@ -40,6 +58,7 @@ const LoginForm = ({ onSuccess }) => {
     const timer = setTimeout(async () => {
       try {
         const res = await userPreview(form.email);
+
         dispatch({
           type: SET_PROFILE_PREVIEW,
           payload: {
@@ -56,8 +75,11 @@ const LoginForm = ({ onSuccess }) => {
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [form.email]);
+  }, [form.email, dispatch]);
 
+  /**
+   * Form submit handler
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -77,12 +99,18 @@ const LoginForm = ({ onSuccess }) => {
     <form className="auth-form" onSubmit={handleSubmit}>
       <h2>Login</h2>
 
+      {/* Email-based avatar preview */}
       {avatar && (
         <div className="login-avatar-wrapper">
-          <img src={avatar} alt="User avatar" className="email-avatar" />
+          <img
+            src={avatar}
+            alt="User avatar"
+            className="email-avatar"
+          />
         </div>
       )}
 
+      {/* Error message */}
       {error && <p className="form-error">{error}</p>}
 
       <div className="email-field">
@@ -91,6 +119,7 @@ const LoginForm = ({ onSuccess }) => {
         </label>
 
         <input
+          id="email"
           name="email"
           type="email"
           placeholder="Email"
@@ -106,6 +135,7 @@ const LoginForm = ({ onSuccess }) => {
       </label>
 
       <input
+        id="password"
         name="password"
         type="password"
         placeholder="Password"
@@ -114,7 +144,11 @@ const LoginForm = ({ onSuccess }) => {
         required
       />
 
-      <button type="submit" className="btn primary" disabled={isLoading}>
+      <button
+        type="submit"
+        className="btn primary"
+        disabled={isLoading}
+      >
         {isLoading ? "Logging in..." : "Login"}
       </button>
 

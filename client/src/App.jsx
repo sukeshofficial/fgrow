@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 /* Global styles */
@@ -14,23 +15,35 @@ import Register from "./pages/auth/Register";
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard";
 
-/* Routes */
+/* Routing */
 import ProtectedRoute from "./routes/ProtectedRoute";
 
-import { useEffect } from "react";
+/* Auth */
 import { useAuth } from "./hooks/useAuth";
 import { checkAuth } from "./features/auth/auth.actions";
 
+/**
+ * App
+ *
+ * Root application component responsible for
+ * initializing auth state and defining routes.
+ */
 const App = () => {
+  /**
+   * Auth dispatch
+   */
   const { dispatch } = useAuth();
 
+  /**
+   * Check authenticated session on app mount
+   */
   useEffect(() => {
     checkAuth(dispatch);
   }, [dispatch]);
 
   return (
     <Routes>
-      {/* Default route */}
+      {/* Default redirect */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* Public routes */}

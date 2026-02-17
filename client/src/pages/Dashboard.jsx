@@ -1,14 +1,15 @@
-import { useAuth } from "../hooks/useAuth";
-
 import Navbar from "../components/NavBar";
 
+/**
+ * Dashboard page
+ *
+ * Main authenticated landing page.
+ */
 const Dashboard = () => {
-  const { user, logout } = useAuth();
-
   return (
     <>
       <Navbar />
-      <div className="dashboard"></div>
+      <div className="dashboard" />
     </>
   );
 };

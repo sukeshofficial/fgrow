@@ -1,8 +1,10 @@
 /**
- * Authentication reducer and initial state responsible for managing
- * user authentication status, loading states, user data, and errors
- * based on dispatched authentication-related actions.
+ * Authentication reducer and initial state
+ *
+ * Manages authentication lifecycle, user data,
+ * loading states, and error handling.
  */
+
 import {
   AUTH_START,
   AUTH_SUCCESS,
@@ -13,6 +15,9 @@ import {
   SET_PROFILE_PREVIEW,
 } from "./auth.types";
 
+/**
+ * Initial authentication state
+ */
 export const initialAuthState = {
   user: null,
   avatar: null,
@@ -22,6 +27,9 @@ export const initialAuthState = {
   error: null,
 };
 
+/**
+ * Auth reducer
+ */
 export const authReducer = (state, action) => {
   switch (action.type) {
     case AUTH_START:
@@ -37,7 +45,9 @@ export const authReducer = (state, action) => {
         isLoading: false,
         isAuthenticated: true,
         user: action.payload,
-        avatar: action.payload?.profile_avatar?.secure_url || null,
+        avatar:
+          action.payload?.profile_avatar?.secure_url ||
+          null,
         username: action.payload?.username || null,
       };
 

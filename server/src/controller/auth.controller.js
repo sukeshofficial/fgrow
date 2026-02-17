@@ -74,7 +74,6 @@ export const registerUser = async (req, res) => {
     if (existing)
       return res.status(409).json({ message: "account already exists" });
 
-    // Upload to Cloudinary
     let avatarData = {
       public_id: "",
       secure_url: "",

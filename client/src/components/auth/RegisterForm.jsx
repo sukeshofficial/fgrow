@@ -6,24 +6,45 @@ import { useAuth } from "../../hooks/useAuth.js";
 import { register } from "../../features/auth/auth.actions.js";
 import AvatarUpload from "../../components/auth/AvatarUpload";
 
-const strengthFor = (pw) => {
-  if (!pw) return { score: 0, label: "Too short" };
+/**
+ * Password strength evaluator
+ */
+const strengthFor = (password) => {
+  if (!password) {
+    return { score: 0, label: "Too short" };
+  }
 
   let score = 0;
-  if (pw.length >= 8) score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[0-9]/.test(pw)) score++;
-  if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+  if (password.length >= 8) score += 1;
+  if (/[A-Z]/.test(password)) score += 1;
+  if (/[0-9]/.test(password)) score += 1;
+  if (/[^A-Za-z0-9]/.test(password)) score += 1;
 
   const labels = ["Too weak", "Weak", "Okay", "Good", "Strong"];
-  return { score, label: labels[Math.min(4, score)] };
+
+  return {
+    score,
+    label: labels[Math.min(score, labels.length - 1)],
+  };
 };
 
+/**
+ * RegisterForm
+ *
+ * Handles user registration, avatar upload,
+ * password strength feedback, and form submission.
+ */
 const RegisterForm = ({ onSuccess }) => {
+  /**
+   * Auth context and navigation
+   */
   const { dispatch, isLoading } = useAuth();
-
   const navigate = useNavigate();
 
+  /**
+   * Form  and error state
+   */
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -31,14 +52,23 @@ const RegisterForm = ({ onSuccess }) => {
     confirm: "",
     file: null,
   });
-
   const [error, setError] = useState("");
 
+  /**
+   * Generic input change handler
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
+  /**
+   * Form submission handler
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -47,14 +77,19 @@ const RegisterForm = ({ onSuccess }) => {
     formData.append("email", form.email);
     formData.append("password", form.password);
     formData.append("role", "user");
-    if (form.file) formData.append("profile-avatar", form.file);
+
+    if (form.file) {
+      formData.append("profile-avatar", form.file);
+    }
 
     try {
       await register(dispatch, formData);
       onSuccess(form.email);
     } catch (err) {
       const status = err?.response?.status;
-      const message = err?.response?.data?.message || "Registration failed";
+      const message =
+        err?.response?.data?.message || "Registration failed";
+
       if (status === 409) {
         setError(message);
 
@@ -69,6 +104,9 @@ const RegisterForm = ({ onSuccess }) => {
     }
   };
 
+  /**
+   * Derived password strength
+   */
   const strength = strengthFor(form.password);
 
   return (
@@ -78,9 +116,14 @@ const RegisterForm = ({ onSuccess }) => {
       aria-describedby="register-error"
     >
       <h2>Create your account</h2>
-      
+
+      {/* Registration error */}
       {error && (
-        <div id="register-error" role="alert" className="form-error">
+        <div
+          id="register-error"
+          role="alert"
+          className="form-error"
+        >
           {error}
         </div>
       )}
@@ -115,7 +158,9 @@ const RegisterForm = ({ onSuccess }) => {
 
       <label className="input-label">Profile picture</label>
       <AvatarUpload
-        onFileChange={(file) => setForm((prev) => ({ ...prev, file }))}
+        onFileChange={(file) =>
+          setForm((prev) => ({ ...prev, file }))
+        }
       />
 
       <label className="input-label" htmlFor="password">
@@ -132,7 +177,10 @@ const RegisterForm = ({ onSuccess }) => {
         required
       />
 
-      <div className={`password-meter strength-${strength.score}`}>
+      {/* Password strength indicator */}
+      <div
+        className={`password-meter strength-${strength.score}`}
+      >
         <div className="meter-fill" />
         <div className="meter-label">{strength.label}</div>
       </div>
@@ -151,7 +199,11 @@ const RegisterForm = ({ onSuccess }) => {
         required
       />
 
-      <button type="submit" className="btn primary" disabled={isLoading}>
+      <button
+        type="submit"
+        className="btn primary"
+        disabled={isLoading}
+      >
         {isLoading ? (
           <span className="btn-spinner" aria-hidden />
         ) : (
