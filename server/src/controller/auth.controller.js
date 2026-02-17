@@ -13,6 +13,7 @@
 
 import crypto from "crypto";
 import validator from "validator";
+import fs from "fs";
 
 import { User } from "../config/userModel.js";
 import sendEmail from "../utils/sendEmail.js";
@@ -129,6 +130,11 @@ export const registerUser = async (req, res) => {
     newUser.reset_token_expiry = Date.now() + 5 * 60 * 1000;
 
     await newUser.save();
+
+    if (req.file){
+      fs.unlinkSync(req.file.path);
+      console.log(`File - ${req.file.path} deleted`)
+    }
 
     await sendEmail({
       to: email,
@@ -273,7 +279,7 @@ export const loginUser = async (req, res) => {
         .json({ message: "email and password required" });
     }
 
-    const user = await User.findOne({ email }).select(
+    const user = await User.findOne({ email, reset_token:null, reset_token_expiry:null }).select(
       "+password_hash +failed_login_attempts +locked_until +lockout_level",
     );
 
