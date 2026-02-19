@@ -44,7 +44,7 @@ const App = () => {
   return (
     <Routes>
       {/* Default redirect */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
       {/* Public routes */}
       <Route path="/register" element={<Register />} />

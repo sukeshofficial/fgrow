@@ -1,4 +1,4 @@
-// config/userModel.js
+// config/user.model.js
 /**
  * User model
  *

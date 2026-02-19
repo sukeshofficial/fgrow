@@ -15,13 +15,10 @@ import crypto from "crypto";
 import validator from "validator";
 import fs from "fs";
 
-import { User } from "../config/userModel.js";
+import { User } from "../models/user.model.js";
 import sendEmail from "../utils/sendEmail.js";
 import { generateToken } from "../utils/jwt.js";
-import {
-  createNumericOtp,
-  generateUsername,
-} from "../utils/helper.js";
+import { createNumericOtp, generateUsername } from "../utils/helper.js";
 import { uploadToCloud } from "../utils/cloudinary.js";
 
 // Lockout configuration
@@ -47,9 +44,7 @@ const sendAuthSuccess = (res, user, payload = {}) => {
   res.cookie("auth_token", token, COOKIE_OPTIONS);
 
   const safeUser =
-    typeof user.toJSON === "function"
-      ? user.toJSON()
-      : { ...user };
+    typeof user.toJSON === "function" ? user.toJSON() : { ...user };
 
   return res.status(200).json({
     message: "Logged-in successfully",
@@ -83,9 +78,7 @@ export const registerUser = async (req, res) => {
     }).lean();
 
     if (existing) {
-      return res
-        .status(409)
-        .json({ message: "account already exists" });
+      return res.status(409).json({ message: "account already exists" });
     }
 
     let avatarData = {
@@ -121,19 +114,16 @@ export const registerUser = async (req, res) => {
 
     // OTP generation
     const rawOtp = createNumericOtp();
-    const hashedOtp = crypto
-      .createHash("sha256")
-      .update(rawOtp)
-      .digest("hex");
+    const hashedOtp = crypto.createHash("sha256").update(rawOtp).digest("hex");
 
     newUser.reset_token = hashedOtp;
     newUser.reset_token_expiry = Date.now() + 5 * 60 * 1000;
 
     await newUser.save();
 
-    if (req.file){
+    if (req.file) {
       fs.unlinkSync(req.file.path);
-      console.log(`File - ${req.file.path} deleted`)
+      console.log(`File - ${req.file.path} deleted`);
     }
 
     await sendEmail({
@@ -150,11 +140,8 @@ export const registerUser = async (req, res) => {
     console.error("Register error:", err);
 
     if (err.code === 11000) {
-      const field =
-        Object.keys(err.keyValue || {})[0] || "field";
-      return res
-        .status(409)
-        .json({ message: `${field} already in use` });
+      const field = Object.keys(err.keyValue || {})[0] || "field";
+      return res.status(409).json({ message: `${field} already in use` });
     }
 
     return res.status(500).json({
@@ -172,15 +159,10 @@ export const verifyOtp = async (req, res) => {
     const { email, otp } = req.body;
 
     if (!email || !otp) {
-      return res
-        .status(400)
-        .json({ message: "email and otp required" });
+      return res.status(400).json({ message: "email and otp required" });
     }
 
-    const hashedOtp = crypto
-      .createHash("sha256")
-      .update(otp)
-      .digest("hex");
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
     const user = await User.findOne({
       email,
@@ -189,9 +171,7 @@ export const verifyOtp = async (req, res) => {
     }).select("+password_hash");
 
     if (!user) {
-      return res
-        .status(400)
-        .json({ message: "invalid or expired otp" });
+      return res.status(400).json({ message: "invalid or expired otp" });
     }
 
     user.reset_token = undefined;
@@ -219,9 +199,7 @@ export const resendSignupOtp = async (req, res) => {
     const { email } = req.body;
 
     if (!email || !validator.isEmail(email)) {
-      return res
-        .status(400)
-        .json({ message: "valid email required" });
+      return res.status(400).json({ message: "valid email required" });
     }
 
     const user = await User.findOne({ email }).lean();
@@ -233,10 +211,7 @@ export const resendSignupOtp = async (req, res) => {
     }
 
     const otp = createNumericOtp();
-    const hashedOtp = crypto
-      .createHash("sha256")
-      .update(otp)
-      .digest("hex");
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
     await User.updateOne(
       { email },
@@ -254,9 +229,7 @@ export const resendSignupOtp = async (req, res) => {
       html: `<p>Your verification code is: <strong>${otp}</strong>. It expires in 5 minutes.</p>`,
     });
 
-    return res
-      .status(200)
-      .json({ message: "Verification code resent" });
+    return res.status(200).json({ message: "Verification code resent" });
   } catch (err) {
     console.error("Resend Signup-Otp error:", err);
     return res.status(500).json({
@@ -274,26 +247,23 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password || !validator.isEmail(email)) {
-      return res
-        .status(400)
-        .json({ message: "email and password required" });
+      return res.status(400).json({ message: "email and password required" });
     }
 
-    const user = await User.findOne({ email, reset_token:null, reset_token_expiry:null }).select(
+    const user = await User.findOne({
+      email,
+      reset_token: null,
+      reset_token_expiry: null,
+    }).select(
       "+password_hash +failed_login_attempts +locked_until +lockout_level",
     );
 
     if (!user) {
-      return res
-        .status(401)
-        .json({ message: "invalid credentials" });
+      return res.status(401).json({ message: "invalid credentials" });
     }
 
     // Active lock check
-    if (
-      user.locked_until &&
-      user.locked_until.getTime() > Date.now()
-    ) {
+    if (user.locked_until && user.locked_until.getTime() > Date.now()) {
       const remainingMinutes = Math.ceil(
         (user.locked_until.getTime() - Date.now()) / 60000,
       );
@@ -306,8 +276,7 @@ export const loginUser = async (req, res) => {
     const validPassword = await user.comparePassword(password);
 
     if (!validPassword) {
-      user.failed_login_attempts =
-        (user.failed_login_attempts || 0) + 1;
+      user.failed_login_attempts = (user.failed_login_attempts || 0) + 1;
 
       if (user.failed_login_attempts >= THRESHOLD_SHORT) {
         if (!user.lockout_level || user.lockout_level === 0) {
@@ -339,9 +308,7 @@ export const loginUser = async (req, res) => {
       }
 
       await user.save({ validateBeforeSave: false });
-      return res
-        .status(401)
-        .json({ message: "invalid credentials" });
+      return res.status(401).json({ message: "invalid credentials" });
     }
 
     // Successful login reset
@@ -374,10 +341,7 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(token)
-      .digest("hex");
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
     const user = await User.findOne({
       email,
@@ -386,9 +350,7 @@ export const resetPassword = async (req, res) => {
     }).select("+password_hash +locked_until +lockout_level");
 
     if (!user) {
-      return res
-        .status(400)
-        .json({ message: "invalid or expired token" });
+      return res.status(400).json({ message: "invalid or expired token" });
     }
 
     user.password = newPassword;
@@ -435,9 +397,7 @@ export const getMe = async (req, res) => {
     const userId = req.user && req.user.id;
 
     if (!userId) {
-      return res
-        .status(401)
-        .json({ message: "missing user in request" });
+      return res.status(401).json({ message: "missing user in request" });
     }
 
     const user = await User.findById(userId).select(
@@ -445,9 +405,7 @@ export const getMe = async (req, res) => {
     );
 
     if (!user) {
-      return res
-        .status(404)
-        .json({ message: "user not found" });
+      return res.status(404).json({ message: "user not found" });
     }
 
     return res.status(200).json({
@@ -470,9 +428,7 @@ export const userPreview = async (req, res) => {
     const { email } = req.query;
 
     if (!email) {
-      return res
-        .status(400)
-        .json({ message: "missing email query param" });
+      return res.status(400).json({ message: "missing email query param" });
     }
 
     const user = await User.findOne({ email }).select(
@@ -480,9 +436,7 @@ export const userPreview = async (req, res) => {
     );
 
     if (!user) {
-      return res
-        .status(404)
-        .json({ message: "user not found" });
+      return res.status(404).json({ message: "user not found" });
     }
 
     return res.status(200).json({
