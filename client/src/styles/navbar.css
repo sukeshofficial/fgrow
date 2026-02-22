@@ -320,7 +320,7 @@
    - min-width version (desktop-up):
      @media (min-width: 1024px) { ... }
 */
-@media (min-width <= 1024px) {
+@media (min-width: 1024px) {
   .mobile-menu {
     display: none;
   }
@@ -328,7 +328,7 @@
     display: none;
   }
 }
-
+/* 1909 */
 @media (max-width: 1024px) {
   .navbar-links {
     display: none;
@@ -346,9 +346,9 @@
     top: 18px;
     width: 94%;
   }
-  .logo-text {
+  /* .logo-text {
     display: none;
-  }
+  } */
   .mobile-menu {
     right: 4%;
     width: 220px;
