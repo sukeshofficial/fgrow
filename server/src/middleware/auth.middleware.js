@@ -31,9 +31,7 @@ export default async function authMiddleware(req, res, next) {
     }
 
     if (!token) {
-      return res
-        .status(401)
-        .json({ message: "unauthorized: token missing" });
+      return res.status(401).json({ message: "unauthorized: token missing" });
     }
 
     // Verify JWT
@@ -41,9 +39,7 @@ export default async function authMiddleware(req, res, next) {
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch {
-      return res
-        .status(401)
-        .json({ message: "unauthorized: invalid token" });
+      return res.status(401).json({ message: "unauthorized: invalid token" });
     }
 
     const userId = decoded.userId || decoded.id || decoded._id;
@@ -60,19 +56,12 @@ export default async function authMiddleware(req, res, next) {
     );
 
     if (!user) {
-      return res
-        .status(401)
-        .json({ message: "unauthorized: user not found" });
+      return res.status(401).json({ message: "unauthorized: user not found" });
     }
 
     // Block access if account is locked
-    if (
-      user.locked_until &&
-      user.locked_until.getTime() > Date.now()
-    ) {
-      return res
-        .status(423)
-        .json({ message: "account locked" });
+    if (user.locked_until && user.locked_until.getTime() > Date.now()) {
+      return res.status(423).json({ message: "account locked" });
     }
 
     // Attach minimal user object to request
@@ -85,8 +74,6 @@ export default async function authMiddleware(req, res, next) {
     next();
   } catch (err) {
     console.error("Auth middleware error:", err);
-    return res
-      .status(500)
-      .json({ message: "internal server error" });
+    return res.status(500).json({ message: "internal server error" });
   }
 }

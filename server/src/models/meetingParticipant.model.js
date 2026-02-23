@@ -17,7 +17,15 @@ const meetingParticipantSchema = new mongoose.Schema(
       enum: ["host", "cohost", "editor", "viewer"],
       default: "viewer",
     },
-    isPresent: { type: Boolean, default: false },
+    status: {
+      type: String,
+      enum: ["waiting", "joined", "left", "rejected"],
+      default: "waiting",
+    },
+    isPresent: {
+      type: Boolean,
+      default: false,
+    },
     joinedAt: Date,
     leftAt: Date,
   },
