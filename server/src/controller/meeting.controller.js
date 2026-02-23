@@ -4,7 +4,8 @@ import { joinMeetingService } from "../services/meeting.service.js";
 export const createMeeting = async (req, res) => {
   try {
     const { title, scheduledAt, waitingRoom } = req.body;
-    const userId = req.user._id;
+    const userId = req.user.id;
+    console.log(req.user)
 
     if (!title) {
       return res.status(400).json({
@@ -34,7 +35,7 @@ export const createMeeting = async (req, res) => {
 export const joinMeeting = async (req, res) => {
   try {
     const { code } = req.params;
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const result = await joinMeetingService({
       meetingCode: code,
