@@ -197,7 +197,7 @@ export const rejectParticipant = async (req, res) => {
 export const leaveMeeting = async (req, res) => {
   try {
     const meetingId = req.params.id;
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     const { alreadyLeft, participant } = await leaveMeetingService({
       meetingId,

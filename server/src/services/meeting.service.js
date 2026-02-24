@@ -145,21 +145,21 @@ export const admitParticipantService = async ({
     };
   }
 
-  if (participant.status === "joined") {
-    return { alreadyJoined: true, participant };
-  }
+  // if (participant.status === "joined") {
+  //   return { alreadyJoined: true, participant };
+  // }
 
-  if (participant.status !== "waiting") {
-    throw {
-      status: 400,
-      message: `Participant cannot be admitted from status ${participant.status}`,
-    };
-  }
+  // if (participant.status !== "waiting") {
+  //   throw {
+  //     status: 400,
+  //     message: `Participant cannot be admitted from status ${participant.status}`,
+  //   };
+  // }
 
-  participant.status = "joined";
-  participant.isPresent = true;
-  participant.joinedAt = new Date();
-  await participant.save();
+  // participant.status = "joined";
+  // participant.isPresent = true;
+  // participant.joinedAt = new Date();
+  // await participant.save();
 
   return { participant, meeting };
 };
@@ -212,6 +212,8 @@ export const leaveMeetingService = async ({ meetingId, userId }) => {
     meetingId,
     userId,
   });
+
+  console.log(participant);
 
   if (!participant) {
     throw { status: 404, message: "You are not a participant of this meeting" };
