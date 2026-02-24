@@ -22,5 +22,8 @@
   "homepage": "https://github.com/sukeshofficial/collazo-v0#readme",
   "devDependencies": {
     "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "socket.io": "^4.8.3"
   }
 }

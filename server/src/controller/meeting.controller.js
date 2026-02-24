@@ -16,6 +16,7 @@ import {
   rejectParticipantService,
   leaveMeetingService,
 } from "../services/meeting.service.js";
+import { emitToUser } from "../sockets/meeting.socket.js";
 
 /**
  * Create a new meeting
@@ -140,6 +141,20 @@ export const admitParticipant = async (req, res) => {
       meetingId,
       participantId,
       actingUserId,
+    });
+
+    // notify the participant(s) directly
+    const io = req.app.get("io");
+    emitToUser(String(participant.userId), "participant-admitted", {
+      meetingId: meetingId,
+      participantId: participantId,
+    }, io);
+
+    // also broadcast to meeting room that participant joined
+    io.to(`meeting_${meetingId}`).emit("participant-joined", {
+      participantId: participantId,
+      userId: actingUserId,
+      name: actingUserId?.name || "unknown",
     });
 
     return res.status(200).json({

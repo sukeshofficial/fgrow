@@ -1,17 +1,28 @@
+import http from "http";
+import dotenv from "dotenv";
+
+import { initSocket } from "./sockets/meeting.socket.js";
+
 import app from "./app.js";
-import connectDB from './config/initDb.js'; 
-import dotenv from 'dotenv';
+import connectDB from "./config/initDb.js";
+
 dotenv.config();
 
 const start = async () => {
   try {
-    await connectDB(); // <- this must be awaited
-    const port = process.env.PORT || 5000;
-    app.listen(port, () => {
-      console.log(`Server running on port ${port}`);
+    await connectDB();
+
+    const server = http.createServer(app);
+
+    initSocket(server, app);
+
+    const PORT = process.env.PORT || 5000;
+
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
   } catch (err) {
-    console.error('Failed to start server:', err);
+    console.error("Failed to start server:", err);
     process.exit(1);
   }
 };

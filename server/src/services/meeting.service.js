@@ -1,5 +1,6 @@
 import Meeting from "../models/meeting.model.js";
 import MeetingParticipant from "../models/meetingParticipant.model.js";
+
 import { generateMeetingCode } from "../utils/helper.js";
 
 /**
