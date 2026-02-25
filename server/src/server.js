@@ -1,8 +1,6 @@
 import http from "http";
 import dotenv from "dotenv";
 
-import { initSocket } from "./sockets/meeting.socket.js";
-
 import app from "./app.js";
 import connectDB from "./config/initDb.js";
 
@@ -13,9 +11,6 @@ const start = async () => {
     await connectDB();
 
     const server = http.createServer(app);
-
-    initSocket(server, app);
-
     const PORT = process.env.PORT || 5000;
 
     server.listen(PORT, () => {
