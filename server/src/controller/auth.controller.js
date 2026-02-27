@@ -173,7 +173,7 @@ export const verifyOtp = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "invalid or expired otp" });
     }
-
+    user.emailVerified = true;
     user.reset_token = undefined;
     user.reset_token_expiry = undefined;
 
@@ -210,18 +210,17 @@ export const resendSignupOtp = async (req, res) => {
         .json({ message: "no account found for this email" });
     }
 
+    if (user.emailVerified) {
+      return res.status(400).json({ message: "email already verified" });
+    }
+
     const otp = createNumericOtp();
     const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
-    await User.updateOne(
-      { email },
-      {
-        $set: {
-          reset_token: hashedOtp,
-          reset_token_expiry: Date.now() + 5 * 60 * 1000,
-        },
-      },
-    );
+    user.reset_token = hashedOtp;
+    user.reset_token_expiry = Date.now() + 5 * 60 * 1000;
+
+    await user.save({ validateBeforeSave: false });
 
     await sendEmail({
       to: email,
@@ -260,6 +259,12 @@ export const loginUser = async (req, res) => {
 
     if (!user) {
       return res.status(401).json({ message: "invalid credentials" });
+    }
+
+    if (!user.emailVerified) {
+      return res.status(403).json({
+        message: "Please verify your email before logging in",
+      });
     }
 
     // Active lock check

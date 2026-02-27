@@ -23,6 +23,14 @@ const SALT_ROUNDS = 12;
 // User schema definition
 const userSchema = new mongoose.Schema(
   {
+    // Multi-tenant reference
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tenant",
+      required: true,
+      index: true,
+    },
+
     name: {
       type: String,
       trim: true,
@@ -62,6 +70,43 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Role System
+    role: {
+      type: String,
+      enum: ["owner", "admin", "staff", "read_only"],
+      default: "owner",
+      index: true,
+    },
+
+    // Account Status
+    status: {
+      type: String,
+      enum: ["invited", "active", "suspended"],
+      default: "active",
+      index: true,
+    },
+
+    invited_by: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    joined_at: {
+      type: Date,
+      default: Date.now,
+    },
+
+    last_login_at: {
+      type: Date,
+      default: null,
+    },
+
     // Profile avatar (cloud storage reference)
     profile_avatar: {
       public_id: { type: String, default: "" },
@@ -73,7 +118,6 @@ const userSchema = new mongoose.Schema(
     reset_token_expiry: { type: Date, select: false },
 
     // Security metadata
-    last_login: { type: Date, default: null },
     failed_login_attempts: {
       type: Number,
       default: 0,
@@ -111,15 +155,10 @@ userSchema.methods.comparePassword = async function (candidate) {
 };
 
 // Generate password reset token and expiry
-userSchema.methods.createResetToken = function (
-  expiryMs = 60 * 60 * 1000,
-) {
+userSchema.methods.createResetToken = function (expiryMs = 60 * 60 * 1000) {
   const rawToken = crypto.randomBytes(32).toString("hex");
 
-  this.reset_token = crypto
-    .createHash("sha256")
-    .update(rawToken)
-    .digest("hex");
+  this.reset_token = crypto.createHash("sha256").update(rawToken).digest("hex");
 
   this.reset_token_expiry = Date.now() + expiryMs;
 

@@ -67,7 +67,9 @@ export default async function authMiddleware(req, res, next) {
     // Attach minimal user object to request
     req.user = {
       id: user._id,
-      role: user.globalRole || user.role,
+      tenantId: user.tenant,
+      role: user.role,
+      status: user.status,
       data: user,
     };
 
