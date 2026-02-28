@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth.js";
+import { verifyOtp } from "../../features/auth/auth.actions.js";
 import { login } from "../../features/auth/auth.actions.js";
 import { userPreview } from "../../api/auth.api.js";
 import { SET_PROFILE_PREVIEW } from "../../features/auth/auth.types.js";
@@ -27,6 +28,9 @@ const LoginForm = ({ onSuccess }) => {
   });
   const [avatar, setAvatar] = useState(null);
   const [error, setError] = useState(null);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
 
   /**
    * Input change handler
@@ -102,11 +106,7 @@ const LoginForm = ({ onSuccess }) => {
       {/* Email-based avatar preview */}
       {avatar && (
         <div className="login-avatar-wrapper">
-          <img
-            src={avatar}
-            alt="User avatar"
-            className="email-avatar"
-          />
+          <img src={avatar} alt="User avatar" className="email-avatar" />
         </div>
       )}
 
@@ -144,11 +144,7 @@ const LoginForm = ({ onSuccess }) => {
         required
       />
 
-      <button
-        type="submit"
-        className="btn primary"
-        disabled={isLoading}
-      >
+      <button type="submit" className="btn primary" disabled={isLoading}>
         {isLoading ? "Logging in..." : "Login"}
       </button>
 
