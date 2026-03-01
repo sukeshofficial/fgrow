@@ -7,12 +7,7 @@ import {
   getMe,
 } from "../../api/auth.api.js";
 
-import {
-  AUTH_START,
-  AUTH_SUCCESS,
-  AUTH_FAIL,
-  LOGOUT,
-} from "./auth.types.js";
+import { AUTH_START, AUTH_SUCCESS, AUTH_FAIL, LOGOUT } from "./auth.types.js";
 
 /**
  * Register a new user
@@ -31,9 +26,7 @@ export const register = async (dispatch, formData) => {
     return res.data;
   } catch (err) {
     const message =
-      err.response?.data?.message ||
-      err.message ||
-      "Register failed";
+      err.response?.data?.message || err.message || "Register failed";
 
     dispatch({
       type: AUTH_FAIL,
@@ -62,9 +55,7 @@ export const verifyOtp = async (dispatch, payload) => {
   } catch (err) {
     dispatch({
       type: AUTH_FAIL,
-      payload:
-        err.response?.data?.message ||
-        "OTP verification failed",
+      payload: err.response?.data?.message || "OTP verification failed",
     });
 
     throw err;
@@ -101,9 +92,7 @@ export const login = async (dispatch, payload) => {
   } catch (err) {
     dispatch({
       type: AUTH_FAIL,
-      payload:
-        err.response?.data?.message ||
-        "Login failed",
+      payload: err.response?.data?.message || "Login failed",
     });
 
     throw err;
