@@ -2,18 +2,18 @@ import Navbar from "../components/NavBar";
 import SideBar from "../components/SideBar";
 
 /**
- * Dashboard page
+ * Tasks page
  *
  * Main authenticated landing page.
  */
-const Dashboard = () => {
+const Tasks = () => {
   return (
     <>
       {/* <Navbar /> */}
       <SideBar />
-      <div className="dashboard" />
+      <div className="tasks" />
     </>
   );
 };
 
-export default Dashboard;
+export default Tasks;

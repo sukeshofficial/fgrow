@@ -1,0 +1,361 @@
+:root {
+  --bg: #ffffff;
+  --muted: #6b7280;
+  --text: #111827;
+  --sidebar-w: 260px;
+  --selected-bg: #eaf4ff; /* light blue pill */
+  --selected-text: #0f62fe; /* blue-ish */
+  --divider: #e6e9ee;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family:
+    "Inter",
+    "Roboto",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+}
+
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg);
+  border-right: 1px solid var(--divider);
+  min-height: 100vh;
+  padding: 18px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: width 0.3s ease;
+}
+
+/* internal wrapper for padding alignment */
+.sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+/* brand */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px;
+}
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #0f172a, #0f62fe);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  box-shadow: 0 2px 6px rgba(2, 6, 23, 0.06);
+}
+.brand-name {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 15px;
+}
+
+/* menu */
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: auto;
+  padding-right: 6px;
+}
+
+/* each menu item */
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--muted);
+  padding: 10px 12px;
+  border-radius: 26px; /* pill */
+  transition:
+    background 0.15s ease,
+    color 0.12s ease,
+    transform 0.06s ease;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* icon on left */
+.menu-icon {
+  min-width: 28px;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 16px;
+  margin-left: 2px;
+}
+
+/* label */
+.menu-label {
+  display: inline-block;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* right side small icons (plus / chevron) */
+.menu-right {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #9aa1aa;
+  font-size: 13px;
+}
+
+/* active state - pill filled, blue text */
+.menu-item.active {
+  background: var(--selected-bg);
+  color: var(--selected-text);
+  box-shadow: 0 2px 6px rgba(15, 98, 254, 0.06);
+}
+.menu-item.active .menu-icon {
+  color: var(--selected-text);
+}
+.menu-item:hover {
+  background: rgba(15, 98, 254, 0.04);
+  color: var(--text);
+}
+
+/* small badge like 'New' */
+.badge {
+  background: #ffb020;
+  color: white;
+  font-weight: 600;
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  margin-left: 8px;
+}
+
+/* divider between groups */
+.divider {
+  height: 1px;
+  background: var(--divider);
+  margin: 10px 2px;
+  border-radius: 2px;
+}
+
+/* bottom area spacing */
+.menu > .menu-item:last-child {
+  margin-bottom: 6px;
+}
+
+/* small external arrow for external links */
+.external-arrow {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* USER AREA - clean, compact, responsive */
+
+.user-area {
+  margin-top: auto;
+  padding: 12px 14px; /* reduced padding so space is tight */
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* avatar+name left, logout right */
+  gap: 8px;
+  border-top: 1px solid #e6e9ee;
+  background: transparent; /* keep background subtle */
+}
+
+/* left side: avatar + name */
+.user-left {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* smaller gap than before */
+  min-width: 0; /* allow text truncation if needed */
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03) inset;
+}
+
+/* name style */
+.user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* logout button - compact, icon + text */
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 8px; /* small gap between icon and text */
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  color: #b91c1c; /* red tone */
+  cursor: pointer;
+  padding: 8px 12px; /* compact padding */
+  border-radius: 10px;
+  transition:
+    background 0.12s ease,
+    transform 0.08s;
+  width: fit-content; /* important: don't stretch */
+}
+
+/* icon inside the button */
+.logout-icon {
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* hover */
+.logout-btn:hover {
+  background: #fff1f2;
+}
+
+/* ensure logout text is small and no weird trailing space */
+.logout-text {
+  display: inline-block;
+  margin-right: 0;
+  margin-left: 0;
+}
+
+/* ========== COLLAPSED SIDEBAR BEHAVIOUR ========== */
+
+/* when the sidebar is collapsed we change the layout */
+.sidebar.collapsed .user-area {
+  /* stack vertically and center everything */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+  gap: 8px;
+  border-top: none; /* optional: remove divider in collapsed view */
+}
+
+/* hide the user name in collapsed mode */
+.sidebar.collapsed .user-name,
+.sidebar.collapsed .logout-text {
+  display: none;
+}
+
+/* make the logout button a circular icon centered under the avatar */
+.sidebar.collapsed .logout-btn {
+  width: 44px; /* fixed square */
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff1f2;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+}
+
+.sidebar.collapsed .logout-btn:hover {
+  width: 44px; /* fixed square */
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fecaca;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+}
+
+/* center alignment; remove left alignment issues */
+.sidebar.collapsed .user-left {
+  justify-content: center;
+  width: 100%;
+}
+
+/* small tweak to center avatar precisely */
+.sidebar.collapsed .user-avatar {
+  margin: 0 auto;
+}
+
+.sidebar.collapsed .logout-btn[aria-label]:hover::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: 60px;
+  top: 95%;
+  transform: translateY(-50%);
+  background: #111827;
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 9999;
+}
+
+.sidebar.collapsed {
+  width: 72px;
+}
+
+.sidebar.collapsed .user-info {
+  display: none;
+}
+
+.sidebar.collapsed .user-area {
+  justify-content: center; /* Center avatar */
+}
+
+/* responsive: collapse to narrower sidebar (icons only) */
+@media (max-width: 980px) {
+  .sidebar {
+    width: 72px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .brand-name {
+    display: none;
+  }
+  .menu-label {
+    display: none;
+  }
+  .badge {
+    display: none;
+  }
+
+  .menu-item {
+    justify-content: center;
+    border-radius: 10px;
+    padding: 10px;
+  }
+  .menu-item.active {
+    border-radius: 10px;
+  }
+  .menu-right {
+    display: none;
+  }
+}

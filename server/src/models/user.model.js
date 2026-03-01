@@ -24,10 +24,10 @@ const SALT_ROUNDS = 12;
 const userSchema = new mongoose.Schema(
   {
     // Multi-tenant reference
-    tenant: {
+    tenant_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tenant",
-      required: true,
+      default: null,
       index: true,
     },
 
