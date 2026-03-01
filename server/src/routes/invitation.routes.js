@@ -1,4 +1,4 @@
-  import express from "express";
+import express from "express";
 import {
   inviteUser,
   acceptInvitation,
@@ -15,6 +15,6 @@ router.post(
   inviteUser,
 );
 
-router.post("/accept", acceptInvitation);
+router.post("/accept", authMiddleware, acceptInvitation);
 
 export default router;

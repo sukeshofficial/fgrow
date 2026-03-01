@@ -3,7 +3,7 @@ import { UserInvitation } from "../models/userInvitation.model.js";
 import crypto from "crypto";
 
 export const inviteUserService = async ({
-  tenantId,
+  tenant_id,
   userId,
   email,
   role,
@@ -11,7 +11,7 @@ export const inviteUserService = async ({
 }) => {
   // 1️⃣ Check active users count
   const existingUsers = await User.countDocuments({
-    tenant: tenantId,
+    tenant_id: tenant_id,
     status: "active",
   });
 
@@ -22,7 +22,7 @@ export const inviteUserService = async ({
 
   // 3️⃣ Create invitation
   const invitation = await UserInvitation.create({
-    tenant: tenantId,
+    tenant_id,
     email,
     role,
     invited_by: userId,
@@ -61,7 +61,7 @@ export const acceptInvitationService = async ({
       name,
       username,
       email: invitation.email,
-      tenant: invitation.tenant,
+      tenant_id: invitation.tenant_id,
       role: invitation.role,
       status: "active",
     });

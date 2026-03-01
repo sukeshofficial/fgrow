@@ -8,7 +8,7 @@ export const inviteUser = async (req, res) => {
     const { email, role } = req.body;
 
     const result = await inviteUserService({
-      tenantId: req.tenantId,
+      tenant_id: req.tenant_id,
       userId: req.userId,
       email,
       role,

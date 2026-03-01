@@ -5,10 +5,10 @@ export const createTenant = async (req, res) => {
   try {
     const { tenant, user } = await createTenantService(req.body);
 
-    // 7️⃣ Generate JWT
+    // 7️⃣ Generate JWT (unnecessary process rn.)
     const token = generateToken({
       id: user._id,
-      tenantId: tenant._id,
+      tenant_id: tenant._id,
       role: user.role,
     });
 

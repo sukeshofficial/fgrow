@@ -3,26 +3,18 @@ import { UserInvitation } from "../models/userInvitation.model.js";
 import crypto from "crypto";
 
 export const inviteUserService = async ({
-  tenantId,
+  tenant_id,
   userId,
   email,
   role,
   frontendUrl,
 }) => {
-  // 1️⃣ Check plan user limit
-  const existingUsers = await User.countDocuments({
-    tenant: tenantId,
-    status: "active",
-  });
-
-  // Add subscription check logic here later
-
   // 2️⃣ Generate invite token
   const inviteToken = crypto.randomBytes(32).toString("hex");
 
   // 3️⃣ Create invitation
-  await UserInvitation.create({
-    tenant: tenantId,
+  const userInvitation = await UserInvitation.create({
+    tenant_id: tenant_id,
     email,
     role,
     invited_by: userId,
@@ -33,15 +25,11 @@ export const inviteUserService = async ({
   return {
     message: "Invitation sent successfully",
     inviteLink: `${frontendUrl}/invite/${inviteToken}`,
+    invitation: userInvitation,
   };
 };
 
-export const acceptInvitationService = async ({
-  token,
-  name,
-  username,
-  password,
-}) => {
+export const acceptInvitationService = async ({ token, userId }) => {
   const invitation = await UserInvitation.findOne({
     invite_token: token,
   });
@@ -58,30 +46,27 @@ export const acceptInvitationService = async ({
     throw new Error("Already accepted");
   }
 
-  // Check if user exists
-  let user = await User.findOne({ email: invitation.email });
+  const user = await User.findById(userId);
 
   if (!user) {
-    user = new User({
-      name,
-      username,
-      email: invitation.email,
-      tenant: invitation.tenant,
-      role: invitation.role,
-      status: "active",
-    });
-
-    user.password = password;
-    await user.save();
-  } else {
-    user.tenant = invitation.tenant;
-    user.role = invitation.role;
-    user.status = "active";
-    await user.save();
+    throw new Error("User not found");
   }
+
+  if (user.email !== invitation.email) {
+    throw new Error("This invitation is not for this account");
+  }
+
+  user.tenant_id = invitation.tenant_id;
+  user.role = invitation.role;
+  user.status = "active";
+
+  await user.save();
 
   invitation.accepted_at = new Date();
   await invitation.save();
 
-  return { message: "Joined successfully" };
+  return {
+    message: "Joined successfully",
+    user: user.toJSON(),
+  };
 };

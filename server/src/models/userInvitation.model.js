@@ -3,7 +3,7 @@ import crypto from "crypto";
 
 const userInvitationSchema = new mongoose.Schema(
   {
-    tenant: {
+    tenant_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tenant",
       required: true,
