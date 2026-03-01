@@ -1,4 +1,5 @@
 import { User } from "../models/user.model.js";
+import Tenant from "../models/tenant.model.js";
 import { UserInvitation } from "../models/userInvitation.model.js";
 import crypto from "crypto";
 
@@ -9,6 +10,23 @@ export const inviteUserService = async ({
   role,
   frontendUrl,
 }) => {
+  // 1️⃣ Check tenant verification status
+  const tenant = await Tenant.findById(tenant_id);
+
+  if (!tenant) {
+    throw new Error("Tenant not found");
+  }
+
+  if (tenant.verificationStatus !== "verified") {
+    throw new Error(
+      "Your organization is not verified. You cannot add staff or clients until verification is complete.",
+    );
+  }
+
+  if (!tenant.isActive) {
+    throw new Error("Tenant is inactive");
+  }
+
   // 2️⃣ Generate invite token
   const inviteToken = crypto.randomBytes(32).toString("hex");
 
