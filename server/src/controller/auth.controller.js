@@ -20,6 +20,7 @@ import sendEmail from "../utils/sendEmail.js";
 import { generateToken } from "../utils/jwt.js";
 import { createNumericOtp, generateUsername } from "../utils/helper.js";
 import { uploadToCloud } from "../utils/cloudinary.js";
+import { UserInvitation } from "../models/userInvitation.model.js";
 
 // Lockout configuration
 const THRESHOLD_SHORT = 3;
@@ -413,8 +414,36 @@ export const getMe = async (req, res) => {
       return res.status(404).json({ message: "user not found" });
     }
 
+    if (user.tenant_id) {
+      return res.status(200).json({
+        message: "User Active",
+        state: "ACTIVE",
+        user,
+      });
+    }
+
+    const invitation = await UserInvitation.findOne({
+      email: user.email,
+      accepted_at: null,
+      expires_at: { $gt: new Date() },
+    }).populate("tenant");
+
+    if (invitation) {
+      return res.status(200).json({
+        message: "User Invited",
+        state: "INVITED",
+        user,
+        invitation: {
+          tenantName: invitation.tenant.name,
+          role: invitation.role,
+          token: invitation.invite_token,
+        },
+      });
+    }
+
     return res.status(200).json({
-      message: "Your Details",
+      message: "Tenant setup required",
+      state: "NO_TENANT",
       user,
     });
   } catch (err) {
