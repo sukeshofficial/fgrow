@@ -19,7 +19,7 @@ import {
 import { FiLogOut } from "react-icons/fi";
 
 import { useAuth } from "../hooks/useAuth.js";
-import logo from "/ForgeGrid.svg";
+import logo from "/FGrow.png";
 
 /* -------------------------------------------------------------------------- */
 /*                                   MENU                                     */
@@ -148,7 +148,7 @@ export default function Sidebar() {
           <span
             className={`logo-text ${collapsed ? "collapsed" : ""} user-info`}
           >
-            ForgeGrid
+            <span className="fg">FG</span>row
           </span>
         </div>
 

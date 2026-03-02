@@ -39,7 +39,7 @@
 .navbar-logo {
   display: flex;
   align-items: center;
-  filter: invert(100%);
+  /* filter: invert(100%); */
   gap: 10px;
   padding-left: 10px;
 }
@@ -53,7 +53,6 @@
 .logo-text {
   font-weight: 700;
   font-size: 1.1rem;
-  filter: invert(1);
   background: black;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
