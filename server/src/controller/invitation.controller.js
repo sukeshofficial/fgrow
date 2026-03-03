@@ -1,14 +1,15 @@
+import dotenv from "dotenv";
+
 import {
   inviteUserService,
   acceptInvitationService,
 } from "../services/invitation.service.js";
-import dotenv from "dotenv";
 
 dotenv.config();
 
 export const inviteUser = async (req, res) => {
   try {
-    const { email, role } = req.body;
+    const { email, tenant_role } = req.body;
 
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -18,7 +19,7 @@ export const inviteUser = async (req, res) => {
       tenant_id: req.user.tenant_id,
       userId: req.user.id,
       email,
-      role,
+      tenant_role,
       frontendUrl: process.env.FRONTEND_URL,
     });
 

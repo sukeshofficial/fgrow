@@ -76,9 +76,16 @@ const userSchema = new mongoose.Schema(
     },
 
     // Role System
-    role: {
+    platform_role: {
       type: String,
-      enum: ["owner", "admin", "staff", "read_only"],
+      enum: ["super_admin", "none"],
+      default: "none",
+      index: true,
+    },
+
+    tenant_role: {
+      type: String,
+      enum: ["owner", "staff", "read_only"],
       default: "owner",
       index: true,
     },

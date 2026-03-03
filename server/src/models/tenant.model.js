@@ -43,10 +43,19 @@ const tenantSchema = new mongoose.Schema(
       default: "pending",
     },
 
-    verifiedAt: Date,
+    verifiedAt: {
+      type: Date,
+      default: null,
+    },
+
     verifiedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+    },
+
+    rejection_reason: {
+      type: String,
+      default: null,
     },
 
     // Trial & Plan
@@ -76,6 +85,18 @@ const tenantSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    // Appeal for Rejected Tenants
+    appealCount: {
+      type: Number,
+      default: 0,
+    },
+
+    lastAppealedAt: {
+      type: Date,
+      default: null,
+    },
+
   },
   { timestamps: true },
 );

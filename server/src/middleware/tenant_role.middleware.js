@@ -4,7 +4,7 @@ export const requireRole = (...allowedRoles) => {
       return res.status(401).json({ message: "unauthorized" });
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    if (!allowedRoles.includes(req.user.tenant_role)) {
       return res.status(403).json({
         message: "forbidden: insufficient permissions",
       });

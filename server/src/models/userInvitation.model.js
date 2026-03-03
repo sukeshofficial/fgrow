@@ -18,7 +18,7 @@ const userInvitationSchema = new mongoose.Schema(
       index: true,
     },
 
-    role: {
+    tenant_role: {
       type: String,
       enum: ["admin", "staff", "read_only"],
       default: "staff",

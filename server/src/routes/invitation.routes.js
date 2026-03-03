@@ -4,14 +4,14 @@ import {
   acceptInvitation,
 } from "../controller/invitation.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
-import { requireRole } from "../middleware/role.middleware.js";
+import { requireRole } from "../middleware/tenant_role.middleware.js";
 
 const router = express.Router();
 
 router.post(
   "/invite",
   authMiddleware,
-  requireRole("owner", "admin"),
+  requireRole("owner"),
   inviteUser,
 );
 

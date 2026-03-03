@@ -1,6 +1,4 @@
 import Tenant from "../models/tenant.model.js";
-import Plan from "../models/plan.model.js";
-import TenantSubscription from "../models/tenantSubscription.model.js";
 import { User } from "../models/user.model.js";
 import slugify from "slugify";
 
@@ -42,7 +40,7 @@ export const createTenantService = async (data) => {
 
   // 2️⃣ Attach tenant to user
   user.tenant_id = tenant._id;
-  user.role = "owner";
+  user.tenant_role = "owner";
   user.status = "active";
 
   await user.save();
@@ -95,7 +93,7 @@ export const createTenantService = async (data) => {
 
   // 3️⃣ Attach user to tenant
   user.tenant_id = tenant._id;
-  user.role = "owner";
+  user.tenant_role = "owner";
   user.status = "active";
   await user.save();
 
@@ -106,4 +104,92 @@ export const createTenantService = async (data) => {
   await tenant.save();
 
   return { tenant, user };
+};
+
+// --------------------------------------------------
+// 1️⃣ Get All Pending Tenants
+// --------------------------------------------------
+export const fetchPendingTenants = async () => {
+  return await Tenant.find({
+    verificationStatus: "pending",
+  }).populate("ownerUserId", "name email");
+};
+
+// --------------------------------------------------
+// 2️⃣ Approve Tenant
+// --------------------------------------------------
+export const approveTenantService = async (tenantId, adminId) => {
+  const tenant = await Tenant.findById(tenantId);
+
+  if (!tenant) {
+    return { error: "Tenant not found", status: 404 };
+  }
+
+  if (tenant.verificationStatus === "verified") {
+    return { error: "Tenant already approved", status: 400 };
+  }
+
+  tenant.verificationStatus = "verified";
+  tenant.verifiedBy = adminId;
+  tenant.verifiedAt = new Date();
+  tenant.rejection_reason = null;
+
+  await tenant.save();
+
+  return { tenant };
+};
+
+// --------------------------------------------------
+// 3️⃣ Reject Tenant
+// --------------------------------------------------
+export const rejectTenantService = async (tenantId, reason, adminId) => {
+  if (!reason) {
+    return { error: "Rejection reason is required", status: 400 };
+  }
+
+  const tenant = await Tenant.findById(tenantId);
+
+  if (!tenant) {
+    return { error: "Tenant not found", status: 404 };
+  }
+
+  tenant.verificationStatus = "rejected";
+  tenant.rejection_reason = reason;
+  tenant.verifiedBy = adminId;
+  tenant.verifiedAt = new Date();
+
+  await tenant.save();
+
+  return { tenant };
+};
+
+// --------------------------------------------------
+// 4️⃣ Re-appeal Tenant
+// --------------------------------------------------
+export const reAppealTenantService = async (tenantId, userId) => {
+  const tenant = await Tenant.findById(tenantId);
+
+  if (!tenant) {
+    throw new Error("Tenant not found");
+  }
+
+  if (tenant.verificationStatus !== "rejected") {
+    throw new Error("Tenant is not rejected");
+  }
+
+  // Optional: limit appeals
+  if (tenant.appealCount >= 3) {
+    throw new Error("Maximum appeal attempts reached");
+  }
+
+  tenant.verificationStatus = "pending";
+  tenant.rejection_reason = null;
+  tenant.appealCount += 1;
+  tenant.lastAppealedAt = new Date();
+  tenant.verifiedBy = null;
+  tenant.verifiedAt = null;
+
+  await tenant.save();
+
+  return tenant;
 };

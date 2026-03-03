@@ -15,8 +15,10 @@ import crypto from "crypto";
 import validator from "validator";
 import fs from "fs";
 
-import { User } from "../models/user.model.js";
 import sendEmail from "../utils/sendEmail.js";
+import Tenant from "../models/tenant.model.js";
+
+import { User } from "../models/user.model.js";
 import { generateToken } from "../utils/jwt.js";
 import { createNumericOtp, generateUsername } from "../utils/helper.js";
 import { uploadToCloud } from "../utils/cloudinary.js";
@@ -323,6 +325,12 @@ export const loginUser = async (req, res) => {
     user.lockout_level = 0;
     user.last_login = new Date();
 
+    const superAdminEmails = process.env.SUPER_ADMIN_EMAILS.split(",");
+
+    if (superAdminEmails.includes(user.email)) {
+      user.platform_role = "super_admin";
+    }
+
     await user.save({ validateBeforeSave: false });
 
     return sendAuthSuccess(res, user);
@@ -414,38 +422,103 @@ export const getMe = async (req, res) => {
       return res.status(404).json({ message: "user not found" });
     }
 
-    if (user.tenant_id) {
+    if (!user.tenant_id) {
+      const invitation = await UserInvitation.findOne({
+        email: user.email,
+        accepted_at: null,
+        expires_at: { $gt: new Date() },
+      }).populate("tenant");
+
+      if (invitation) {
+        return res.status(200).json({
+          message: "User Invited",
+          state: "INVITED",
+          user,
+          invitation: {
+            tenantName: invitation.tenant?.name || null,
+            tenant_role: invitation.tenant_role,
+            token: invitation.invite_token,
+          },
+        });
+      }
+
       return res.status(200).json({
-        message: "User Active",
-        state: "ACTIVE",
+        message: "Tenant setup required",
+        state: "NO_TENANT",
         user,
       });
     }
 
-    const invitation = await UserInvitation.findOne({
-      email: user.email,
-      accepted_at: null,
-      expires_at: { $gt: new Date() },
-    }).populate("tenant");
+    const tenant = await Tenant.findById(user.tenant_id).select(
+      "name verificationStatus verifiedBy verifiedAt rejection_reason isActive createdAt plan"
+    ).populate("verifiedBy", "name email");
 
-    if (invitation) {
-      return res.status(200).json({
-        message: "User Invited",
-        state: "INVITED",
+    if (!tenant) {
+      // tenant reference broken or deleted
+      return res.status(400).json({
+        message: "Tenant not found (referenced tenant missing)",
+        state: "TENANT_MISSING",
         user,
-        invitation: {
-          tenantName: invitation.tenant.name,
-          role: invitation.role,
-          token: invitation.invite_token,
+      });
+    }
+
+    // Tenant-level gating
+    if (!tenant.isActive) {
+      return res.status(200).json({
+        message: "Tenant is inactive",
+        state: "TENANT_INACTIVE",
+        user,
+        tenant: {
+          id: tenant._id,
+          name: tenant.name,
+          isActive: tenant.isActive,
         },
       });
     }
 
-    return res.status(200).json({
-      message: "Tenant setup required",
-      state: "NO_TENANT",
-      user,
-    });
+    // Use your existing verificationStatus field as the approval state
+    switch (tenant.verificationStatus) {
+      case "verified":
+        return res.status(200).json({
+          message: "User Active",
+          state: "ACTIVE",
+          user,
+          tenant: {
+            id: tenant._id,
+            name: tenant.name,
+            plan: tenant.plan,
+          },
+        });
+
+      case "pending":
+      default:
+        return res.status(200).json({
+          message: "Tenant pending verification",
+          state: "PENDING_VERIFICATION",
+          user,
+          tenant: {
+            id: tenant._id,
+            name: tenant.name,
+            verificationStatus: tenant.verificationStatus,
+            createdAt: tenant.createdAt,
+          },
+        });
+
+      case "rejected":
+        return res.status(200).json({
+          message: "Tenant rejected",
+          state: "REJECTED_VERIFICATION",
+          user,
+          tenant: {
+            id: tenant._id,
+            name: tenant.name,
+            verificationStatus: tenant.verificationStatus,
+            rejection_reason: tenant.rejection_reason,
+            verifiedBy: tenant.verifiedBy,
+            verifiedAt: tenant.verifiedAt,
+          },
+        });
+    }
   } catch (err) {
     console.error("Get Me error:", err);
     return res.status(500).json({

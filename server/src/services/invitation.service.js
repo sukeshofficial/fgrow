@@ -1,13 +1,17 @@
-import { User } from "../models/user.model.js";
-import Tenant from "../models/tenant.model.js";
-import { UserInvitation } from "../models/userInvitation.model.js";
 import crypto from "crypto";
+
+import Tenant from "../models/tenant.model.js";
+import sendEmail from "../utils/sendEmail.js";
+
+import { User } from "../models/user.model.js";
+import { UserInvitation } from "../models/userInvitation.model.js";
+import { send } from "process";
 
 export const inviteUserService = async ({
   tenant_id,
   userId,
   email,
-  role,
+  tenant_role,
   frontendUrl,
 }) => {
   // 1️⃣ Check tenant verification status
@@ -31,13 +35,38 @@ export const inviteUserService = async ({
   const inviteToken = crypto.randomBytes(32).toString("hex");
 
   // 3️⃣ Create invitation
+
+  // Check if there's already a pending invitation for the same email
+  const existingInvitation = await UserInvitation.findOne({
+    tenant_id,
+    email,
+    accepted_at: null,
+    expires_at: { $gt: new Date() }
+  });
+
+  if (existingInvitation) {
+    throw new Error("An active invitation already exists for this user.");
+  }
+
   const userInvitation = await UserInvitation.create({
     tenant_id: tenant_id,
     email,
-    role,
+    tenant_role,
     invited_by: userId,
     invite_token: inviteToken,
     expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  });
+
+  const user = await User.findOne({ email });
+
+  user.invited_by = userId;
+  await user.save();
+
+  // 4️⃣ Send email (placeholder - implement actual email sending logic here)
+  await sendEmail({
+    to: email,
+    subject: "You're invited to join FGrow",
+    text: `You have been invited to join our ${tenant.name}. Please click the following link to accept the invitation: ${frontendUrl}/invite/${inviteToken}`,
   });
 
   return {
@@ -75,7 +104,7 @@ export const acceptInvitationService = async ({ token, userId }) => {
   }
 
   user.tenant_id = invitation.tenant_id;
-  user.role = invitation.role;
+  user.tenant_role = invitation.tenant_role;
   user.status = "active";
 
   await user.save();
