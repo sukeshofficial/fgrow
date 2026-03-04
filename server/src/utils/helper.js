@@ -34,3 +34,17 @@ export const generateMeetingCode = () => {
   // Format: ABCD-1234
   return `${code.slice(0, 4)}-${code.slice(4)}`;
 };
+
+export const validatePAN = (pan) => {
+  if (!pan) return false;
+  // PAN: 5 letters, 4 digits, 1 letter (10 chars)
+  const re = /^[A-Z]{5}[0-9]{4}[A-Z]$/i;
+  return re.test(pan.trim());
+};
+
+export const validateGSTIN = (gst) => {
+  if (!gst) return true;
+  // GSTIN: 15 chars. Basic pattern - 2 digits (state), 10-char PAN, 1 entity code, 1 'Z', 1 checksum
+  const re = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/i;
+  return re.test(gst.trim());
+};
