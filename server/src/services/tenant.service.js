@@ -1,5 +1,5 @@
-import Tenant from "../models/tenant.model.js";
-import { User } from "../models/user.model.js";
+import Tenant from "../models/tenant/tenant.model.js";
+import { User } from "../models/auth/user.model.js";
 import slugify from "slugify";
 
 /*

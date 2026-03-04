@@ -1,10 +1,10 @@
 import crypto from "crypto";
 
-import Tenant from "../models/tenant.model.js";
+import Tenant from "../models/tenant/tenant.model.js";
 import sendEmail from "../utils/sendEmail.js";
 
-import { User } from "../models/user.model.js";
-import { UserInvitation } from "../models/userInvitation.model.js";
+import { User } from "../models/auth/user.model.js";
+import { UserInvitation } from "../models/auth/userInvitation.model.js";
 import { send } from "process";
 
 export const inviteUserService = async ({

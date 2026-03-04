@@ -16,13 +16,13 @@ import validator from "validator";
 import fs from "fs";
 
 import sendEmail from "../utils/sendEmail.js";
-import Tenant from "../models/tenant.model.js";
+import Tenant from "../models/tenant/tenant.model.js";
 
-import { User } from "../models/user.model.js";
+import { User } from "../models/auth/user.model.js";
 import { generateToken } from "../utils/jwt.js";
 import { createNumericOtp, generateUsername } from "../utils/helper.js";
 import { uploadToCloud } from "../utils/cloudinary.js";
-import { UserInvitation } from "../models/userInvitation.model.js";
+import { UserInvitation } from "../models/auth/userInvitation.model.js";
 
 // Lockout configuration
 const THRESHOLD_SHORT = 3;

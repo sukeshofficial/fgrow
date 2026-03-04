@@ -1,5 +1,5 @@
 // ---------- Helper: create 6-digit OTP ----------
-import { User } from "../models/user.model.js";
+import { User } from "../models/auth/user.model.js";
 
 export const createNumericOtp = () => {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit string
