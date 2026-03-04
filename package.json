@@ -1,5 +1,5 @@
 {
-  "name": "collazo-v0-new",
+  "name": "fgrow",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,16 +10,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sukeshofficial/collazo-v0.git"
+    "url": "git+https://github.com/sukeshofficial/fgrow.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/sukeshofficial/collazo-v0/issues"
+    "url": "https://github.com/sukeshofficial/fgrow/issues"
   },
-  "homepage": "https://github.com/sukeshofficial/collazo-v0#readme",
+  "homepage": "https://github.com/sukeshofficial/fgrow#readme",
   "devDependencies": {
     "concurrently": "^9.2.1"
   },
