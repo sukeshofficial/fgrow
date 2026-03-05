@@ -1,102 +1,129 @@
-// services/client.service.js
-import Client from "../models/client.model.js";
+import mongoose from "mongoose";
+import Client from "../models/client/client.model.js";
 
-/**
- * Create a new client
- * @param {Object} data - client payload (tenant_id should already be set)
- * @returns {Promise<Client>}
- */
-export async function createClient(data) {
-    const client = new Client(data);
-    return client.save();
-}
+const { Types } = mongoose;
 
-/**
- * Get paginated clients with filters
- * @param {Object} filters
- * @param {Object} options - { page, limit, sort, search }
- */
-export async function listClients(filters = {}, options = {}) {
-    const page = Math.max(1, Number(options.page) || 1);
-    const limit = Math.max(1, Math.min(100, Number(options.limit) || 20));
+export const createClientService = async ({ tenant_id, user_id, payload }) => {
+  try {
+    const { pan } = payload;
+
+    const existingClient = await Client.findOne({
+      tenant_id,
+      pan: pan?.toUpperCase(),
+      archived: false,
+    });
+
+    if (existingClient) {
+      throw new Error("Client with this PAN already exists");
+    }
+
+    const client = new Client({
+      ...payload,
+      tenant_id,
+      created_by: user_id,
+    });
+
+    const savedClient = await client.save();
+
+    return savedClient;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+export const listClientsService = async ({
+  tenant_id,
+  page = 1,
+  limit = 10,
+  search,
+  filters = {},
+}) => {
+  try {
+    const query = {
+      tenant_id,
+      archived: false,
+    };
+
+    // allowed filter fields
+    const allowedFilters = [
+      "type",
+      "pan",
+      "gstin",
+      "group",
+      "billing_profile",
+      "is_active",
+      "is_non_recurring",
+      "file_no",
+    ];
+
+    // apply filters dynamically
+    for (const key of allowedFilters) {
+      if (filters[key] !== undefined) {
+        query[key] = filters[key];
+      }
+    }
+
+    // group filter (ObjectId)
+    if (filters.group) {
+      if (!Types.ObjectId.isValid(filters.group)) {
+        throw new Error("Invalid group id");
+      }
+      query.group = new Types.ObjectId(filters.group);
+    }
+
+    // billing profile filter
+    if (
+      filters.billing_profile &&
+      Types.ObjectId.isValid(filters.billing_profile)
+    ) {
+      query.billing_profile = new Types.ObjectId(filters.billing_profile);
+    }
+
+    // tags filter
+    if (filters.tags) {
+      const tagArray = Array.isArray(filters.tags)
+        ? filters.tags
+        : [filters.tags];
+
+      query.tags = {
+        $in: tagArray
+          .filter((id) => Types.ObjectId.isValid(id))
+          .map((id) => new Types.ObjectId(id)),
+      };
+    }
+
+    // search logic
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { pan: { $regex: search, $options: "i" } },
+        { gstin: { $regex: search, $options: "i" } },
+        { primary_contact_name: { $regex: search, $options: "i" } },
+        { primary_contact_mobile: { $regex: search, $options: "i" } },
+        { primary_contact_email: { $regex: search, $options: "i" } },
+      ];
+    }
+
     const skip = (page - 1) * limit;
 
-    const mongoFilter = { archived: false, ...filters };
+    const clients = await Client.find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean();
 
-    // text search handling if provided
-    if (options.search) {
-        // Use text index defined on client model: name and contacts.name
-        mongoFilter.$text = { $search: options.search };
-    }
-
-    // Build query
-    const query = Client.find(mongoFilter)
-        .populate("group")
-        .populate("tags")
-        .skip(skip)
-        .limit(limit);
-
-    if (options.sort) {
-        query.sort(options.sort);
-    } else {
-        query.sort({ createdAt: -1 });
-    }
-
-    const [items, total] = await Promise.all([
-        query.exec(),
-        Client.countDocuments(mongoFilter)
-    ]);
+    const total = await Client.countDocuments(query);
 
     return {
-        items,
-        meta: {
-            page,
-            limit,
-            total,
-            pages: Math.ceil(total / limit)
-        }
+      clients,
+      pagination: {
+        total,
+        page,
+        limit,
+        total_pages: Math.ceil(total / limit),
+      },
     };
-}
-
-/**
- * Get single client by id (and tenant guard)
- */
-export async function getClientById(id, tenantId) {
-    return Client.findOne({ _id: id, tenant_id: tenantId, archived: false })
-        .populate("group")
-        .populate("tags")
-        .exec();
-}
-
-/**
- * Update client by id (tenant guarded)
- */
-export async function updateClient(id, tenantId, update) {
-    return Client.findOneAndUpdate(
-        { _id: id, tenant_id: tenantId, archived: false },
-        { $set: update },
-        { new: true }
-    ).populate("group").populate("tags").exec();
-}
-
-/**
- * Archive (soft-delete) a client
- */
-export async function archiveClient(id, tenantId, archivedByUserId) {
-    return Client.findOneAndUpdate(
-        { _id: id, tenant_id: tenantId, archived: false },
-        { $set: { archived: true, archived_at: new Date(), updated_by: archivedByUserId } },
-        { new: true }
-    ).exec();
-}
-
-/**
- * Optional: check uniqueness of file_no for tenant
- */
-export async function existsFileNoForTenant(file_no, tenantId, excludeClientId = null) {
-    if (!file_no) return false;
-    const q = { tenant_id: tenantId, file_no: file_no.trim(), archived: false };
-    if (excludeClientId) q._id = { $ne: excludeClientId };
-    const c = await Client.countDocuments(q).lean();
-    return c > 0;
-}
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
