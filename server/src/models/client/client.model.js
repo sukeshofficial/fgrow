@@ -41,6 +41,11 @@ const clientSchema = new Schema(
             index: true,
         },
 
+        customType: {
+            type: String,
+            trim: true
+        },
+
         group: { type: Schema.Types.ObjectId, ref: "ClientGroup", default: null },
 
         tags: [{

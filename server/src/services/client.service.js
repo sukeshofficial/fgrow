@@ -17,6 +17,10 @@ export const createClientService = async ({ tenant_id, user_id, payload }) => {
       throw new Error("Client with this PAN already exists");
     }
 
+    if (payload.type == "Other" && !payload.customType) {
+      throw new Error("Custom type is required for 'Other' client type");
+    }
+
     const client = new Client({
       ...payload,
       tenant_id,
@@ -123,6 +127,32 @@ export const listClientsService = async ({
         total_pages: Math.ceil(total / limit),
       },
     };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+export const getClientByIdService = async ({ tenant_id, client_id }) => {
+  try {
+    if (!Types.ObjectId.isValid(client_id)) {
+      throw new Error("Invalid client id");
+    }
+
+    const client = await Client.findOne({
+      _id: new Types.ObjectId(client_id),
+      tenant_id,
+      archived: false,
+    })
+      .populate("group", "name")
+      .populate("tags", "name color")
+      .populate("billing_profile", "name")
+      .lean();
+
+    if (!client) {
+      throw new Error("Client not found");
+    }
+
+    return client;
   } catch (error) {
     throw new Error(error.message);
   }

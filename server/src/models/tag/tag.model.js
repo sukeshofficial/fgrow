@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const TagSchema = new mongoose.Schema({
-    tenantId: {
+    tenant_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Tenant",
         required: true,
