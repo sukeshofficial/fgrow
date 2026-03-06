@@ -23,6 +23,11 @@ const serviceSchema = new Schema(
       index: true,
     },
 
+    description: {
+      type: String,
+      trim: true
+    },
+
     is_enabled: {
       type: Boolean,
       default: true,
@@ -38,15 +43,40 @@ const serviceSchema = new Schema(
       default: false,
     },
 
+    recurring_config: {
+      frequency: {
+        type: String,
+        enum: ["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]
+      },
+
+      creation_day: Number,
+      due_day: Number,
+
+      target_days_after_creation: Number,
+
+      task_generation_mode: {
+        type: String,
+        enum: ["recent_period", "current_period"],
+        default: "recent_period"
+      },
+
+      assign_to_client_users: {
+        type: Boolean,
+        default: false
+      }
+    },
+
     // Billing Settings
     sac_code: {
       type: String,
       trim: true,
+      match: /^[0-9]{6}$/
     },
 
     gst_rate: {
       type: Number,
-      default: 0,
+      enum: [0, 5, 12, 18, 28],
+      default: 18
     },
 
     default_billing_rate: {
@@ -76,11 +106,8 @@ const serviceSchema = new Schema(
 
     // Service Workflow Templates
     checklists: [checklistSchema],
-
     subtasks: [subtaskSchema],
-
     custom_fields: [customFieldSchema],
-
     supporting_files: [fileSchema],
 
     created_by: {
@@ -96,7 +123,7 @@ const serviceSchema = new Schema(
     archived: {
       type: Boolean,
       default: false,
-    },
+    }
   },
   { timestamps: true }
 );
