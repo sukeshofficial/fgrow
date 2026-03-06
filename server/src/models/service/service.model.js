@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
-import checklistSchema from "../schemas/serviceChecklist.schema.js";
-import subtaskSchema from "../schemas/serviceSubtask.schema.js";
-import fileSchema from "../schemas/serviceFile.schema.js";
-import customFieldSchema from "../schemas/customField.schema.js";
+import checklistSchema from "./schemas/serviceChecklist.schema.js";
+import subtaskSchema from "./schemas/serviceSubtask.schema.js";
+import fileSchema from "./schemas/serviceFile.schema.js";
+import customFieldSchema from "../client/schemas/customField.schema.js";
 
 const { Schema } = mongoose;
 

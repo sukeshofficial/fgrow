@@ -1,3 +1,7 @@
+import mongoose from "mongoose";
+
+const { Schema } = mongoose;
+
 const serviceClientSchema = new Schema({
 
     tenant_id: {
@@ -28,3 +32,5 @@ const serviceClientSchema = new Schema({
 }, { timestamps: true });
 
 serviceClientSchema.index({ service: 1, client: 1 }, { unique: true });
+
+export default mongoose.model("ServiceClient", serviceClientSchema);
