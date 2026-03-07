@@ -20,9 +20,6 @@ import {
  */
 export const initialAuthState = {
   user: null,
-  tenant: null,
-  invitation: null,
-  meState: null,
   avatar: null,
   username: null,
   isAuthenticated: false,
@@ -43,27 +40,16 @@ export const authReducer = (state, action) => {
       };
 
     case AUTH_SUCCESS:
-      // Support both legacy payloads (user only) and full /auth/me payload
-      // - Login/register/verifyOtp pass a user object directly
-      // - checkAuth passes the full response: { state, user, tenant, invitation, ... }
-      {
-        const payload = action.payload || null;
-        const resolvedUser = payload && payload.user ? payload.user : payload;
-
-        return {
-          ...state,
-          isLoading: false,
-          isAuthenticated: true,
-          user: resolvedUser,
-          tenant: payload && payload.tenant ? payload.tenant : state.tenant,
-          invitation:
-            payload && payload.invitation ? payload.invitation : state.invitation,
-          meState: payload && payload.state ? payload.state : state.meState,
-          avatar:
-            resolvedUser?.profile_avatar?.secure_url || null,
-          username: resolvedUser?.username || null,
-        };
-      }
+      return {
+        ...state,
+        isLoading: false,
+        isAuthenticated: true,
+        user: action.payload,
+        avatar:
+          action.payload?.profile_avatar?.secure_url ||
+          null,
+        username: action.payload?.username || null,
+      };
 
     case SET_USER:
       return {
