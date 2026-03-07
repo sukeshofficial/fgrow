@@ -3,8 +3,12 @@ import { api } from "./api";
 /**
  * Create Tenant
  */
-export const createTenant = (payload) => {
-  return api.post("/tenant/create", payload);
+export const createTenant = async (formData) => {
+  return api.post("/tenant/create", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
 /**

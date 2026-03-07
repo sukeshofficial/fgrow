@@ -5,6 +5,8 @@ import { createTenant } from "../../api/tenant.api.js";
 import { checkAuth } from "../../features/auth/auth.actions.js";
 import cameraIcon from "../../assets/camera.png";
 
+import "../../styles/tenant-gate.css";
+
 const DRAFT_KEY = "fgcrm_tenant_draft";
 
 // Exported so you can extend required fields easily elsewhere
@@ -35,6 +37,7 @@ export const CreateTenantModal = () => {
     officialAddress: "",
     companyEmail: "",
     companyPhone: "",
+    companyLogo: null,
     gstCertificate: "",
   });
 
@@ -136,13 +139,18 @@ export const CreateTenantModal = () => {
     setSubmitting(true);
 
     try {
-      await createTenant({
-        companyName: form.companyName,
-        companyEmail: form.companyEmail,
-        companyPhone: form.companyPhone,
-        email: user?.email,
-        // logoFile can be wired to backend when multipart/form-data support is added
-      });
+      const formData = new FormData();
+
+      formData.append("companyName", form.companyName);
+      formData.append("companyEmail", form.companyEmail);
+      formData.append("companyPhone", form.companyPhone);
+      formData.append("email", user?.email);
+
+      if (logoFile) {
+        formData.append("companyLogo", logoFile);
+      }
+
+      await createTenant(formData);
 
       window.localStorage.removeItem(DRAFT_KEY);
 
@@ -152,6 +160,7 @@ export const CreateTenantModal = () => {
         err.response?.data?.message ||
         err.message ||
         "Failed to create tenant. Please try again.";
+
       setError(message);
     } finally {
       setSubmitting(false);
@@ -170,7 +179,10 @@ export const CreateTenantModal = () => {
           <div className="tenant-form-main">
             <div className="tenant-form-fields">
               <label className="tenant-label" htmlFor="tenant-companyName">
-                Company Name <span className="tenant-required">*</span>
+                <span className="tenant-label-heading">
+                  Company Name <span className="tenant-required">*</span>
+                </span>
+
                 <input
                   type="text"
                   id="tenant-companyName"
@@ -211,7 +223,10 @@ export const CreateTenantModal = () => {
                   className="tenant-label"
                   htmlFor="tenant-companyEmail"
                 >
-                  Email <span className="tenant-required">*</span>
+                  <span className="tenant-label-heading">
+                    Email <span className="tenant-required">*</span>
+                  </span>
+
                   <input
                     type="email"
                     id="tenant-companyEmail"
@@ -227,7 +242,10 @@ export const CreateTenantModal = () => {
                   className="tenant-label"
                   htmlFor="tenant-companyPhone"
                 >
+                  <span className="tenant-label-heading">
                   Contact No <span className="tenant-required">*</span>
+                  </span>
+                  
                   <input
                     type="tel"
                     id="tenant-companyPhone"
