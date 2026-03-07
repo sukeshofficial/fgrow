@@ -25,7 +25,7 @@ export const approveTenant = (tenantId) => {
  * Reject Tenant
  */
 export const rejectTenant = (tenantId, reason) => {
-  return api.patch(`/tenant/${tenantId}/approve`, { reason });
+  return api.patch(`/tenant/${tenantId}/reject`, { reason });
 };
 
 /**

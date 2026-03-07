@@ -3,8 +3,11 @@ import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth.js";
 import { checkAuth } from "../../features/auth/auth.actions.js";
 
+import "../../styles/tenant-pending.css";
+import waitingIcon from "../../assets/wait-icon.png";
+
 export const TenantPendingScreen = () => {
-  const { tenant, meState, dispatch, logout } = useAuth();
+  const { tenant, dispatch, logout } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = async () => {
@@ -20,59 +23,60 @@ export const TenantPendingScreen = () => {
     tenant && tenant.createdAt ? new Date(tenant.createdAt) : null;
 
   return (
-    <div className="tenant-pending-wrapper">
+    <div className="tenant-pending-overlay">
       <div className="tenant-pending-card">
-        <div className="tenant-pending-icon" aria-hidden="true">
-          ⏳
+        <div className="tenant-pending-icon">
+          <img src={waitingIcon} alt="Waiting Icon" />
         </div>
 
         <h2 className="tenant-pending-title">
-          Wait for Super ADMIN Approval
+          Waiting for Super Admin Approval
         </h2>
 
         <p className="tenant-pending-text">
-          Your organization details have been submitted and are currently
-          under review by the Super Admin.
+          Your organization has been submitted successfully and is currently
+          under review. Once approved you will gain full access to the
+          dashboard.
         </p>
 
         {tenant && (
           <div className="tenant-pending-meta">
-            <div className="tenant-meta-row">
-              <span className="tenant-meta-label">Tenant</span>
-              <span className="tenant-meta-value">{tenant.name}</span>
+            <div className="meta-row">
+              <span className="meta-label">Tenant</span>
+              <span className="meta-value">{tenant.name}</span>
             </div>
+
             {createdAt && (
-              <div className="tenant-meta-row">
-                <span className="tenant-meta-label">Submitted on</span>
-                <span className="tenant-meta-value">
+              <div className="meta-row">
+                <span className="meta-label">Submitted on</span>
+                <span className="meta-value">
                   {createdAt.toLocaleString()}
                 </span>
               </div>
             )}
-            {meState && (
-              <div className="tenant-meta-row">
-                <span className="tenant-meta-label">Status</span>
-                <span className="tenant-meta-value">
-                  Pending verification ({meState})
-                </span>
-              </div>
-            )}
+
+            <div className="meta-row">
+              <span className="meta-label">Status</span>
+              <span className="meta-status pending">
+                Pending Verification
+              </span>
+            </div>
           </div>
         )}
 
         <div className="tenant-pending-actions">
           <button
             type="button"
-            className="btn tenant-btn-refresh"
+            className="btn refresh-btn"
             onClick={handleRefresh}
             disabled={refreshing}
           >
-            {refreshing ? "Checking status..." : "Refresh status"}
+            {refreshing ? "Checking status..." : "Refresh Status"}
           </button>
 
           <button
             type="button"
-            className="btn ghost tenant-btn-logout"
+            className="btn logout-btn"
             onClick={logout}
           >
             Logout
@@ -84,4 +88,3 @@ export const TenantPendingScreen = () => {
 };
 
 export default TenantPendingScreen;
-
