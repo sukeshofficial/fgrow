@@ -1,0 +1,399 @@
+.tenant-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 15, 25, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* blur the background (works on modern browsers) */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  /* slightly darker than before so it feels locked */
+  background: rgba(18, 23, 30, 0.5);
+
+  /* sit above everything else */
+  z-index: 10000;
+
+}
+
+.tenant-modal {
+  position: relative;
+  z-index: 10001;
+  width: min(720px, 96%);
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.8rem 2rem 1.6rem;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+}
+
+/* body locking while modal open (optional — add/remove on open/close) */
+body.modal-open {
+  overflow: hidden; /* prevents background scrolling while modal is shown */
+}
+
+.tenant-modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.tenant-modal-subtitle {
+  margin: 0.25rem 0 1.5rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #6b7280;
+}
+
+.tenant-form-error {
+  margin-bottom: 0.9rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  background: rgba(220, 38, 38, 0.06);
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  color: #7f1d1d;
+  font-size: 0.85rem;
+}
+
+.tenant-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.tenant-form-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+.tenant-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tenant-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.tenant-label-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap; /* prevents the '*' from wrapping to a new line if space allows */
+}
+
+.tenant-input {
+  padding: 0.6rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tenant-input:focus {
+  outline: none;
+  border-color: #7c5cff;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.12);
+}
+
+.tenant-input-error {
+  border-color: #f97373;
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.7);
+}
+
+.tenant-grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.tenant-logo-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tenant-logo-box {
+  width: 100%;
+  min-height: 140px;
+  border-radius: 18px;
+  border: 1.5px dashed #d1d5db;
+  background: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: #9ca3af;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.tenant-logo-box:hover {
+  border-color: #7c5cff;
+  background: #f3f0ff;
+}
+
+.tenant-logo-box-hover {
+  border-color: #7c5cff;
+  background: #f3f0ff;
+}
+
+/* Placeholder (no image selected) */
+.tenant-logo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  color: #9ca3af;
+  font-size: 0.88rem;
+  transition: color 0.2s ease;
+}
+
+.tenant-logo-box:hover .tenant-logo-placeholder {
+  color: #7c5cff;
+}
+
+.tenant-logo-hint-text {
+  font-size: 0.75rem;
+  color: #b0b8c4;
+}
+
+/* Camera icon */
+.tenant-logo-camera-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  opacity: 0.55;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tenant-logo-box:hover .tenant-logo-camera-icon {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Logo preview */
+.tenant-logo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  max-height: 130px;
+  border-radius: 14px;
+  display: block;
+}
+
+/* Overlay shown when hovering over a selected logo */
+.tenant-logo-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(124, 92, 255, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  border-radius: 18px;
+}
+
+.tenant-logo-box:hover .tenant-logo-overlay {
+  opacity: 1;
+}
+
+.tenant-logo-overlay-text {
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.tenant-logo-overlay .tenant-logo-camera-icon {
+  opacity: 1;
+  filter: brightness(0) invert(1);
+  transform: none;
+}
+
+.tenant-logo-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+/* Required asterisk */
+.tenant-required {
+  color: #ef4444;
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 0.95em;
+  vertical-align: middle;
+  transform: translateY(-1px);
+}
+
+.tenant-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 0.4rem;
+}
+
+/* keep buttons visually above overlay */
+.tenant-actions .btn {
+  z-index: 10002;
+}
+
+.tenant-btn-draft {
+  background: #ffe900;
+  color: #111827;
+  border-radius: 999px;
+  padding: 0.55rem 1.2rem;
+}
+
+.tenant-btn-submit {
+  background: #38bdf8;
+  color: #0f172a;
+  border-radius: 999px;
+  padding: 0.55rem 1.4rem;
+}
+
+.tenant-btn-draft,
+.tenant-btn-submit {
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.tenant-btn-draft:disabled,
+.tenant-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.tenant-owner-email-value {
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  background: #f9fafb;
+  border: 1px dashed #e5e7eb;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+@media (max-width: 768px) {
+  .tenant-form-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.tenant-pending-wrapper {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(243, 244, 246, 0.94);
+  z-index: 9999;
+}
+
+.tenant-pending-card {
+  width: min(460px, 92%);
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 2rem 1.8rem 1.6rem;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+  text-align: center;
+}
+
+.tenant-pending-icon {
+  font-size: 2.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.tenant-pending-title {
+  margin: 0 0 0.4rem;
+  font-size: 1.2rem;
+}
+
+.tenant-pending-text {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.tenant-pending-meta {
+  text-align: left;
+  margin: 0 auto 1rem;
+  max-width: 320px;
+}
+
+.tenant-meta-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 0.25rem 0;
+}
+
+.tenant-meta-label {
+  color: #6b7280;
+}
+
+.tenant-meta-value {
+  color: #111827;
+  font-weight: 500;
+}
+
+.tenant-pending-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.tenant-btn-refresh,
+.tenant-btn-logout {
+  border-radius: 999px;
+  padding: 0.55rem 1.2rem;
+  font-size: 0.9rem;
+}
+
+.tenant-btn-refresh {
+  background: #38bdf8;
+  color: #0f172a;
+  border: none;
+}
+
+.tenant-btn-logout {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+}
+
+.tenant-block-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+}
+
+.tenant-block-card {
+  width: min(440px, 92%);
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.6rem 1.4rem;
+  text-align: center;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+}
