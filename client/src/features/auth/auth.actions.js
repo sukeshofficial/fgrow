@@ -20,7 +20,7 @@ export const register = async (dispatch, formData) => {
 
     dispatch({
       type: AUTH_SUCCESS,
-      payload: res.data.user || null,
+      payload: res.data,
     });
 
     return res.data;
@@ -44,14 +44,11 @@ export const verifyOtp = async (dispatch, payload) => {
   dispatch({ type: AUTH_START });
 
   try {
-    const res = await verifySignupOtp(payload);
+    await verifySignupOtp(payload); // API sets the cookie
 
-    dispatch({
-      type: AUTH_SUCCESS,
-      payload: res.data.user,
-    });
-
-    return res.data;
+    // Fetch full hydrated state (tenant info, meState, etc)
+    const fullState = await checkAuth(dispatch);
+    return fullState;
   } catch (err) {
     dispatch({
       type: AUTH_FAIL,
@@ -81,14 +78,11 @@ export const login = async (dispatch, payload) => {
   dispatch({ type: AUTH_START });
 
   try {
-    const res = await loginUser(payload);
+    await loginUser(payload); // API sets the cookie
 
-    dispatch({
-      type: AUTH_SUCCESS,
-      payload: res.data.user,
-    });
-
-    return res.data;
+    // Fetch full hydrated state (tenant info, meState, etc)
+    const fullState = await checkAuth(dispatch);
+    return fullState;
   } catch (err) {
     dispatch({
       type: AUTH_FAIL,
@@ -121,7 +115,7 @@ export const checkAuth = async (dispatch) => {
 
     dispatch({
       type: AUTH_SUCCESS,
-      payload: res.data.user,
+      payload: res.data, // to get the state.
     });
 
     return res.data;

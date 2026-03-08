@@ -19,6 +19,9 @@ import Tasks from "./pages/Tasks";
 
 /* Routing */
 import ProtectedRoute from "./routes/ProtectedRoute";
+import SuperAdminRoute from "./routes/SuperAdminRoute";
+import TenantRoutes from "./routes/TenantRoute";
+import StaffRoutes from "./routes/StaffRoute";
 
 /* Auth */
 import { useAuth } from "./hooks/useAuth";
@@ -45,102 +48,50 @@ const App = () => {
 
   return (
     <Routes>
-      {/* Default redirect */}
+
+      {/* Default */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-      {/* Public routes */}
-      <Route path="/register" element={<Register />} />
+      {/* Public */}
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-      {/* Protected routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/tasks"
-        element={
-          <ProtectedRoute>
-            <Tasks />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/todo"
-        element={
-          <ProtectedRoute>
-            <Tasks />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/clients"
-        element={
-          <ProtectedRoute>
-            <Tasks />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/services"
-        element={
-          <ProtectedRoute>
-            <Tasks />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/finance"
-        element={
-          <ProtectedRoute>
-            <Tasks />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/documents"
-        element={
-          <ProtectedRoute>
-            <Tasks />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/reports"
-        element={
-          <ProtectedRoute>
-            <Tasks />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/users"
-        element={
-          <ProtectedRoute>
-            <Tasks />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/notifications"
-        element={
-          <ProtectedRoute>
-            <Tasks />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <Tasks />
-          </ProtectedRoute>
-        }
-      />
+      {/* ---------------- ADMIN PORTAL ---------------- */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<SuperAdminRoute />}>
+
+          <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/admin/tenants" element={<Tasks />} />
+
+        </Route>
+      </Route>
+
+
+      {/* ---------------- TENANT APP ---------------- */}
+      <Route element={<ProtectedRoute />}>
+
+        <Route element={<TenantRoutes />}>
+
+          <Route element={<StaffRoutes />}>
+
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/todo" element={<Tasks />} />
+            <Route path="/clients" element={<Tasks />} />
+            <Route path="/services" element={<Tasks />} />
+            <Route path="/finance" element={<Tasks />} />
+            <Route path="/documents" element={<Tasks />} />
+            <Route path="/reports" element={<Tasks />} />
+            <Route path="/users" element={<Tasks />} />
+            <Route path="/notifications" element={<Tasks />} />
+            <Route path="/settings" element={<Tasks />} />
+
+          </Route>
+
+        </Route>
+
+      </Route>
+
     </Routes>
   );
 };
