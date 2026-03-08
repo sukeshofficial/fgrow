@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-import fileSchema from "../schemas/serviceFile.schema.js";
+import fileSchema from "../service/schemas/serviceFile.schema.js";
 import taskChecklistSchema from "./schemas/taskChecklist.schema.js";
 import taskTimelogSchema from "./schemas/taskTimelog.schema.js";
 

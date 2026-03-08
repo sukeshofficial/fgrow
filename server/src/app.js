@@ -10,6 +10,7 @@ import clientRoutes from "./routes/client.routes.js";
 import tagRoutes from "./routes/tag.routes.js";
 import clientGroupRoutes from "./routes/clientGroup.routes.js";
 import serviceRoutes from "./routes/service.routes.js";
+import taskRoutes from "./routes/task.routes.js";
 
 const app = express();
 
@@ -30,7 +31,8 @@ app.use("/api/v0/invitation", invitationRoutes);
 app.use("/api/v0/clients", clientRoutes);
 app.use("/api/v0/tags", tagRoutes);
 app.use("/api/v0/client-groups", clientGroupRoutes);
-app.use("/api/v0/services", serviceRoutes)
+app.use("/api/v0/services", serviceRoutes);
+app.use("/api/v0/tasks", taskRoutes);
 
 app.get("/api/v0/health", (req, res) => {
   res.json({ status: "OK" });

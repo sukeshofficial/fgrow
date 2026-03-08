@@ -12,7 +12,7 @@ const serviceFileSchema = new Schema(
   {
     filename: { type: String, required: true, trim: true },
     original_name: { type: String, trim: true },
-    url: { type: String, required: true, trim: true }, // or path
+    url: { type: String, trim: true }, // or path
     size: { type: Number, default: 0 }, // bytes
     mime_type: { type: String, trim: true },
     uploaded_by: { type: Schema.Types.ObjectId, ref: "User", default: null },
