@@ -1,20 +1,51 @@
+import fs from "fs";
+
 import {
   createTenantService,
   fetchPendingTenants,
   approveTenantService,
   rejectTenantService,
-  reAppealTenantService
+  reAppealTenantService,
 } from "../services/tenant.service.js";
+
 import { generateToken } from "../utils/jwt.js";
+import { uploadToCloud } from "../utils/cloudinary.js";
 
 export const createTenant = async (req, res) => {
   try {
-    const { tenant, user } = await createTenantService(req.body);
+    let logoData = {
+      public_id: "",
+      secure_url: "",
+    };
+
+    if (req.file) {
+      const upload = await uploadToCloud(req.file.path);
+
+      if (!upload.success) {
+        return res.status(500).json({
+          message: "Image upload failed",
+          error: upload.error,
+        });
+      }
+
+      logoData = {
+        public_id: upload.public_id,
+        secure_url: upload.secure_url,
+      };
+
+      fs.unlinkSync(req.file.path);
+      console.log(`File - ${req.file.path} deleted`);
+    }
+
+    const { tenant, user } = await createTenantService({
+      ...req.body,
+      logo: logoData,
+    });
 
     // 7️⃣ Generate JWT (unnecessary process rn.)
     const token = generateToken({
-      id: user._id,
-      tenant_id: tenant._id,
+      id: user.id,
+      tenant_id: tenant.id,
       tenant_role: user.tenant_role,
     });
 
@@ -58,10 +89,7 @@ export const approveTenant = async (req, res) => {
   try {
     const { tenantId } = req.params;
 
-    const result = await approveTenantService(
-      tenantId,
-      req.user.id
-    );
+    const result = await approveTenantService(tenantId, req.user.id);
 
     if (result.error) {
       return res.status(result.status).json({
@@ -89,11 +117,7 @@ export const rejectTenant = async (req, res) => {
     const { tenantId } = req.params;
     const { reason } = req.body;
 
-    const result = await rejectTenantService(
-      tenantId,
-      reason,
-      req.user.id
-    );
+    const result = await rejectTenantService(tenantId, reason, req.user.id);
 
     if (result.error) {
       return res.status(result.status).json({
@@ -126,10 +150,7 @@ export const reAppealTenant = async (req, res) => {
       });
     }
 
-    const tenant = await reAppealTenantService(
-      user.tenant_id,
-      user.id
-    );
+    const tenant = await reAppealTenantService(user.tenant_id, user.id);
 
     return res.status(200).json({
       message: "Re-appeal submitted successfully",
