@@ -162,7 +162,7 @@ export async function deleteChecklistItemController(req, res) {
 /* ------------------ timelog ------------------ */
 export async function startTimelogController(req, res) {
   try {
-    const currentUser = req.user || { id: req.body.userId };
+    const currentUser = req.user;
 
     const startedTimeLog = await startTimelog(req.params.id, currentUser.id);
 
@@ -190,7 +190,7 @@ export async function stopTimelogController(req, res) {
 
 export async function addTimelogController(req, res) {
   try {
-    const currentUser = req.user || { id: req.body.userId };
+    const currentUser = req.user;
 
     const createdTimeLog = await addTimelog(
       req.params.id,

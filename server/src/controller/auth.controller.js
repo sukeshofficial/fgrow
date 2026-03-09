@@ -182,9 +182,8 @@ export const verifyOtp = async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
-    return res.status(200).json({
+    return sendAuthSuccess(res, user, {
       message: "Email verified and authenticated successfully",
-      user: user.toJSON(),
     });
   } catch (err) {
     console.error("Verify-Otp error:", err);
@@ -449,9 +448,11 @@ export const getMe = async (req, res) => {
       });
     }
 
-    const tenant = await Tenant.findById(user.tenant_id).select(
-      "name verificationStatus verifiedBy verifiedAt rejection_reason isActive createdAt plan"
-    ).populate("verifiedBy", "name email");
+    const tenant = await Tenant.findById(user.tenant_id)
+      .select(
+        "name verificationStatus verifiedBy verifiedAt rejection_reason isActive createdAt plan",
+      )
+      .populate("verifiedBy", "name email");
 
     if (!tenant) {
       // tenant reference broken or deleted
