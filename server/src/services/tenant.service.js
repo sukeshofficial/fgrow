@@ -8,7 +8,7 @@ export const createTenantService = async (data) => {
     companyEmail,
     companyPhone,
     email,
-    logo,
+    logoUrl,
   } = data;
 
   // 1️⃣ Find existing user and Tenant if exists
@@ -30,7 +30,7 @@ export const createTenantService = async (data) => {
     companyEmail,
     companyPhone,
     domain: slugify(companyName, { lower: true }),
-    logo,
+    logoUrl,
   });
 
   // 3️⃣ Attach user to tenant

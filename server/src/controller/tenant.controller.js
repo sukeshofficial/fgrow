@@ -39,13 +39,13 @@ export const createTenant = async (req, res) => {
 
     const { tenant, user } = await createTenantService({
       ...req.body,
-      logo: logoData,
+      logoUrl: logoData.secure_url,
     });
 
     // 7️⃣ Generate JWT (unnecessary process rn.)
     const token = generateToken({
-      id: user.id,
-      tenant_id: tenant.id,
+      id: user._id,
+      tenant_id: tenant._id,
       tenant_role: user.tenant_role,
     });
 

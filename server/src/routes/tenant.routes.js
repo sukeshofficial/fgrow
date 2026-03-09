@@ -17,7 +17,6 @@ const router = express.Router();
 router.post(
   "/create",
   authMiddleware,
-  requireSuperAdmin,
   upload.single("companyLogo"),
   createTenant,
 );
