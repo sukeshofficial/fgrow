@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose"; // removed unused `mongo` named import
 import invoiceItemSchema from "./schemas/invoiceItem.schema.js";
 import paymentSchema from "./schemas/payment.schema.js";
 
@@ -17,7 +17,6 @@ const invoiceSchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      index: true,
     },
 
     billing_entity: {
@@ -42,7 +41,7 @@ const invoiceSchema = new Schema(
 
     due_date: {
       type: Date,
-      required: false,
+      default: null,
       index: true,
     },
 
@@ -86,9 +85,10 @@ const invoiceSchema = new Schema(
   { timestamps: true },
 );
 
-// Indexes
+// Compound unique index — invoice_no must be unique per tenant
 invoiceSchema.index({ tenant_id: 1, invoice_no: 1 }, { unique: true });
 invoiceSchema.index({ tenant_id: 1, client: 1 });
 invoiceSchema.index({ tenant_id: 1, date: -1 });
+invoiceSchema.index({ tenant_id: 1, status: 1 });
 
 export default mongoose.model("Invoice", invoiceSchema);

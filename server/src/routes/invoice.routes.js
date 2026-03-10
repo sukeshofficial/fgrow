@@ -6,10 +6,16 @@ import { requireRole } from "../middleware/tenant_role.middleware.js";
 
 const router = express.Router();
 
-// A. CRUD & listing
+// ─────────────────────────────────────────────────────────────────────────────
+// IMPORTANT: Static / fixed-segment routes MUST be declared before /:id routes.
+// Express matches routes in registration order. Routes like /export, /bulk, and
+// /next-number would be incorrectly treated as /:id values if placed after /:id.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// A. Collection-level routes (no :id param)
 router.get(
   "/",
-  authMiddleware,  
+  authMiddleware,
   requireRole("owner", "staff"),
   validate("list"),
   controller.listInvoices,
@@ -23,6 +29,7 @@ router.post(
   controller.createInvoice,
 );
 
+// FIX: Moved above /:id — was previously shadowed by the /:id GET route
 router.get(
   "/next-number",
   authMiddleware,
@@ -30,6 +37,27 @@ router.get(
   controller.getNextInvoiceNumber,
 );
 
+// FIX: Moved above /:id — was previously shadowed by the /:id GET route
+// "export" was being matched as an :id value
+router.get(
+  "/export",
+  authMiddleware,
+  requireRole("owner"),
+  validate("export"),
+  controller.exportInvoices,
+);
+
+// FIX: Moved above /:id/... — "bulk" was being matched as an :id value
+router.post(
+  "/bulk",
+  authMiddleware,
+  requireRole("owner"),
+  controller.bulkOperations,
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// B. Single-invoice CRUD (requires :id)
+// ─────────────────────────────────────────────────────────────────────────────
 router.get(
   "/:id",
   authMiddleware,
@@ -52,7 +80,9 @@ router.delete(
   controller.deleteInvoice,
 );
 
-// B. Items
+// ─────────────────────────────────────────────────────────────────────────────
+// C. Items
+// ─────────────────────────────────────────────────────────────────────────────
 router.post(
   "/:id/items",
   authMiddleware,
@@ -83,7 +113,9 @@ router.get(
   controller.getUnbilledTasks,
 );
 
-// C. Payments & status
+// ─────────────────────────────────────────────────────────────────────────────
+// D. Payments & status
+// ─────────────────────────────────────────────────────────────────────────────
 router.post(
   "/:id/payments",
   authMiddleware,
@@ -106,7 +138,9 @@ router.post(
   controller.markPaid,
 );
 
-// D. Preview / Send / PDF / export
+// ─────────────────────────────────────────────────────────────────────────────
+// E. Preview / Send / PDF
+// ─────────────────────────────────────────────────────────────────────────────
 router.get(
   "/:id/preview",
   authMiddleware,
@@ -129,22 +163,9 @@ router.get(
   controller.getPdf,
 );
 
-router.get(
-  "/export",
-  authMiddleware,
-  requireRole("owner"),
-  validate("export"),
-  controller.exportInvoices,
-);
-
-// E. Bulk / utilities
-router.post(
-  "/bulk",
-  authMiddleware,
-  requireRole("owner"),
-  controller.bulkOperations,
-);
-
+// ─────────────────────────────────────────────────────────────────────────────
+// F. Utilities
+// ─────────────────────────────────────────────────────────────────────────────
 router.post(
   "/:id/reverse",
   authMiddleware,

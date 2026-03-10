@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import InvoiceCounter from "../models/invoice/schemas/invoiceCounter.model.js";
 import Invoice from "../models/invoice/invoice.model.js";
 
 import { computeInvoiceTotals } from "../utils/totals.js";
@@ -7,6 +8,31 @@ import { Parser as Json2csvParser } from "json2csv";
 import stream from "stream";
 import { generatePdfBuffer } from "../utils/pdf.helper.js";
 import sendEmail from "../utils/sendEmail.js";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Returns the base filter that always scopes queries to the current tenant.
+ * Every DB query MUST include this to prevent cross-tenant data leaks.
+ */
+const tenantFilter = (user) => ({ tenant_id: user.tenant_id });
+
+/**
+ * Applies computed totals from the utility onto a Mongoose document in-place.
+ */
+const applyTotals = (inv, totals) => {
+  inv.subtotal = totals.subtotal;
+  inv.total_gst = totals.total_gst;
+  inv.discount_total = totals.discount_total;
+  inv.total_amount = totals.total_amount;
+  inv.round_off = totals.round_off;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// A. CRUD & listing
+// ─────────────────────────────────────────────────────────────────────────────
 
 export const listInvoices = async (user, query) => {
   const {
@@ -21,23 +47,29 @@ export const listInvoices = async (user, query) => {
     order = "desc",
   } = query;
 
-  const filter = { archived: false };
+  // FIX: Always scope to the calling user's tenant
+  const filter = { ...tenantFilter(user), archived: false };
+
   if (client) filter.client = client;
   if (status) filter.status = status;
+
   if (date_from || date_to) {
     filter.date = {};
     if (date_from) filter.date.$gte = new Date(date_from);
     if (date_to) filter.date.$lte = new Date(date_to);
   }
+
   if (q) {
-    // simple text search against invoice_no or remark
     filter.$or = [
       { invoice_no: new RegExp(q, "i") },
       { remark: new RegExp(q, "i") },
     ];
   }
 
-  const sort = { [sort_by]: order === "asc" ? 1 : -1 };
+  // Whitelist sort_by to prevent arbitrary field injection
+  const allowedSortFields = ["date", "due_date", "invoice_no", "total_amount", "status", "createdAt"];
+  const safeSortBy = allowedSortFields.includes(sort_by) ? sort_by : "date";
+  const sort = { [safeSortBy]: order === "asc" ? 1 : -1 };
 
   const { skip, limit } = buildPagination(page, per_page);
 
@@ -58,10 +90,10 @@ export const listInvoices = async (user, query) => {
 };
 
 export const createInvoice = async (user, payload) => {
-  // basic server-side sanitation: only allow certain fields
   const doc = {
-    tenant_id: payload.tenant_id,
-    invoice_no: payload.invoice_no,
+    // FIX: tenant_id always comes from the authenticated user, never from the payload
+    tenant_id: user.tenant_id,
+    invoice_no: await getNextInvoiceNumber(user.tenant_id),
     billing_entity: payload.billing_entity,
     client: payload.client,
     date: payload.date || new Date(),
@@ -70,31 +102,41 @@ export const createInvoice = async (user, payload) => {
     items: payload.items || [],
     remark: payload.remark || "",
     created_by: user._id,
-    status: payload.status || "draft",
+    status: "draft", // FIX: status cannot be set by the caller on creation
     linked_sources: payload.linked_sources || [],
   };
 
-  // compute totals before save
-  const totals = computeInvoiceTotals(doc.items);
-  doc.subtotal = totals.subtotal;
-  doc.total_gst = totals.total_gst;
-  doc.discount_total = totals.discount_total;
-  doc.total_amount = totals.total_amount;
-  doc.round_off = totals.round_off;
+  applyTotals(doc, computeInvoiceTotals(doc.items));
 
   const invoice = await Invoice.create(doc);
   return invoice.toObject();
 };
 
+export const getNextInvoiceNumber = async (tenantId) => {
+  const year = new Date().getFullYear();
+
+  const counter = await InvoiceCounter.findOneAndUpdate(
+    { tenant_id: tenantId, year },   // find this tenant's counter for this year
+    { $inc: { seq: 1 } },            // atomically bump the sequence
+    {
+      new: true,                     // return the document AFTER the increment
+      upsert: true,                  // create the counter document if it doesn't exist yet
+      setDefaultsOnInsert: true,
+    },
+  );
+
+  return `INV-${year}-${String(counter.seq).padStart(4, "0")}`;
+};
+
 export const getInvoiceById = async (user, id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) return null;
-  return Invoice.findById(id)
+  // FIX: Scoped to tenant
+  return Invoice.findOne({ _id: id, ...tenantFilter(user) })
     .populate("client billing_entity created_by updated_by")
     .lean();
 };
 
 export const updateInvoice = async (user, id, payload) => {
-  // allow only certain fields to be updated
   const allowed = [
     "billing_entity",
     "client",
@@ -105,150 +147,127 @@ export const updateInvoice = async (user, id, payload) => {
     "status",
     "linked_sources",
   ];
+
   const update = {};
   for (const k of allowed) if (payload[k] !== undefined) update[k] = payload[k];
 
-  // Items updates should use item-specific endpoints to keep auditable
-  // If items present in payload, ignore them here (or you could allow replace with caution)
-
-  const inv = await Invoice.findById(id);
+  // FIX: Scoped to tenant
+  const inv = await Invoice.findOne({ _id: id, ...tenantFilter(user) });
   if (!inv) throw new Error("Invoice not found");
 
   Object.assign(inv, update);
 
-  // recompute totals if items changed externally
   if (payload.items) {
     inv.items = payload.items;
   }
 
-  const totals = computeInvoiceTotals(inv.items);
-  inv.subtotal = totals.subtotal;
-  inv.total_gst = totals.total_gst;
-  inv.discount_total = totals.discount_total;
-  inv.total_amount = totals.total_amount;
-  inv.round_off = totals.round_off;
-
+  applyTotals(inv, computeInvoiceTotals(inv.items));
   inv.updated_by = user._id;
   await inv.save();
   return inv.toObject();
 };
 
 export const deleteInvoice = async (user, id, force = false) => {
+  const filter = { _id: id, ...tenantFilter(user) }; // FIX: Scoped to tenant
+
   if (force) {
-    // hard delete
-    await Invoice.deleteOne({ _id: id });
+    await Invoice.deleteOne(filter);
     return;
   }
-  // soft delete / archive
-  await Invoice.updateOne(
-    { _id: id },
-    { archived: true, archived_at: new Date() },
-  );
+  await Invoice.updateOne(filter, { archived: true, archived_at: new Date() });
 };
 
-//
-// Items
-//
+// ─────────────────────────────────────────────────────────────────────────────
+// B. Items
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const addItems = async (user, invoiceId, items = []) => {
   if (!Array.isArray(items)) items = [items];
 
-  const inv = await Invoice.findById(invoiceId);
+  // FIX: Scoped to tenant
+  const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) });
   if (!inv) throw new Error("Invoice not found");
 
-  // push items
   for (const it of items) inv.items.push(it);
 
-  // recompute totals
-  const totals = computeInvoiceTotals(inv.items);
-  inv.subtotal = totals.subtotal;
-  inv.total_gst = totals.total_gst;
-  inv.discount_total = totals.discount_total;
-  inv.total_amount = totals.total_amount;
-  inv.round_off = totals.round_off;
-
+  applyTotals(inv, computeInvoiceTotals(inv.items));
   inv.updated_by = user._id;
   await inv.save();
   return inv.items;
 };
 
 export const updateItem = async (user, invoiceId, itemId, payload) => {
-  const inv = await Invoice.findById(invoiceId);
+  // FIX: Scoped to tenant
+  const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) });
   if (!inv) throw new Error("Invoice not found");
 
   const item = inv.items.id(itemId);
   if (!item) throw new Error("Item not found");
 
-  // only allow price/qty/discount/description update
-  [
-    "description",
-    "quantity",
-    "unit_price",
-    "discount",
-    "gst_rate",
-    "meta",
-  ].forEach((k) => {
+  ["description", "quantity", "unit_price", "discount", "gst_rate", "meta"].forEach((k) => {
     if (payload[k] !== undefined) item[k] = payload[k];
   });
 
-  // recompute totals
-  const totals = computeInvoiceTotals(inv.items);
-  inv.subtotal = totals.subtotal;
-  inv.total_gst = totals.total_gst;
-  inv.discount_total = totals.discount_total;
-  inv.total_amount = totals.total_amount;
-  inv.round_off = totals.round_off;
-
+  applyTotals(inv, computeInvoiceTotals(inv.items));
   inv.updated_by = user._id;
   await inv.save();
   return item.toObject();
 };
 
 export const deleteItem = async (user, invoiceId, itemId) => {
-  const inv = await Invoice.findById(invoiceId);
+  // FIX: Scoped to tenant
+  const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) });
   if (!inv) throw new Error("Invoice not found");
-  inv.items.id(itemId).remove();
 
-  const totals = computeInvoiceTotals(inv.items);
-  inv.subtotal = totals.subtotal;
-  inv.total_gst = totals.total_gst;
-  inv.discount_total = totals.discount_total;
-  inv.total_amount = totals.total_amount;
-  inv.round_off = totals.round_off;
+  const item = inv.items.id(itemId);
+  if (!item) throw new Error("Item not found");
 
+  // FIX: .remove() is deprecated in Mongoose 7+; use deleteOne() on the subdoc
+  item.deleteOne();
+
+  applyTotals(inv, computeInvoiceTotals(inv.items));
   inv.updated_by = user._id;
   await inv.save();
 };
 
 export const getUnbilledTasks = async (user, invoiceId) => {
-  // helper: returns unbilled tasks for the invoice's client
-  const invoice = await Invoice.findById(invoiceId).lean();
+  // FIX: Scoped to tenant
+  const invoice = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) }).lean();
   if (!invoice) throw new Error("Invoice not found");
 
-  // assumes you have a Task model with fields: client, billed (boolean) or invoice_id
-  // Fallback - return [] if Task model not present
   let Task;
   try {
     Task = mongoose.model("Task");
   } catch (e) {
     return [];
   }
+
   const tasks = await Task.find({
     client: invoice.client,
     invoice_id: { $exists: false },
     archived: { $ne: true },
   }).lean();
+
   return tasks;
 };
 
-//
-// Payments
-//
+// ─────────────────────────────────────────────────────────────────────────────
+// C. Payments
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const addPayment = async (user, invoiceId, payload) => {
-  const inv = await Invoice.findById(invoiceId);
+  // FIX: Validate payment amount up front
+  const amount = Number(payload.amount);
+  if (!amount || amount <= 0) throw new Error("Payment amount must be greater than 0");
+
+  // FIX: Scoped to tenant
+  const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) });
   if (!inv) throw new Error("Invoice not found");
 
+  if (inv.status === "cancelled") throw new Error("Cannot add payment to a cancelled invoice");
+
   const payment = {
-    amount: payload.amount,
+    amount,
     date: payload.date ? new Date(payload.date) : new Date(),
     method: payload.method,
     reference: payload.reference,
@@ -257,8 +276,8 @@ export const addPayment = async (user, invoiceId, payload) => {
   };
 
   inv.payments.push(payment);
-  inv.amount_received = (inv.amount_received || 0) + payment.amount;
-  inv.balance_due = (inv.total_amount || 0) - inv.amount_received;
+  inv.amount_received = (inv.amount_received || 0) + amount;
+  inv.balance_due = Math.max(0, (inv.total_amount || 0) - inv.amount_received);
 
   if (inv.balance_due <= 0) inv.status = "paid";
   else if (inv.amount_received > 0) inv.status = "partially_paid";
@@ -266,31 +285,36 @@ export const addPayment = async (user, invoiceId, payload) => {
   inv.updated_by = user._id;
   await inv.save();
 
-  // return the inserted payment (last one)
   return inv.payments[inv.payments.length - 1];
 };
 
 export const listPayments = async (user, invoiceId) => {
-  const inv = await Invoice.findById(invoiceId).lean();
+  // FIX: Scoped to tenant
+  const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) }).lean();
   if (!inv) throw new Error("Invoice not found");
   return inv.payments || [];
 };
 
 export const markPaid = async (user, invoiceId) => {
-  const inv = await Invoice.findById(invoiceId);
+  // FIX: Scoped to tenant
+  const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) });
   if (!inv) throw new Error("Invoice not found");
-  const remaining = (inv.total_amount || 0) - (inv.amount_received || 0);
+
+  if (inv.status === "cancelled") throw new Error("Cannot mark a cancelled invoice as paid");
+
+  const remaining = Math.max(0, (inv.total_amount || 0) - (inv.amount_received || 0));
+
   if (remaining <= 0) {
     inv.status = "paid";
     await inv.save();
     return inv.toObject();
   }
-  // create a payment equal to remaining (could be restricted)
+
   inv.payments.push({
     amount: remaining,
     date: new Date(),
     method: "manual",
-    note: "Marked paid by user",
+    note: "Marked as paid by user",
     created_by: user._id,
   });
   inv.amount_received += remaining;
@@ -301,85 +325,110 @@ export const markPaid = async (user, invoiceId) => {
   return inv.toObject();
 };
 
-//
-// Preview / PDF / Send / Export
-//
+// ─────────────────────────────────────────────────────────────────────────────
+// D. Preview / PDF / Send / Export
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const previewInvoice = async (user, invoiceId) => {
-  const inv = await Invoice.findById(invoiceId).lean();
+  // FIX: Scoped to tenant
+  const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) }).lean();
   if (!inv) throw new Error("Invoice not found");
-  // recompute totals (do not persist)
   const totals = computeInvoiceTotals(inv.items || []);
   return { ...inv, ...totals };
 };
 
 export const getPdf = async (user, invoiceId) => {
-  const inv = await Invoice.findById(invoiceId).lean();
+  // FIX: Scoped to tenant
+  const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) })
+    .populate("client billing_entity")
+    .lean();
   if (!inv) throw new Error("Invoice not found");
-  const buffer = await generatePdfBuffer(inv); // helper returns Buffer or stream
+  const buffer = await generatePdfBuffer(inv);
   const rs = new stream.PassThrough();
   rs.end(buffer);
   return rs;
 };
 
 export const sendInvoice = async (user, invoiceId, body) => {
-  const inv = await Invoice.findById(invoiceId)
+  if (!body.to) throw new Error("Recipient email address (to) is required");
+
+  // FIX: Scoped to tenant
+  const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) })
     .populate("client billing_entity")
     .lean();
   if (!inv) throw new Error("Invoice not found");
 
   const pdfBuffer = await generatePdfBuffer(inv);
 
-  // sendMail should accept attachments; stubbed in helpers
   const mailResult = await sendEmail({
     to: body.to,
     cc: body.cc,
     subject: body.subject || `Invoice ${inv.invoice_no}`,
-    text: body.message || "Please find attached invoice.",
+    text: body.message || "Please find the attached invoice.",
     attachments: [{ filename: `${inv.invoice_no}.pdf`, content: pdfBuffer }],
   });
 
-  // update status to 'sent' if it was draft
-  await Invoice.updateOne(
-    { _id: inv._id },
-    { $set: { status: "sent", updated_by: user._id } },
-  );
+  // Only advance from draft → sent; do not regress from paid/partially_paid
+  if (inv.status === "draft") {
+    await Invoice.updateOne(
+      { _id: inv._id },
+      { $set: { status: "sent", updated_by: user._id } },
+    );
+  }
 
   return mailResult;
 };
 
 export const exportInvoices = async (user, query) => {
-  const result = await listInvoices(user, query);
-  const rows = result.data;
-  const fields = ["invoice_no", "date", "client", "total_amount", "status"];
+  // FIX: Pass user so listInvoices scopes to the right tenant
+  const result = await listInvoices(user, { ...query, per_page: 10000 });
+  const rows = result.data.map((inv) => ({
+    invoice_no: inv.invoice_no,
+    date: inv.date,
+    client: inv.client?.name || inv.client,
+    total_amount: inv.total_amount,
+    amount_received: inv.amount_received,
+    balance_due: inv.balance_due,
+    status: inv.status,
+  }));
+
+  const fields = ["invoice_no", "date", "client", "total_amount", "amount_received", "balance_due", "status"];
   const parser = new Json2csvParser({ fields });
   const csv = parser.parse(rows);
-  return { filename: "invoices.csv", mimetype: "text/csv", content: csv };
+
+  const timestamp = new Date().toISOString().split("T")[0];
+  return { filename: `invoices-${timestamp}.csv`, mimetype: "text/csv", content: csv };
 };
 
-//
-// Bulk / Reverse
-//
+// ─────────────────────────────────────────────────────────────────────────────
+// E. Bulk / Reverse
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const bulkOperations = async (user, payload) => {
-  // Example: payload = { action: "create", invoices: [...] }
   if (payload.action === "create") {
-    const created = [];
-    for (const inv of payload.invoices) {
-      const c = await createInvoice(user, inv);
-      created.push(c);
+    if (!Array.isArray(payload.invoices) || payload.invoices.length === 0) {
+      throw new Error("invoices array is required for bulk create");
     }
+
+    // FIX: Run in parallel instead of sequentially for better throughput.
+    // If you need all-or-nothing semantics, wrap in a MongoDB session/transaction.
+    const created = await Promise.all(
+      payload.invoices.map((inv) => createInvoice(user, inv)),
+    );
     return { created };
   }
-  // add other bulk ops as needed
-  return {};
+
+  throw new Error(`Unsupported bulk action: "${payload.action}"`);
 };
 
 export const reverseInvoice = async (user, invoiceId) => {
-  // admin only - check user role in calling layer
-  const inv = await Invoice.findById(invoiceId);
+  // FIX: Scoped to tenant
+  const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) });
   if (!inv) throw new Error("Invoice not found");
 
-  // unmark linked tasks/expenses (example assumes Task model has invoice_id)
-  if (Array.isArray(inv.linked_sources)) {
+  if (inv.status === "cancelled") throw new Error("Invoice is already cancelled");
+
+  if (Array.isArray(inv.linked_sources) && inv.linked_sources.length > 0) {
     const Task = mongoose.models.Task;
     if (Task) {
       await Task.updateMany(
@@ -390,25 +439,6 @@ export const reverseInvoice = async (user, invoiceId) => {
   }
 
   inv.status = "cancelled";
+  inv.updated_by = user._id;
   await inv.save();
-};
-
-export const getNextInvoiceNumber = async (user) => {
-  const lastInvoice = await Invoice.findOne({ tenant_id: user.tenant_id })
-    .sort({ createdAt: -1 })
-    .lean();
-
-  if (!lastInvoice) {
-    return "INV-001";
-  }
-
-  const lastNo = lastInvoice.invoice_no;
-  const match = lastNo.match(/(\d+)$/);
-  if (!match) {
-    return lastNo + "-1";
-  }
-
-  const nextNumber = parseInt(match[1]) + 1;
-  const prefix = lastNo.substring(0, match.index);
-  return `${prefix}${nextNumber.toString().padStart(match[1].length, "0")}`;
 };

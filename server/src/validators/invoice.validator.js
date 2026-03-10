@@ -13,7 +13,7 @@ const itemSchema = Joi.object({
 
 const createSchema = Joi.object({
   tenant_id: Joi.string().required(),
-  invoice_no: Joi.string().required(),
+  // invoice_no: Joi.string().required(),
   billing_entity: Joi.string().required(),
   client: Joi.string().required(),
   date: Joi.date().optional(),

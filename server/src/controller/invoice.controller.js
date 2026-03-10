@@ -1,5 +1,9 @@
 import * as service from "../services/invoice.service.js";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// A. CRUD & listing
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const listInvoices = async (req, res, next) => {
   try {
     const result = await service.listInvoices(req.user, req.query);
@@ -18,6 +22,16 @@ export const createInvoice = async (req, res, next) => {
   }
 };
 
+// FIX: Was referenced in routes but never implemented — added here
+export const getNextInvoiceNumber = async (req, res, next) => {
+  try {
+    const nextNumber = await service.getNextInvoiceNumber(req.user);
+    res.json({ invoice_no: nextNumber });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const getInvoiceById = async (req, res, next) => {
   try {
     const inv = await service.getInvoiceById(req.user, req.params.id);
@@ -28,22 +42,9 @@ export const getInvoiceById = async (req, res, next) => {
   }
 };
 
-export const getNextInvoiceNumber = async (req, res, next) => {
-  try {
-    const nextNumber = await service.getNextInvoiceNumber(req.user);
-    res.json({ nextInvoiceNumber: nextNumber });
-  } catch (err) {
-    next(err);
-  }
-};
-
 export const updateInvoice = async (req, res, next) => {
   try {
-    const updated = await service.updateInvoice(
-      req.user,
-      req.params.id,
-      req.body,
-    );
+    const updated = await service.updateInvoice(req.user, req.params.id, req.body);
     res.json(updated);
   } catch (err) {
     next(err);
@@ -60,14 +61,13 @@ export const deleteInvoice = async (req, res, next) => {
   }
 };
 
-// Items
+// ─────────────────────────────────────────────────────────────────────────────
+// B. Items
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const addItems = async (req, res, next) => {
   try {
-    const items = await service.addItems(
-      req.user,
-      req.params.id,
-      req.body.items,
-    );
+    const items = await service.addItems(req.user, req.params.id, req.body.items);
     res.status(201).json(items);
   } catch (err) {
     next(err);
@@ -106,7 +106,10 @@ export const getUnbilledTasks = async (req, res, next) => {
   }
 };
 
-// Payments
+// ─────────────────────────────────────────────────────────────────────────────
+// C. Payments
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const addPayment = async (req, res, next) => {
   try {
     const payment = await service.addPayment(req.user, req.params.id, req.body);
@@ -134,7 +137,10 @@ export const markPaid = async (req, res, next) => {
   }
 };
 
-// Preview / PDF / send
+// ─────────────────────────────────────────────────────────────────────────────
+// D. Preview / PDF / Send / Export
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const previewInvoice = async (req, res, next) => {
   try {
     const preview = await service.previewInvoice(req.user, req.params.id);
@@ -157,6 +163,10 @@ export const getPdf = async (req, res, next) => {
   try {
     const pdfStream = await service.getPdf(req.user, req.params.id);
     res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="invoice-${req.params.id}.pdf"`,
+    );
     pdfStream.pipe(res);
   } catch (err) {
     next(err);
@@ -166,10 +176,7 @@ export const getPdf = async (req, res, next) => {
 export const exportInvoices = async (req, res, next) => {
   try {
     const file = await service.exportInvoices(req.user, req.query);
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${file.filename}"`,
-    );
+    res.setHeader("Content-Disposition", `attachment; filename="${file.filename}"`);
     res.setHeader("Content-Type", file.mimetype);
     res.send(file.content);
   } catch (err) {
@@ -177,7 +184,10 @@ export const exportInvoices = async (req, res, next) => {
   }
 };
 
-// Bulk & reverse
+// ─────────────────────────────────────────────────────────────────────────────
+// E. Bulk & reverse
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const bulkOperations = async (req, res, next) => {
   try {
     const out = await service.bulkOperations(req.user, req.body);
@@ -190,7 +200,7 @@ export const bulkOperations = async (req, res, next) => {
 export const reverseInvoice = async (req, res, next) => {
   try {
     await service.reverseInvoice(req.user, req.params.id);
-    res.status(200).json({ message: "Invoice reversed" });
+    res.status(200).json({ message: "Invoice reversed successfully" });
   } catch (err) {
     next(err);
   }
