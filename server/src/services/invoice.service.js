@@ -6,7 +6,7 @@ import { buildPagination } from "../utils/pagination.js";
 import { Parser as Json2csvParser } from "json2csv";
 import stream from "stream";
 import { generatePdfBuffer } from "../utils/pdf.helper.js";
-import { sendMail } from "../utils/sendEmail.js";
+import sendEmail from "../utils/sendEmail.js";
 
 export const listInvoices = async (user, query) => {
   const {
@@ -330,7 +330,7 @@ export const sendInvoice = async (user, invoiceId, body) => {
   const pdfBuffer = await generatePdfBuffer(inv);
 
   // sendMail should accept attachments; stubbed in helpers
-  const mailResult = await sendMail({
+  const mailResult = await sendEmail({
     to: body.to,
     cc: body.cc,
     subject: body.subject || `Invoice ${inv.invoice_no}`,
@@ -391,4 +391,24 @@ export const reverseInvoice = async (user, invoiceId) => {
 
   inv.status = "cancelled";
   await inv.save();
+};
+
+export const getNextInvoiceNumber = async (user) => {
+  const lastInvoice = await Invoice.findOne({ tenant_id: user.tenant_id })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  if (!lastInvoice) {
+    return "INV-001";
+  }
+
+  const lastNo = lastInvoice.invoice_no;
+  const match = lastNo.match(/(\d+)$/);
+  if (!match) {
+    return lastNo + "-1";
+  }
+
+  const nextNumber = parseInt(match[1]) + 1;
+  const prefix = lastNo.substring(0, match.index);
+  return `${prefix}${nextNumber.toString().padStart(match[1].length, "0")}`;
 };

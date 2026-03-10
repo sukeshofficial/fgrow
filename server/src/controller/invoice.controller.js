@@ -28,6 +28,15 @@ export const getInvoiceById = async (req, res, next) => {
   }
 };
 
+export const getNextInvoiceNumber = async (req, res, next) => {
+  try {
+    const nextNumber = await service.getNextInvoiceNumber(req.user);
+    res.json({ nextInvoiceNumber: nextNumber });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const updateInvoice = async (req, res, next) => {
   try {
     const updated = await service.updateInvoice(
