@@ -25,7 +25,7 @@ export const createInvoice = async (req, res, next) => {
 // FIX: Was referenced in routes but never implemented — added here
 export const getNextInvoiceNumber = async (req, res, next) => {
   try {
-    const nextNumber = await service.getNextInvoiceNumber(req.user);
+    const nextNumber = await service.getNextInvoiceNumber(req.user.tenant_id);
     res.json({ invoice_no: nextNumber });
   } catch (err) {
     next(err);
@@ -44,7 +44,11 @@ export const getInvoiceById = async (req, res, next) => {
 
 export const updateInvoice = async (req, res, next) => {
   try {
-    const updated = await service.updateInvoice(req.user, req.params.id, req.body);
+    const updated = await service.updateInvoice(
+      req.user,
+      req.params.id,
+      req.body,
+    );
     res.json(updated);
   } catch (err) {
     next(err);
@@ -54,10 +58,35 @@ export const updateInvoice = async (req, res, next) => {
 export const deleteInvoice = async (req, res, next) => {
   try {
     const force = req.query.force === "true";
+
     await service.deleteInvoice(req.user, req.params.id, force);
-    res.status(204).end();
+
+    return res.status(200).json({
+      success: true,
+      message: "Invoice deleted successfully",
+    });
   } catch (err) {
-    next(err);
+    // Known errors from service
+    if (err.message === "Invoice not found") {
+      return res.status(404).json({
+        success: false,
+        message: "Invoice not found",
+      });
+    }
+
+    if (err.message === "Invoice already deleted") {
+      return res.status(400).json({
+        success: false,
+        message: "Invoice already deleted",
+      });
+    }
+
+    // Unexpected error
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete invoice",
+      error: err.message,
+    });
   }
 };
 
@@ -67,7 +96,11 @@ export const deleteInvoice = async (req, res, next) => {
 
 export const addItems = async (req, res, next) => {
   try {
-    const items = await service.addItems(req.user, req.params.id, req.body.items);
+    const items = await service.addItems(
+      req.user,
+      req.params.id,
+      req.body.items,
+    );
     res.status(201).json(items);
   } catch (err) {
     next(err);
@@ -91,9 +124,31 @@ export const updateItem = async (req, res, next) => {
 export const deleteItem = async (req, res, next) => {
   try {
     await service.deleteItem(req.user, req.params.id, req.params.itemId);
-    res.status(204).end();
+
+    return res.status(200).json({
+      success: true,
+      message: "Invoice item deleted successfully",
+    });
   } catch (err) {
-    next(err);
+    if (err.message === "Invoice not found") {
+      return res.status(404).json({
+        success: false,
+        message: "Invoice not found",
+      });
+    }
+
+    if (err.message === "Item not found") {
+      return res.status(404).json({
+        success: false,
+        message: "Invoice item not found",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete invoice item",
+      error: err.message,
+    });
   }
 };
 
@@ -176,7 +231,10 @@ export const getPdf = async (req, res, next) => {
 export const exportInvoices = async (req, res, next) => {
   try {
     const file = await service.exportInvoices(req.user, req.query);
-    res.setHeader("Content-Disposition", `attachment; filename="${file.filename}"`);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${file.filename}"`,
+    );
     res.setHeader("Content-Type", file.mimetype);
     res.send(file.content);
   } catch (err) {
@@ -191,9 +249,16 @@ export const exportInvoices = async (req, res, next) => {
 export const bulkOperations = async (req, res, next) => {
   try {
     const out = await service.bulkOperations(req.user, req.body);
-    res.json(out);
+
+    return res.status(200).json({
+      success: true,
+      data: out,
+    });
   } catch (err) {
-    next(err);
+    return res.status(400).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 

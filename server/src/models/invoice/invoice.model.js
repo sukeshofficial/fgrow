@@ -80,6 +80,8 @@ const invoiceSchema = new Schema(
 
     archived_at: { type: Date, default: null },
 
+    archived_by: { type: Schema.Types.ObjectId, ref: "User" },
+
     linked_sources: [{ type: Schema.Types.ObjectId }],
   },
   { timestamps: true },

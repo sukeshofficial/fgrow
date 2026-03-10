@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import InvoiceCounter from "../models/invoice/schemas/invoiceCounter.model.js";
 import Invoice from "../models/invoice/invoice.model.js";
+import BillingEntity from "../models/billing/billingEntity.model.js";
 
 import { computeInvoiceTotals } from "../utils/totals.js";
 import { buildPagination } from "../utils/pagination.js";
@@ -67,7 +68,14 @@ export const listInvoices = async (user, query) => {
   }
 
   // Whitelist sort_by to prevent arbitrary field injection
-  const allowedSortFields = ["date", "due_date", "invoice_no", "total_amount", "status", "createdAt"];
+  const allowedSortFields = [
+    "date",
+    "due_date",
+    "invoice_no",
+    "total_amount",
+    "status",
+    "createdAt",
+  ];
   const safeSortBy = allowedSortFields.includes(sort_by) ? sort_by : "date";
   const sort = { [safeSortBy]: order === "asc" ? 1 : -1 };
 
@@ -75,7 +83,7 @@ export const listInvoices = async (user, query) => {
 
   const [items, total] = await Promise.all([
     Invoice.find(filter)
-      .populate("client billing_entity")
+      .populate([{ path: "client" }, { path: "billing_entity" }])
       .sort(sort)
       .skip(skip)
       .limit(limit)
@@ -116,11 +124,11 @@ export const getNextInvoiceNumber = async (tenantId) => {
   const year = new Date().getFullYear();
 
   const counter = await InvoiceCounter.findOneAndUpdate(
-    { tenant_id: tenantId, year },   // find this tenant's counter for this year
-    { $inc: { seq: 1 } },            // atomically bump the sequence
+    { tenant_id: tenantId, year }, // find this tenant's counter for this year
+    { $inc: { seq: 1 } }, // atomically bump the sequence
     {
-      new: true,                     // return the document AFTER the increment
-      upsert: true,                  // create the counter document if it doesn't exist yet
+      new: true, // return the document AFTER the increment
+      upsert: true, // create the counter document if it doesn't exist yet
       setDefaultsOnInsert: true,
     },
   );
@@ -131,7 +139,7 @@ export const getNextInvoiceNumber = async (tenantId) => {
 export const getInvoiceById = async (user, id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) return null;
   // FIX: Scoped to tenant
-  return Invoice.findOne({ _id: id, ...tenantFilter(user) })
+  return Invoice.findOne({ _id: id, ...tenantFilter(user), archived: false })
     .populate("client billing_entity created_by updated_by")
     .lean();
 };
@@ -168,13 +176,24 @@ export const updateInvoice = async (user, id, payload) => {
 };
 
 export const deleteInvoice = async (user, id, force = false) => {
-  const filter = { _id: id, ...tenantFilter(user) }; // FIX: Scoped to tenant
+  const filter = { _id: id, ...tenantFilter(user) };
 
-  if (force) {
-    await Invoice.deleteOne(filter);
-    return;
+  const invoice = await Invoice.findOne(filter);
+
+  if (!invoice) {
+    throw new Error("Invoice not found");
   }
-  await Invoice.updateOne(filter, { archived: true, archived_at: new Date() });
+
+  // If already archived and force not requested
+  if (invoice.archived && !force) {
+    throw new Error("Invoice already deleted");
+  }
+
+  await Invoice.updateOne(filter, {
+    archived: true,
+    archived_at: new Date(),
+    archived_by: user.id,
+  });
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -204,7 +223,14 @@ export const updateItem = async (user, invoiceId, itemId, payload) => {
   const item = inv.items.id(itemId);
   if (!item) throw new Error("Item not found");
 
-  ["description", "quantity", "unit_price", "discount", "gst_rate", "meta"].forEach((k) => {
+  [
+    "description",
+    "quantity",
+    "unit_price",
+    "discount",
+    "gst_rate",
+    "meta",
+  ].forEach((k) => {
     if (payload[k] !== undefined) item[k] = payload[k];
   });
 
@@ -232,7 +258,10 @@ export const deleteItem = async (user, invoiceId, itemId) => {
 
 export const getUnbilledTasks = async (user, invoiceId) => {
   // FIX: Scoped to tenant
-  const invoice = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) }).lean();
+  const invoice = await Invoice.findOne({
+    _id: invoiceId,
+    ...tenantFilter(user),
+  }).lean();
   if (!invoice) throw new Error("Invoice not found");
 
   let Task;
@@ -258,13 +287,15 @@ export const getUnbilledTasks = async (user, invoiceId) => {
 export const addPayment = async (user, invoiceId, payload) => {
   // FIX: Validate payment amount up front
   const amount = Number(payload.amount);
-  if (!amount || amount <= 0) throw new Error("Payment amount must be greater than 0");
+  if (!amount || amount <= 0)
+    throw new Error("Payment amount must be greater than 0");
 
   // FIX: Scoped to tenant
   const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) });
   if (!inv) throw new Error("Invoice not found");
 
-  if (inv.status === "cancelled") throw new Error("Cannot add payment to a cancelled invoice");
+  if (inv.status === "cancelled")
+    throw new Error("Cannot add payment to a cancelled invoice");
 
   const payment = {
     amount,
@@ -290,7 +321,10 @@ export const addPayment = async (user, invoiceId, payload) => {
 
 export const listPayments = async (user, invoiceId) => {
   // FIX: Scoped to tenant
-  const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) }).lean();
+  const inv = await Invoice.findOne({
+    _id: invoiceId,
+    ...tenantFilter(user),
+  }).lean();
   if (!inv) throw new Error("Invoice not found");
   return inv.payments || [];
 };
@@ -300,9 +334,13 @@ export const markPaid = async (user, invoiceId) => {
   const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) });
   if (!inv) throw new Error("Invoice not found");
 
-  if (inv.status === "cancelled") throw new Error("Cannot mark a cancelled invoice as paid");
+  if (inv.status === "cancelled")
+    throw new Error("Cannot mark a cancelled invoice as paid");
 
-  const remaining = Math.max(0, (inv.total_amount || 0) - (inv.amount_received || 0));
+  const remaining = Math.max(
+    0,
+    (inv.total_amount || 0) - (inv.amount_received || 0),
+  );
 
   if (remaining <= 0) {
     inv.status = "paid";
@@ -331,21 +369,31 @@ export const markPaid = async (user, invoiceId) => {
 
 export const previewInvoice = async (user, invoiceId) => {
   // FIX: Scoped to tenant
-  const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) }).lean();
+  const inv = await Invoice.findOne({
+    _id: invoiceId,
+    ...tenantFilter(user),
+  }).lean();
   if (!inv) throw new Error("Invoice not found");
   const totals = computeInvoiceTotals(inv.items || []);
   return { ...inv, ...totals };
 };
 
 export const getPdf = async (user, invoiceId) => {
-  // FIX: Scoped to tenant
-  const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) })
+  const inv = await Invoice.findOne({
+    _id: invoiceId,
+    ...tenantFilter(user),
+    archived: false,
+  })
     .populate("client billing_entity")
     .lean();
+
   if (!inv) throw new Error("Invoice not found");
+
   const buffer = await generatePdfBuffer(inv);
+
   const rs = new stream.PassThrough();
   rs.end(buffer);
+
   return rs;
 };
 
@@ -392,12 +440,24 @@ export const exportInvoices = async (user, query) => {
     status: inv.status,
   }));
 
-  const fields = ["invoice_no", "date", "client", "total_amount", "amount_received", "balance_due", "status"];
+  const fields = [
+    "invoice_no",
+    "date",
+    "client",
+    "total_amount",
+    "amount_received",
+    "balance_due",
+    "status",
+  ];
   const parser = new Json2csvParser({ fields });
   const csv = parser.parse(rows);
 
   const timestamp = new Date().toISOString().split("T")[0];
-  return { filename: `invoices-${timestamp}.csv`, mimetype: "text/csv", content: csv };
+  return {
+    filename: `invoices-${timestamp}.csv`,
+    mimetype: "text/csv",
+    content: csv,
+  };
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -410,11 +470,15 @@ export const bulkOperations = async (user, payload) => {
       throw new Error("invoices array is required for bulk create");
     }
 
-    // FIX: Run in parallel instead of sequentially for better throughput.
-    // If you need all-or-nothing semantics, wrap in a MongoDB session/transaction.
     const created = await Promise.all(
-      payload.invoices.map((inv) => createInvoice(user, inv)),
+      payload.invoices.map((inv) =>
+        createInvoice(user, {
+          ...inv,
+          tenant_id: user.tenant_id,
+        }),
+      ),
     );
+
     return { created };
   }
 
@@ -426,7 +490,8 @@ export const reverseInvoice = async (user, invoiceId) => {
   const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) });
   if (!inv) throw new Error("Invoice not found");
 
-  if (inv.status === "cancelled") throw new Error("Invoice is already cancelled");
+  if (inv.status === "cancelled")
+    throw new Error("Invoice is already cancelled");
 
   if (Array.isArray(inv.linked_sources) && inv.linked_sources.length > 0) {
     const Task = mongoose.models.Task;

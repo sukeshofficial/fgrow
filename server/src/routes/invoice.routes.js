@@ -173,4 +173,11 @@ router.post(
   controller.reverseInvoice,
 );
 
+router.post(
+  "/bulk",
+  authMiddleware,
+  requireRole("owner"),
+  controller.bulkOperations,
+);
+
 export default router;
