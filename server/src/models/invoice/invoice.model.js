@@ -21,7 +21,7 @@ const invoiceSchema = new Schema(
 
     billing_entity: {
       type: Schema.Types.ObjectId,
-      ref: "BillingEntity",
+      ref: "Tenant",
       required: true,
     },
 

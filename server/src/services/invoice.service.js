@@ -384,11 +384,11 @@ export const getPdf = async (user, invoiceId) => {
     ...tenantFilter(user),
     archived: false,
   })
-    .populate("client billing_entity")
+    .populate([{ path: "client" }, { path: "billing_entity" }])
     .lean();
 
   if (!inv) throw new Error("Invoice not found");
-
+  console.log(inv);
   const buffer = await generatePdfBuffer(inv);
 
   const rs = new stream.PassThrough();
