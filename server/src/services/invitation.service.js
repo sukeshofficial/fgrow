@@ -5,7 +5,6 @@ import sendEmail from "../utils/sendEmail.js";
 
 import { User } from "../models/auth/user.model.js";
 import { UserInvitation } from "../models/auth/userInvitation.model.js";
-import { send } from "process";
 
 export const inviteUserService = async ({
   tenant_id,
@@ -59,8 +58,13 @@ export const inviteUserService = async ({
 
   const user = await User.findOne({ email });
 
-  user.invited_by = userId;
-  await user.save();
+  if (user) {
+    user.invited_by = userId;
+    if (user.status !== "active") {
+      user.status = "invited";
+    }
+    await user.save();
+  }
 
   // 4️⃣ Send email (placeholder - implement actual email sending logic here)
   await sendEmail({

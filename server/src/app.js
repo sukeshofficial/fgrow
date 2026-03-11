@@ -13,6 +13,7 @@ import serviceRoutes from "./routes/service.routes.js";
 import taskRoutes from "./routes/task.routes.js";
 import todoRoutes from "./routes/todo.routes.js";
 import invoiceRoutes from "./routes/invoice.routes.js";
+import receiptRoutes from "./routes/receipt.routes.js";
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use("/api/v0/services", serviceRoutes);
 app.use("/api/v0/tasks", taskRoutes);
 app.use("/api/v0/todo", todoRoutes);
 app.use("/api/v0/invoices", invoiceRoutes);
+app.use("/api/v0/receipts", receiptRoutes);
 
 app.get("/api/v0/health", (req, res) => {
   res.json({ status: "OK" });
