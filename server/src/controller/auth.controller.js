@@ -106,29 +106,61 @@ export const registerUser = async (req, res) => {
       };
     }
 
-    const newUser = new User({
+    // Prevent duplicate accounts
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(409).json({
+        message: "account already exists",
+      });
+    }
+
+    const invitation = await UserInvitation.findOne({
+      email,
+      accepted_at: null,
+    });
+
+    let invitedBy;
+
+    if (invitation) {
+      if (invitation.expires_at < Date.now()) {
+        return res.status(400).json({
+          message: "Invitation expired",
+        });
+      }
+
+      invitedBy = invitation.invited_by;
+    }
+
+    // Create user
+    const user = new User({
       name,
       username,
       email,
+      invited_by: invitedBy,
       profile_avatar: avatarData,
+      status: "active",
+      joined_at: new Date(),
     });
 
-    newUser.password = password;
+    user.password = password;
 
     // OTP generation
     const rawOtp = createNumericOtp();
     const hashedOtp = crypto.createHash("sha256").update(rawOtp).digest("hex");
 
-    newUser.reset_token = hashedOtp;
-    newUser.reset_token_expiry = Date.now() + 5 * 60 * 1000;
+    user.reset_token = hashedOtp;
+    user.reset_token_expiry = Date.now() + 5 * 60 * 1000;
 
-    await newUser.save();
+    await user.save();
 
+    // Delete temp file
     if (req.file) {
       fs.unlinkSync(req.file.path);
       console.log(`File - ${req.file.path} deleted`);
     }
 
+    // Send verification email
     await sendEmail({
       to: email,
       subject: "Your verification code",
@@ -137,14 +169,17 @@ export const registerUser = async (req, res) => {
 
     return res.status(201).json({
       message: "User registered successfully",
-      user: newUser.toJSON(),
+      user: user.toJSON(),
     });
   } catch (err) {
     console.error("Register error:", err);
 
     if (err.code === 11000) {
       const field = Object.keys(err.keyValue || {})[0] || "field";
-      return res.status(409).json({ message: `${field} already in use` });
+
+      return res.status(409).json({
+        message: `${field} already in use`,
+      });
     }
 
     return res.status(500).json({
@@ -426,7 +461,7 @@ export const getMe = async (req, res) => {
         email: user.email,
         accepted_at: null,
         expires_at: { $gt: new Date() },
-      }).populate("tenant");
+      }).populate("tenant_id");
 
       if (invitation) {
         return res.status(200).json({
