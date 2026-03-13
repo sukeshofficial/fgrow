@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import Quotation from "../models/quotation/quotation.model.js";
 import Invoice from "../models/invoice/invoice.model.js";
 import QuotationCounter from "../models/quotation/schemas/quotationCounter.model.js";
+import { generateQuotationNumber } from "../utils/generateQuotationNumber.js";
+
 const { Types } = mongoose;
 
 function computeItemTotals(item) {
@@ -30,21 +32,6 @@ function computeQuotationTotals(items, round_off = 0) {
   };
 }
 
-export const generateQuotationNumber = async (tenant_id) => {
-  const year = new Date().getFullYear();
-
-  const counter = await QuotationCounter.findOneAndUpdate(
-    { tenant_id: new Types.ObjectId(tenant_id), year },
-    { $inc: { seq: 1 } },
-    { new: true, upsert: true },
-  );
-
-  const seq = counter.seq.toString().padStart(3, "0");
-
-  // Example format
-  return `QUO-${year}/${seq}`;
-};
-
 export const createQuotationService = async ({
   tenant_id,
   user_id,
@@ -52,14 +39,17 @@ export const createQuotationService = async ({
 }) => {
   if (!payload.client) throw new Error("client is required");
   if (!payload.billing_entity) throw new Error("billing_entity is required");
-  if (!payload.quotation_no) throw new Error("quotation_no is required");
-
-  const quotation_no = await generateQuotationNumber(tenant_id);
 
   if (!Types.ObjectId.isValid(payload.client))
     throw new Error("Invalid client id");
+
   if (!Types.ObjectId.isValid(payload.billing_entity))
     throw new Error("Invalid billing entity id");
+
+  // generate quotation number automatically
+  const quotation_no = await generateQuotationNumber(tenant_id);
+
+  const now = new Date();
 
   // process items
   const items = (payload.items || []).map((it) => {
@@ -68,15 +58,19 @@ export const createQuotationService = async ({
         it.service_id && Types.ObjectId.isValid(it.service_id)
           ? new Types.ObjectId(it.service_id)
           : null,
+
       description: it.description || it.service_name || "Item",
       quantity: Number(it.quantity || 1),
       unit_price: Number(it.unit_price || 0),
       gst_rate: Number(it.gst_rate || 0),
       meta: it.meta || {},
     };
+
     const totals = computeItemTotals(copy);
+
     copy.gst_amount = +totals.gst_amount.toFixed(2);
     copy.total_amount = +totals.total_amount.toFixed(2);
+
     return copy;
   });
 
@@ -87,20 +81,25 @@ export const createQuotationService = async ({
     quotation_no,
     billing_entity: payload.billing_entity,
     client: payload.client,
-    date: payload.date ? new Date(payload.date) : new Date(),
+
+    date: payload.date ? new Date(payload.date) : now,
     valid_until: payload.valid_until ? new Date(payload.valid_until) : null,
+
     items,
     subtotal: totals.subtotal,
     total_gst: totals.total_gst,
     round_off: Number(payload.round_off || 0),
     total_amount: totals.total_amount,
+
     terms: payload.terms || "",
     status: payload.status || "pending",
+
     created_by: user_id,
     updated_by: user_id,
   });
 
   await doc.save();
+
   return doc.toObject();
 };
 
