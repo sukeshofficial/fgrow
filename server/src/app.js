@@ -14,6 +14,8 @@ import taskRoutes from "./routes/task.routes.js";
 import todoRoutes from "./routes/todo.routes.js";
 import invoiceRoutes from "./routes/invoice.routes.js";
 import receiptRoutes from "./routes/receipt.routes.js";
+import quotationRoutes from "./routes/quotation.routes.js";
+import expenseRoutes from "./routes/expense.routes.js";
 
 const app = express();
 
@@ -39,6 +41,8 @@ app.use("/api/v0/tasks", taskRoutes);
 app.use("/api/v0/todo", todoRoutes);
 app.use("/api/v0/invoices", invoiceRoutes);
 app.use("/api/v0/receipts", receiptRoutes);
+app.use("/api/v0/quotations", quotationRoutes);
+app.use("/api/v0/expenses", expenseRoutes);
 
 app.get("/api/v0/health", (req, res) => {
   res.json({ status: "OK" });

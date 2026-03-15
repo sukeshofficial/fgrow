@@ -1,28 +1,29 @@
 import express from "express";
-
 import {
-    createServiceController,
-    listServicesController,
-    getServiceByIdController,
-    updateServiceController,
-    deleteServiceController,
-    assignServiceToClientsController,
-    listAssignedClientsController,
-    unassignClientController
+  createServiceController,
+  listServicesController,
+  getServiceByIdController,
+  updateServiceController,
+  deleteServiceController,
+  assignServiceToClientsController,
+  listAssignedClientsController,
+  unassignClientController,
 } from "../controller/service.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/tenant_role.middleware.js";
 
 const router = express.Router();
+const authStaff = [authMiddleware, requireRole("owner", "staff")];
 
-router.post("/", authMiddleware, requireRole("owner", "staff"), createServiceController);
-router.get("/", authMiddleware, requireRole("owner", "staff"), listServicesController);
-router.get("/:id", authMiddleware, requireRole("owner", "staff"), getServiceByIdController);
-router.patch("/:id", authMiddleware, requireRole("owner", "staff"), updateServiceController);
-router.delete("/:id", authMiddleware, requireRole("owner", "staff"), deleteServiceController);
-router.post("/:id/assign-clients", authMiddleware, requireRole("owner", "staff"), assignServiceToClientsController);
-router.get("/:id/clients", authMiddleware, requireRole("owner", "staff"), listAssignedClientsController);
-router.delete("/:id/clients/:clientId", authMiddleware, requireRole("owner", "staff"), unassignClientController);
+router.post("/", ...authStaff, createServiceController);
+router.get("/", ...authStaff, listServicesController);
+router.get("/:id", ...authStaff, getServiceByIdController);
+router.patch("/:id", ...authStaff, updateServiceController);
+router.delete("/:id", ...authStaff, deleteServiceController);
+
+router.post("/:id/assign-clients", ...authStaff, assignServiceToClientsController);
+router.get("/:id/clients", ...authStaff, listAssignedClientsController);
+router.delete("/:id/clients/:clientId", ...authStaff, unassignClientController);
 
 export default router;

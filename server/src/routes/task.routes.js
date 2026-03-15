@@ -1,38 +1,47 @@
 import express from "express";
-import { listTasksController, createTaskController, getTaskController, updateTaskController, updateStatusController, addChecklistItemController, updateChecklistItemController, deleteChecklistItemController, startTimelogController, stopTimelogController, addTimelogController, getActivitiesController } from "../controller/task.controller.js";
+import {
+  listTasksController,
+  createTaskController,
+  getTaskController,
+  updateTaskController,
+  updateStatusController,
+  addChecklistItemController,
+  updateChecklistItemController,
+  deleteChecklistItemController,
+  startTimelogController,
+  stopTimelogController,
+  addTimelogController,
+  getActivitiesController,
+} from "../controller/task.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/tenant_role.middleware.js";
 
 const router = express.Router();
 
-/* ------------------ task list & creation ------------------ */
+const authStaff = [authMiddleware, requireRole("owner", "staff")];
 
-router.get("/", authMiddleware, requireRole("owner", "staff"), listTasksController);
-router.post("/", authMiddleware, requireRole("owner", "staff"), createTaskController);
+// task list & creation
+router.get("/", ...authStaff, listTasksController);
+router.post("/", ...authStaff, createTaskController);
 
-/* ------------------ task details & update ------------------ */
+// task details & update
+router.get("/:id", ...authStaff, getTaskController);
+router.put("/:id", ...authStaff, updateTaskController);
 
-router.get("/:id", authMiddleware, requireRole("owner", "staff"), getTaskController);
-router.put("/:id", authMiddleware, requireRole("owner", "staff"), updateTaskController);
+// task status
+router.patch("/:id/status", ...authStaff, updateStatusController);
 
-/* ------------------ task status ------------------ */
+// checklist management
+router.post("/:id/checklist", ...authStaff, addChecklistItemController);
+router.patch("/:id/checklist/:idx", ...authStaff, updateChecklistItemController);
+router.delete("/:id/checklist/:idx", ...authStaff, deleteChecklistItemController);
 
-router.patch("/:id/status", authMiddleware, requireRole("owner", "staff"), updateStatusController);
+// time log management
+router.post("/:id/timelogs/start", ...authStaff, startTimelogController);
+router.post("/:id/timelogs/stop", ...authStaff, stopTimelogController);
+router.post("/:id/timelogs", ...authStaff, addTimelogController);
 
-/* ------------------ checklist management ------------------ */
-
-router.post("/:id/checklist", authMiddleware, requireRole("owner", "staff"), addChecklistItemController);
-router.patch("/:id/checklist/:idx", authMiddleware, requireRole("owner", "staff"), updateChecklistItemController);
-router.delete("/:id/checklist/:idx", authMiddleware, requireRole("owner", "staff"), deleteChecklistItemController);
-
-/* ------------------ time log management ------------------ */
-
-router.post("/:id/timelogs/start", authMiddleware, requireRole("owner", "staff"), startTimelogController);
-router.post("/:id/timelogs/stop", authMiddleware, requireRole("owner", "staff"), stopTimelogController);
-router.post("/:id/timelogs", authMiddleware, requireRole("owner", "staff"), addTimelogController);
-
-/* ------------------ task activity ------------------ */
-
-router.get("/:id/activities", authMiddleware, requireRole("owner", "staff"), getActivitiesController);
+// task activity
+router.get("/:id/activities", ...authStaff, getActivitiesController);
 
 export default router;

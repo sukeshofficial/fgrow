@@ -1,16 +1,15 @@
-// routes/receipt.routes.js
 import express from "express";
 import {
-    createReceiptController,
-    listReceiptsController,
-    getReceiptController,
-    updateReceiptController,
-    deleteReceiptController,
-    applyToInvoicesController,
-    autoApplyController,
-    unapplyReceiptController,
-    unpaidInvoicesForClientController,
-    printReceiptController,
+  createReceiptController,
+  listReceiptsController,
+  getReceiptController,
+  updateReceiptController,
+  deleteReceiptController,
+  applyToInvoicesController,
+  autoApplyController,
+  unapplyReceiptController,
+  unpaidInvoicesForClientController,
+  printReceiptController,
 } from "../controller/receipt.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
@@ -18,25 +17,27 @@ import { requireRole } from "../middleware/tenant_role.middleware.js";
 
 const router = express.Router();
 
+const authStaff = [authMiddleware, requireRole("owner", "staff")];
+const authOwnerStaffUser = [authMiddleware, requireRole("owner", "staff", "user")];
+
 // CRUD
-router.post("/", authMiddleware, requireRole("owner", "staff"), createReceiptController);
-router.get("/", authMiddleware, requireRole("owner", "staff"), listReceiptsController);
+router.post("/", ...authStaff, createReceiptController);
+router.get("/", ...authStaff, listReceiptsController);
 
-// utility: get unallocated invoices for client (used to render "Settle invoices" table)
-// NOTE: this route must be defined before `/:id` to avoid route conflicts
-router.get("/client/:clientId/unpaid-invoices", authMiddleware, requireRole("owner", "staff"), unpaidInvoicesForClientController);
+// Utility (must be before /:id to avoid conflicts)
+router.get("/client/:clientId/unpaid-invoices", ...authStaff, unpaidInvoicesForClientController);
 
-// Print / preview    
-router.get("/:id/print", authMiddleware, requireRole("owner", "staff", "user"), printReceiptController);
+// Print / preview
+router.get("/:id/print", ...authOwnerStaffUser, printReceiptController);
 
-// read single
-router.get("/:id", authMiddleware, requireRole("owner", "staff", "user"), getReceiptController);
-router.patch("/:id", authMiddleware, requireRole("owner", "staff"), updateReceiptController);
-router.delete("/:id", authMiddleware, requireRole("owner", "staff"), deleteReceiptController);
+// Read single / update / delete
+router.get("/:id", ...authOwnerStaffUser, getReceiptController);
+router.patch("/:id", ...authStaff, updateReceiptController);
+router.delete("/:id", ...authStaff, deleteReceiptController);
 
-// applying to invoices
-router.post("/:id/apply", authMiddleware, requireRole("owner", "staff"), applyToInvoicesController); // body: { allocations: [{ invoiceId, amount }] }
-router.post("/:id/auto-apply", authMiddleware, requireRole("owner", "staff"), autoApplyController); // auto-apply algorithm
-router.post("/:id/unapply", authMiddleware, requireRole("owner", "staff"), unapplyReceiptController); // body: { invoiceIds: [..] }
+// Applying to invoices
+router.post("/:id/apply", ...authStaff, applyToInvoicesController);
+router.post("/:id/auto-apply", ...authStaff, autoApplyController);
+router.post("/:id/unapply", ...authStaff, unapplyReceiptController);
 
 export default router;

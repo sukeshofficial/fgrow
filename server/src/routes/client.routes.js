@@ -11,20 +11,12 @@ import { requireRole } from "../middleware/tenant_role.middleware.js";
 
 const router = express.Router();
 
-router.post(
-  "/",
-  authMiddleware,
-  requireRole("owner", "staff"),
-  createClientController,
-);
-router.get(
-  "/",
-  authMiddleware,
-  requireRole("owner", "staff"),
-  listClientsController,
-);
-router.get("/:id", authMiddleware, requireRole("owner", "staff"), getClientByIdController);
-router.patch("/:id", authMiddleware, requireRole("owner", "staff"), updateClientController);
-router.delete("/:id", authMiddleware, requireRole("owner", "staff"), deleteClientController);
+const authStaff = [authMiddleware, requireRole("owner", "staff")];
+
+router.post("/", ...authStaff, createClientController);
+router.get("/", ...authStaff, listClientsController);
+router.get("/:id", ...authStaff, getClientByIdController);
+router.patch("/:id", ...authStaff, updateClientController);
+router.delete("/:id", ...authStaff, deleteClientController);
 
 export default router;

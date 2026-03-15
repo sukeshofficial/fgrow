@@ -24,7 +24,7 @@ export const generatePdfBuffer = (invoice) => {
     if (seller.logoUrl) {
       try {
         doc.image(seller.logoUrl, 40, 40, { width: 60 });
-      } catch (err) { }
+      } catch (err) {}
     }
 
     // HEADER
@@ -38,7 +38,8 @@ export const generatePdfBuffer = (invoice) => {
       .text(seller.name || "-")
       .text(sellerAddress.street || "")
       .text(
-        `${sellerAddress.city || ""}, ${sellerAddress.state || ""} ${sellerAddress.postalCode || ""
+        `${sellerAddress.city || ""}, ${sellerAddress.state || ""} ${
+          sellerAddress.postalCode || ""
         }`,
       )
       .text(sellerAddress.country || "")
@@ -157,7 +158,9 @@ export const generateReceiptPdfBuffer = (receipt) => {
       // Seller
       doc.fontSize(10).text(seller.name || "-", 40, doc.y);
       if (sellerAddress.street) doc.text(sellerAddress.street);
-      doc.text(`${sellerAddress.city || ""} ${sellerAddress.state || ""} ${sellerAddress.postalCode || ""}`);
+      doc.text(
+        `${sellerAddress.city || ""} ${sellerAddress.state || ""} ${sellerAddress.postalCode || ""}`,
+      );
       if (sellerAddress.country) doc.text(sellerAddress.country);
       if (seller.companyPhone) doc.text(`Phone: ${seller.companyPhone}`);
       if (seller.companyEmail) doc.text(`Email: ${seller.companyEmail}`);
@@ -175,8 +178,10 @@ export const generateReceiptPdfBuffer = (receipt) => {
       if (clientAddress.street) doc.text(clientAddress.street, leftX);
       const cityLine = `${clientAddress.city || ""} ${clientAddress.state || ""} ${clientAddress.postalCode || ""}`;
       if (cityLine.trim()) doc.text(cityLine, leftX);
-      if (client.primary_contact_mobile) doc.text(`Mobile: ${client.primary_contact_mobile}`, leftX);
-      if (client.primary_contact_email) doc.text(`Email: ${client.primary_contact_email}`, leftX);
+      if (client.primary_contact_mobile)
+        doc.text(`Mobile: ${client.primary_contact_mobile}`, leftX);
+      if (client.primary_contact_email)
+        doc.text(`Email: ${client.primary_contact_email}`, leftX);
 
       // Right: Receipt meta
       const metaTop = top;
@@ -184,7 +189,9 @@ export const generateReceiptPdfBuffer = (receipt) => {
       doc.fontSize(12).text(receipt.receipt_no || "-", rightX, doc.y - 12);
 
       doc.fontSize(10).text(`Date:`, rightX, doc.y + 4);
-      const dateStr = receipt.date ? new Date(receipt.date).toLocaleDateString() : "";
+      const dateStr = receipt.date
+        ? new Date(receipt.date).toLocaleDateString()
+        : "";
       doc.fontSize(12).text(dateStr, rightX, doc.y - 12);
 
       doc.moveDown(2);
@@ -210,7 +217,10 @@ export const generateReceiptPdfBuffer = (receipt) => {
         doc.fontSize(10).text(p.payment_mode || "-", col1, y);
         doc.text(p.reference || "-", col2, y);
         doc.text(dateStr, col3, y);
-        doc.text(Number(p.amount || 0).toFixed(2), col4, y, { width: 90, align: "right" });
+        doc.text(Number(p.amount || 0).toFixed(2), col4, y, {
+          width: 90,
+          align: "right",
+        });
         y += 18;
       });
 
@@ -240,7 +250,12 @@ export const generateReceiptPdfBuffer = (receipt) => {
       y += 16;
 
       doc.fontSize(12).text("Total Available:", labelX, y);
-      doc.fontSize(12).text(`₹ ${total.toFixed(2)}`, valueX, y, { width: 90, align: "right" });
+      doc
+        .fontSize(12)
+        .text(`₹ ${total.toFixed(2)}`, valueX, y, {
+          width: 90,
+          align: "right",
+        });
       y += 22;
 
       // applied invoices (if any)
@@ -262,11 +277,19 @@ export const generateReceiptPdfBuffer = (receipt) => {
         y += 18;
 
         (receipt.applied_invoices || []).forEach((ai) => {
-          const invDate = ai.invoice_date ? new Date(ai.invoice_date).toLocaleDateString() : "-";
+          const invDate = ai.invoice_date
+            ? new Date(ai.invoice_date).toLocaleDateString()
+            : "-";
           doc.fontSize(10).text(ai.invoice_no || ai.invoice || "-", aCol1, y);
           doc.text(invDate, aCol2, y);
-          doc.text(Number(ai.invoice_amount || 0).toFixed(2), aCol3, y, { width: 90, align: "right" });
-          doc.text(Number(ai.amount_applied || 0).toFixed(2), aCol4, y, { width: 90, align: "right" });
+          doc.text(Number(ai.invoice_amount || 0).toFixed(2), aCol3, y, {
+            width: 90,
+            align: "right",
+          });
+          doc.text(Number(ai.amount_applied || 0).toFixed(2), aCol4, y, {
+            width: 90,
+            align: "right",
+          });
           y += 16;
         });
       }
@@ -285,6 +308,174 @@ export const generateReceiptPdfBuffer = (receipt) => {
       doc.fontSize(10).text("For " + (seller.name || ""), { align: "right" });
       doc.moveDown(3);
       doc.fontSize(10).text("Authorised Signatory", { align: "right" });
+
+      doc.end();
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+export const generateQuotationPdfBuffer = (quotation) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({ margin: 40 });
+      const buffers = [];
+      doc.on("data", buffers.push.bind(buffers));
+      doc.on("end", () => resolve(Buffer.concat(buffers)));
+
+      // Header / Title
+      doc.fontSize(18).text("QUOTATION", { align: "right" });
+      doc.moveDown(0.5);
+
+      // Seller (billing entity) and logo
+      const seller = quotation.billing_entity || {};
+      const sellerAddr = seller.companyAddress || {};
+      if (seller.logoUrl) {
+        try {
+          doc.image(seller.logoUrl, 40, 40, { width: 60 });
+        } catch (e) {}
+      }
+
+      // Seller block
+      doc.fontSize(11).text(seller.name || "-", 40, doc.y);
+      if (sellerAddr.street) doc.text(sellerAddr.street);
+      const cityLine =
+        `${sellerAddr.city || ""} ${sellerAddr.state || ""} ${sellerAddr.postalCode || ""}`.trim();
+      if (cityLine) doc.text(cityLine);
+      if (seller.companyPhone) doc.text(`Phone: ${seller.companyPhone}`);
+      if (seller.companyEmail) doc.text(`Email: ${seller.companyEmail}`);
+      if (seller.gstNumber) doc.text(`GSTIN: ${seller.gstNumber}`);
+      doc.moveDown();
+
+      // Quotation meta block (right side)
+      const metaX = 320;
+      const top = 80;
+      doc.fontSize(10).text(`Quotation No:`, metaX, top);
+      doc.fontSize(12).text(quotation.quotation_no || "-", metaX, doc.y - 12);
+      doc.fontSize(10).text(`Date:`, metaX, doc.y + 4);
+      doc
+        .fontSize(12)
+        .text(
+          quotation.date ? new Date(quotation.date).toLocaleDateString() : "-",
+          metaX,
+          doc.y - 12,
+        );
+      if (quotation.valid_until) {
+        doc.fontSize(10).text(`Valid Until:`, metaX, doc.y + 4);
+        doc
+          .fontSize(12)
+          .text(
+            new Date(quotation.valid_until).toLocaleDateString(),
+            metaX,
+            doc.y - 12,
+          );
+      }
+
+      doc.moveDown(3);
+
+      // Client block
+      const client = quotation.client || {};
+      doc.fontSize(11).text("To:", 40, doc.y);
+      doc.fontSize(12).text(client.name || "-", 40, doc.y);
+      if (client.address?.street) doc.text(client.address.street);
+      const clientCity =
+        `${client.address?.city || ""} ${client.address?.state || ""} ${client.address?.postalCode || ""}`.trim();
+      if (clientCity) doc.text(clientCity);
+      if (client.primary_contact_mobile)
+        doc.text(`Mobile: ${client.primary_contact_mobile}`);
+      if (client.primary_contact_email)
+        doc.text(`Email: ${client.primary_contact_email}`);
+      doc.moveDown();
+
+      // Items table header
+      const tableTop = doc.y;
+      const col1 = 40; // desc
+      const col2 = 330; // qty
+      const col3 = 380; // unit price
+      const col4 = 450; // gst%
+      const col5 = 500; // amount
+
+      doc.fontSize(11).text("Description", col1, tableTop);
+      doc.text("Qty", col2, tableTop);
+      doc.text("Unit", col3, tableTop);
+      doc.text("GST%", col4, tableTop);
+      doc.text("Amount", col5, tableTop, { width: 80, align: "right" });
+
+      let y = tableTop + 22;
+      doc.fontSize(10);
+
+      (quotation.items || []).forEach((it) => {
+        const qty = Number(it.quantity || 1);
+        const unit = Number(it.unit_price || 0);
+        const price = qty * unit;
+        const gstAmt = Number(
+          it.gst_amount ?? price * (Number(it.gst_rate || 0) / 100),
+        );
+        const amount = Number(it.total_amount ?? price + gstAmt);
+
+        doc.text(it.description || "-", col1, y, { width: 270 });
+        doc.text(qty.toString(), col2, y);
+        doc.text(unit.toFixed(2), col3, y);
+        doc.text(Number(it.gst_rate || 0).toString() + "%", col4, y);
+        doc.text(amount.toFixed(2), col5, y, { width: 80, align: "right" });
+
+        y += 18;
+
+        // add page if needed
+        if (y > 700) {
+          doc.addPage();
+          y = 40;
+        }
+      });
+
+      doc
+        .moveTo(40, y + 6)
+        .lineTo(560, y + 6)
+        .strokeOpacity(0.05)
+        .stroke();
+      y += 16;
+
+      // Totals
+      const rightLabelX = 360;
+      const rightValueX = 520;
+
+      doc.fontSize(11).text("Subtotal:", rightLabelX, y);
+      doc.text((quotation.subtotal ?? 0).toFixed(2), rightValueX, y, {
+        width: 80,
+        align: "right",
+      });
+      y += 16;
+
+      doc.text("Total GST:", rightLabelX, y);
+      doc.text((quotation.total_gst ?? 0).toFixed(2), rightValueX, y, {
+        width: 80,
+        align: "right",
+      });
+      y += 16;
+
+      doc.text("Round Off:", rightLabelX, y);
+      doc.text((quotation.round_off ?? 0).toFixed(2), rightValueX, y, {
+        width: 80,
+        align: "right",
+      });
+      y += 16;
+
+      doc.fontSize(13).text("Total:", rightLabelX, y);
+      doc
+        .fontSize(13)
+        .text((quotation.total_amount ?? 0).toFixed(2), rightValueX, y, {
+          width: 80,
+          align: "right",
+        });
+      y += 24;
+
+      // Terms
+      if (quotation.terms) {
+        doc.moveDown();
+        doc.fontSize(10).text("Terms & Conditions:");
+        doc.fontSize(10).text(quotation.terms);
+      }
 
       doc.end();
     } catch (err) {

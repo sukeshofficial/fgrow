@@ -1,39 +1,36 @@
-// routes/quotation.routes.js
 import express from "express";
 import {
-    createQuotationController,
-    listQuotationsController,
-    getQuotationController,
-    updateQuotationController,
-    deleteQuotationController,
-    changeQuotationStatusController,
-    convertQuotationToInvoiceController
-} from "../controllers/quotation.controller.js";
+  createQuotationController,
+  listQuotationsController,
+  getQuotationController,
+  updateQuotationController,
+  deleteQuotationController,
+  changeQuotationStatusController,
+  convertQuotationToInvoiceController,
+  previewQuotationController,
+  sendQuotationController,
+} from "../controller/quotation.controller.js";
 
-import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { requireRole } from "../middlewares/role.middleware.js";
+import authMiddleware from "../middleware/auth.middleware.js";
+import { requireRole } from "../middleware/tenant_role.middleware.js";
 
 const router = express.Router();
+const authStaff = [authMiddleware, requireRole("owner", "staff")];
 
-// CRUD + list
-router.post("/", authMiddleware, requireRole("owner", "staff"), createQuotationController);
-router.get("/", authMiddleware, requireRole("owner", "staff", "user"), listQuotationsController);
-router.get("/:id", authMiddleware, requireRole("owner", "staff", "user"), getQuotationController);
-router.patch("/:id", authMiddleware, requireRole("owner", "staff"), updateQuotationController);
-router.delete("/:id", authMiddleware, requireRole("owner", "staff"), deleteQuotationController);
+router.post("/", ...authStaff, createQuotationController);
+router.get("/", ...authStaff, listQuotationsController);
+router.get("/:id", ...authStaff, getQuotationController);
+router.patch("/:id", ...authStaff, updateQuotationController);
+router.delete("/:id", ...authStaff, deleteQuotationController);
 
-// status change (accept / reject / cancel)
-router.post("/:id/status", authMiddleware, requireRole("owner", "staff"), changeQuotationStatusController);
+// status change
+router.post("/:id/status", ...authStaff, changeQuotationStatusController);
 
 // convert to invoice
-router.post("/:id/convert-to-invoice", authMiddleware, requireRole("owner", "staff"), convertQuotationToInvoiceController);
+router.post("/:id/convert-to-invoice", ...authStaff, convertQuotationToInvoiceController);
 
-// preview/pdf/send endpoints are optional integrations (501 placeholders)
-router.get("/:id/preview", authMiddleware, requireRole("owner", "staff", "user"), async (req, res) => {
-    res.status(501).json({ success: false, message: "Preview endpoint - implement (PDF / render)" });
-});
-router.post("/:id/send", authMiddleware, requireRole("owner", "staff"), async (req, res) => {
-    res.status(501).json({ success: false, message: "Send quotation by email - implement" });
-});
+// preview/pdf/send
+router.get("/:id/preview", authMiddleware, requireRole("owner", "staff", "user"), previewQuotationController);
+router.post("/:id/send", authMiddleware, requireRole("owner", "staff", "user"), sendQuotationController);
 
 export default router;

@@ -1,5 +1,4 @@
 import express from "express";
-
 import authMiddleware from "../middleware/auth.middleware.js";
 import { requireSuperAdmin } from "../middleware/superAdmin.middleware.js";
 import { requireRole } from "../middleware/tenant_role.middleware.js";
@@ -14,37 +13,20 @@ import { upload } from "../middleware/upload.middleware.js";
 
 const router = express.Router();
 
-router.post(
-  "/create",
-  authMiddleware,
-  upload.single("companyLogo"),
-  createTenant,
-);
+const authSuperAdmin = [authMiddleware, requireSuperAdmin];
+const authOwner = [authMiddleware, requireRole("owner")];
 
-router.get("/pending", authMiddleware, requireSuperAdmin, getPendingTenants);
+// Create tenant (public endpoint guarded by auth + upload)
+router.post("/create", authMiddleware, upload.single("companyLogo"), createTenant);
 
-// Approve tenant
-router.patch(
-  "/:tenantId/approve",
-  authMiddleware,
-  requireSuperAdmin,
-  approveTenant,
-);
+// Get pending tenants (super-admin only)
+router.get("/pending", ...authSuperAdmin, getPendingTenants);
 
-// Reject tenant
-router.patch(
-  "/:tenantId/reject",
-  authMiddleware,
-  requireSuperAdmin,
-  rejectTenant,
-);
+// Approve / reject tenant (super-admin only)
+router.patch("/:tenantId/approve", ...authSuperAdmin, approveTenant);
+router.patch("/:tenantId/reject", ...authSuperAdmin, rejectTenant);
 
-// Re-appeal tenant
-router.patch(
-  "/re-appeal",
-  authMiddleware,
-  requireRole("owner"),
-  reAppealTenant,
-);
+// Re-appeal tenant (owner)
+router.patch("/re-appeal", ...authOwner, reAppealTenant);
 
 export default router;

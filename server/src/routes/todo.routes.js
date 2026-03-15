@@ -11,56 +11,22 @@ import authMiddleware from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/tenant_role.middleware.js";
 
 const router = express.Router();
+const authStaff = [authMiddleware, requireRole("owner", "staff")];
 
-/* ------------------ todo list & creation ------------------ */
+// todo list & creation
+router.post("/", ...authStaff, createTodoController);
+router.get("/", ...authStaff, listTodosController);
 
-router.post(
-  "/",
-  authMiddleware,
-  requireRole("owner", "staff"),
-  createTodoController,
-);
-router.get(
-  "/",
-  authMiddleware,
-  requireRole("owner", "staff"),
-  listTodosController,
-);
+// todo details
+router.get("/:id", ...authStaff, getTodoByIdController);
 
-/* ------------------ todo details ------------------ */
+// update todo
+router.patch("/:id", ...authStaff, updateTodoController);
 
-router.get(
-  "/:id",
-  authMiddleware,
-  requireRole("owner", "staff"),
-  getTodoByIdController,
-);
+// delete todo
+router.delete("/:id", ...authStaff, deleteTodoController);
 
-/* ------------------ update todo ------------------ */
-
-router.patch(
-  "/:id",
-  authMiddleware,
-  requireRole("owner", "staff"),
-  updateTodoController,
-);
-
-/* ------------------ delete todo ------------------ */
-
-router.delete(
-  "/:id",
-  authMiddleware,
-  requireRole("owner", "staff"),
-  deleteTodoController,
-);
-
-/* ------------------ mark todo complete ------------------ */
-
-router.patch(
-  "/:id/complete",
-  authMiddleware,
-  requireRole("owner", "staff"),
-  markTodoCompleteController,
-);
+// mark todo complete
+router.patch("/:id/complete", ...authStaff, markTodoCompleteController);
 
 export default router;
