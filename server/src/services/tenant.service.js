@@ -11,20 +11,40 @@ export const createTenantService = async (data) => {
     logoUrl,
   } = data;
 
-  // 1️⃣ Find existing user and Tenant if exists
+  // 1️⃣ Find user
   const user = await User.findOne({ email });
-  const existingTenant = await Tenant.findOne({ companyEmail });
 
   if (!user) {
     throw new Error("User with this email does not exist");
   }
 
-  // Optional safety check
-  if (user.tenant_id) {
-    throw new Error(`User already belongs to a tenant ${existingTenant.name}`);
+  // 2️⃣ Check if tenant already exists with same name/email/phone
+  const existingTenant = await Tenant.findOne({
+    $or: [
+      { name: companyName },
+      { companyEmail: companyEmail },
+      { companyPhone: companyPhone }
+    ]
+  });
+
+  if (existingTenant) {
+    if (existingTenant.name === companyName) {
+      throw new Error("Tenant with this company name already exists");
+    }
+    if (existingTenant.companyEmail === companyEmail) {
+      throw new Error("Tenant with this company email already exists");
+    }
+    if (existingTenant.companyPhone === companyPhone) {
+      throw new Error("Tenant with this company phone already exists");
+    }
   }
 
-  // 2️⃣ Create tenant instance (NOT saved yet)
+  // 3️⃣ Check if user already belongs to a tenant
+  if (user.tenant_id) {
+    throw new Error(`User already belongs to a tenant`);
+  }
+
+  // 4️⃣ Create tenant
   const tenant = new Tenant({
     name: companyName,
     companyEmail,
@@ -33,16 +53,16 @@ export const createTenantService = async (data) => {
     logoUrl,
   });
 
-  // 3️⃣ Attach user to tenant
+  // 5️⃣ Attach user to tenant
   user.tenant_id = tenant._id;
   user.tenant_role = "owner";
   user.status = "active";
   await user.save();
 
-  // 4️⃣ Attach owner to tenant
+  // 6️⃣ Attach owner
   tenant.ownerUserId = user._id;
 
-  // 5️⃣ Save tenant
+  // 7️⃣ Save tenant
   await tenant.save();
 
   return { tenant, user };

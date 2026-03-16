@@ -16,6 +16,8 @@ import invoiceRoutes from "./routes/invoice.routes.js";
 import receiptRoutes from "./routes/receipt.routes.js";
 import quotationRoutes from "./routes/quotation.routes.js";
 import expenseRoutes from "./routes/expense.routes.js";
+import documentTypeRoutes from "./routes/documentType.routes.js";
+import documentRoutes from "./routes/document.routes.js";
 
 const app = express();
 
@@ -43,6 +45,8 @@ app.use("/api/v0/invoices", invoiceRoutes);
 app.use("/api/v0/receipts", receiptRoutes);
 app.use("/api/v0/quotations", quotationRoutes);
 app.use("/api/v0/expenses", expenseRoutes);
+app.use("/api/v0/document-types", documentTypeRoutes);
+app.use("/api/v0/documents", documentRoutes);
 
 app.get("/api/v0/health", (req, res) => {
   res.json({ status: "OK" });
