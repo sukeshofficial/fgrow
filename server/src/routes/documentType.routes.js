@@ -16,10 +16,10 @@ const authStaff = [authMiddleware, requireRole("owner", "staff")];
 const authOwner = [authMiddleware, requireRole("owner")];
 const authOwnerStaff = authStaff;
 
-router.post("/", authOwnerStaff, createDocumentTypeController);
-router.get("/", authOwnerStaff, listDocumentTypesController);
-router.get("/:id", authOwnerStaff, getDocumentTypeController);
-router.patch("/:id", authOwnerStaff, updateDocumentTypeController);
-router.delete("/:id", authOwnerStaff, deleteDocumentTypeController);
+router.post("/", ...authOwnerStaff, createDocumentTypeController);
+router.get("/", ...authOwnerStaff, listDocumentTypesController);
+router.get("/:id", ...authOwnerStaff, getDocumentTypeController);
+router.patch("/:id", ...authOwnerStaff, updateDocumentTypeController);
+router.delete("/:id", ...authOwnerStaff, deleteDocumentTypeController);
 
 export default router;
