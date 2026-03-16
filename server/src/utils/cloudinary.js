@@ -38,13 +38,13 @@ export const uploadToCloud = async (file_path) => {
 
 export const uploadFileToCloud = async (file_path, folder = "expenses") => {
   try {
-    if (!file_path) {
-      throw new Error("File path is missing");
-    }
-
     const result = await cloudinary.uploader.upload(file_path, {
       folder,
-      resource_type: "auto", // supports pdf, doc, xls, images
+      resource_type: "raw",
+      type: "upload",
+      access_mode: "public",
+      use_filename: true,
+      unique_filename: true,
     });
 
     return {
@@ -56,8 +56,6 @@ export const uploadFileToCloud = async (file_path, folder = "expenses") => {
       mime: result.format,
     };
   } catch (error) {
-    console.error("Cloudinary file upload error:", error.message);
-
     return {
       success: false,
       error: error.message,

@@ -54,11 +54,12 @@ const storageFiles = multer.diskStorage({
 });
 
 const fileFilterFiles = (_req, file, cb) => {
-  const allowedExt =
-    /\.(pdf|doc|docx|xls|xlsx|csv|txt|zip|jpeg|jpg|png|webp)$/i;
+  const allowedExt = /\.(pdf|doc|docx|xls|xlsx|csv|txt|zip|jpeg|jpg|png|webp)$/i;
   const ext = path.extname(file.originalname).toLowerCase();
-  if (allowedExt.test(ext) || allowedExt.test(file.mimetype)) cb(null, true);
-  else
+
+  if (allowedExt.test(ext)) {
+    cb(null, true);
+  } else
     cb(
       new Error(
         "File type not allowed. Allowed: pdf, doc, docx, xls, xlsx, csv, txt, zip, jpg, png, webp",

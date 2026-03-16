@@ -8,6 +8,8 @@ import PaymentMode from "../models/expense/schemas/paymentMode.model.js";
 import { generateExpenseNumber } from "../utils/generateExpenseNumber.js";
 import { uploadFileToCloud } from "../utils/cloudinary.js";
 
+import fs from "fs";
+
 const { Types } = mongoose;
 
 /* ---- small helpers ---- */
@@ -324,7 +326,16 @@ export const uploadFilesToExpenseService = async ({
   const uploadedFiles = [];
 
   for (const file of files) {
-    const upload = await uploadFileToCloud(file.path, `expenses/${tenant_id}`);
+
+    let upload;
+
+    try {
+      upload = await uploadFileToCloud(file.path, `expenses/${tenant_id}`);
+    } finally {
+      if (fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+    }
 
     if (!upload.success) {
       throw new Error(upload.error);
@@ -373,7 +384,7 @@ export const deleteExpenseFileService = async ({
 
   // delete from cloudinary
   await cloudinary.uploader.destroy(file.key, {
-    resource_type: "auto",
+    resource_type: "raw",
   });
 
   // remove from array

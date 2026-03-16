@@ -151,7 +151,7 @@ export const deleteExpenseFileController = async (req, res) => {
     const user_id = req.user._id;
 
     const expense_id = req.params.id;
-    const file_id = req.params.fileId;
+    const file_id = decodeURIComponent(req.params.fileId);
 
     const result = await deleteExpenseFileService({
       tenant_id,
