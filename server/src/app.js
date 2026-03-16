@@ -19,6 +19,7 @@ import expenseRoutes from "./routes/expense.routes.js";
 import documentTypeRoutes from "./routes/documentType.routes.js";
 import documentRoutes from "./routes/document.routes.js";
 import dscRoutes from "./routes/dsc.routes.js";
+import documentCollectionRequestRoutes from "./routes/documentCollectionRequest.routes.js";
 
 const app = express();
 
@@ -49,6 +50,7 @@ app.use("/api/v0/expenses", expenseRoutes);
 app.use("/api/v0/document-types", documentTypeRoutes);
 app.use("/api/v0/documents", documentRoutes);
 app.use("/api/v0/dsc", dscRoutes);
+app.use("/api/v0/collection-requests", documentCollectionRequestRoutes);
 
 app.get("/api/v0/health", (req, res) => {
   res.json({ status: "OK" });
