@@ -121,7 +121,7 @@ export const JoinAsStaff = ({ onClose, initialToken }) => {
 
           <div
             className="tenant-actions"
-            style={{ marginTop: "1.5rem", justifyContent: "space-between" }}
+            style={{ marginTop: "1.5rem" }}
           >
             {onClose ? (
               <button
