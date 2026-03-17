@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 
 import WelcomePage from "../../pages/Welcome";
@@ -7,6 +8,7 @@ import JoinAsStaff from "../../components/staff/JoinAsStaff";
 import "../../styles/tenant-gate.css";
 
 export const TenantGate = ({ children }) => {
+  const [dismissedJoin, setDismissedJoin] = useState(false);
   const { user, tenant, meState, invitation } = useAuth();
 
   // Super Admin bypass
@@ -23,8 +25,13 @@ export const TenantGate = ({ children }) => {
     return <WelcomePage />;
   }
 
-  else if (meState === "INVITED") {
-    overlay = <JoinAsStaff initialToken={invitation?.token} />;
+  else if (meState === "INVITED" && !dismissedJoin) {
+    overlay = (
+      <JoinAsStaff 
+        initialToken={invitation?.token} 
+        onClose={() => setDismissedJoin(true)} 
+      />
+    );
   }
 
   else if (

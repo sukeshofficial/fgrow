@@ -45,11 +45,12 @@ const Dashboard = () => {
           <StaffListTable refreshKey={refreshKey} />
         )}
 
-        <InviteUserModal
-          isOpen={isInviteModalOpen}
-          onClose={() => setIsInviteModalOpen(false)}
-          onInviteSuccess={handleInviteSuccess}
-        />
+        {isInviteModalOpen && (
+          <InviteUserModal
+            onClose={() => setIsInviteModalOpen(false)}
+            onSuccess={handleInviteSuccess}
+          />
+        )}
       </div>
     </>
   );

@@ -64,8 +64,9 @@
 .welcome-base-card {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  /* border: 2px solid rgba(222, 222, 222, 0.142); */
+  /* box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06); */
   padding: 2rem;
 }
 
@@ -73,7 +74,7 @@
 /* WelcomeCard Component */
 /* -------------------------------------------------------------------------- */
 .welcome-action-card {
-  max-width: 480px;
+  max-width: 600px;
   width: 100%;
   text-align: center;
   margin: 0 auto;
@@ -94,13 +95,13 @@
 }
 
 .welcome-card-actions {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
+  flex-direction: row;
   gap: 1rem;
 }
 
 .welcome-card-actions .welcome-btn {
-  width: 100%;
+  width: inherit;
   justify-content: center;
 }
 
@@ -134,7 +135,7 @@
 
 .welcome-modal {
   position: relative;
-  max-width: 500px;
+  max-width: 600px;
   width: 100%;
   background: white;
   border-radius: 16px;
@@ -399,4 +400,141 @@
   border-radius: 6px;
   font-size: 0.875rem;
   border: 1px solid #fee2e2;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Responsive Design */
+/* -------------------------------------------------------------------------- */
+
+/* Tablet (<= 768px) */
+@media (max-width: 768px) {
+  /* Welcome Card */
+  .welcome-action-card {
+    padding: 1.5rem;
+  }
+
+  .welcome-card-title {
+    font-size: 1.25rem;
+  }
+
+  .welcome-card-subtitle {
+    font-size: 0.9rem;
+  }
+
+  /* Stack buttons vertically */
+  .welcome-card-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .welcome-card-actions .welcome-btn {
+    width: 100%;
+  }
+
+  /* Modal */
+  .welcome-modal {
+    padding: 2rem 1.5rem;
+  }
+
+  /* Header */
+  .dashboard-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .invite-staff-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Mobile (<= 480px) */
+@media (max-width: 480px) {
+  /* Page padding */
+  .welcome-page {
+    padding: 0.75rem;
+  }
+
+  /* Card */
+  .welcome-base-card {
+    padding: 1.25rem;
+  }
+
+  .welcome-card-title {
+    font-size: 1.1rem;
+  }
+
+  .welcome-card-subtitle {
+    font-size: 0.85rem;
+  }
+
+  /* Buttons */
+  .welcome-btn-lg {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Modal */
+  .welcome-modal {
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+  }
+
+  .welcome-modal-close {
+    top: 0.75rem;
+    right: 1rem;
+    font-size: 1.25rem;
+  }
+
+  /* Staff Table → Make it scroll nicely */
+  .staff-table th,
+  .staff-table td {
+    padding: 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .staff-member-cell {
+    gap: 0.5rem;
+  }
+
+  .staff-avatar,
+  .staff-avatar-placeholder {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Form */
+  .tenant-form {
+    gap: 1rem;
+  }
+
+  .tenant-input {
+    font-size: 0.8rem;
+  }
+
+  /* Actions */
+  .tenant-actions {
+    flex-direction: column;
+  }
+
+  .tenant-actions .welcome-btn {
+    width: 100%;
+  }
+}
+
+/* Extra Small Devices (<= 360px) */
+@media (max-width: 360px) {
+  .welcome-card-title {
+    font-size: 1rem;
+  }
+
+  .welcome-card-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .invite-staff-btn {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+  }
 }

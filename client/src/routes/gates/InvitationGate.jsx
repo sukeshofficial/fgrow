@@ -4,14 +4,21 @@
  * Shows AcceptInvitationModal when meState === "INVITED".
  */
 
+import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import JoinAsStaff from "../../components/staff/JoinAsStaff";
 
 const InvitationGate = ({ children }) => {
+  const [dismissed, setDismissed] = useState(false);
   const { meState, invitation } = useAuth();
 
-  if (meState === "INVITED") {
-    return <JoinAsStaff initialToken={invitation?.token} />;
+  if (meState === "INVITED" && !dismissed) {
+    return (
+      <JoinAsStaff 
+        initialToken={invitation?.token} 
+        onClose={() => setDismissed(true)} 
+      />
+    );
   }
 
   return children;

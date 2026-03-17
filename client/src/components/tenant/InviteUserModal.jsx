@@ -20,11 +20,11 @@ const InviteUserModal = ({ onClose, onSuccess }) => {
       await inviteUser({ email, tenant_role: role });
       setSuccess(`Invitation sent to ${email} successfully!`);
       setEmail("");
-      // Refresh the list after a small delay
+      // Refresh the list immediately
       if (onSuccess) {
-        setTimeout(onSuccess, 1500);
+        onSuccess();
       }
-      setTimeout(onClose, 2000);
+      onClose();
     } catch (err) {
       setError(err?.response?.data?.message || err?.message || "Failed to send invitation.");
     } finally {

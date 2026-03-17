@@ -4,7 +4,7 @@ import "../../styles/welcome.css";
 
 export const WelcomeCard = ({ onCreateTenant, onJoinAsStaff }) => {
   return (
-    <Card className="welcome-action-card">
+    <Card className="welcome-action-card welcome-card">
       <h2 className="welcome-card-title">Welcome to FGrow</h2>
       <p className="welcome-card-subtitle">
         Please select an option to get started
