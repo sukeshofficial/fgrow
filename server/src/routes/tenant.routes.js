@@ -8,6 +8,11 @@ import {
   approveTenant,
   rejectTenant,
   reAppealTenant,
+  getTenantStaff,
+  getAllTenants,
+  getTenantById,
+  getTenantStaffAdmin,
+  getTenantClientsAdmin,
 } from "../controller/tenant.controller.js";
 import { upload } from "../middleware/upload.middleware.js";
 
@@ -19,6 +24,18 @@ const authOwner = [authMiddleware, requireRole("owner")];
 // Create tenant (public endpoint guarded by auth + upload)
 router.post("/create", authMiddleware, upload.single("companyLogo"), createTenant);
 
+// GET ALL tenants (super-admin only)
+router.get("/all", ...authSuperAdmin, getAllTenants);
+
+// GET single tenant details (super-admin only)
+router.get("/detail/:tenantId", ...authSuperAdmin, getTenantById);
+
+// GET targeted tenant staff (super-admin only)
+router.get("/detail/:tenantId/staff", ...authSuperAdmin, getTenantStaffAdmin);
+
+// GET targeted tenant clients (super-admin only)
+router.get("/detail/:tenantId/clients", ...authSuperAdmin, getTenantClientsAdmin);
+
 // Get pending tenants (super-admin only)
 router.get("/pending", ...authSuperAdmin, getPendingTenants);
 
@@ -28,5 +45,9 @@ router.patch("/:tenantId/reject", ...authSuperAdmin, rejectTenant);
 
 // Re-appeal tenant (owner)
 router.patch("/re-appeal", ...authOwner, reAppealTenant);
+
+// Get tenant staff (owner only presumably, or staff too?)
+// The plan said ...authOwner, so only owner can see the full list of joiners.
+router.get("/staff", ...authOwner, getTenantStaff);
 
 export default router;

@@ -1,13 +1,22 @@
 import express from "express";
-import { inviteUser, acceptInvitation } from "../controller/invitation.controller.js";
+import { 
+  inviteUser, 
+  acceptInvitation,
+  getPendingInvitations,
+  revokeInvitation
+} from "../controller/invitation.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/tenant_role.middleware.js";
 
 const router = express.Router();
 
-const authOwner = [authMiddleware, requireRole("owner")];
+const authManagement = [authMiddleware, requireRole("owner", "admin")];
 
-router.post("/invite", ...authOwner, inviteUser);
+router.post("/invite", ...authManagement, inviteUser);
 router.post("/accept", authMiddleware, acceptInvitation);
+
+// Invitation Management
+router.get("/pending", ...authManagement, getPendingInvitations);
+router.delete("/:invitationId", ...authManagement, revokeInvitation);
 
 export default router;

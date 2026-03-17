@@ -155,3 +155,26 @@ export const reAppealTenantService = async (tenantId, userId) => {
 
   return tenant;
 };
+
+// --------------------------------------------------
+// 5️⃣ Fetch All Tenants (with status filter)
+// --------------------------------------------------
+export const fetchAllTenantsService = async (status) => {
+  const query = {};
+  if (status) {
+    query.verificationStatus = status;
+  }
+  
+  return await Tenant.find(query)
+    .populate("ownerUserId", "name email username")
+    .sort({ createdAt: -1 });
+};
+
+// --------------------------------------------------
+// 6️⃣ Fetch Tenant By ID
+// --------------------------------------------------
+export const fetchTenantByIdService = async (tenantId) => {
+  return await Tenant.findById(tenantId)
+    .populate("ownerUserId", "name email username")
+    .populate("verifiedBy", "name email");
+};

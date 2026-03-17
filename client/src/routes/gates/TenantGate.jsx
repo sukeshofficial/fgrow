@@ -1,13 +1,13 @@
 import { useAuth } from "../../hooks/useAuth";
 
-import CreateTenantModal from "../../components/tenant/CreateTenantModal";
+import WelcomePage from "../../pages/Welcome";
 import TenantPendingScreen from "../../components/tenant/TenantPendingScreen";
-import AcceptInvitationModal from "../../components/staff/AcceptInvitationModal";
+import JoinAsStaff from "../../components/staff/JoinAsStaff";
 
 import "../../styles/tenant-gate.css";
 
 export const TenantGate = ({ children }) => {
-  const { user, tenant, meState } = useAuth();
+  const { user, tenant, meState, invitation } = useAuth();
 
   // Super Admin bypass
   if (user?.platform_role === "super_admin") {
@@ -20,11 +20,11 @@ export const TenantGate = ({ children }) => {
   let overlay = null;
 
   if (!hasTenant || meState === "NO_TENANT") {
-    overlay = <CreateTenantModal />;
+    return <WelcomePage />;
   }
 
   else if (meState === "INVITED") {
-    overlay = <AcceptInvitationModal />;
+    overlay = <JoinAsStaff initialToken={invitation?.token} />;
   }
 
   else if (

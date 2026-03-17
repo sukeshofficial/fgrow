@@ -10,12 +10,16 @@ import "./styles/avatar-upload.css";
 import "./styles/otp-modal.css";
 import "./styles/password-meter.css";
 import "./styles/sidebar.css";
+import "./styles/welcome.css";
 
 /* Pages */
 import Register from "./pages/auth/Register";
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard";
 import Tasks from "./pages/Tasks";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import TenantDetailView from "./pages/admin/TenantDetailView";
+import Users from "./pages/Users";
 
 /* Routing */
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -60,8 +64,8 @@ const App = () => {
       <Route element={<ProtectedRoute />}>
         <Route element={<SuperAdminRoute />}>
 
-          <Route path="/admin/dashboard" element={<Dashboard />} />
-          <Route path="/admin/tenants" element={<Tasks />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/tenants/:tenantId" element={<TenantDetailView />} />
 
         </Route>
       </Route>
@@ -82,7 +86,7 @@ const App = () => {
             <Route path="/finance" element={<Tasks />} />
             <Route path="/documents" element={<Tasks />} />
             <Route path="/reports" element={<Tasks />} />
-            <Route path="/users" element={<Tasks />} />
+            <Route path="/users" element={<Users />} />
             <Route path="/notifications" element={<Tasks />} />
             <Route path="/settings" element={<Tasks />} />
 

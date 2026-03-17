@@ -14,6 +14,7 @@ export const inviteUserService = async ({
   frontendUrl,
 }) => {
   // 1️⃣ Check tenant verification status
+  console.log("Inviting user to tenant:", tenant_id, "email:", email);
   const tenant = await Tenant.findById(tenant_id);
 
   if (!tenant) {
@@ -120,4 +121,39 @@ export const acceptInvitationService = async ({ token, userId }) => {
     message: "Joined successfully",
     user: user.toJSON(),
   };
+};
+
+/**
+ * Fetch all pending invitations for a tenant
+ */
+export const fetchPendingInvitationsService = async (tenant_id) => {
+  return await UserInvitation.find({
+    tenant_id,
+    accepted_at: null,
+    expires_at: { $gt: new Date() },
+  })
+    .populate("invited_by", "name email")
+    .sort({ createdAt: -1 });
+};
+
+/**
+ * Revoke/Delete a pending invitation
+ */
+export const revokeInvitationService = async (invitationId, tenant_id) => {
+  const invitation = await UserInvitation.findOne({
+    _id: invitationId,
+    tenant_id,
+  });
+
+  if (!invitation) {
+    throw new Error("Invitation not found or unauthorized");
+  }
+
+  if (invitation.accepted_at) {
+    throw new Error("Cannot revoke an already accepted invitation");
+  }
+
+  await UserInvitation.findByIdAndDelete(invitationId);
+
+  return { message: "Invitation revoked successfully" };
 };

@@ -94,6 +94,10 @@ const MENU = [
   },
 ];
 
+const ADMIN_MENU = [
+  { label: "Admin Dashboard", path: "/admin/dashboard", icon: <FaTachometerAlt />, isBottom: true },
+];
+
 /* -------------------------------------------------------------------------- */
 /*                                  SIDEBAR                                   */
 /* -------------------------------------------------------------------------- */
@@ -132,7 +136,10 @@ export default function Sidebar() {
   /* ----------------------------- Menu Sections ----------------------------- */
 
   const topItems = MENU.filter((item) => !item.isBottom);
-  const bottomItems = MENU.filter((item) => item.isBottom);
+  const bottomItems = [
+    ...MENU.filter((item) => item.isBottom),
+    ...(user?.platform_role === "super_admin" ? ADMIN_MENU : []),
+  ];
 
   /* -------------------------------------------------------------------------- */
 

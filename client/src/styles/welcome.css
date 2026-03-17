@@ -1,0 +1,402 @@
+/* Welcome UI Styles */
+
+/* -------------------------------------------------------------------------- */
+/* Buttons */
+/* -------------------------------------------------------------------------- */
+.welcome-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+
+.welcome-btn-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Sizes */
+.welcome-btn-sm {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.welcome-btn-md {
+  padding: 0.625rem 1rem;
+  font-size: 1rem;
+}
+
+.welcome-btn-lg {
+  padding: 0.875rem 1.5rem;
+  font-size: 1.125rem;
+}
+
+/* Variants */
+.welcome-btn-primary {
+  background-color: #4f46e5;
+  color: white;
+}
+
+.welcome-btn-primary:hover {
+  background-color: #4338ca;
+}
+
+.welcome-btn-secondary {
+  background-color: white;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.welcome-btn-secondary:hover {
+  background-color: #f9fafb;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Card Primitive */
+/* -------------------------------------------------------------------------- */
+.welcome-base-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 2rem;
+}
+
+/* -------------------------------------------------------------------------- */
+/* WelcomeCard Component */
+/* -------------------------------------------------------------------------- */
+.welcome-action-card {
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.welcome-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+.welcome-card-subtitle {
+  color: #6b7280;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+.welcome-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.welcome-card-actions .welcome-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* -------------------------------------------------------------------------- */
+/* WelcomePage */
+/* -------------------------------------------------------------------------- */
+.welcome-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f3f4f6;
+  padding: 1rem;
+}
+
+/* -------------------------------------------------------------------------- */
+/* WelcomeModal */
+/* -------------------------------------------------------------------------- */
+.welcome-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 15, 25, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.welcome-modal {
+  position: relative;
+  max-width: 500px;
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 2.5rem 2rem;
+  animation: modal-fade-in 0.3s ease-out;
+}
+
+.welcome-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.welcome-modal-close:hover {
+  color: #4b5563;
+}
+
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Staff List Table */
+/* -------------------------------------------------------------------------- */
+.staff-list-card {
+  width: 100%;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.staff-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+}
+
+.staff-table-container {
+  overflow-x: auto;
+}
+
+.staff-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.staff-table th {
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid #f1f5f9;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.staff-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+  font-size: 0.9375rem;
+}
+
+.staff-member-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.staff-avatar,
+.staff-avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.staff-avatar-placeholder {
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.staff-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.staff-name {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.staff-username {
+  font-size: 0.8125rem;
+  color: #94a3b8;
+}
+
+.staff-role-badge {
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.role-owner {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.role-staff {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.staff-status-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.status-active::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  margin-right: 0.5rem;
+}
+
+.status-invited::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59e0b;
+  margin-right: 0.5rem;
+}
+
+.staff-loading,
+.staff-error {
+  padding: 2rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.staff-error {
+  color: #ef4444;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dashboard Header & Invite Button */
+/* -------------------------------------------------------------------------- */
+.dashboard-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.invite-staff-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #4f46e5 !important;
+  color: white !important;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: none;
+  cursor: pointer;
+  height: fit-content;
+}
+
+.invite-staff-btn:hover {
+  background-color: #4338ca !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Tenant Form (for Modals) */
+/* -------------------------------------------------------------------------- */
+.tenant-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tenant-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tenant-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.tenant-required {
+  color: #ef4444;
+}
+
+.tenant-input {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  width: 100%;
+}
+
+.tenant-input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.tenant-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.tenant-form-error {
+  background-color: #fef2f2;
+  color: #991b1b;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  border: 1px solid #fee2e2;
+}

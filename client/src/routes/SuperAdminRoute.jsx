@@ -6,12 +6,13 @@ const SuperAdminRoute = () => {
 
   if (!user) return null;
 
-  // Super admin dashboard
+  // Only allow super admins to proceed
   if (user.platform_role === "super_admin") {
-    return <Navigate to="/admin/dashboard" replace />;
+    return <Outlet />;
   }
 
-  return <Outlet />;
+  // Redirect non-platform-admins to their tenant dashboard
+  return <Navigate to="/dashboard" replace />;
 };
 
 export default SuperAdminRoute;

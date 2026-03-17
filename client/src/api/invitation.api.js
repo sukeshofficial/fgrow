@@ -2,13 +2,13 @@
 import { api } from "./api";
 
 /**
- * Invite Staff
+ * Invite User
  * POST /invitation/invite
  */
-export const inviteUser = ({ email, role }) => {
+export const inviteUser = ({ email, tenant_role }) => {
   return api.post("/invitation/invite", {
     email,
-    role,
+    tenant_role,
   });
 };
 
@@ -20,4 +20,18 @@ export const acceptInvitation = (token) => {
   return api.post("/invitation/accept", {
     token,
   });
+};
+
+/**
+ * Get Pending Invitations (Owner)
+ */
+export const getPendingInvitations = () => {
+  return api.get("/invitation/pending");
+};
+
+/**
+ * Revoke Invitation (Owner)
+ */
+export const revokeInvitation = (invitationId) => {
+  return api.delete(`/invitation/${invitationId}`);
 };

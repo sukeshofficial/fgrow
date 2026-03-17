@@ -6,7 +6,11 @@ import {
   approveTenantService,
   rejectTenantService,
   reAppealTenantService,
+  fetchAllTenantsService,
+  fetchTenantByIdService,
 } from "../services/tenant.service.js";
+import { User } from "../models/auth/user.model.js";
+import Client from "../models/client/client.model.js";
 
 import { generateToken } from "../utils/jwt.js";
 import { uploadToCloud } from "../utils/cloudinary.js";
@@ -160,6 +164,118 @@ export const reAppealTenant = async (req, res) => {
   } catch (err) {
     return res.status(400).json({
       message: err.message,
+    });
+  }
+};
+
+// --------------------------------------------------
+// 5️⃣ Get Tenant Staff (Joiners)
+// --------------------------------------------------
+export const getTenantStaff = async (req, res) => {
+  try {
+    const { User } = await import("../models/auth/user.model.js");
+
+    const users = await User.find({ tenant_id: req.user.tenant_id })
+      .select("name email username tenant_role status joined_at profile_avatar")
+      .sort({ joined_at: -1 });
+
+    return res.status(200).json({
+      success: true,
+      data: users,
+    });
+  } catch (err) {
+    console.error("Get Tenant Staff Error:", err);
+    return res.status(500).json({
+      message: err.message || "internal server error",
+    });
+  }
+};
+
+// --------------------------------------------------
+// 6️⃣ Get All Tenants (Pending, Approved, etc.)
+// --------------------------------------------------
+export const getAllTenants = async (req, res) => {
+  try {
+    const { status } = req.query; // optional filter
+    const tenants = await fetchAllTenantsService(status);
+
+    return res.status(200).json({
+      success: true,
+      data: tenants,
+    });
+  } catch (err) {
+    console.error("Get All Tenants Error:", err);
+    return res.status(500).json({
+      message: "internal server error",
+    });
+  }
+};
+
+// --------------------------------------------------
+// 7️⃣ Get Tenant By ID
+// --------------------------------------------------
+export const getTenantById = async (req, res) => {
+  try {
+    const { tenantId } = req.params;
+    const tenant = await fetchTenantByIdService(tenantId);
+
+    if (!tenant) {
+      return res.status(404).json({ message: "Tenant not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: tenant,
+    });
+  } catch (err) {
+    console.error("Get Tenant By ID Error:", err);
+    return res.status(500).json({
+      message: "internal server error",
+    });
+  }
+};
+
+// --------------------------------------------------
+// 8️⃣ Admin: Get Targeted Tenant Staff
+// --------------------------------------------------
+export const getTenantStaffAdmin = async (req, res) => {
+  try {
+    const { tenantId } = req.params;
+
+    const users = await User.find({ tenant_id: tenantId })
+      .select("name email username tenant_role status joined_at profile_avatar")
+      .sort({ joined_at: -1 });
+
+    return res.status(200).json({
+      success: true,
+      data: users,
+    });
+  } catch (err) {
+    console.error("Get Tenant Staff Admin Error:", err);
+    return res.status(500).json({
+      message: "internal server error",
+    });
+  }
+};
+
+// --------------------------------------------------
+// 9️⃣ Admin: Get Targeted Tenant Clients
+// --------------------------------------------------
+export const getTenantClientsAdmin = async (req, res) => {
+  try {
+    const { tenantId } = req.params;
+
+    const clients = await Client.find({ tenant_id: tenantId })
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      data: clients,
+    });
+  } catch (err) {
+    console.error("Get Tenant Clients Admin Error:", err);
+    return res.status(500).json({
+      message: "internal server error",
     });
   }
 };

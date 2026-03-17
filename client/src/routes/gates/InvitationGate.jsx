@@ -5,13 +5,13 @@
  */
 
 import { useAuth } from "../../hooks/useAuth";
-import { AcceptInvitationModal } from "../../components/staff/AcceptInvitationModal.jsx";
+import JoinAsStaff from "../../components/staff/JoinAsStaff";
 
 const InvitationGate = ({ children }) => {
-  const { meState } = useAuth();
+  const { meState, invitation } = useAuth();
 
   if (meState === "INVITED") {
-    return <AcceptInvitationModal />;
+    return <JoinAsStaff initialToken={invitation?.token} />;
   }
 
   return children;
