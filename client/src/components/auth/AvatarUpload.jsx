@@ -18,18 +18,21 @@ export default function AvatarUpload({
   initialUrl = null,
   size = 96,
 }) {
-  /**
-   * Component state
-   */
+  // -----------------------------
+  // State
+  // -----------------------------
   const [preview, setPreview] = useState(initialUrl);
   const [error, setError] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
 
-  /**
-   * Hidden file input reference
-   */
+  // -----------------------------
+  // Refs
+  // -----------------------------
   const inputRef = useRef(null);
 
+  // -----------------------------
+  // Helpers
+  // -----------------------------
   /**
    * Validates file, generates preview, and emits file to parent
    */
@@ -39,46 +42,52 @@ export default function AvatarUpload({
 
       if (!file) return;
 
+      // Validate file type
       if (!ACCEPTED_TYPES.includes(file.type)) {
         setError("Only JPG / PNG / WEBP allowed");
         return;
       }
 
+      // Validate file size
       if (file.size > MAX_BYTES) {
         setError("File too large (max 5MB)");
         return;
       }
 
+      // Generate preview
       const reader = new FileReader();
-      reader.onload = (e) => setPreview(e.target.result);
+      reader.onload = (e) => {
+        setPreview(e.target.result);
+      };
       reader.readAsDataURL(file);
 
+      // Emit to parent
       onFileChange?.(file);
     },
-    [onFileChange],
+    [onFileChange]
   );
 
-  /**
-   * Input file selection handler
-   */
+  // -----------------------------
+  // Handlers
+  // -----------------------------
   const handleFileInput = (e) => {
-    emitFile(e.target.files?.[0]);
+    const file = e.target.files?.[0];
+    emitFile(file);
   };
 
-  /**
-   * Drag-and-drop handler
-   */
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragOver(false);
-    emitFile(e.dataTransfer.files?.[0]);
+
+    const file = e.dataTransfer.files?.[0];
+    emitFile(file);
   };
 
+  // -----------------------------
+  // Render
+  // -----------------------------
   return (
-    <div
-      className="avatar-upload-root"
-      style={{ "--avatar-size": `${size}px` }}
-    >
+    <div className="avatar-upload-root">
       {/* Upload dropzone */}
       <div
         className={`avatar-dropzone ${isDragOver ? "drag-over" : ""}`}
@@ -173,7 +182,9 @@ export default function AvatarUpload({
       {error && <div className="avatar-error">{error}</div>}
 
       {/* File requirements hint */}
-      <div className="avatar-hint">JPG/PNG/WEBP • max 5MB</div>
+      <div className="avatar-hint">
+        JPG / PNG / WEBP • max 5MB
+      </div>
     </div>
   );
 }

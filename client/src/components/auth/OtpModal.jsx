@@ -100,7 +100,7 @@ const OtpModal = ({
     if (timeLeft === 0 && !hasAutoResentRef.current) {
       hasAutoResentRef.current = true;
 
-      onResend(); // ✅ SAFE here
+      onResend();
       setTimeLeft(OTP_EXPIRY_SECONDS);
       setResendLock(RESEND_LOCK_SECONDS);
     }

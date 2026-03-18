@@ -1,11 +1,13 @@
+// src/components/auth/LoginForm.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth.js";
-import { verifyOtp } from "../../features/auth/auth.actions.js";
-import { login } from "../../features/auth/auth.actions.js";
+import { verifyOtp, login } from "../../features/auth/auth.actions.js";
 import { userPreview } from "../../api/auth.api.js";
 import { SET_PROFILE_PREVIEW } from "../../features/auth/auth.types.js";
+
+import "../../styles/login-form.css";
 
 /**
  * LoginForm
@@ -14,27 +16,29 @@ import { SET_PROFILE_PREVIEW } from "../../features/auth/auth.types.js";
  * and login submission flow.
  */
 const LoginForm = ({ onSuccess }) => {
-  /**
-   * Auth context
-   */
+  // -----------------------------
+  // Auth context
+  // -----------------------------
   const { dispatch, isLoading } = useAuth();
 
-  /**
-   * Form and UI state
-   */
+  // -----------------------------
+  // State
+  // -----------------------------
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
+
   const [avatar, setAvatar] = useState(null);
   const [error, setError] = useState(null);
+
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpError, setOtpError] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
 
-  /**
-   * Input change handler
-   */
+  // -----------------------------
+  // Handlers
+  // -----------------------------
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -43,13 +47,16 @@ const LoginForm = ({ onSuccess }) => {
       [name]: value,
     }));
 
-    // Reset preview and errors when email changes
+    // Reset preview + errors when email changes
     if (name === "email") {
       setError(null);
       setAvatar(null);
     }
   };
 
+  // -----------------------------
+  // Effects
+  // -----------------------------
   /**
    * Debounced email-based profile preview
    */
@@ -99,20 +106,28 @@ const LoginForm = ({ onSuccess }) => {
     }
   };
 
+  // -----------------------------
+  // Render
+  // -----------------------------
   return (
     <form className="auth-form" onSubmit={handleSubmit}>
-      <h2>Login</h2>
+      <h2 className="auth-title">Login</h2>
 
-      {/* Email-based avatar preview */}
+      {/* Avatar Preview */}
       {avatar && (
         <div className="login-avatar-wrapper">
-          <img src={avatar} alt="User avatar" className="email-avatar" />
+          <img
+            src={avatar}
+            alt="User avatar"
+            className="email-avatar"
+          />
         </div>
       )}
 
-      {/* Error message */}
+      {/* Error */}
       {error && <p className="form-error">{error}</p>}
 
+      {/* Email */}
       <div className="email-field">
         <label className="input-label" htmlFor="email">
           Email <span className="star-red">*</span>
@@ -130,6 +145,7 @@ const LoginForm = ({ onSuccess }) => {
         />
       </div>
 
+      {/* Password */}
       <label className="input-label" htmlFor="password">
         Password <span className="star-red">*</span>
       </label>
@@ -144,10 +160,16 @@ const LoginForm = ({ onSuccess }) => {
         required
       />
 
-      <button type="submit" className="btn primary" disabled={isLoading}>
+      {/* Submit */}
+      <button
+        type="submit"
+        className="btn primary"
+        disabled={isLoading}
+      >
         {isLoading ? "Logging in..." : "Login"}
       </button>
 
+      {/* Switch */}
       <p className="auth-switch">
         New user?{" "}
         <Link to="/register" className="auth-link">

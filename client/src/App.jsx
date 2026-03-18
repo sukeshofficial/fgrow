@@ -4,7 +4,10 @@ import { Navigate, Route, Routes } from "react-router-dom";
 /* Global styles */
 import "./App.css";
 import "./styles/spinner.css";
-import "./styles/auth.css";
+import "./styles/auth-base.css"
+import "./styles/auth-layout.css"
+import "./styles/login-form.css"
+import "./styles/register-form.css"
 import "./styles/dashboard.css";
 import "./styles/avatar-upload.css";
 import "./styles/otp-modal.css";

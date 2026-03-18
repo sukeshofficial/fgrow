@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import LoginForm from "../../components/auth/LoginForm";
 import illustration from "../../assets/auth-illustration.png";
 
-import "../../styles/auth.css";
 
 /**
  * Login page
