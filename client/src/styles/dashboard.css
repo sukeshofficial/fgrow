@@ -10,14 +10,33 @@
 
 .dashboard--left {
   display: block;
-  margin-left: var(--sidebar-w, 260px) !important;
-  margin-right: 0 !important;
   padding: 20px;
-  max-width: none !important;
-  width: calc(100% - var(--sidebar-w, 260px));
-  justify-content: flex-start !important;
-  align-items: flex-start !important;
-  text-align: left;
+  width: auto;
+  min-height: 100vh;
+}
+
+.tenant-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Stack grid columns on tablets and split-screens */
+@media (max-width: 1200px) {
+  .tenant-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .dashboard--left {
+    max-width: 100%;
+  }
+}
+
+.profile-sidebar-card {
+  margin: 0 !important;
+  height: fit-content;
 }
 
 /* If the sidebar is collapsed, we might need a class on a parent or handle it via a shared state */

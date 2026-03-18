@@ -83,9 +83,9 @@ const TenantDetailView = () => {
         </div>
       </div>
 
-      <div className="tenant-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
+      <div className="tenant-detail-grid">
         {/* Profile Card */}
-        <div className="staff-list-card" style={{ margin: 0, height: 'fit-content' }}>
+        <div className="staff-list-card profile-sidebar-card">
           <div style={{ textAlign: 'center', paddingBottom: '1.5rem', borderBottom: '1px solid #f1f5f9' }}>
              <div className="staff-avatar-placeholder" style={{ width: '80px', height: '80px', fontSize: '2rem', margin: '0 auto 1rem' }}>
                 {tenant.name[0].toUpperCase()}

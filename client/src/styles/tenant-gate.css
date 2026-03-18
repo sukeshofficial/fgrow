@@ -11,9 +11,7 @@ body {
   font-family: 'Nunito', sans-serif;
   background: #ffffff;
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* Removed flex centering to allow normal page scrolling */
 }
 
 /* ─── Modal overlay ─────────────────────────────────────── */
