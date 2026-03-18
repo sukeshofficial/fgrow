@@ -27,8 +27,8 @@ router.post("/create", authMiddleware, upload.single("companyLogo"), createTenan
 // GET ALL tenants (super-admin only)
 router.get("/all", ...authSuperAdmin, getAllTenants);
 
-// GET single tenant details (super-admin only)
-router.get("/detail/:tenantId", ...authSuperAdmin, getTenantById);
+// GET single tenant details (authorized users only)
+router.get("/detail/:tenantId", authMiddleware, getTenantById);
 
 // GET targeted tenant staff (super-admin only)
 router.get("/detail/:tenantId/staff", ...authSuperAdmin, getTenantStaffAdmin);
