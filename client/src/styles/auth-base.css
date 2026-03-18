@@ -80,6 +80,7 @@
     margin-top: 2rem;
     background: linear-gradient(90deg, #6d5cff, #7c5cff);
     color: #fff;
+    border: 1px solid transparent;
 }
 
 .btn[disabled] {

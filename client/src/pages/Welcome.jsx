@@ -15,7 +15,7 @@ const WELCOME_SHOWN_KEY = "fgrow_welcome_shown";
 
 export const WelcomePage = () => {
   const { user, meState, isLoading, invitation } = useAuth();
-  
+
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [activeFlow, setActiveFlow] = useState(null); // 'create-tenant', 'join-staff-prefilled', 'join-staff-manual'
 
@@ -39,16 +39,16 @@ export const WelcomePage = () => {
 
   // Fallback edge case handler: if state is unrecognized but we somehow end up here
   if (!["NO_TENANT", "INVITED", "PENDING_VERIFICATION", "ACTIVE", "TENANT_INACTIVE", "TENANT_MISSING", "REJECTED_VERIFICATION"].includes(meState)) {
-      console.error("Unrecognized meState:", meState, "Full state:", { meState, user, invitation });
-      return (
-        <div className="welcome-page">
-          <div style={{ textAlign: 'center', background: 'white', padding: '2rem', borderRadius: '12px' }}>
-            <h2 style={{marginTop: 0}}>Something went wrong</h2>
-            <p>We couldn't determine your account state. <br/> Please try reloading the page.</p>
-            <button className="welcome-btn welcome-btn-primary" onClick={() => window.location.reload()}>Reload</button>
-          </div>
+    console.error("Unrecognized meState:", meState, "Full state:", { meState, user, invitation });
+    return (
+      <div className="welcome-page">
+        <div style={{ textAlign: 'center', background: 'white', padding: '2rem', borderRadius: '12px' }}>
+          <h2 style={{ marginTop: 0 }}>Something went wrong</h2>
+          <p>We couldn't determine your account state. <br /> Please try reloading the page.</p>
+          <button className="welcome-btn welcome-btn-primary" onClick={() => window.location.reload()}>Reload</button>
         </div>
-      );
+      </div>
+    );
   }
 
   // The main view for NO_TENANT
@@ -91,9 +91,9 @@ export const WelcomePage = () => {
       )}
 
       {(activeFlow === "join-staff-prefilled" || activeFlow === "join-staff-manual") && (
-        <JoinAsStaff 
-          onClose={closeFlow} 
-          initialToken={activeFlow === "join-staff-prefilled" ? invitation?.token : null} 
+        <JoinAsStaff
+          onClose={closeFlow}
+          initialToken={activeFlow === "join-staff-prefilled" ? invitation?.token : null}
         />
       )}
     </div>

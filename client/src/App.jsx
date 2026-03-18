@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 /* Global styles */
 import "./App.css";
 import "./styles/spinner.css";
+import "./styles/auth.css"
 import "./styles/auth-base.css"
 import "./styles/auth-layout.css"
 import "./styles/login-form.css"

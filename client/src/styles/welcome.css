@@ -14,6 +14,7 @@
   transition: all 0.2s ease;
   border: 1px solid transparent;
   text-decoration: none;
+  box-sizing: border-box;
 }
 
 .welcome-btn-disabled {
@@ -168,6 +169,7 @@
     opacity: 0;
     transform: translateY(10px) scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -395,6 +397,14 @@
   gap: 0.75rem;
 }
 
+.tenant-actions .welcome-btn {
+  height: 42px;
+  padding: 0 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .tenant-form-error {
   background-color: #fef2f2;
   color: #991b1b;
@@ -417,6 +427,7 @@
 
 /* Tablet (<= 768px) */
 @media (max-width: 768px) {
+
   /* Welcome Card */
   .welcome-action-card {
     padding: 1.5rem;
@@ -460,6 +471,7 @@
 
 /* Mobile (<= 480px) */
 @media (max-width: 480px) {
+
   /* Page padding */
   .welcome-page {
     padding: 0.75rem;

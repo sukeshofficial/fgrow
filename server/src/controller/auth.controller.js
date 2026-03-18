@@ -239,7 +239,7 @@ export const resendSignupOtp = async (req, res) => {
       return res.status(400).json({ message: "valid email required" });
     }
 
-    const user = await User.findOne({ email }).lean();
+    const user = await User.findOne({ email });
 
     if (!user) {
       return res
