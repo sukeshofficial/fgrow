@@ -404,6 +404,13 @@
   border: 1px solid #fee2e2;
 }
 
+
+.tenant-logo-super-admin {
+  border-radius: 999px;
+  width: inherit;
+  height: inherit;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Responsive Design */
 /* -------------------------------------------------------------------------- */

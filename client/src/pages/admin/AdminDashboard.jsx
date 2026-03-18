@@ -52,8 +52,8 @@ const AdminDashboard = () => {
     }
   };
 
-  const filteredTenants = tenants.filter(t => 
-    t.name.toLowerCase().includes(search.toLowerCase()) || 
+  const filteredTenants = tenants.filter(t =>
+    t.name.toLowerCase().includes(search.toLowerCase()) ||
     t.companyEmail.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -63,19 +63,19 @@ const AdminDashboard = () => {
       <div className="dashboard-header-row">
         <h1 className="dashboard-title">Super Admin Dashboard</h1>
         <div className="admin-stats-summary" style={{ display: 'flex', gap: '2rem' }}>
-           <div className="stat-item">
-              <span className="stat-label">Total Tenants:</span>
-              <span className="stat-value" style={{ fontWeight: 'bold', marginLeft: '8px' }}>{tenants.length}</span>
-           </div>
+          <div className="stat-item">
+            <span className="stat-label">Total Tenants:</span>
+            <span className="stat-value" style={{ fontWeight: 'bold', marginLeft: '8px' }}>{tenants.length}</span>
+          </div>
         </div>
       </div>
 
       <div className="admin-controls" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', gap: '1rem', alignItems: 'center' }}>
         <div className="search-box" style={{ position: 'relative', flex: 1 }}>
-          <FaSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-          <input 
-            type="text" 
-            placeholder="Search tenants by name or email..." 
+          <FaSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-65%)', color: '#94a3b8' }} />
+          <input
+            type="text"
+            placeholder="Search tenants by name or email..."
             className="tenant-input"
             style={{ paddingLeft: '40px' }}
             value={search}
@@ -133,7 +133,7 @@ const AdminDashboard = () => {
                     <td>
                       <div className="staff-member-cell">
                         <div className="staff-avatar-placeholder" style={{ backgroundColor: '#e2e8f0' }}>
-                          {tenant.name[0].toUpperCase()}
+                          <img src={tenant.logoUrl} alt="logo" className="tenant-logo-super-admin"/>
                         </div>
                         <div className="staff-info">
                           <span className="staff-name">{tenant.name}</span>
@@ -148,13 +148,12 @@ const AdminDashboard = () => {
                       </div>
                     </td>
                     <td>
-                      <span className={`staff-role-badge ${
-                        tenant.verificationStatus === 'verified' ? 'role-staff' : 
+                      <span className={`staff-role-badge ${tenant.verificationStatus === 'verified' ? 'role-staff' :
                         tenant.verificationStatus === 'pending' ? 'role-owner' : 'role-rejected'
-                      }`} style={{
-                        backgroundColor: tenant.verificationStatus === 'rejected' ? '#fee2e2' : undefined,
-                        color: tenant.verificationStatus === 'rejected' ? '#991b1b' : undefined,
-                      }}>
+                        }`} style={{
+                          backgroundColor: tenant.verificationStatus === 'rejected' ? '#fee2e2' : undefined,
+                          color: tenant.verificationStatus === 'rejected' ? '#991b1b' : undefined,
+                        }}>
                         {tenant.verificationStatus}
                       </span>
                     </td>
@@ -172,19 +171,19 @@ const AdminDashboard = () => {
                         </Link>
                         {tenant.verificationStatus === 'pending' && (
                           <>
-                            <Button 
-                              variant="primary" 
-                              size="sm" 
-                              style={{ padding: '6px 10px', backgroundColor: '#22c55e' }} 
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              style={{ padding: '6px 10px', backgroundColor: '#22c55e' }}
                               onClick={() => handleApprove(tenant._id)}
                               title="Approve"
                             >
                               <FaCheck />
                             </Button>
-                            <Button 
-                              variant="secondary" 
-                              size="sm" 
-                              style={{ padding: '6px 10px', color: '#ef4444' }} 
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              style={{ padding: '6px 10px', color: '#ef4444' }}
                               onClick={() => handleReject(tenant._id)}
                               title="Reject"
                             >

@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { 
-  getTenantById, 
-  getTenantStaffAdmin, 
-  getTenantClientsAdmin, 
-  approveTenant, 
-  rejectTenant 
-} from "../../api/tenant.api";
+import { getTenantById, getTenantStaffAdmin, getTenantClientsAdmin, approveTenant, rejectTenant } from "../../api/tenant.api";
 import { Button } from "../../components/ui/Button";
 import { FaArrowLeft, FaCheck, FaTimes, FaUsers, FaUserTie, FaBuilding, FaEnvelope, FaPhone } from "react-icons/fa";
+import Sidebar from "../../components/SideBar";
 import "../../styles/welcome.css";
 
 const TenantDetailView = () => {
@@ -67,7 +62,8 @@ const TenantDetailView = () => {
   if (!tenant) return <div className="staff-error">Tenant not found.</div>;
 
   return (
-    <div className="dashboard">
+    <div className="dashboard dashboard--left">
+      <Sidebar />
       <div className="dashboard-header-row">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Link to="/admin/dashboard" style={{ color: '#64748b' }}><FaArrowLeft /></Link>
