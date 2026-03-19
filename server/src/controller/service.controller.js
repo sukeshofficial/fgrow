@@ -6,7 +6,8 @@ import {
     deleteServiceService,
     assignServiceToClientsService,
     listAssignedClientsService,
-    unassignClientService
+    unassignClientService,
+    listServicesByTenantService
 } from "../services/service.service.js";
 
 export const createServiceController = async (req, res) => {
@@ -125,5 +126,15 @@ export const unassignClientController = async (req, res) => {
         return res.json({ success: true, data: removed });
     } catch (e) {
         return res.status(400).json({ success: false, message: e.message });
+    }
+};
+
+export const listServicesByTenantController = async (req, res) => {
+    try {
+        const tenant_id = req.user.tenant_id;
+        const services = await listServicesByTenantService({ tenant_id });
+        return res.json({ success: true, data: services });
+    } catch (e) {
+        return res.status(500).json({ success: false, message: e.message });
     }
 };

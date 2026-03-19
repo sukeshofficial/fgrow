@@ -64,7 +64,8 @@ const clientSchema = new Schema(
             amount: { type: Number, default: 0 },
             type: { type: String, enum: ["debit", "credit"] },
             as_of: { type: Date },
-            currency: { type: String, default: "INR" }
+            currency: { type: String, default: "INR" },
+            pay_mode: { type: String, default: "Debit" }
         },
 
         contacts: [contactSchema],

@@ -78,8 +78,25 @@ export const listTags = () => {
 export const createTag = (payload) => {
   return api.post("/tags", payload);
 };
+ 
 /**
- * Upload client photo
+ * List billing entities
+ * GET /billing-entities
+ */
+export const listBillingEntities = () => {
+  return api.get("/billing-entities");
+};
+
+/**
+ * List tenant staff
+ * GET /tenant/staff
+ */
+export const listStaff = () => {
+  return api.get("/tenant/staff");
+};
+
+/**
+  * Upload client photo
  * POST /clients/upload-photo
  */
 export const uploadClientPhoto = (file) => {

@@ -20,6 +20,7 @@ import documentTypeRoutes from "./routes/documentType.routes.js";
 import documentRoutes from "./routes/document.routes.js";
 import dscRoutes from "./routes/dsc.routes.js";
 import documentCollectionRequestRoutes from "./routes/documentCollectionRequest.routes.js";
+import billingEntityRoutes from "./routes/billingEntity.routes.js";
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use("/api/v0/document-types", documentTypeRoutes);
 app.use("/api/v0/documents", documentRoutes);
 app.use("/api/v0/dsc", dscRoutes);
 app.use("/api/v0/collection-requests", documentCollectionRequestRoutes);
+app.use("/api/v0/billing-entities", billingEntityRoutes);
 
 app.get("/api/v0/health", (req, res) => {
   res.json({ status: "OK" });

@@ -1,7 +1,22 @@
 import mongoose from "mongoose";
 import Client from "../models/client/client.model.js";
+import ServiceClient from "../models/service/serviceClient.model.js";
 
 const { Types } = mongoose;
+
+const sanitizePayload = (payload) => {
+  const fields = ["group", "billing_profile", "created_by", "updated_by"];
+  fields.forEach(f => {
+    if (payload[f] === "" || payload[f] === undefined) {
+      payload[f] = null;
+    }
+  });
+
+  if (payload.tags && Array.isArray(payload.tags)) {
+    payload.tags = payload.tags.filter(t => t && t !== "");
+  }
+  return payload;
+};
 
 export const createClientService = async ({ tenant_id, user_id, payload }) => {
   try {
@@ -21,6 +36,8 @@ export const createClientService = async ({ tenant_id, user_id, payload }) => {
       throw new Error("Custom type is required for 'Other' client type");
     }
 
+    sanitizePayload(payload);
+
     const client = new Client({
       ...payload,
       tenant_id,
@@ -28,6 +45,27 @@ export const createClientService = async ({ tenant_id, user_id, payload }) => {
     });
 
     const savedClient = await client.save();
+
+    // Handle service assignments if provided
+    if (payload.service_assignments && Array.isArray(payload.service_assignments)) {
+      const ServiceClient = mongoose.model("ServiceClient");
+      const ops = payload.service_assignments.map(assign => ({
+        updateOne: {
+          filter: { tenant_id, client: savedClient._id, service: assign.service_id },
+          update: { 
+            $set: { 
+              tenant_id, 
+              client: savedClient._id, 
+              service: assign.service_id,
+              custom_price: assign.custom_price,
+              custom_users: assign.custom_users 
+            } 
+          },
+          upsert: true
+        }
+      }));
+      if (ops.length > 0) await ServiceClient.bulkWrite(ops);
+    }
 
     return savedClient;
   } catch (error) {
@@ -110,6 +148,8 @@ export const listClientsService = async ({
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
+      .populate("group", "name")
+      .populate("tags", "name color")
       .lean();
 
     const total = await Client.countDocuments(query);
@@ -148,6 +188,15 @@ export const getClientByIdService = async ({ tenant_id, client_id }) => {
       throw new Error("Client not found");
     }
 
+    // Fetch service assignments
+    const ServiceClient = mongoose.model("ServiceClient");
+    const assignments = await ServiceClient.find({ client: client_id, tenant_id }).lean();
+    client.service_assignments = assignments.map(a => ({
+        service_id: a.service,
+        custom_price: a.custom_price,
+        custom_users: a.custom_users
+    }));
+
     return client;
   } catch (error) {
     throw new Error(error.message);
@@ -164,6 +213,8 @@ export const updateClientService = async ({ tenant_id, user_id, client_id, paylo
     if (payload.type === "Other" && !payload.customType) {
       throw new Error("Custom type is required for 'Other' client type");
     }
+
+    sanitizePayload(payload);
 
     // PAN uniqueness check (if pan provided)
     if (payload.pan) {
@@ -183,14 +234,20 @@ export const updateClientService = async ({ tenant_id, user_id, client_id, paylo
     }
 
     // validate/convert ObjectId-like fields if provided
-    if (payload.group) {
-      if (!Types.ObjectId.isValid(payload.group)) throw new Error("Invalid group id");
+    if (payload.group && Types.ObjectId.isValid(payload.group)) {
       payload.group = new Types.ObjectId(payload.group);
+    } else if (payload.group === null) {
+      // keep null to unset
+    } else {
+      delete payload.group;
     }
 
-    if (payload.billing_profile) {
-      if (!Types.ObjectId.isValid(payload.billing_profile)) throw new Error("Invalid billing_profile id");
+    if (payload.billing_profile && Types.ObjectId.isValid(payload.billing_profile)) {
       payload.billing_profile = new Types.ObjectId(payload.billing_profile);
+    } else if (payload.billing_profile === null) {
+      // specifically keep null if we want to unset
+    } else {
+      delete payload.billing_profile;
     }
 
     if (payload.tags) {
@@ -224,6 +281,37 @@ export const updateClientService = async ({ tenant_id, user_id, client_id, paylo
     ).populate("group", "name").populate("tags", "name color").lean();
 
     if (!updated) throw new Error("Client not found");
+
+    // Sync service assignments
+    if (payload.service_assignments && Array.isArray(payload.service_assignments)) {
+      const ServiceClient = mongoose.model("ServiceClient");
+      
+      // 1. Remove assignments not in the payload (optional, but requested implicitly by "sync")
+      const currentServiceIds = payload.service_assignments.map(a => a.service_id);
+      await ServiceClient.deleteMany({ 
+        tenant_id, 
+        client: client_id, 
+        service: { $nin: currentServiceIds } 
+      });
+
+      // 2. Upsert current assignments
+      const ops = payload.service_assignments.map(assign => ({
+        updateOne: {
+          filter: { tenant_id, client: client_id, service: assign.service_id },
+          update: { 
+            $set: { 
+              tenant_id, 
+              client: client_id, 
+              service: assign.service_id,
+              custom_price: assign.custom_price,
+              custom_users: assign.custom_users 
+            } 
+          },
+          upsert: true
+        }
+      }));
+      if (ops.length > 0) await ServiceClient.bulkWrite(ops);
+    }
 
     return updated;
   } catch (error) {

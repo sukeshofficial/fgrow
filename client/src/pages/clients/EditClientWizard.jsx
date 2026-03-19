@@ -4,6 +4,7 @@ import Stepper from "../../components/ui/Stepper";
 import Sidebar from "../../components/SideBar";
 import ClientDetailsForm from "./steps/ClientDetailsForm";
 import ContactDetailsForm from "./steps/ContactDetailsForm";
+import ClientServicesForm from "./steps/ClientServicesForm";
 import { getClientById, updateClient } from "../../api/client.api";
 import "../../styles/CreateClient.css";
 
@@ -26,12 +27,23 @@ const EditClientWizard = () => {
     primary_contact_mobile: "",
     primary_contact_email: "",
     primary_contact_role: "",
+    contacts: [],
     address: {
       street: "",
       city: "",
       state: "",
       postalCode: "",
       country: "India"
+    },
+    recurring_services: [],
+    service_assignments: [],
+    billing_profile: "",
+    opening_balance: {
+        enabled: false,
+        amount: 0,
+        type: "debit",
+        as_of: new Date().toISOString().split('T')[0],
+        currency: "INR"
     }
   });
 
@@ -60,12 +72,23 @@ const EditClientWizard = () => {
           primary_contact_mobile: clientData.primary_contact_mobile || "",
           primary_contact_email: clientData.primary_contact_email || "",
           primary_contact_role: clientData.primary_contact_role || "",
+          contacts: clientData.contacts || [],
           address: {
             street: clientData.address?.street || "",
             city: clientData.address?.city || "",
             state: clientData.address?.state || "",
             postalCode: clientData.address?.postalCode || "",
             country: clientData.address?.country || "India"
+          },
+          recurring_services: clientData.recurring_services || [],
+          service_assignments: clientData.service_assignments || [],
+          billing_profile: clientData.billing_profile?._id || clientData.billing_profile || null,
+          opening_balance: clientData.opening_balance || {
+            enabled: false,
+            amount: 0,
+            type: "debit",
+            as_of: new Date().toISOString().split('T')[0],
+            currency: "INR"
           }
         });
       } catch (err) {
@@ -133,20 +156,12 @@ const EditClientWizard = () => {
         );
       case 2:
         return (
-          <div className="step-container">
-            <h2 className="form-title">Services & Settings</h2>
-            <div className="step-placeholder" style={{ padding: '40px 0' }}>
-              Services update implementation coming soon...
-            </div>
-            <div className="next-button-container" style={{ marginTop: '40px', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button className="prev-button" onClick={handlePrev} style={{ background: '#f1f5f9', border: 'none', padding: '10px 24px', borderRadius: '10px', fontWeight: '600', cursor: 'pointer' }}>
-                Back
-              </button>
-              <button className="next-button" onClick={() => handleSave(formData)}>
-                Update Client
-              </button>
-            </div>
-          </div>
+          <ClientServicesForm 
+            data={formData} 
+            onNext={handleNext} 
+            onPrev={handlePrev}
+            isEdit={true}
+          />
         );
       default:
         return null;
