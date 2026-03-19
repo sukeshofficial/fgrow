@@ -29,6 +29,7 @@ import EditClientWizard from "./pages/clients/EditClientWizard";
 import ClientList from "./pages/clients/ClientList";
 import Services from "./pages/services/Services";
 import CreateServiceWizard from "./pages/services/CreateServiceWizard";
+import EditServiceWizard from "./pages/services/EditServiceWizard";
 
 /* Routing */
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -95,6 +96,7 @@ const App = () => {
             <Route path="/clients" element={<ClientList />} />
             <Route path="/services" element={<Services />} />
             <Route path="/services/create" element={<CreateServiceWizard />} />
+            <Route path="/services/edit/:id" element={<EditServiceWizard />} />
             <Route path="/finance" element={<Tasks />} />
             <Route path="/documents" element={<Tasks />} />
             <Route path="/reports" element={<Tasks />} />
