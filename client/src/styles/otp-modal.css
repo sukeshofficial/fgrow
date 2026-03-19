@@ -4,8 +4,25 @@
 
 .otp-actions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
+  align-items: center;
 }
+
+.otp-actions .btn {
+  flex: 1;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0 20px;
+  /* Reset inherited styles that cause misalignment */
+  margin: 0 !important;
+  width: auto;
+  white-space: nowrap;
+}
+
 
 /* Overlay */
 .otp-overlay {

@@ -6,7 +6,7 @@ import OtpModal from "../../components/auth/OtpModal";
 import illustration from "../../assets/auth-illustration.png";
 
 import { useAuth } from "../../hooks/useAuth.js";
-import { verifyOtp } from "../../features/auth/auth.actions.js";
+import { verifyOtp, resendOtp } from "../../features/auth/auth.actions.js";
 
 /**
  * Register page
@@ -70,9 +70,7 @@ const Register = () => {
     setOtpError("");
 
     try {
-      await resendOtp(dispatch, {
-        email: registeredEmail,
-      });
+      await resendOtp(dispatch, registeredEmail);
     } catch (err) {
       setOtpError(
         err.response?.data?.message ||

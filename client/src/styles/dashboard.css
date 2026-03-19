@@ -1,16 +1,48 @@
 .dashboard {
-  margin-top: 80px;
+  margin-top: 50px;
   margin-left: var(--sidebar-w, 260px);
   padding: 20px;
+  display: block;
   transition: margin-left 0.3s ease;
+}
+
+/* ─── Fix left alignment only for Tenant Detail ─────────── */
+
+.dashboard--left {
+  display: block;
+  padding: 20px;
+  width: auto;
+  min-height: 100vh;
+}
+
+.tenant-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Stack grid columns on tablets and split-screens */
+@media (max-width: 1200px) {
+  .tenant-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .dashboard--left {
+    max-width: 100%;
+  }
+}
+
+.profile-sidebar-card {
+  margin: 0 !important;
+  height: fit-content;
 }
 
 /* If the sidebar is collapsed, we might need a class on a parent or handle it via a shared state */
 /* For now, let's just make it responsive if the viewport is small as per sidebar.css */
 @media (max-width: 980px) {
-  .dashboard {
-    margin-left: 72px;
-  }
+  /* margin-left adjustment is handled in sidebar.css global content layout section */
 }
 
 .dashboard-title {

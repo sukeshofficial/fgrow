@@ -2,9 +2,9 @@ import { useState } from "react";
 
 import { useAuth } from "../../hooks/useAuth.js";
 import { checkAuth } from "../../features/auth/auth.actions.js";
+import { HiOutlineClock } from "react-icons/hi2";
 
 import "../../styles/tenant-pending.css";
-import waitingIcon from "../../assets/wait-icon.png";
 
 export const TenantPendingScreen = () => {
   const { tenant, dispatch, logout } = useAuth();
@@ -26,11 +26,11 @@ export const TenantPendingScreen = () => {
     <div className="tenant-pending-overlay">
       <div className="tenant-pending-card">
         <div className="tenant-pending-icon">
-          <img src={waitingIcon} alt="Waiting Icon" />
+          <HiOutlineClock size={48} className="pending-clock-icon" />
         </div>
 
         <h2 className="tenant-pending-title">
-          Waiting for Super Admin Approval
+          Waiting for Admin Approval
         </h2>
 
         <p className="tenant-pending-text">

@@ -494,31 +494,6 @@ body {
 /*                               CUSTOM SCROLLBAR                             */
 /* ========================================================================== */
 
-.menu::-webkit-scrollbar {
-  width: 0;
-}
-
-.sidebar:hover {
-  transition: width 0.3s ease;
-}
-
-.sidebar:hover .menu::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar:hover .menu::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar:hover .menu::-webkit-scrollbar-thumb {
-  background: #b3bbc9;
-  border-radius: 20px;
-}
-
-.sidebar:hover .menu::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
-}
-
 /* Global Content Layout */
 .dashboard,
 .tasks,

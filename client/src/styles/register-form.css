@@ -1,0 +1,57 @@
+/* Register-specific styles */
+
+.password-meter {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meter-fill {
+  height: 6px;
+  flex: 1;
+  border-radius: 6px;
+  background: #e6e9ee;
+  overflow: hidden;
+  position: relative;
+}
+
+.meter-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 0%;
+  background: linear-gradient(90deg, #f97316, #10b981);
+  transition: width 0.25s ease;
+}
+
+.meter-label {
+  min-width: 70px;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.password-meter.s0 .meter-fill::after {
+  width: 4%;
+  background: #ef4444;
+}
+
+.password-meter.s1 .meter-fill::after {
+  width: 25%;
+  background: #f97316;
+}
+
+.password-meter.s2 .meter-fill::after {
+  width: 50%;
+  background: #f59e0b;
+}
+
+.password-meter.s3 .meter-fill::after {
+  width: 75%;
+  background: #10b981;
+}
+
+.password-meter.s4 .meter-fill::after {
+  width: 100%;
+  background: #059669;
+}

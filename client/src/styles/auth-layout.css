@@ -1,0 +1,40 @@
+/* Auth Layout */
+
+.auth-page {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    align-items: center;
+    overflow: hidden;
+    padding: 24px 32px;
+}
+
+.auth-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-left .illustration {
+    border-radius: 18px;
+    border: 2px dashed rgba(174, 174, 174, 0.329);
+    max-height: 90vh;
+    max-width: 90%;
+}
+
+.auth-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .auth-page {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-left {
+        display: none;
+    }
+}

@@ -1,0 +1,14 @@
+.email-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+  background: #fff;
+}
+
+.login-avatar-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 20px 0;
+}

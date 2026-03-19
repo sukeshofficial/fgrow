@@ -121,12 +121,12 @@ export const JoinAsStaff = ({ onClose, initialToken }) => {
 
           <div
             className="tenant-actions"
-            style={{ marginTop: "1.5rem", justifyContent: "space-between" }}
+            style={{ marginTop: "1.5rem" }}
           >
             {onClose ? (
               <button
                 type="button"
-                className="welcome-btn welcome-btn-secondary"
+                className="welcome-btn welcome-btn-md welcome-btn-secondary"
                 onClick={onClose}
                 disabled={submitting}
               >
@@ -137,7 +137,7 @@ export const JoinAsStaff = ({ onClose, initialToken }) => {
             )}
             <button
               type="submit"
-              className="welcome-btn welcome-btn-primary"
+              className="welcome-btn welcome-btn-md welcome-btn-primary"
               disabled={submitting}
             >
               {submitting ? "Joining..." : "Join Organization"}

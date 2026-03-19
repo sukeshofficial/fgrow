@@ -1,10 +1,12 @@
-// src/pages/auth/RegisterForm.jsx
+// src/components/auth/RegisterForm.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth.js";
 import { register } from "../../features/auth/auth.actions.js";
 import AvatarUpload from "../../components/auth/AvatarUpload";
+
+import "../../styles/register-form.css";
 
 /**
  * Password strength evaluator
@@ -36,15 +38,15 @@ const strengthFor = (password) => {
  * password strength feedback, and form submission.
  */
 const RegisterForm = ({ onSuccess }) => {
-  /**
-   * Auth context and navigation
-   */
+  // -----------------------------
+  // Auth + Navigation
+  // -----------------------------
   const { dispatch, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  /**
-   * Form  and error state
-   */
+  // -----------------------------
+  // State
+  // -----------------------------
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -52,11 +54,12 @@ const RegisterForm = ({ onSuccess }) => {
     confirm: "",
     file: null,
   });
+
   const [error, setError] = useState("");
 
-  /**
-   * Generic input change handler
-   */
+  // -----------------------------
+  // Handlers
+  // -----------------------------
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -64,13 +67,17 @@ const RegisterForm = ({ onSuccess }) => {
       ...prev,
       [name]: value,
     }));
+
+    if (error) setError("");
   };
 
-  /**
-   * Form submission handler
-   */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (form.password !== form.confirm) {
+      setError("Passwords do not match");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("name", form.name);
@@ -104,20 +111,23 @@ const RegisterForm = ({ onSuccess }) => {
     }
   };
 
-  /**
-   * Derived password strength
-   */
+  // -----------------------------
+  // Derived State
+  // -----------------------------
   const strength = strengthFor(form.password);
 
+  // -----------------------------
+  // Render
+  // -----------------------------
   return (
     <form
-      className="auth-form"
+      className="auth-form register-form"
       onSubmit={handleSubmit}
       aria-describedby="register-error"
     >
-      <h2>Create your account</h2>
+      <h2 className="auth-title">Create your account</h2>
 
-      {/* Registration error */}
+      {/* Error */}
       {error && (
         <div
           id="register-error"
@@ -128,6 +138,7 @@ const RegisterForm = ({ onSuccess }) => {
         </div>
       )}
 
+      {/* Name */}
       <label className="input-label" htmlFor="name">
         Full name <span className="star-red">*</span>
       </label>
@@ -142,6 +153,7 @@ const RegisterForm = ({ onSuccess }) => {
         required
       />
 
+      {/* Email */}
       <label className="input-label" htmlFor="email">
         Email <span className="star-red">*</span>
       </label>
@@ -156,6 +168,7 @@ const RegisterForm = ({ onSuccess }) => {
         required
       />
 
+      {/* Avatar */}
       <label className="input-label">Profile picture</label>
       <AvatarUpload
         onFileChange={(file) =>
@@ -163,6 +176,7 @@ const RegisterForm = ({ onSuccess }) => {
         }
       />
 
+      {/* Password */}
       <label className="input-label" htmlFor="password">
         Password <span className="star-red">*</span>
       </label>
@@ -177,14 +191,13 @@ const RegisterForm = ({ onSuccess }) => {
         required
       />
 
-      {/* Password strength indicator */}
-      <div
-        className={`password-meter strength-${strength.score}`}
-      >
+      {/* Strength */}
+      <div className={`password-meter s${strength.score}`}>
         <div className="meter-fill" />
         <div className="meter-label">{strength.label}</div>
       </div>
 
+      {/* Confirm */}
       <label className="input-label" htmlFor="confirm">
         Confirm password <span className="star-red">*</span>
       </label>
@@ -199,6 +212,7 @@ const RegisterForm = ({ onSuccess }) => {
         required
       />
 
+      {/* Submit */}
       <button
         type="submit"
         className="btn primary"
@@ -211,6 +225,7 @@ const RegisterForm = ({ onSuccess }) => {
         )}
       </button>
 
+      {/* Switch */}
       <p className="auth-switch">
         Already registered?{" "}
         <Link to="/login" className="auth-link">

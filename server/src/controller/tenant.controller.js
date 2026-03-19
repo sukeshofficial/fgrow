@@ -154,7 +154,18 @@ export const reAppealTenant = async (req, res) => {
       });
     }
 
-    const tenant = await reAppealTenantService(user.tenant_id, user.id);
+    const { name, companyEmail, companyPhone, gstNumber, registrationNumber, timezone, currency, companyAddress } = req.body;
+
+    const tenant = await reAppealTenantService(user.tenant_id, user.id, {
+      name,
+      companyEmail,
+      companyPhone,
+      gstNumber,
+      registrationNumber,
+      timezone,
+      currency,
+      companyAddress,
+    });
 
     return res.status(200).json({
       message: "Re-appeal submitted successfully",
@@ -217,6 +228,17 @@ export const getAllTenants = async (req, res) => {
 export const getTenantById = async (req, res) => {
   try {
     const { tenantId } = req.params;
+
+    // Authorization: Super Admin can see any; Owner/Staff only their own.
+    const isSuperAdmin = req.user.platformRole === "super_admin";
+    const isOwnerOrStaffOfThisTenant = req.user.tenant_id?.toString() === tenantId;
+
+    if (!isSuperAdmin && !isOwnerOrStaffOfThisTenant) {
+      return res.status(403).json({
+        message: "forbidden: you can only access your own organization details",
+      });
+    }
+
     const tenant = await fetchTenantByIdService(tenantId);
 
     if (!tenant) {

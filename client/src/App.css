@@ -1,0 +1,82 @@
+/* ─── Global Scrollbar ───────────────────────────────────── */
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(227, 227, 227) transparent;
+}
+
+/* Chrome / Safari / Edge */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+/* Remove scrollbar arrows */
+::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* Remove bottom corner / weird square */
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Extra safety: remove any end-piece artifacts */
+::-webkit-resizer {
+    display: none;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4f46e5;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.25s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #4338ca;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(to bottom, #c18aff, #79d8ff);
+    background-clip: padding-box;
+}
+
+
+/* ─── Sidebar Scrollbar Behavior ─────────────────────────── */
+
+/* Hide scrollbar initially */
+.menu::-webkit-scrollbar {
+    width: 0;
+}
+
+/* Smooth sidebar hover */
+.sidebar:hover {
+    transition: width 0.3s ease;
+}
+
+/* Show styled scrollbar only on hover */
+.sidebar:hover .menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar:hover .menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar:hover .menu::-webkit-scrollbar-thumb {
+    background: #b3bbc9;
+    border-radius: 20px;
+}
+
+.sidebar:hover .menu::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
