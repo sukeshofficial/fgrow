@@ -320,7 +320,7 @@ export default function Sidebar() {
         <div className="sidebar-inner">
           {/* Logo / Brand */}
           <div className="navbar-logo">
-            <img src={logo} alt="ForgeGrid" className="logo-img" />
+            <img src={logo} alt="ForgeGrid" className="logo-img brand-icon" />
             <span className={`logo-text ${collapsed ? "collapsed" : ""} user-info`}>
               <span className="fg">FG</span>row
             </span>
@@ -388,8 +388,8 @@ export default function Sidebar() {
 
       {/* React Tooltip rendered outside sidebar so it can overflow */}
       {tooltip && collapsed && (
-        <div 
-          className="sidebar-tooltip" 
+        <div
+          className="sidebar-tooltip"
           style={{ top: tooltip.top }}
         >
           {tooltip.label}

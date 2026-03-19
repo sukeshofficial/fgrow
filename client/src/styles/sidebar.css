@@ -80,7 +80,7 @@ body {
   justify-content: center;
 
   border-radius: 8px;
-  background: linear-gradient(135deg, #0f172a, #0f62fe);
+  /* background: linear-gradient(135deg, #0f172a, #0f62fe); */
   color: #ffffff;
 
   font-weight: 700;
