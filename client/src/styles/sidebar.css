@@ -417,25 +417,7 @@ body {
   background: #fecaca;
 }
 
-.sidebar.collapsed .logout-btn[aria-label]:hover::after {
-  content: attr(aria-label);
-
-  position: absolute;
-  left: 60px;
-  top: 50%;
-  transform: translateY(-50%);
-
-  padding: 6px 8px;
-  border-radius: 6px;
-
-  font-size: 12px;
-  white-space: nowrap;
-
-  background: #111827;
-  color: #ffffff;
-
-  z-index: 9999;
-}
+/* Tooltip styles moved to .sidebar-tooltip */
 
 /* Ensure perfect centering in collapsed view */
 .sidebar.collapsed .menu {
@@ -454,28 +436,10 @@ body {
   display: none;
 }
 
-.sidebar.collapsed .menu-item[aria-label]:hover::after {
-  content: attr(aria-label);
-
-  position: absolute;
-  top: 50%;
-  left: calc(100% + 10px);
-  transform: translateY(-50%);
-
-  background: #111827;
-  color: #fff;
-  border: 1px solid #111827;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 12px;
-  white-space: nowrap;
-  z-index: 9999;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-  pointer-events: none;
-}
+/* Tooltip styles moved to .sidebar-tooltip */
 
 /* ========================================================================== */
-/*                                RESPONSIVE                                  */
+/*                               RESPONSIVE                                   */
 /* ========================================================================== */
 
 @media (max-width: 980px) {
@@ -516,7 +480,7 @@ body {
   min-width: 190px;
   background: rgba(232, 232, 232, 0.395);
   ;
-  border: 1px solid #e6e9ee;
+  border: 1px solid #d6d6d6;
   border-radius: 14px;
   box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
   backdrop-filter: blur(10px);
@@ -590,6 +554,43 @@ body {
 
 .menu-item.flyout-open .menu-icon {
   color: #0f62fe;
+}
+
+/* ========================================================================== */
+/*                              SIDEBAR TOOLTIP                               */
+/* ========================================================================== */
+
+.sidebar-tooltip {
+  position: fixed;
+  left: 78px;
+  /* (sidebar width 72px) + small gap (6px) */
+  transform: translateY(-50%);
+  z-index: 10000;
+
+  background: #111827;
+  color: #ffffff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+
+  animation: tooltip-in 0.15s ease-out;
+}
+
+@keyframes tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
 }
 
 /* ========================================================================== */

@@ -157,6 +157,8 @@ export default function Sidebar() {
   const [openMenus, setOpenMenus] = useState({});
   // flyout: { item, top } | null
   const [flyout, setFlyout] = useState(null);
+  // tooltip: { label, top } | null
+  const [tooltip, setTooltip] = useState(null);
 
   /* ----------------------------- Menu Helpers ------------------------------ */
 
@@ -166,6 +168,21 @@ export default function Sidebar() {
       [menuName]: !prev[menuName],
     }));
   };
+
+  const leaveTimeout = useRef(null);
+
+  const handleMouseEnter = useCallback((e, label) => {
+    if (leaveTimeout.current) clearTimeout(leaveTimeout.current);
+    if (!collapsed) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltip({ label, top: rect.top + rect.height / 2 });
+  }, [collapsed]);
+
+  const handleMouseLeave = useCallback(() => {
+    leaveTimeout.current = setTimeout(() => {
+      setTooltip(null);
+    }, 50);
+  }, []);
 
   const handleCollapsedItemClick = useCallback((e, item) => {
     if (!item.subItems) return;
@@ -178,16 +195,19 @@ export default function Sidebar() {
 
   const closeFlyout = useCallback(() => setFlyout(null), []);
 
-  // Close flyout on route change
+  // Close flyout and tooltip on route change
   useEffect(() => {
     setFlyout(null);
+    setTooltip(null);
   }, [location.pathname]);
 
   /* ----------------------------- Responsive UI ----------------------------- */
 
   useEffect(() => {
     const handleResize = () => {
-      setCollapsed(window.innerWidth <= 992);
+      const isCollapsed = window.innerWidth <= 992;
+      console.log("Resize: width", window.innerWidth, "isCollapsed", isCollapsed);
+      setCollapsed(isCollapsed);
     };
 
     handleResize();
@@ -220,6 +240,8 @@ export default function Sidebar() {
           <div
             className={`menu-item has-children ${isActive ? "active" : ""} ${isFlyoutOpen ? "flyout-open" : ""}`}
             onClick={(e) => handleCollapsedItemClick(e, item)}
+            onMouseEnter={(e) => handleMouseEnter(e, item.label)}
+            onMouseLeave={handleMouseLeave}
             role="menuitem"
             aria-label={item.label}
           >
@@ -277,6 +299,8 @@ export default function Sidebar() {
         key={item.label}
         to={item.path}
         className={`menu-item ${isActive ? "active" : ""}`}
+        onMouseEnter={(e) => handleMouseEnter(e, item.label)}
+        onMouseLeave={handleMouseLeave}
         role="menuitem"
         aria-label={item.label}
       >
@@ -315,6 +339,8 @@ export default function Sidebar() {
                   key={item.label}
                   to={item.path}
                   className={`menu-item ${isActive ? "active" : ""}`}
+                  onMouseEnter={(e) => handleMouseEnter(e, item.label)}
+                  onMouseLeave={handleMouseLeave}
                   aria-label={item.label}
                 >
                   <span className="menu-icon">{item.icon}</span>
@@ -339,6 +365,8 @@ export default function Sidebar() {
                 type="button"
                 className="logout-btn"
                 onClick={logout}
+                onMouseEnter={(e) => handleMouseEnter(e, "Logout")}
+                onMouseLeave={handleMouseLeave}
                 aria-label="Logout"
               >
                 <FiLogOut className="logout-icon" />
@@ -356,6 +384,16 @@ export default function Sidebar() {
           top={flyout.top}
           onClose={closeFlyout}
         />
+      )}
+
+      {/* React Tooltip rendered outside sidebar so it can overflow */}
+      {tooltip && collapsed && (
+        <div 
+          className="sidebar-tooltip" 
+          style={{ top: tooltip.top }}
+        >
+          {tooltip.label}
+        </div>
       )}
     </>
   );
