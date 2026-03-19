@@ -17,6 +17,14 @@ export const listClients = (params) => {
 };
 
 /**
+ * NEW: List clients by tenant_id (Independent function)
+ * GET /clients/tenant-list
+ */
+export const listClientsByTenantId = (params) => {
+  return api.get("/clients/tenant-list", { params });
+};
+
+/**
  * Get client details by ID
  * GET /clients/:id
  */

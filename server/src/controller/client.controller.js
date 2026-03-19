@@ -1,6 +1,7 @@
 import {
   createClientService,
   listClientsService,
+  getClientByIdService,
   updateClientService,
   deleteClientService,
 } from "../services/client.service.js";
@@ -214,5 +215,35 @@ export const deleteClientController = async (req, res) => {
     }
 
     return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Controller for listing clients by tenant_id
+ */
+export const listClientsByTenantIdController = async (req, res) => {
+  try {
+    const tenant_id = req.user.tenant_id;
+    const { page = 1, limit = 10, search = "" } = req.query;
+
+    const { listClientsByTenantIdService } = await import("../services/client.service.js");
+    
+    const result = await listClientsByTenantIdService({
+      tenant_id,
+      page: Number(page),
+      limit: Number(limit),
+      search
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: result.clients,
+      pagination: result.pagination
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };

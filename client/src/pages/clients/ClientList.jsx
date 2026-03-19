@@ -4,7 +4,7 @@ import FilterBar from "./components/FilterBar";
 import ClientTable from "./components/ClientTable";
 import AdvancedFilterModal from "./components/AdvancedFilterModal";
 import Sidebar from "../../components/SideBar";
-import { listClients } from "../../api/client.api";
+import { listClientsByTenantId } from "../../api/client.api";
 import "../../styles/ClientList.css";
 
 const ClientList = () => {
@@ -45,7 +45,7 @@ const ClientList = () => {
         type: currentFilters.type
       };
       
-      const resp = await listClients(params);
+      const resp = await listClientsByTenantId(params);
       setClients(resp.data.data);
       setPagination(prev => ({ ...prev, ...resp.data.pagination }));
     } catch (e) {

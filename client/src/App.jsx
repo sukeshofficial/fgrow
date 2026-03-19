@@ -25,6 +25,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import TenantDetailView from "./pages/admin/TenantDetailView";
 import Users from "./pages/Users";
 import CreateClientWizard from "./pages/clients/CreateClientWizard";
+import EditClientWizard from "./pages/clients/EditClientWizard";
 import ClientList from "./pages/clients/ClientList";
 
 /* Routing */
@@ -88,6 +89,7 @@ const App = () => {
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/todo" element={<Tasks />} />
             <Route path="/clients/create" element={<CreateClientWizard />} />
+            <Route path="/clients/:id" element={<EditClientWizard />} />
             <Route path="/clients" element={<ClientList />} />
             <Route path="/services" element={<Tasks />} />
             <Route path="/finance" element={<Tasks />} />

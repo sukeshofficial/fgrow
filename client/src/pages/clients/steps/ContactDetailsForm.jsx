@@ -5,6 +5,12 @@ const ContactDetailsForm = ({ data, onNext, onPrev, isTransitioning }) => {
   const [form, setForm] = useState(data);
   const [errors, setErrors] = useState({});
 
+  React.useEffect(() => {
+    if (data) {
+      setForm(data);
+    }
+  }, [data]);
+
   const handleChange = (key, value) => {
     setForm(prev => ({ ...prev, [key]: value }));
     if (errors[key]) {

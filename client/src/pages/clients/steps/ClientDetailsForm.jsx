@@ -22,6 +22,12 @@ const ClientDetailsForm = ({ data, onNext, isTransitioning }) => {
     fetchTags();
   }, []);
 
+  useEffect(() => {
+    if (data) {
+      setForm(data);
+    }
+  }, [data]);
+
   const fetchGroups = async () => {
     try {
       const resp = await listClientGroups();
