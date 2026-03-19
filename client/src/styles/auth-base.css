@@ -77,7 +77,7 @@
 }
 
 .btn.primary {
-    margin-top: 2rem;
+    margin-top: 2rem !important;
     background: linear-gradient(90deg, #6d5cff, #7c5cff);
     color: #fff;
     border: 1px solid transparent;

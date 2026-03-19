@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 
+import { CiCamera } from "react-icons/ci";
+
 import { useAuth } from "../../hooks/useAuth.js";
 import { createTenant } from "../../api/tenant.api.js";
 import { checkAuth } from "../../features/auth/auth.actions.js";
 import cameraIcon from "../../assets/camera.png";
+import { HiOutlineArrowLeft } from "react-icons/hi2";
 
 import "../../styles/tenant-gate.css";
 
@@ -28,7 +31,7 @@ export const TENANT_REQUIRED_FIELDS = [
   },
 ];
 
-export const CreateTenantModal = () => {
+export const CreateTenantModal = ({ onClose }) => {
   const { user, dispatch } = useAuth();
 
   const [form, setForm] = useState({
@@ -170,7 +173,18 @@ export const CreateTenantModal = () => {
   return (
     <div className="tenant-modal-overlay" aria-modal="true" role="dialog">
       <div className="tenant-modal">
-        <h2 className="tenant-modal-title">Tenant Admin</h2>
+        {onClose && (
+          <button
+            type="button"
+            className="tenant-back-btn"
+            onClick={onClose}
+            aria-label="Go back"
+          >
+            <HiOutlineArrowLeft size={20} />
+            <span>Back</span>
+          </button>
+        )}
+        <h2 className="tenant-modal-title">Client Creation</h2>
         <p className="tenant-modal-subtitle">Fill details for approval</p>
 
         {error && <div className="tenant-form-error">{error}</div>}
@@ -179,7 +193,9 @@ export const CreateTenantModal = () => {
           <div className="tenant-form-main">
             <div className="tenant-form-fields">
               <label className="tenant-label" htmlFor="tenant-companyName">
-                Company Name <span className="tenant-required">*</span>
+                <span className="tenant-label-heading">
+                  Company Name <span className="tenant-required">*</span>
+                </span>
                 <input
                   type="text"
                   id="tenant-companyName"
@@ -192,7 +208,7 @@ export const CreateTenantModal = () => {
               </label>
 
               <label className="tenant-label" htmlFor="tenant-gstin">
-                GSTIN
+                <span className="tenant-label-heading">GSTIN</span>
                 <input
                   type="text"
                   id="tenant-gstin"
@@ -204,7 +220,7 @@ export const CreateTenantModal = () => {
               </label>
 
               <label className="tenant-label" htmlFor="tenant-officialAddress">
-                Official Address
+                <span className="tenant-label-heading">Official Address</span>
                 <input
                   type="text"
                   id="tenant-officialAddress"
@@ -239,7 +255,9 @@ export const CreateTenantModal = () => {
                   className="tenant-label"
                   htmlFor="tenant-companyPhone"
                 >
-                  Contact No <span className="tenant-required">*</span>
+                  <span className="tenant-label-heading">
+                    Contact No <span className="tenant-required">*</span>
+                  </span>
                   <input
                     type="tel"
                     id="tenant-companyPhone"
@@ -253,7 +271,7 @@ export const CreateTenantModal = () => {
               </div>
 
               <label className="tenant-label" htmlFor="tenant-gstCertificate">
-                GST Certificate
+                <span className="tenant-label-heading">GST Certificate</span>
                 <input
                   type="text"
                   id="tenant-gstCertificate"
@@ -266,7 +284,7 @@ export const CreateTenantModal = () => {
               </label>
 
               <div className="tenant-label owner-email">
-                Owner email
+                <span className="tenant-label-heading">Owner email</span>
                 <div className="tenant-owner-email-value">{user?.email}</div>
               </div>
             </div>
@@ -286,13 +304,12 @@ export const CreateTenantModal = () => {
                       className="tenant-logo-preview"
                     />
                     <div className="tenant-logo-overlay">
-                      <img src={cameraIcon} alt="Change logo" className="tenant-logo-camera-icon" />
                       <span className="tenant-logo-overlay-text">Change</span>
                     </div>
                   </>
                 ) : (
                   <div className="tenant-logo-placeholder">
-                    <img src={cameraIcon} alt="Upload logo" className="tenant-logo-camera-icon" />
+                    <CiCamera className="tenant-logo-camera-icon"/>
                     <span>Company Logo</span>
                     <span className="tenant-logo-hint-text">click to upload</span>
                   </div>

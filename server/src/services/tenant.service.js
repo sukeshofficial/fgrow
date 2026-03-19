@@ -128,7 +128,7 @@ export const rejectTenantService = async (tenantId, reason, adminId) => {
 // --------------------------------------------------
 // 4️⃣ Re-appeal Tenant
 // --------------------------------------------------
-export const reAppealTenantService = async (tenantId, userId) => {
+export const reAppealTenantService = async (tenantId, userId, updates = {}) => {
   const tenant = await Tenant.findById(tenantId);
 
   if (!tenant) {
@@ -143,6 +143,19 @@ export const reAppealTenantService = async (tenantId, userId) => {
   if (tenant.appealCount >= 3) {
     throw new Error("Maximum appeal attempts reached");
   }
+
+  // Apply updated company details if provided
+  if (updates.name) {
+    tenant.name = updates.name;
+    tenant.domain = slugify(updates.name, { lower: true });
+  }
+  if (updates.companyEmail) tenant.companyEmail = updates.companyEmail;
+  if (updates.companyPhone) tenant.companyPhone = updates.companyPhone;
+  if (updates.gstNumber) tenant.gstNumber = updates.gstNumber;
+  if (updates.registrationNumber) tenant.registrationNumber = updates.registrationNumber;
+  if (updates.timezone) tenant.timezone = updates.timezone;
+  if (updates.currency) tenant.currency = updates.currency;
+  if (updates.companyAddress) tenant.companyAddress = updates.companyAddress;
 
   tenant.verificationStatus = "pending";
   tenant.rejection_reason = null;

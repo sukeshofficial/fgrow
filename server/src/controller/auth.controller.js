@@ -485,7 +485,7 @@ export const getMe = async (req, res) => {
 
     const tenant = await Tenant.findById(user.tenant_id)
       .select(
-        "name verificationStatus verifiedBy verifiedAt rejection_reason isActive createdAt plan",
+        "name companyEmail companyPhone gstNumber registrationNumber companyAddress timezone currency verificationStatus verifiedBy verifiedAt rejection_reason isActive createdAt plan appealCount",
       )
       .populate("verifiedBy", "name email");
 
@@ -548,8 +548,16 @@ export const getMe = async (req, res) => {
           tenant: {
             id: tenant._id,
             name: tenant.name,
+            companyEmail: tenant.companyEmail,
+            companyPhone: tenant.companyPhone,
+            gstNumber: tenant.gstNumber,
+            registrationNumber: tenant.registrationNumber,
+            companyAddress: tenant.companyAddress,
+            timezone: tenant.timezone,
+            currency: tenant.currency,
             verificationStatus: tenant.verificationStatus,
             rejection_reason: tenant.rejection_reason,
+            appealCount: tenant.appealCount,
             verifiedBy: tenant.verifiedBy,
             verifiedAt: tenant.verifiedAt,
           },

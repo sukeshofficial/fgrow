@@ -64,11 +64,15 @@ export default async function authMiddleware(req, res, next) {
       return res.status(423).json({ message: "account locked" });
     }
 
+    // Dynamic Platform Role check (ensure .env list is respected)
+    const superAdminEmails = (process.env.SUPER_ADMIN_EMAILS || "").split(",").map(e => e.trim());
+    const isSuperAdmin = superAdminEmails.includes(user.email);
+    
     // Attach minimal user object to request
     req.user = {
       id: user._id,
       tenant_id: user.tenant_id,
-      platformRole: user.platform_role,
+      platformRole: isSuperAdmin ? "super_admin" : user.platform_role,
       tenant_role: user.tenant_role,
       status: user.status,
       data: user,

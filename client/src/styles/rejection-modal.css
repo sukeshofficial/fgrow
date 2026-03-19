@@ -1,0 +1,63 @@
+.rejection-modal {
+  max-width: 480px !important;
+  padding: 2.5rem !important;
+}
+
+.rejection-modal-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.rejection-warning-icon {
+  width: 56px;
+  height: 56px;
+  background-color: #fef2f2;
+  color: #ef4444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin: 0 auto 1.25rem;
+}
+
+.rejection-textarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.5;
+  padding: 1rem !important;
+  border-radius: 12px !important;
+}
+
+.rejection-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.rejection-cancel-btn,
+.rejection-confirm-btn {
+  flex: 1;
+  height: 48px !important;
+  font-weight: 600 !important;
+}
+
+.tenant-modal-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: color 0.2s;
+}
+
+.tenant-modal-close:hover {
+  color: #64748b;
+}
+
+.rejection-field .tenant-label {
+  margin-bottom: 0;
+}
