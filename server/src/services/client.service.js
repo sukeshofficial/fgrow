@@ -110,6 +110,8 @@ export const listClientsService = async ({
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
+      .populate("group", "name")
+      .populate("tags", "name color")
       .lean();
 
     const total = await Client.countDocuments(query);

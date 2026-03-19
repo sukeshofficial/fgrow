@@ -26,6 +26,7 @@ const EditClientWizard = () => {
     primary_contact_mobile: "",
     primary_contact_email: "",
     primary_contact_role: "",
+    contacts: [],
     address: {
       street: "",
       city: "",
@@ -60,6 +61,7 @@ const EditClientWizard = () => {
           primary_contact_mobile: clientData.primary_contact_mobile || "",
           primary_contact_email: clientData.primary_contact_email || "",
           primary_contact_role: clientData.primary_contact_role || "",
+          contacts: clientData.contacts || [],
           address: {
             street: clientData.address?.street || "",
             city: clientData.address?.city || "",
