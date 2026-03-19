@@ -78,7 +78,7 @@ const ClientTable = ({ clients, loading }) => {
         </tbody>
       </table>
       
-      <style jsx>{`
+      <style>{`
         .action-btn {
           border: 1px solid #e2e8f0;
           background: white;

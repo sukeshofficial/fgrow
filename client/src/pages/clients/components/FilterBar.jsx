@@ -23,7 +23,7 @@ const FilterBar = ({
       <div className="quick-filters">
         <div className="status-toggle">
           <button 
-            className={`toggle-btn ${!filters.is_active || filters.is_active === 'all' ? 'active' : ''}`}
+            className={`toggle-btn ${filters.is_active === 'all' || filters.is_active === undefined ? 'active' : ''}`}
             onClick={() => onFilterChange("is_active", 'all')}
           >
             All

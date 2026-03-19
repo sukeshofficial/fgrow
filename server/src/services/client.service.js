@@ -62,7 +62,7 @@ export const listClientsService = async ({
 
     // apply filters dynamically
     for (const key of allowedFilters) {
-      if (filters[key] !== undefined) {
+      if (filters[key] !== undefined && filters[key] !== "") {
         query[key] = filters[key];
       }
     }
@@ -84,13 +84,9 @@ export const listClientsService = async ({
     }
 
     // tags filter
-    if (filters.tags) {
-      const tagArray = Array.isArray(filters.tags)
-        ? filters.tags
-        : [filters.tags];
-
+    if (filters.tags && Array.isArray(filters.tags) && filters.tags.length > 0) {
       query.tags = {
-        $in: tagArray
+        $in: filters.tags
           .filter((id) => Types.ObjectId.isValid(id))
           .map((id) => new Types.ObjectId(id)),
       };

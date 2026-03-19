@@ -4,7 +4,7 @@ import FilterBar from "./components/FilterBar";
 import ClientTable from "./components/ClientTable";
 import AdvancedFilterModal from "./components/AdvancedFilterModal";
 import Sidebar from "../../components/SideBar";
-import { listClientsByTenantId } from "../../api/client.api";
+import { listClients } from "../../api/client.api";
 import "../../styles/ClientList.css";
 
 const ClientList = () => {
@@ -42,10 +42,13 @@ const ClientList = () => {
         search: currentFilters.search,
         ...activeFilter,
         group: currentFilters.group,
-        type: currentFilters.type
+        type: currentFilters.type,
+        tags: currentFilters.tags,
+        pan: currentFilters.pan,
+        gstin: currentFilters.gstin
       };
       
-      const resp = await listClientsByTenantId(params);
+      const resp = await listClients(params);
       setClients(resp.data.data);
       setPagination(prev => ({ ...prev, ...resp.data.pagination }));
     } catch (e) {
