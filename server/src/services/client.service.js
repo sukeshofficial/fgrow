@@ -58,7 +58,10 @@ export const createClientService = async ({ tenant_id, user_id, payload }) => {
               client: savedClient._id, 
               service: assign.service_id,
               custom_price: assign.custom_price,
-              custom_users: assign.custom_users 
+              custom_users: assign.custom_users,
+              is_recurring: assign.is_recurring,
+              start_date: assign.start_date,
+              end_date: assign.end_date 
             } 
           },
           upsert: true
@@ -191,11 +194,14 @@ export const getClientByIdService = async ({ tenant_id, client_id }) => {
     // Fetch service assignments
     const ServiceClient = mongoose.model("ServiceClient");
     const assignments = await ServiceClient.find({ client: client_id, tenant_id }).lean();
-    client.service_assignments = assignments.map(a => ({
-        service_id: a.service,
-        custom_price: a.custom_price,
-        custom_users: a.custom_users
-    }));
+     client.service_assignments = assignments.map(a => ({
+         service_id: a.service,
+         custom_price: a.custom_price,
+         custom_users: a.custom_users,
+         is_recurring: a.is_recurring,
+         start_date: a.start_date,
+         end_date: a.end_date
+     }));
 
     return client;
   } catch (error) {
@@ -304,7 +310,10 @@ export const updateClientService = async ({ tenant_id, user_id, client_id, paylo
               client: client_id, 
               service: assign.service_id,
               custom_price: assign.custom_price,
-              custom_users: assign.custom_users 
+              custom_users: assign.custom_users,
+              is_recurring: assign.is_recurring,
+              start_date: assign.start_date,
+              end_date: assign.end_date 
             } 
           },
           upsert: true

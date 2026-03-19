@@ -23,7 +23,9 @@ const serviceClientSchema = new Schema({
     },
 
     custom_price: Number,
-
+    is_recurring: Boolean,
+    start_date: Date,
+    end_date: Date,
     custom_users: [{
         type: Schema.Types.ObjectId,
         ref: "User"
