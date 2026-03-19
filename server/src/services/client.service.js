@@ -62,7 +62,7 @@ export const listClientsService = async ({
 
     // apply filters dynamically
     for (const key of allowedFilters) {
-      if (filters[key] !== undefined) {
+      if (filters[key] !== undefined && filters[key] !== "") {
         query[key] = filters[key];
       }
     }
@@ -84,13 +84,9 @@ export const listClientsService = async ({
     }
 
     // tags filter
-    if (filters.tags) {
-      const tagArray = Array.isArray(filters.tags)
-        ? filters.tags
-        : [filters.tags];
-
+    if (filters.tags && Array.isArray(filters.tags) && filters.tags.length > 0) {
       query.tags = {
-        $in: tagArray
+        $in: filters.tags
           .filter((id) => Types.ObjectId.isValid(id))
           .map((id) => new Types.ObjectId(id)),
       };
@@ -257,6 +253,49 @@ export const deleteClientService = async ({ tenant_id, user_id, client_id, force
       if (!archived) throw new Error("Client not found or already archived");
       return { archived, hard: false };
     }
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+/**
+ * NEW: List all clients by tenant_id (Independent function)
+ */
+export const listClientsByTenantIdService = async ({ tenant_id, page = 1, limit = 10, search = "" }) => {
+  try {
+    const query = {
+      tenant_id,
+      archived: false
+    };
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { pan: { $regex: search, $options: "i" } },
+        { file_no: { $regex: search, $options: "i" } }
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+    const clients = await Client.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("group", "name")
+      .populate("tags", "name color")
+      .lean();
+
+    const total = await Client.countDocuments(query);
+
+    return {
+      clients,
+      pagination: {
+        total,
+        page,
+        limit,
+        total_pages: Math.ceil(total / limit)
+      }
+    };
   } catch (error) {
     throw new Error(error.message);
   }

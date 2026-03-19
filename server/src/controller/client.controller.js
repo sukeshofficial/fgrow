@@ -1,9 +1,52 @@
 import {
   createClientService,
   listClientsService,
+  getClientByIdService,
   updateClientService,
   deleteClientService,
 } from "../services/client.service.js";
+import { uploadToCloudAndUnlink } from "../utils/cloudinary.js";
+
+
+/**
+ * Upload client photo to Cloudinary
+ */
+export const uploadClientPhotoController = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No photo uploaded",
+      });
+    }
+
+    const result = await uploadToCloudAndUnlink(req.file.path, "clients");
+
+    if (!result.success) {
+      console.error("Cloudinary upload failed:", result.error);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to upload photo to Cloudinary",
+        error: result.error,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Photo uploaded successfully",
+      data: {
+        public_id: result.public_id,
+        secure_url: result.secure_url,
+      },
+    });
+  } catch (error) {
+    console.error("Upload controller error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 
 export const createClientController = async (req, res) => {
@@ -172,5 +215,35 @@ export const deleteClientController = async (req, res) => {
     }
 
     return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Controller for listing clients by tenant_id
+ */
+export const listClientsByTenantIdController = async (req, res) => {
+  try {
+    const tenant_id = req.user.tenant_id;
+    const { page = 1, limit = 10, search = "" } = req.query;
+
+    const { listClientsByTenantIdService } = await import("../services/client.service.js");
+    
+    const result = await listClientsByTenantIdService({
+      tenant_id,
+      page: Number(page),
+      limit: Number(limit),
+      search
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: result.clients,
+      pagination: result.pagination
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };

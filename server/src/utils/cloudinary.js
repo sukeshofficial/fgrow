@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import "dotenv/config";
+import fs from "fs";
 
 // config
 cloudinary.config({
@@ -56,6 +57,49 @@ export const uploadFileToCloud = async (file_path, folder = "expenses") => {
       mime: result.format,
     };
   } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+/**
+ * Upload to Cloudinary and unlink local file
+ */
+export const uploadToCloudAndUnlink = async (file_path, folder = "clients") => {
+  try {
+    if (!file_path) {
+      throw new Error("File path is missing");
+    }
+
+    const result = await cloudinary.uploader.upload(file_path, {
+      folder,
+      resource_type: "image",
+    });
+
+    // Unlink file from local storage
+    if (fs.existsSync(file_path)) {
+      fs.unlinkSync(file_path);
+    }
+
+    return {
+      success: true,
+      public_id: result.public_id,
+      secure_url: result.secure_url,
+    };
+  } catch (error) {
+    console.error("Cloudinary upload & unlink error:", error.message);
+
+    // Try to unlink even if upload fails
+    try {
+      if (file_path && fs.existsSync(file_path)) {
+        fs.unlinkSync(file_path);
+      }
+    } catch (e) {
+      console.error("Error unlinking file after failed upload:", e.message);
+    }
+
     return {
       success: false,
       error: error.message,

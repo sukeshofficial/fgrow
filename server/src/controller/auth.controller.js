@@ -164,7 +164,42 @@ export const registerUser = async (req, res) => {
     await sendEmail({
       to: email,
       subject: "Your verification code",
-      html: `<p>Your verification code is: <strong>${rawOtp}</strong>. It expires in 5 minutes.</p>`,
+      text: `Your verification code is ${rawOtp}. It expires in 5 minutes.`,
+      html: `
+    <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
+      <div style="max-width: 500px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; border: 1px solid #e0e0e0;">
+        
+        <h2 style="margin-top: 0; color: #2c3e50;">Verify Your Email</h2>
+        
+        <p style="font-size: 14px; color: #555;">
+          Use the verification code below to continue. This code will expire in <strong>5 minutes</strong>.
+        </p>
+
+        <div style="
+          margin: 25px 0;
+          padding: 15px;
+          text-align: center;
+          font-size: 24px;
+          font-weight: bold;
+          letter-spacing: 4px;
+          background-color: #f8f9fa;
+          border: 1px dashed #ccc;
+          border-radius: 6px;
+        ">
+          ${rawOtp}
+        </div>
+
+        <p style="font-size: 13px; color: #888;">
+          If you didn’t request this code, you can safely ignore this email.
+        </p>
+
+        <p style="font-size: 13px; color: #888;">
+          — FGrow Team
+        </p>
+
+      </div>
+    </div>
+  `,
     });
 
     return res.status(201).json({
@@ -262,7 +297,46 @@ export const resendSignupOtp = async (req, res) => {
     await sendEmail({
       to: email,
       subject: "Your new verification code (resend)",
-      html: `<p>Your verification code is: <strong>${otp}</strong>. It expires in 5 minutes.</p>`,
+      text: `Your new verification code is ${otp}. It expires in 5 minutes.`,
+      html: `
+    <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
+      <div style="max-width: 500px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; border: 1px solid #e0e0e0;">
+        
+        <h2 style="margin-top: 0; color: #2c3e50;">New Verification Code 🔄</h2>
+        
+        <p style="font-size: 14px; color: #555;">
+          You requested a new verification code. Use the code below to continue.
+        </p>
+
+        <p style="font-size: 14px; color: #555;">
+          This code will expire in <strong>5 minutes</strong>.
+        </p>
+
+        <div style="
+          margin: 25px 0;
+          padding: 15px;
+          text-align: center;
+          font-size: 24px;
+          font-weight: bold;
+          letter-spacing: 4px;
+          background-color: #f8f9fa;
+          border: 1px dashed #ccc;
+          border-radius: 6px;
+        ">
+          ${otp.toString().split('').join(' ')}
+        </div>
+
+        <p style="font-size: 13px; color: #888;">
+          If you didn’t request this, you can safely ignore this email.
+        </p>
+
+        <p style="font-size: 13px; color: #888;">
+          — FGrow Team
+        </p>
+
+      </div>
+    </div>
+  `,
     });
 
     return res.status(200).json({ message: "Verification code resent" });
@@ -340,8 +414,53 @@ export const loginUser = async (req, res) => {
           try {
             await sendEmail({
               to: user.email,
-              subject: "Account temporarily locked",
-              html: `<p>Your account has been locked.</p><p><a href="${resetLink}">${resetLink}</a></p>`,
+              subject: "Your account has been temporarily locked",
+              text: `Your account has been temporarily locked due to multiple failed attempts. Reset your password here: ${resetLink}`,
+              html: `
+                <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
+                  <div style="max-width: 520px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                    
+                    <h2 style="margin-top: 0; color: #c0392b;">Account Locked 🔒</h2>
+                    
+                    <p style="font-size: 14px; color: #555;">
+                      Your account has been temporarily locked due to multiple unsuccessful login attempts.
+                    </p>
+
+                    <p style="font-size: 14px; color: #555;">
+                      For your security, please reset your password to regain access.
+                    </p>
+
+                    <div style="text-align: center; margin: 25px 0;">
+                      <a href="${resetLink}" 
+                        style="
+                          display: inline-block;
+                          padding: 12px 20px;
+                          background-color: #e74c3c;
+                          color: #ffffff;
+                          text-decoration: none;
+                          border-radius: 6px;
+                          font-weight: bold;
+                        ">
+                        Reset Password
+                      </a>
+                    </div>
+
+                    <p style="font-size: 13px; color: #888;">
+                      If you did not attempt to log in, we strongly recommend resetting your password immediately.
+                    </p>
+
+                    <p style="font-size: 13px; color: #aaa; word-break: break-all;">
+                      If the button doesn’t work, copy and paste this link into your browser:<br/>
+                      ${resetLink}
+                    </p>
+
+                    <p style="font-size: 13px; color: #888;">
+                      — FGrow Security Team
+                    </p>
+
+                  </div>
+                </div>
+              `,
             });
           } catch (e) {
             console.error("Failed to send lock email", e);

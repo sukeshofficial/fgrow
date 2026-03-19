@@ -74,6 +74,7 @@ const clientSchema = new Schema(
         primary_contact_name: String,
         primary_contact_mobile: String,
         primary_contact_email: String,
+        primary_contact_role: String,
 
         address: addressSchema,
         recurring_services: [recurringItemSchema],

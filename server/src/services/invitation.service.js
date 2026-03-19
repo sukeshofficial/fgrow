@@ -71,7 +71,40 @@ export const inviteUserService = async ({
   await sendEmail({
     to: email,
     subject: "You're invited to join FGrow",
-    text: `You have been invited to join our ${tenant.name}. Please click the following link to accept the invitation: ${frontendUrl}/invite/${inviteToken}`,
+    html: `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <h2 style="color: #2c3e50;">You're invited to join FGrow 🎉</h2>
+      
+      <p>Hello,</p>
+      
+      <p>
+        You have been invited to join <strong>${tenant.name}</strong>.
+      </p>
+      
+      <p>
+        Please use the invite token below to accept your invitation:
+      </p>
+      
+      <div style="
+        margin: 20px 0;
+        padding: 15px;
+        background: #f4f6f8;
+        border: 1px dashed #ccc;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        letter-spacing: 1px;
+      ">
+        ${inviteToken}
+      </div>
+      
+      <p>
+        If you did not expect this invitation, you can safely ignore this email.
+      </p>
+      
+      <p>Thanks,<br/>FGrow Team</p>
+    </div>
+  `,
   });
 
   return {
