@@ -49,12 +49,22 @@ export const createServiceService = async ({ tenant_id, user_id, payload }) => {
 export const listServicesService = async ({ tenant_id, page = 1, limit = 20, search, filters = {} }) => {
     const query = { tenant_id, archived: false };
 
-    const allowed = ["is_enabled", "is_recurring", "gst_rate"];
-    for (const k of allowed) {
-        if (filters[k] !== undefined) {
-            if (k === "is_enabled" || k === "is_recurring") query[k] = filters[k] === "true" || filters[k] === true;
-            else query[k] = filters[k];
-        }
+    // Boolean filters
+    if (filters.is_enabled !== undefined && filters.is_enabled !== 'all') {
+        query.is_enabled = filters.is_enabled === 'true' || filters.is_enabled === true;
+    }
+    if (filters.is_recurring !== undefined && filters.is_recurring !== 'all') {
+        query.is_recurring = filters.is_recurring === 'true' || filters.is_recurring === true;
+    }
+
+    // Number filters
+    if (filters.gst_rate !== undefined && filters.gst_rate !== "") {
+        query.gst_rate = Number(filters.gst_rate);
+    }
+
+    // Exact/Partial Match filters
+    if (filters.sac_code) {
+        query.sac_code = { $regex: filters.sac_code, $options: "i" };
     }
 
     if (search) {
@@ -69,7 +79,7 @@ export const listServicesService = async ({ tenant_id, page = 1, limit = 20, sea
 
     const [services, total] = await Promise.all([
         Service.find(query)
-            .select("name is_enabled is_recurring gst_rate default_billing_rate createdAt")
+            .select("name sac_code is_enabled is_recurring gst_rate default_billing_rate createdAt")
             .skip(skip)
             .limit(limit)
             .sort({ createdAt: -1 })
@@ -169,4 +179,11 @@ export const unassignClientService = async ({ tenant_id, service_id, client_id }
     const res = await ServiceClient.findOneAndDelete({ tenant_id, service: service_id, client: client_id });
     if (!res) throw new Error("Assignment not found");
     return res;
+};
+
+export const listServicesByTenantService = async ({ tenant_id }) => {
+    return await Service.find({ tenant_id, archived: false })
+        .select("name description is_enabled is_recurring gst_rate default_billing_rate sac_code createdAt")
+        .sort({ name: 1 })
+        .lean();
 };

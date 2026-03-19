@@ -27,6 +27,8 @@ import Users from "./pages/Users";
 import CreateClientWizard from "./pages/clients/CreateClientWizard";
 import EditClientWizard from "./pages/clients/EditClientWizard";
 import ClientList from "./pages/clients/ClientList";
+import Services from "./pages/services/Services";
+import CreateServiceWizard from "./pages/services/CreateServiceWizard";
 
 /* Routing */
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -91,7 +93,8 @@ const App = () => {
             <Route path="/clients/create" element={<CreateClientWizard />} />
             <Route path="/clients/:id" element={<EditClientWizard />} />
             <Route path="/clients" element={<ClientList />} />
-            <Route path="/services" element={<Tasks />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/services/create" element={<CreateServiceWizard />} />
             <Route path="/finance" element={<Tasks />} />
             <Route path="/documents" element={<Tasks />} />
             <Route path="/reports" element={<Tasks />} />

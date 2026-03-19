@@ -4,6 +4,7 @@ import Stepper from "../../components/ui/Stepper";
 import Sidebar from "../../components/SideBar";
 import ClientDetailsForm from "./steps/ClientDetailsForm";
 import ContactDetailsForm from "./steps/ContactDetailsForm";
+import ClientServicesForm from "./steps/ClientServicesForm";
 import { createClient } from "../../api/client.api";
 import "../../styles/CreateClient.css";
 
@@ -30,6 +31,16 @@ const CreateClientWizard = () => {
       state: "",
       postalCode: "",
       country: "India"
+    },
+    recurring_services: [],
+    service_assignments: [],
+    billing_profile: "",
+    opening_balance: {
+        enabled: false,
+        amount: 0,
+        type: "debit",
+        as_of: new Date().toISOString().split('T')[0],
+        currency: "INR"
     }
   });
 
@@ -87,24 +98,11 @@ const CreateClientWizard = () => {
         );
       case 2:
         return (
-          <div className="step-container">
-            <h2 className="form-title">Finalize Activation</h2>
-            <div style={{ padding: '40px', textAlign: 'center', background: '#f8fafc', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
-              <div style={{ fontSize: '48px', marginBottom: '20px' }}>🚀</div>
-              <h3 style={{ marginBottom: '12px' }}>Ready to Launch!</h3>
-              <p style={{ color: '#64748b', marginBottom: '24px' }}>All details are collected. Click the button below to create the client profile and activate their account.</p>
-              <button 
-                className="next-button" 
-                onClick={() => handleSave(formData)} 
-                style={{ position: 'static', width: 'auto', padding: '12px 40px' }}
-              >
-                Create & Activate Client
-              </button>
-            </div>
-            <div style={{ marginTop: '24px' }}>
-              <button className="btn ghost" onClick={handlePrev} style={{ borderRadius: '10px' }}>Back to Contacts</button>
-            </div>
-          </div>
+          <ClientServicesForm 
+            data={formData} 
+            onNext={handleNext} 
+            onPrev={handlePrev}
+          />
         );
       default:
         return null;

@@ -8,6 +8,7 @@ import {
   assignServiceToClientsController,
   listAssignedClientsController,
   unassignClientController,
+  listServicesByTenantController
 } from "../controller/service.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
@@ -18,6 +19,7 @@ const authStaff = [authMiddleware, requireRole("owner", "staff")];
 
 router.post("/", ...authStaff, createServiceController);
 router.get("/", ...authStaff, listServicesController);
+router.get("/tenant-list", ...authStaff, listServicesByTenantController);
 router.get("/:id", ...authStaff, getServiceByIdController);
 router.patch("/:id", ...authStaff, updateServiceController);
 router.delete("/:id", ...authStaff, deleteServiceController);
