@@ -24,6 +24,8 @@ import Tasks from "./pages/Tasks";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import TenantDetailView from "./pages/admin/TenantDetailView";
 import Users from "./pages/Users";
+import CreateClientWizard from "./pages/clients/CreateClientWizard";
+import ClientList from "./pages/clients/ClientList";
 
 /* Routing */
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -85,7 +87,8 @@ const App = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/todo" element={<Tasks />} />
-            <Route path="/clients" element={<Tasks />} />
+            <Route path="/clients/create" element={<CreateClientWizard />} />
+            <Route path="/clients" element={<ClientList />} />
             <Route path="/services" element={<Tasks />} />
             <Route path="/finance" element={<Tasks />} />
             <Route path="/documents" element={<Tasks />} />
