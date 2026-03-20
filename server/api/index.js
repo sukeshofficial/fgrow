@@ -1,25 +1,45 @@
 /**
  * Vercel Serverless Entry Point
  *
- * This file wraps the Express app as a serverless function.
- * Vercel calls this instead of starting a long-running HTTP server.
+ * Wraps the Express app as a serverless function.
+ * Connects to MongoDB once per cold-start and reuses the connection.
  */
 
 import dotenv from "dotenv";
-import connectDB from "../src/config/initDb.js";
+import mongoose from "mongoose";
 import app from "../src/app.js";
 
 dotenv.config();
 
-// Connect to MongoDB once per cold-start.
-// Subsequent invocations reuse the cached connection.
-let isConnected = false;
+// ─── DB connection (cached across hot reloads) ────────────────────────────
+async function connectIfNeeded() {
+  // Already connected — reuse
+  if (mongoose.connection.readyState === 1) return;
 
+  const uri = process.env.MONGO_URI;
+  if (!uri) throw new Error("MONGO_URI environment variable is not set");
+
+  await mongoose.connect(uri, { autoIndex: false });
+  console.log("✅ MongoDB connected:", mongoose.connection.host);
+}
+
+// ─── Handler ──────────────────────────────────────────────────────────────
 const handler = async (req, res) => {
-  if (!isConnected) {
-    await connectDB();
-    isConnected = true;
+  try {
+    await connectIfNeeded();
+  } catch (err) {
+    console.error("❌ DB connection failed:", err.message);
+    // Return a plain 503 — Express hasn't run yet so we set headers manually
+    const origin = req.headers.origin || "";
+    const allowed = (process.env.FRONTEND_URL || "").split(",").map((s) => s.trim());
+    if (allowed.includes(origin)) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+    }
+    res.setHeader("Content-Type", "application/json");
+    return res.status(503).json({ message: "Service temporarily unavailable" });
   }
+
   return app(req, res);
 };
 
