@@ -388,8 +388,8 @@ export default function Sidebar() {
 
       {/* React Tooltip rendered outside sidebar so it can overflow */}
       {tooltip && collapsed && (
-        <div 
-          className="sidebar-tooltip" 
+        <div
+          className="sidebar-tooltip"
           style={{ top: tooltip.top }}
         >
           {tooltip.label}

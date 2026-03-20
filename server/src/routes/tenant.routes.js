@@ -46,8 +46,7 @@ router.patch("/:tenantId/reject", ...authSuperAdmin, rejectTenant);
 // Re-appeal tenant (owner)
 router.patch("/re-appeal", ...authOwner, reAppealTenant);
 
-// Get tenant staff (owner only presumably, or staff too?)
-// The plan said ...authOwner, so only owner can see the full list of joiners.
-router.get("/staff", ...authOwner, getTenantStaff);
+// Get tenant staff (owner and staff)
+router.get("/staff", authMiddleware, requireRole("owner", "staff"), getTenantStaff);
 
 export default router;

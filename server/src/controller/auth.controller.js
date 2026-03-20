@@ -166,39 +166,56 @@ export const registerUser = async (req, res) => {
       subject: "Your verification code",
       text: `Your verification code is ${rawOtp}. It expires in 5 minutes.`,
       html: `
-    <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
-      <div style="max-width: 500px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; border: 1px solid #e0e0e0;">
-        
-        <h2 style="margin-top: 0; color: #2c3e50;">Verify Your Email</h2>
-        
-        <p style="font-size: 14px; color: #555;">
-          Use the verification code below to continue. This code will expire in <strong>5 minutes</strong>.
-        </p>
-
-        <div style="
-          margin: 25px 0;
-          padding: 15px;
-          text-align: center;
-          font-size: 24px;
-          font-weight: bold;
-          letter-spacing: 4px;
-          background-color: #f8f9fa;
-          border: 1px dashed #ccc;
-          border-radius: 6px;
-        ">
-          ${rawOtp}
-        </div>
-
-        <p style="font-size: 13px; color: #888;">
-          If you didn’t request this code, you can safely ignore this email.
-        </p>
-
-        <p style="font-size: 13px; color: #888;">
-          — FGrow Team
-        </p>
-
+  <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
+    <div style="max-width: 500px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; border: 1px solid #e0e0e0;">
+      
+      <!-- Circular Image -->
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img 
+          src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1773973712/users/t1dpnedlvx0ilutwbi6c.png" 
+          alt="Profile"
+          style="
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e0e0e0;
+          "
+        />
       </div>
+
+      <h2 style="margin-top: 0; color: #2c3e50; text-align: center;">
+        Verify Your Email
+      </h2>
+      
+      <p style="font-size: 14px; color: #555; text-align: center;">
+        Use the verification code below to continue. This code will expire in <strong>5 minutes</strong>.
+      </p>
+
+      <div style="
+        margin: 25px 0;
+        padding: 15px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        letter-spacing: 4px;
+        background-color: #f8f9fa;
+        border: 1px dashed #ccc;
+        border-radius: 6px;
+      ">
+        ${rawOtp}
+      </div>
+
+      <p style="font-size: 13px; color: #888; text-align: center;">
+        If you didn’t request this code, you can safely ignore this email.
+      </p>
+
+      <p style="font-size: 13px; color: #888; text-align: center;">
+        — FGrow Team
+      </p>
+
     </div>
+  </div>
   `,
     });
 
@@ -299,43 +316,60 @@ export const resendSignupOtp = async (req, res) => {
       subject: "Your new verification code (resend)",
       text: `Your new verification code is ${otp}. It expires in 5 minutes.`,
       html: `
-    <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
-      <div style="max-width: 500px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; border: 1px solid #e0e0e0;">
-        
-        <h2 style="margin-top: 0; color: #2c3e50;">New Verification Code 🔄</h2>
-        
-        <p style="font-size: 14px; color: #555;">
-          You requested a new verification code. Use the code below to continue.
-        </p>
-
-        <p style="font-size: 14px; color: #555;">
-          This code will expire in <strong>5 minutes</strong>.
-        </p>
-
-        <div style="
-          margin: 25px 0;
-          padding: 15px;
-          text-align: center;
-          font-size: 24px;
-          font-weight: bold;
-          letter-spacing: 4px;
-          background-color: #f8f9fa;
-          border: 1px dashed #ccc;
-          border-radius: 6px;
-        ">
-          ${otp.toString().split('').join(' ')}
-        </div>
-
-        <p style="font-size: 13px; color: #888;">
-          If you didn’t request this, you can safely ignore this email.
-        </p>
-
-        <p style="font-size: 13px; color: #888;">
-          — FGrow Team
-        </p>
-
+  <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
+    <div style="max-width: 500px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; border: 1px solid #e0e0e0;">
+      
+      <!-- Circular Image -->
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img 
+          src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1773973712/users/t1dpnedlvx0ilutwbi6c.png" 
+          alt="Profile"
+          style="
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e0e0e0;
+          "
+        />
       </div>
+
+      <h2 style="margin-top: 0; color: #2c3e50; text-align: center;">
+        New Verification Code 🔄
+      </h2>
+      
+      <p style="font-size: 14px; color: #555; text-align: center;">
+        You requested a new verification code. Use the code below to continue.
+      </p>
+
+      <p style="font-size: 14px; color: #555; text-align: center;">
+        This code will expire in <strong>5 minutes</strong>.
+      </p>
+
+      <div style="
+        margin: 25px 0;
+        padding: 15px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        letter-spacing: 4px;
+        background-color: #f8f9fa;
+        border: 1px dashed #ccc;
+        border-radius: 6px;
+      ">
+        ${otp.toString().split('').join(' ')}
+      </div>
+
+      <p style="font-size: 13px; color: #888; text-align: center;">
+        If you didn’t request this, you can safely ignore this email.
+      </p>
+
+      <p style="font-size: 13px; color: #888; text-align: center;">
+        — FGrow Team
+      </p>
+
     </div>
+  </div>
   `,
     });
 
@@ -417,50 +451,67 @@ export const loginUser = async (req, res) => {
               subject: "Your account has been temporarily locked",
               text: `Your account has been temporarily locked due to multiple failed attempts. Reset your password here: ${resetLink}`,
               html: `
-                <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
-                  <div style="max-width: 520px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; border: 1px solid #e0e0e0;">
-                    
-                    <h2 style="margin-top: 0; color: #c0392b;">Account Locked 🔒</h2>
-                    
-                    <p style="font-size: 14px; color: #555;">
-                      Your account has been temporarily locked due to multiple unsuccessful login attempts.
-                    </p>
+    <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
+      <div style="max-width: 520px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; border: 1px solid #e0e0e0;">
+        
+        <!-- Circular Image -->
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img 
+            src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1773973712/users/t1dpnedlvx0ilutwbi6c.png" 
+            alt="Profile"
+            style="
+              width: 80px;
+              height: 80px;
+              border-radius: 50%;
+              object-fit: cover;
+              border: 2px solid #e0e0e0;
+            "
+          />
+        </div>
 
-                    <p style="font-size: 14px; color: #555;">
-                      For your security, please reset your password to regain access.
-                    </p>
+        <h2 style="margin-top: 0; color: #c0392b; text-align: center;">
+          Account Locked 🔒
+        </h2>
+        
+        <p style="font-size: 14px; color: #555; text-align: center;">
+          Your account has been temporarily locked due to multiple unsuccessful login attempts.
+        </p>
 
-                    <div style="text-align: center; margin: 25px 0;">
-                      <a href="${resetLink}" 
-                        style="
-                          display: inline-block;
-                          padding: 12px 20px;
-                          background-color: #e74c3c;
-                          color: #ffffff;
-                          text-decoration: none;
-                          border-radius: 6px;
-                          font-weight: bold;
-                        ">
-                        Reset Password
-                      </a>
-                    </div>
+        <p style="font-size: 14px; color: #555; text-align: center;">
+          For your security, please reset your password to regain access.
+        </p>
 
-                    <p style="font-size: 13px; color: #888;">
-                      If you did not attempt to log in, we strongly recommend resetting your password immediately.
-                    </p>
+        <div style="text-align: center; margin: 25px 0;">
+          <a href="${resetLink}" 
+            style="
+              display: inline-block;
+              padding: 12px 20px;
+              background-color: #e74c3c;
+              color: #ffffff;
+              text-decoration: none;
+              border-radius: 6px;
+              font-weight: bold;
+            ">
+            Reset Password
+          </a>
+        </div>
 
-                    <p style="font-size: 13px; color: #aaa; word-break: break-all;">
-                      If the button doesn’t work, copy and paste this link into your browser:<br/>
-                      ${resetLink}
-                    </p>
+        <p style="font-size: 13px; color: #888; text-align: center;">
+          If you did not attempt to log in, we strongly recommend resetting your password immediately.
+        </p>
 
-                    <p style="font-size: 13px; color: #888;">
-                      — FGrow Security Team
-                    </p>
+        <p style="font-size: 13px; color: #aaa; word-break: break-all; text-align: center;">
+          If the button doesn’t work, copy and paste this link into your browser:<br/>
+          ${resetLink}
+        </p>
 
-                  </div>
-                </div>
-              `,
+        <p style="font-size: 13px; color: #888; text-align: center;">
+          — FGrow Security Team
+        </p>
+
+      </div>
+    </div>
+  `,
             });
           } catch (e) {
             console.error("Failed to send lock email", e);

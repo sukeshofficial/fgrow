@@ -42,8 +42,8 @@ export const JoinAsStaff = ({ onClose, initialToken }) => {
     } catch (err) {
       setError(
         err?.response?.data?.message ||
-          err?.message ||
-          "Failed to accept invitation. Please try again."
+        err?.message ||
+        "Failed to accept invitation. Please try again."
       );
     } finally {
       setSubmitting(false);
@@ -101,8 +101,9 @@ export const JoinAsStaff = ({ onClose, initialToken }) => {
             </label>
 
             <label className="tenant-label" htmlFor="invite-token">
-              Invitation Token <span className="tenant-required">*</span>
-              <input
+              <span className="tenant-label-text">
+                Invitation Token <span className="tenant-required">*</span>
+              </span>              <input
                 type="text"
                 id="invite-token"
                 className="tenant-input"

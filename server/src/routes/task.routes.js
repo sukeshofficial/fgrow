@@ -12,6 +12,7 @@ import {
   stopTimelogController,
   addTimelogController,
   getActivitiesController,
+  deleteTaskController,
 } from "../controller/task.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/tenant_role.middleware.js";
@@ -27,6 +28,7 @@ router.post("/", ...authStaff, createTaskController);
 // task details & update
 router.get("/:id", ...authStaff, getTaskController);
 router.put("/:id", ...authStaff, updateTaskController);
+router.delete("/:id", ...authStaff, deleteTaskController);
 
 // task status
 router.patch("/:id/status", ...authStaff, updateStatusController);

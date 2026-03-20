@@ -8,7 +8,10 @@ const recurringItemSchema = new Schema({
     sac_code: { type: String },
     gst_rate: { type: Number, default: 0 },
     default_billing_rate: { type: Number, default: 0 },
+    is_recurring: { type: Boolean, default: false },
     active: { type: Boolean, default: true },
+    start_date: { type: Date },
+    end_date: { type: Date },
     next_run: { type: Date },
 });
 

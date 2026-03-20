@@ -72,7 +72,10 @@ const ClientServicesForm = ({ data, onNext, onPrev, isEdit }) => {
             sac_code: service.sac_code, 
             gst_rate: service.gst_rate, 
             default_billing_rate: service.default_billing_rate,
-            active: true 
+            is_recurring: service.is_recurring || false,
+            active: true,
+            start_date: new Date().toISOString().split('T')[0],
+            end_date: "" 
           }
         ],
         service_assignments: [
@@ -81,6 +84,40 @@ const ClientServicesForm = ({ data, onNext, onPrev, isEdit }) => {
         ]
       }));
     }
+  };
+
+  const handleRecurringToggle = (serviceId, e) => {
+    e.stopPropagation();
+    setForm(prev => ({
+        ...prev,
+        recurring_services: prev.recurring_services.map(s => {
+            const sId = s.service?._id || s.service;
+            if (sId === serviceId) {
+                return { ...s, is_recurring: !s.is_recurring };
+            }
+            return s;
+        })
+    }));
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "";
+    return d.toISOString().split('T')[0];
+  };
+
+  const handleServiceDataChange = (serviceId, key, value) => {
+    setForm(prev => ({
+        ...prev,
+        recurring_services: prev.recurring_services.map(s => {
+            const sId = s.service?._id || s.service;
+            if (sId === serviceId) {
+                return { ...s, [key]: value };
+            }
+            return s;
+        })
+    }));
   };
 
   const handleAssignmentChange = (users) => {
@@ -110,57 +147,154 @@ const ClientServicesForm = ({ data, onNext, onPrev, isEdit }) => {
     <div className="step-container">
       <h2 className="form-title">Recurring Services</h2>
 
-      {/* Select Services Grid */}
-      <div className="form-field">
-        <label className="form-label">Select Services <span className="required-star">*</span></label>
-        <div className="services-selection-grid" style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
-            gap: '16px', 
-            background: 'var(--bg-light)', 
-            padding: '24px', 
-            borderRadius: '16px',
-            border: '1px solid var(--border-color)',
-            marginBottom: '32px'
+      {/* Select Services Dropdown */}
+      <div className="form-field" style={{ marginBottom: '32px' }}>
+        <label className="form-label" style={{ fontWeight: '600', fontSize: '13px', letterSpacing: '0.5px' }}>SELECT SERVICES <span style={{ color: '#ef4444' }}>*</span></label>
+        <div style={{ maxWidth: '500px', marginTop: '12px' }}>
+            <SearchableDropdown 
+                options={availableServices.map(s => ({ _id: s._id, name: s.name }))}
+                value={null} // Keep it empty for multiple selections
+                onChange={(serviceId) => {
+                    const fullService = availableServices.find(s => s._id === serviceId);
+                    if (fullService) handleServiceToggle(fullService);
+                }}
+                placeholder="Search and select services..."
+            />
+        </div>
+
+        {/* Selected Services List */}
+        <div className="selected-services-list" style={{ 
+            marginTop: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            maxHeight: '480px',
+            overflowY: 'auto',
+            paddingRight: '8px'
         }}>
-          {availableServices.map(service => {
-            const isSelected = form.recurring_services.some(s => (s.service?._id || s.service) === service._id);
+          {form.recurring_services.map(selectedService => {
+            const serviceId = selectedService.service?._id || selectedService.service;
+            const fullServiceInfo = availableServices.find(s => s._id === serviceId) || selectedService.service;
+            
             return (
               <div 
-                key={service._id}
-                className={`service-selection-card ${isSelected ? 'selected' : ''}`}
-                onClick={() => handleServiceToggle(service)}
+                key={serviceId}
+                className="selected-service-item"
                 style={{
                     background: 'white',
-                    border: isSelected ? '2px solid var(--primary-accent)' : '1px solid var(--border-color)',
-                    padding: '16px',
-                    borderRadius: '12px',
-                    cursor: 'pointer',
+                    border: '1.5px solid var(--primary-accent)',
+                    padding: '20px',
+                    borderRadius: '16px',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    transition: 'all 0.2s',
-                    boxShadow: isSelected ? '0 4px 12px rgba(99, 102, 241, 0.15)' : 'none'
+                    flexDirection: 'column',
+                    gap: '16px',
+                    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.08)',
+                    animation: 'slideIn 0.3s ease-out'
                 }}
               >
-                <div style={{ fontSize: '14px', fontWeight: '600', color: isSelected ? 'var(--primary-accent)' : 'var(--text-main)' }}>
-                  {service.name}
-                </div>
-                {isSelected && (
-                    <div style={{ 
-                        width: '20px', 
-                        height: '20px', 
-                        background: 'var(--primary-accent)', 
-                        borderRadius: '50%', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        color: 'white',
-                        fontSize: '12px'
-                    }}>
-                        <FiCheck />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ 
+                            width: '32px', 
+                            height: '32px', 
+                            background: '#f5f3ff', 
+                            borderRadius: '8px', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            color: 'var(--primary-accent)',
+                            fontWeight: 'bold'
+                        }}>
+                            {fullServiceInfo?.name?.charAt(0)}
+                        </div>
+                        <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-main)' }}>{fullServiceInfo?.name}</span>
                     </div>
-                )}
+                    <button 
+                        onClick={() => handleServiceToggle(fullServiceInfo)}
+                        style={{ 
+                            background: 'none', 
+                            border: 'none', 
+                            color: '#ef4444', 
+                            fontSize: '13px', 
+                            fontWeight: '600', 
+                            cursor: 'pointer',
+                            padding: '4px 8px'
+                        }}
+                    >
+                        Remove
+                    </button>
+                </div>
+
+                <div 
+                    style={{ 
+                        borderTop: '1px solid #f1f5f9',
+                        paddingTop: '16px',
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 2fr',
+                        gap: '24px',
+                        alignItems: 'end'
+                    }}
+                >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#64748b', letterSpacing: '0.5px' }}>BILLING TYPE</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '13px', fontWeight: '600', color: selectedService.is_recurring ? 'var(--primary-accent)' : '#64748b' }}>
+                                {selectedService.is_recurring ? 'Recurring' : 'One-time'}
+                            </span>
+                            <div 
+                                className={`custom-toggle ${selectedService.is_recurring ? 'active' : ''}`}
+                                onClick={(e) => handleRecurringToggle(serviceId, e)}
+                                style={{
+                                    width: '36px',
+                                    height: '20px',
+                                    background: selectedService.is_recurring ? 'var(--primary-accent)' : '#e2e8f0',
+                                    borderRadius: '10px',
+                                    position: 'relative',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <div style={{
+                                    width: '14px',
+                                    height: '14px',
+                                    background: 'white',
+                                    borderRadius: '50%',
+                                    position: 'absolute',
+                                    top: '3px',
+                                    left: selectedService.is_recurring ? '19px' : '3px',
+                                    transition: 'all 0.2s'
+                                }} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div className="date-field">
+                            <label style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', marginBottom: '6px', display: 'block' }}>
+                                {selectedService.is_recurring ? 'START DATE' : 'SERVICE DATE'}
+                            </label>
+                            <input 
+                                type="date"
+                                className="form-input"
+                                value={formatDate(selectedService.start_date)}
+                                onChange={(e) => handleServiceDataChange(serviceId, "start_date", e.target.value)}
+                                style={{ height: '38px' }}
+                            />
+                        </div>
+                        {selectedService.is_recurring && (
+                            <div className="date-field">
+                                <label style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', marginBottom: '6px', display: 'block' }}>END DATE</label>
+                                <input 
+                                    type="date"
+                                    className="form-input"
+                                    value={formatDate(selectedService.end_date)}
+                                    onChange={(e) => handleServiceDataChange(serviceId, "end_date", e.target.value)}
+                                    style={{ height: '38px' }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
               </div>
             );
           })}
