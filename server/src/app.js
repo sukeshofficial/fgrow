@@ -43,7 +43,7 @@ app.use("/api/v0/tags", tagRoutes);
 app.use("/api/v0/client-groups", clientGroupRoutes);
 app.use("/api/v0/services", serviceRoutes);
 app.use("/api/v0/tasks", taskRoutes);
-app.use("/api/v0/todo", todoRoutes);
+app.use("/api/v0/todos", todoRoutes);
 app.use("/api/v0/invoices", invoiceRoutes);
 app.use("/api/v0/receipts", receiptRoutes);
 app.use("/api/v0/quotations", quotationRoutes);

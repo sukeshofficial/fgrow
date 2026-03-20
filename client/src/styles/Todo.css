@@ -1,0 +1,449 @@
+/* Todo Dashboard Standard CSS */
+:root {
+  --primary-accent: #6366f1;
+  --primary-hover: #4f46e5;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --border-color: #e2e8f0;
+  --bg-light: #f8fafc;
+  --danger-red: #ef4444;
+  --success-green: #10b981;
+}
+
+.todo-dashboard-container {
+  padding: 32px;
+  min-height: calc(100vh - 50px);
+}
+
+.todo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.todo-title-section h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.todo-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.todo-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.todo-search-input {
+  padding: 10px 16px 10px 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  width: 260px;
+  font-size: 14px;
+  background: white;
+  transition: all 0.2s;
+  height: 42px;
+}
+
+.todo-search-input:focus {
+  outline: none;
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid var(--border-color);
+  padding: 0 16px;
+  height: 42px;
+  border-radius: 10px;
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background: #f9fafb;
+  border-color: var(--text-muted);
+}
+
+.new-todo-btn {
+  background: var(--primary-accent);
+  color: white;
+  border: none;
+  padding: 0 20px;
+  height: 42px;
+  border-radius: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+  transition: all 0.2s;
+}
+
+.new-todo-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+/* Kanban Board Layout */
+.kanban-board {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 4px;
+  align-items: flex-start;
+}
+
+.kanban-column {
+  background: #f1f5f9; /* Subtle gray bg for columns */
+  border-radius: 16px;
+  width: 320px;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 180px);
+  border: 1px solid transparent;
+}
+
+.column-header {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.column-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #475569;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.card-count {
+  background: #e2e8f0;
+  color: #475569;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.task-list {
+  padding: 0 12px 12px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 100px;
+}
+
+/* Redesigned Card (Matching CRM Standard) */
+.todo-card-v2 {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  cursor: grab;
+  position: relative;
+}
+
+.todo-card-v2:hover {
+  border-color: var(--primary-accent);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+}
+
+.todo-card-v2.dragging {
+  cursor: grabbing;
+  transform: rotate(1deg);
+  z-index: 100;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.card-v2-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.card-v2-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.priority-badge-v2 {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.priority-badge-v2.high { background: #fecaca; color: #991b1b; }
+.priority-badge-v2.medium { background: #fee2e2; color: #991b1b; } /* Just matching CRM patterns */
+.priority-badge-v2.low { background: #d1fae5; color: #065f46; }
+
+/* Custom Priority Pill (Matching Screenshot 2) */
+.priority-pill {
+  width: fit-content;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.priority-pill.low { background: #ecfdf5; color: #065f46; }
+.priority-pill.medium { background: #fffbeb; color: #92400e; }
+.priority-pill.high { background: #fef2f2; color: #991b1b; }
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.recurrence-icon {
+  color: var(--primary-accent);
+  font-size: 14px;
+}
+
+.created-by-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.card-v2-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.card-v2-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pill-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  gap: 4px;
+  border: 1px solid transparent;
+}
+
+.pill-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.pill-value {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.pill-value-with-icon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.pill-icon {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.card-v2-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.avatar-stack {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-v2 {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid white;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  margin-right: -8px;
+  font-size: 12px;
+}
+
+.add-avatar-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-main);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  margin-left: 12px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.action-buttons-v2 {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover { background: #f9fafb; }
+.icon-btn.primary { color: var(--primary-accent); border-color: #e0e7ff; background: #f5f3ff; }
+.icon-btn.danger { color: var(--danger-red); border-color: #fee2e2; background: #fef2f2; }
+.icon-btn.success { color: var(--success-green); border-color: #d1fae5; background: #ecfdf5; }
+.icon-btn.secondary { color: var(--text-muted); border-color: var(--border-color); background: #f8fafc; }
+
+.avatar-img-v2 {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Inline Editing Styles */
+.inline-title-input {
+  width: 100%;
+  border: 1px solid var(--primary-accent);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 16px;
+  font-weight: 700;
+  outline: none;
+  background: white;
+}
+
+.inline-pill-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-main);
+  outline: none;
+  padding: 0;
+}
+
+.todo-card-v2.editing {
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.loading-state {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* Custom Dropdown Adjustments for Logos */
+.selected-value-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.dropdown-selected-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dropdown-item img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dropdown-item:hover {
+  background: #f5f3ff;
+  color: var(--primary-accent);
+}

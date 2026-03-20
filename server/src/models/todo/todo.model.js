@@ -34,8 +34,8 @@ const todoSchema = new Schema(
     // bookkeeping
     status: {
       type: String,
-      enum: ["pending", "completed", "cancelled"],
-      default: "pending",
+      enum: ["new", "pending", "completed", "cancelled"],
+      default: "new",
       index: true,
     },
     completed_at: { type: Date, default: null },
@@ -46,6 +46,8 @@ const todoSchema = new Schema(
       default: "medium",
       index: true,
     },
+
+    position: { type: Number, default: 0, index: true },
 
     // optional link to client or service (IDs only)
     client: {

@@ -88,9 +88,26 @@ const SearchableDropdown = ({
               <span className="placeholder">{placeholder}</span>
             )
           ) : (
-            <span className={value ? "selected-value" : "placeholder"}>
-              {options.find((o) => o._id === value)?.name || placeholder}
-            </span>
+            <div className="selected-value-wrapper">
+              {(() => {
+                const selectedOpt = options.find((o) => o._id === value);
+                const imageUrl = selectedOpt?.profile_avatar?.secure_url || selectedOpt?.photo?.secure_url;
+                return (
+                  <>
+                    {imageUrl && (
+                      <img 
+                        src={imageUrl} 
+                        alt="" 
+                        className="dropdown-selected-img"
+                      />
+                    )}
+                    <span className={value ? "selected-value" : "placeholder"}>
+                      {selectedOpt?.name || placeholder}
+                    </span>
+                  </>
+                );
+              })()}
+            </div>
           )}
         </div>
         <FiChevronDown className={`chevron ${isOpen ? "up" : ""}`} />

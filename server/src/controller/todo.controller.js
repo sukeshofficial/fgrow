@@ -6,6 +6,7 @@ import {
   updateTodo,
   archiveTodo,
   markComplete,
+  updateTodoPosition,
 } from "../services/todo.service.js";
 
 /**
@@ -23,21 +24,9 @@ function ensureTenant(req) {
 
 /**
  * sendError
- * Centralized error -> HTTP JSON responder used inside controllers.
- *
- * Behavior:
- *  - If err has `status` numeric -> use it.
- *  - If err.message === 'Todo already exists' -> 400.
- *  - Otherwise -> 500.
- *
- * For non-production, includes `stack` and `raw` to help debugging.
  */
 function sendError(res, err) {
-  // avoid sending headers twice
-  if (res.headersSent) {
-    // If headers already sent, do nothing (Express will handle)
-    return;
-  }
+  if (res.headersSent) return;
 
   const isKnownStatus = Number.isInteger(err?.status);
   const status = isKnownStatus
@@ -51,13 +40,10 @@ function sendError(res, err) {
     message: err?.message || "Internal server error",
   };
 
-  // Include helpful debug info in non-production only
   if (process.env.NODE_ENV !== "production") {
     response.error = {
-      // copy any other useful fields if present
       ...(err && typeof err === "object" ? { ...err } : {}),
     };
-    // Don't include the full object twice
     if (err && err.stack) response.error.stack = err.stack;
   }
 
@@ -76,33 +62,26 @@ export async function createTodoController(req, res, next) {
       title: req.body.title,
       details: req.body.details,
       has_due_date: !!req.body.has_due_date,
-      due_date: req.body.has_due_date ? req.body.due_date : null,
-      recurrence: req.body.recurrence || {},
+      due_date: (req.body.has_due_date && req.body.due_date) ? req.body.due_date : null,
+      recurrence: req.body.recurrence || { enabled: false },
       assign_to_user: !!req.body.assign_to_user,
-      user: req.body.assign_to_user ? req.body.user : null,
+      user: (req.body.assign_to_user && req.body.user) ? req.body.user : null,
       priority: req.body.priority || "medium",
       client: req.body.client || null,
       service: req.body.service || null,
-      created_by: req.user.id,
+      created_by: req.user.id || req.user._id,
+      status: req.body.status || "new"
     };
 
     const todo = await createTodo(payload);
     return res.status(201).json({ success: true, data: todo });
   } catch (err) {
-    // handle duplicate todo specially (service currently throws Error("Todo already exists"))
-    if (err && err.message === "Todo already exists") {
-      return sendError(res, { status: 400, message: err.message });
-    }
-    // If service threw {status, message} object, send that
     return sendError(res, err);
   }
 }
 
 /**
  * List / search todos
- * - By default completed todos are hidden.
- * - Use ?status=completed to only show completed.
- * - Use ?status=all to include all statuses (including completed).
  */
 export async function listTodosController(req, res, next) {
   try {
@@ -110,7 +89,7 @@ export async function listTodosController(req, res, next) {
 
     const filters = {
       tenant_id,
-      status: req.query.status, // undefined -> service will hide completed by default
+      status: req.query.status,
       user: req.query.user,
       priority: req.query.priority,
       client: req.query.client,
@@ -125,14 +104,14 @@ export async function listTodosController(req, res, next) {
 
     const page = Math.max(1, parseInt(req.query.page || "1", 10));
     const limit = Math.min(
-      Math.max(1, parseInt(req.query.limit || "25", 10)),
-      200,
+      Math.max(1, parseInt(req.query.limit || "100", 10)),
+      500,
     );
 
     const result = await listTodos(filters, {
       page,
       limit,
-      sort: { createdAt: -1 },
+      sort: { position: 1, createdAt: -1 },
     });
     return res.json({ success: true, ...result });
   } catch (err) {
@@ -158,43 +137,42 @@ export async function getTodoByIdController(req, res, next) {
 }
 
 /**
- * Update todo - only owner/staff or assigned user allowed (enforced here)
+ * Update todo
  */
 export async function updateTodoController(req, res, next) {
   try {
     const tenant_id = ensureTenant(req);
     const id = req.params.id;
     const actor = req.user;
-    const actorId = actor?.id;
+    const actorId = String(actor.id || actor._id);
 
     const todo = await getTodoById(tenant_id, id);
-    if (!todo)
-      return sendError(res, { status: 404, message: "Todo not found" });
+    if (!todo) return sendError(res, { status: 404, message: "Todo not found" });
 
     const isStaff = ["owner", "staff"].includes(actor.tenant_role);
-    const isAssignedUser =
-      todo.user && actorId && todo.user.toString() === actorId.toString();
+    const assignedUserId = todo.user?._id ? String(todo.user._id) : (todo.user ? String(todo.user) : null);
+    const isAssignedUser = assignedUserId === actorId;
+
     if (!isStaff && !isAssignedUser) {
       return sendError(res, { status: 403, message: "Forbidden" });
     }
 
-    const allowed = [
-      "title",
-      "details",
-      "has_due_date",
-      "due_date",
-      "recurrence",
-      "assign_to_user",
-      "user",
-      "priority",
-      "client",
-      "service",
-      "status",
-      "archived",
-    ];
     const updates = {};
+    const allowed = [
+      "title", "details", "has_due_date", "due_date", "recurrence",
+      "assign_to_user", "user", "priority", "client", "service",
+      "status", "archived", "position"
+    ];
     for (const key of allowed) {
-      if (req.body[key] !== undefined) updates[key] = req.body[key];
+      if (req.body[key] !== undefined) {
+        if (key === "due_date" && !req.body.due_date) {
+            updates[key] = null;
+        } else if ((key === "user" || key === "client" || key === "service") && !req.body[key]) {
+            updates[key] = null;
+        } else {
+            updates[key] = req.body[key];
+        }
+      }
     }
 
     const updated = await updateTodo(tenant_id, id, updates, actor);
@@ -205,7 +183,7 @@ export async function updateTodoController(req, res, next) {
 }
 
 /**
- * Delete (archive) - only staff/owner allowed
+ * Delete (archive)
  */
 export async function deleteTodoController(req, res, next) {
   try {
@@ -225,32 +203,61 @@ export async function deleteTodoController(req, res, next) {
 }
 
 /**
- * Mark complete - owner/staff or assigned user allowed
+ * Mark complete
  */
 export async function markTodoCompleteController(req, res, next) {
   try {
     const tenant_id = ensureTenant(req);
     const id = req.params.id;
     const actor = req.user;
-    const actorId = actor?.id;
+    const actorId = String(actor.id || actor._id);
 
     const todo = await getTodoById(tenant_id, id);
-    if (!todo)
-      return sendError(res, { status: 404, message: "Todo not found" });
+    if (!todo) return sendError(res, { status: 404, message: "Todo not found" });
 
     const isStaff = ["owner", "staff"].includes(actor.tenant_role);
-    const isAssignedUser =
-      todo.user && actorId && todo.user.toString() === actorId.toString();
+    const assignedUserId = todo.user?._id ? String(todo.user._id) : (todo.user ? String(todo.user) : null);
+    const isAssignedUser = assignedUserId === actorId;
+
     if (!isStaff && !isAssignedUser) {
       return sendError(res, { status: 403, message: "Forbidden" });
     }
 
-    const { todo: completed, nextTodo } = await markComplete(
-      tenant_id,
-      id,
-      actor,
-    );
+    const { todo: completed, nextTodo } = await markComplete(tenant_id, id, actor);
     return res.json({ success: true, data: { completed, next: nextTodo } });
+  } catch (err) {
+    return sendError(res, err);
+  }
+}
+
+/**
+ * Move todo (Kanban drag and drop)
+ */
+export async function moveTodoController(req, res, next) {
+  try {
+    const tenant_id = ensureTenant(req);
+    const id = req.params.id;
+    const actor = req.user;
+    const actorId = String(actor.id || actor._id);
+    const { status: newStatus, position: newPosition } = req.body;
+
+    if (newStatus === undefined || newPosition === undefined) {
+      return sendError(res, { status: 400, message: "status and position required" });
+    }
+
+    const todo = await getTodoById(tenant_id, id);
+    if (!todo) return sendError(res, { status: 404, message: "Todo not found" });
+
+    const isStaff = ["owner", "staff"].includes(actor.tenant_role);
+    const assignedUserId = todo.user?._id ? String(todo.user._id) : (todo.user ? String(todo.user) : null);
+    const isAssignedUser = assignedUserId === actorId;
+
+    if (!isStaff && !isAssignedUser) {
+      return sendError(res, { status: 403, message: "Forbidden" });
+    }
+
+    const updated = await updateTodoPosition(tenant_id, id, newStatus, newPosition, actor);
+    return res.json({ success: true, data: updated });
   } catch (err) {
     return sendError(res, err);
   }

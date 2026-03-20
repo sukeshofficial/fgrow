@@ -46,23 +46,33 @@ export async function createTodo(payload) {
     payload;
 
   // Check for duplicate ACTIVE todo
-  const existingTodo = await Todo.findOne({
+  const query = {
     tenant_id,
     title,
-    details,
-    user,
-    client,
-    service,
-    due_date,
+    details: details || null,
+    user: user || null,
+    client: client || null,
+    service: service || null,
+    due_date: due_date || null,
     archived: false,
-    status: { $ne: "completed" }, // important
-  });
+    status: { $ne: "completed" },
+  };
+
+  const existingTodo = await Todo.findOne(query);
 
   if (existingTodo) {
     throw new Error("Todo already exists");
   }
 
-  const todo = new Todo(payload);
+  // Get current max position for the status
+  const lastTodo = await Todo.findOne({ tenant_id, status: payload.status || "new", archived: false })
+    .sort({ position: -1 })
+    .select("position")
+    .lean();
+  
+  const nextPosition = lastTodo ? (lastTodo.position + 1) : 0;
+  
+  const todo = new Todo({ ...payload, position: nextPosition });
   await todo.save();
 
   return todo;
@@ -91,7 +101,7 @@ export async function listTodos(filters = {}, options = {}) {
     search,
   } = filters;
 
-  const { page = 1, limit = 25, sort = { createdAt: -1 } } = options;
+  const { page = 1, limit = 100, sort = { position: 1, createdAt: -1 } } = options;
 
   if (!tenant_id) throw new Error("tenant_id required");
 
@@ -101,20 +111,19 @@ export async function listTodos(filters = {}, options = {}) {
   // - If status === 'all' -> don't filter by status at all.
   // - If status provided and not 'all' -> filter by that status.
   // - If status not provided -> exclude completed todos by default.
-  if (typeof status !== "undefined") {
+  if (status) {
     if (status !== "all") {
       query.status = status;
     }
-    // else status === 'all' -> do not set query.status (allow all statuses)
   } else {
     // default behavior: hide completed todos
     query.status = { $ne: "completed" };
   }
 
-  if (user) query.user = mongoose.Types.ObjectId(user);
+  if (user) query.user = user;
   if (priority) query.priority = priority;
-  if (client) query.client = mongoose.Types.ObjectId(client);
-  if (service) query.service = mongoose.Types.ObjectId(service);
+  if (client) query.client = client;
+  if (service) query.service = service;
 
   if (created_from || created_to) {
     query.createdAt = {};
@@ -141,8 +150,8 @@ export async function listTodos(filters = {}, options = {}) {
       .sort(sort)
       .skip(skip)
       .limit(limit)
-      .populate("user", "name email")
-      .populate("created_by", "name")
+      .populate("user", "name email profile_avatar")
+      .populate("created_by", "name profile_avatar")
       .populate("client", "name")
       .populate("service", "name")
       .lean(),
@@ -191,6 +200,7 @@ export async function updateTodo(tenant_id, id, updates = {}, actor = null) {
     "status",
     "archived",
     "archived_at",
+    "position"
   ];
 
   Object.keys(updates).forEach((k) => {
@@ -203,12 +213,58 @@ export async function updateTodo(tenant_id, id, updates = {}, actor = null) {
 }
 
 /**
+ * updateTodoPosition(tenant_id, id, newStatus, newPosition, actor)
+ */
+export async function updateTodoPosition(tenant_id, id, newStatus, newPosition, actor = null) {
+  const todo = await Todo.findOne({ _id: id, tenant_id });
+  if (!todo) throw { status: 404, message: "Todo not found" };
+
+  const oldStatus = todo.status;
+  const oldPosition = todo.position;
+
+  if (oldStatus === newStatus) {
+    if (oldPosition < newPosition) {
+      await Todo.updateMany(
+        { tenant_id, status: newStatus, position: { $gt: oldPosition, $lte: newPosition }, archived: false },
+        { $inc: { position: -1 } }
+      );
+    } else if (oldPosition > newPosition) {
+      await Todo.updateMany(
+        { tenant_id, status: newStatus, position: { $gte: newPosition, $lt: oldPosition }, archived: false },
+        { $inc: { position: 1 } }
+      );
+    }
+  } else {
+    await Todo.updateMany(
+      { tenant_id, status: oldStatus, position: { $gt: oldPosition }, archived: false },
+      { $inc: { position: -1 } }
+    );
+    await Todo.updateMany(
+      { tenant_id, status: newStatus, position: { $gte: newPosition }, archived: false },
+      { $inc: { position: 1 } }
+    );
+    todo.status = newStatus;
+  }
+
+  todo.position = newPosition;
+  if (actor && actor.id) todo.updated_by = actor.id;
+  
+  await todo.save();
+  return todo;
+}
+
+/**
  * archiveTodo(tenant_id, id, actor)
  * Soft delete
  */
 export async function archiveTodo(tenant_id, id, actor = null) {
   const todo = await Todo.findOne({ _id: id, tenant_id });
   if (!todo) throw { status: 404, message: "Todo not found" };
+
+  await Todo.updateMany(
+    { tenant_id, status: todo.status, position: { $gt: todo.position }, archived: false },
+    { $inc: { position: -1 } }
+  );
 
   todo.archived = true;
   todo.archived_at = new Date();
@@ -230,10 +286,24 @@ export async function markComplete(tenant_id, id, actor = null) {
 
   if (todo.status === "completed") return { todo, nextTodo: null };
 
+  const oldStatus = todo.status;
+  const oldPosition = todo.position;
+
   todo.status = "completed";
   todo.completed_at = new Date();
+  const lastComp = await Todo.findOne({ tenant_id, status: "completed", archived: false })
+    .sort({ position: -1 })
+    .select("position")
+    .lean();
+  todo.position = lastComp ? (lastComp.position + 1) : 0;
+  
   if (actor && actor._id) todo.updated_by = actor._id;
   await todo.save();
+
+  await Todo.updateMany(
+    { tenant_id, status: oldStatus, position: { $gt: oldPosition }, archived: false },
+    { $inc: { position: -1 } }
+  );
 
   let nextTodo = null;
   const r = todo.recurrence || {};
@@ -266,12 +336,11 @@ export async function markComplete(tenant_id, id, actor = null) {
           priority: todo.priority,
           client: todo.client,
           service: todo.service,
-          status: "pending",
+          status: "new",
           created_by: actor?.id || todo.created_by,
         };
 
-        const created = new Todo(payload);
-        nextTodo = await created.save();
+        nextTodo = await createTodo(payload);
       }
     }
   }
