@@ -5,10 +5,12 @@ import InviteUserModal from "../components/tenant/InviteUserModal";
 import { getPendingInvitations, revokeInvitation } from "../api/invitation.api";
 import { Button } from "../components/ui/Button";
 import { FaUserPlus, FaEnvelope, FaTrashAlt, FaClock } from "react-icons/fa";
+import { useAuth } from "../hooks/useAuth";
 import "../styles/dashboard.css";
 import "../styles/welcome.css";
 
 const Users = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("joined"); // joined, pending
   const [invites, setInvites] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -55,9 +57,11 @@ const Users = () => {
       <div className="dashboard-content" style={{ padding: '2rem' }}>
         <div className="dashboard-header-row">
           <h1 className="dashboard-title">User Management</h1>
-          <Button variant="primary" onClick={() => setIsInviteModalOpen(true)}>
-            <FaUserPlus style={{ marginRight: '8px' }} /> Invite Member
-          </Button>
+          {user?.tenant_role === "owner" && (
+            <Button variant="primary" onClick={() => setIsInviteModalOpen(true)}>
+              <FaUserPlus style={{ marginRight: '8px' }} /> Invite Member
+            </Button>
+          )}
         </div>
 
         <div className="filter-tabs" style={{ display: 'flex', backgroundColor: '#f1f5f9', padding: '4px', borderRadius: '8px', width: 'fit-content', marginBottom: '2rem' }}>
@@ -103,7 +107,7 @@ const Users = () => {
               {loading ? (
                 <div className="staff-loading">Fetching invitations...</div>
               ) : invites.length === 0 ? (
-                <div className="staff-loading">No pending invitations.</div>
+                <div className="staff-loading">You don't have any invite</div>
               ) : (
                 <table className="staff-table">
                   <thead>

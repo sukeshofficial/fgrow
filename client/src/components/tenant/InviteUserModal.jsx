@@ -49,7 +49,9 @@ const InviteUserModal = ({ onClose, onSuccess }) => {
         <form onSubmit={handleSubmit} className="tenant-form">
           <div className="tenant-form-fields">
             <label className="tenant-label">
-              Email Address <span className="tenant-required">*</span>
+              <span>
+                Email Address <span className="tenant-required">*</span>
+              </span>
               <input
                 type="email"
                 className="tenant-input"
@@ -61,7 +63,7 @@ const InviteUserModal = ({ onClose, onSuccess }) => {
             </label>
 
             <label className="tenant-label">
-              Assign Role <span className="tenant-required">*</span>
+              <span> Assign Role <span className="tenant-required">*</span> </span>
               <select
                 className="tenant-input"
                 value={role}
@@ -69,7 +71,6 @@ const InviteUserModal = ({ onClose, onSuccess }) => {
                 required
               >
                 <option value="staff">Staff</option>
-                <option value="owner">Owner (Admin)</option>
               </select>
             </label>
           </div>
