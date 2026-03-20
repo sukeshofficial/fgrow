@@ -21,7 +21,7 @@ import Tenant from "../models/tenant/tenant.model.js";
 import { User } from "../models/auth/user.model.js";
 import { generateToken } from "../utils/jwt.js";
 import { createNumericOtp, generateUsername } from "../utils/helper.js";
-import { uploadToCloud } from "../utils/cloudinary.js";
+import { uploadBufferToCloud } from "../utils/cloudinary.js";
 import { UserInvitation } from "../models/auth/userInvitation.model.js";
 
 // Lockout configuration
@@ -91,7 +91,7 @@ export const registerUser = async (req, res) => {
 
     // Optional avatar upload
     if (req.file) {
-      const upload = await uploadToCloud(req.file.path);
+      const upload = await uploadBufferToCloud(req.file.buffer, "users");
 
       if (!upload.success) {
         return res.status(500).json({
@@ -153,13 +153,6 @@ export const registerUser = async (req, res) => {
     user.reset_token_expiry = Date.now() + 5 * 60 * 1000;
 
     await user.save();
-
-    // Delete temp file
-    if (req.file) {
-      fs.unlinkSync(req.file.path);
-      console.log(`File - ${req.file.path} deleted`);
-    }
-
     // Send verification email
     await sendEmail({
       to: email,

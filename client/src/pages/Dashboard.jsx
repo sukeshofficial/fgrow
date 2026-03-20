@@ -3,7 +3,7 @@ import SideBar from "../components/SideBar";
 import StaffListTable from "../components/tenant/StaffListTable";
 import InviteUserModal from "../components/tenant/InviteUserModal";
 import { Button } from "../components/ui/Button";
-import { FaUserPlus } from "react-icons/fa";
+import { FaUserPlus, FaExclamationCircle  } from "react-icons/fa";
 import { useAuth } from "../hooks/useAuth";
 import { getTenantById } from "../api/tenant.api";
 import "../styles/welcome.css";
@@ -112,6 +112,26 @@ const Dashboard = () => {
             onSuccess={handleInviteSuccess}
           />
         )}
+
+        <div className="dashboard-notice-box">
+          <div className="notice-icon">
+            <FaExclamationCircle />
+          </div>
+          <div className="notice-content">
+            <p>
+              This is a <strong>test version</strong> of the FGrow application.
+              If you encounter any bugs, please report them to{" "}
+              <a
+                href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=sukesh.official.2006@gmail.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="feedback-link"
+              >
+                feedback@forgegrid.in
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
     </>
   );

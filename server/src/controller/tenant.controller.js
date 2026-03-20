@@ -1,5 +1,3 @@
-import fs from "fs";
-
 import {
   createTenantService,
   fetchPendingTenants,
@@ -13,7 +11,7 @@ import { User } from "../models/auth/user.model.js";
 import Client from "../models/client/client.model.js";
 
 import { generateToken } from "../utils/jwt.js";
-import { uploadToCloud } from "../utils/cloudinary.js";
+import { uploadBufferToCloud } from "../utils/cloudinary.js";
 import sendEmail from "../utils/sendEmail.js";
 
 export const createTenant = async (req, res) => {
@@ -24,7 +22,7 @@ export const createTenant = async (req, res) => {
     };
 
     if (req.file) {
-      const upload = await uploadToCloud(req.file.path);
+      const upload = await uploadBufferToCloud(req.file.buffer, "tenants");
 
       if (!upload.success) {
         return res.status(500).json({
@@ -37,9 +35,6 @@ export const createTenant = async (req, res) => {
         public_id: upload.public_id,
         secure_url: upload.secure_url,
       };
-
-      fs.unlinkSync(req.file.path);
-      console.log(`File - ${req.file.path} deleted`);
     }
 
     const { tenant, user } = await createTenantService({
