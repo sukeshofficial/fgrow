@@ -229,13 +229,13 @@ const ClientServicesForm = ({ data, onNext, onPrev, isEdit }) => {
                     style={{ 
                         borderTop: '1px solid #f1f5f9',
                         paddingTop: '16px',
-                        display: 'grid',
-                        gridTemplateColumns: '1fr 2fr',
+                        display: 'flex',
+                        flexWrap: 'wrap',
                         gap: '24px',
-                        alignItems: 'end'
+                        alignItems: 'flex-end'
                     }}
                 >
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ flex: '0 0 auto', minWidth: '120px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#64748b', letterSpacing: '0.5px' }}>BILLING TYPE</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <span style={{ fontSize: '13px', fontWeight: '600', color: selectedService.is_recurring ? 'var(--primary-accent)' : '#64748b' }}>
@@ -267,9 +267,9 @@ const ClientServicesForm = ({ data, onNext, onPrev, isEdit }) => {
                             </div>
                         </div>
                     </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                        <div className="date-field">
+-
+                    <div style={{ flex: '1', minWidth: '280px', display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+                        <div className="date-field" style={{ flex: '1', minWidth: '130px' }}>
                             <label style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', marginBottom: '6px', display: 'block' }}>
                                 {selectedService.is_recurring ? 'START DATE' : 'SERVICE DATE'}
                             </label>
@@ -278,18 +278,18 @@ const ClientServicesForm = ({ data, onNext, onPrev, isEdit }) => {
                                 className="form-input"
                                 value={formatDate(selectedService.start_date)}
                                 onChange={(e) => handleServiceDataChange(serviceId, "start_date", e.target.value)}
-                                style={{ height: '38px' }}
+                                style={{ height: '38px', width: '100%' }}
                             />
                         </div>
                         {selectedService.is_recurring && (
-                            <div className="date-field">
+                            <div className="date-field" style={{ flex: '1', minWidth: '130px' }}>
                                 <label style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', marginBottom: '6px', display: 'block' }}>END DATE</label>
                                 <input 
                                     type="date"
                                     className="form-input"
                                     value={formatDate(selectedService.end_date)}
                                     onChange={(e) => handleServiceDataChange(serviceId, "end_date", e.target.value)}
-                                    style={{ height: '38px' }}
+                                    style={{ height: '38px', width: '100%' }}
                                 />
                             </div>
                         )}
@@ -301,8 +301,8 @@ const ClientServicesForm = ({ data, onNext, onPrev, isEdit }) => {
         </div>
       </div>
 
-      <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)', gap: '40px' }}>
-        <div className="left-column" style={{ minWidth: 0 }}>
+      <div className="form-grid" style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
+        <div className="left-column" style={{ flex: '1.2', minWidth: '300px' }}>
            <FormField label="Billing Profile" required>
             <SearchableDropdown 
                 options={billingEntities}
@@ -352,31 +352,35 @@ const ClientServicesForm = ({ data, onNext, onPrev, isEdit }) => {
                         gap: '20px',
                         boxShadow: '0 4px 12px rgba(99, 102, 241, 0.08)'
                     }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                            <FormField label="Amount">
-                                <input 
-                                    type="number" 
-                                    className="form-input" 
-                                    value={form.opening_balance.amount}
-                                    onChange={(e) => handleOpeningBalanceChange("amount", Number(e.target.value))}
-                                    placeholder="0.00"
-                                />
-                            </FormField>
-                            <FormField label="Balance As on">
-                                <input 
-                                    type="date" 
-                                    className="form-input" 
-                                    value={form.opening_balance.as_of ? form.opening_balance.as_of.split('T')[0] : ""}
-                                    onChange={(e) => handleOpeningBalanceChange("as_of", e.target.value)}
-                                />
-                            </FormField>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                            <div style={{ flex: '1', minWidth: '140px' }}>
+                                <FormField label="Amount">
+                                    <input 
+                                        type="number" 
+                                        className="form-input" 
+                                        value={form.opening_balance.amount}
+                                        onChange={(e) => handleOpeningBalanceChange("amount", Number(e.target.value))}
+                                        placeholder="0.00"
+                                    />
+                                </FormField>
+                            </div>
+                            <div style={{ flex: '1', minWidth: '180px' }}>
+                                <FormField label="Balance As on">
+                                    <input 
+                                        type="date" 
+                                        className="form-input" 
+                                        value={form.opening_balance.as_of ? form.opening_balance.as_of.split('T')[0] : ""}
+                                        onChange={(e) => handleOpeningBalanceChange("as_of", e.target.value)}
+                                    />
+                                </FormField>
+                            </div>
                         </div>
                     </div>
                 )}
            </div>
         </div>
 
-        <div className="right-column" style={{ minWidth: 0 }}>
+        <div className="right-column" style={{ flex: '1', minWidth: '300px' }}>
             <FormField label="Users" required>
                 <SearchableDropdown 
                     isMulti
@@ -414,7 +418,7 @@ const ClientServicesForm = ({ data, onNext, onPrev, isEdit }) => {
         </div>
       </div>
 
-      <div className="wizard-footer" style={{ marginTop: '48px', display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
+      <div className="wizard-footer">
         <button type="button" className="back-btn" onClick={onPrev}>
           Back
         </button>

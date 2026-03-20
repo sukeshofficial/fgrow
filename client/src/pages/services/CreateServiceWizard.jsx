@@ -61,16 +61,16 @@ const CreateServiceWizard = () => {
     switch (currentStep) {
       case 0:
         return (
-          <ServiceDetailsForm 
-            data={formData} 
-            onNext={handleNext} 
+          <ServiceDetailsForm
+            data={formData}
+            onNext={handleNext}
           />
         );
       case 1:
         return (
-          <ServiceBillingForm 
-            data={formData} 
-            onNext={handleNext} 
+          <ServiceBillingForm
+            data={formData}
+            onNext={handleNext}
             onPrev={handlePrev}
           />
         );
@@ -78,23 +78,23 @@ const CreateServiceWizard = () => {
         return (
           <div className="step-container">
             <h2 className="form-title">Review & Activate</h2>
-            <div className="review-card" style={{ 
-              padding: '48px', 
-              textAlign: 'center', 
-              background: 'white', 
-              borderRadius: '24px', 
+            <div className="review-card" style={{
+              padding: '48px',
+              textAlign: 'center',
+              background: 'white',
+              borderRadius: '24px',
               border: '1px solid var(--border-color)',
               boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)',
               marginBottom: '32px'
             }}>
-              <div className="review-icon-wrapper" style={{ 
-                width: '80px', 
-                height: '80px', 
-                background: '#f5f3ff', 
-                borderRadius: '50%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
+              <div className="review-icon-wrapper" style={{
+                width: '80px',
+                height: '80px',
+                background: '#f5f3ff',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 margin: '0 auto 24px',
                 color: 'var(--primary-accent)',
                 fontSize: '32px'
@@ -103,12 +103,12 @@ const CreateServiceWizard = () => {
               </div>
               <h3 style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '8px' }}>Ready to go!</h3>
               <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>Check your service configuration one last time.</p>
-              
-              <div className="review-details" style={{ 
-                textAlign: 'left', 
-                background: '#f8fafc', 
-                padding: '24px', 
-                borderRadius: '16px', 
+
+              <div className="review-details" style={{
+                textAlign: 'left',
+                background: '#f8fafc',
+                padding: '24px',
+                borderRadius: '16px',
                 marginBottom: '32px',
                 border: '1px solid #e2e8f0'
               }}>
@@ -140,15 +140,15 @@ const CreateServiceWizard = () => {
                 </div>
               </div>
 
-              <button 
-                className="next-button" 
-                onClick={() => handleSave(formData)} 
+              <button
+                className="next-button"
+                onClick={() => handleSave(formData)}
                 style={{ position: 'static', width: '100%', padding: '16px', borderRadius: '12px', fontSize: '16px' }}
               >
                 Create & Activate Service
               </button>
             </div>
-            
+
             <div className="wizard-footer">
               <button className="back-btn" onClick={handlePrev}>
                 Back to Billing

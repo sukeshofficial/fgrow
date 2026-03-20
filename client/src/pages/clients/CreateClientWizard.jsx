@@ -86,6 +86,7 @@ const CreateClientWizard = () => {
           <ClientDetailsForm 
             data={formData} 
             onNext={handleNext} 
+            onPrev={() => navigate("/clients")}
           />
         );
       case 1:

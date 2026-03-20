@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { FaEdit } from "react-icons/fa";
 
 const ClientTable = ({ clients, loading }) => {
   const navigate = useNavigate();
@@ -62,9 +63,11 @@ const ClientTable = ({ clients, loading }) => {
                   </span>
                 </td>
                 <td>
-                  <button className="action-btn" onClick={() => navigate(`/clients/${client._id}`)}>
-                    Edit
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'nowrap' }}>
+                    <button className="action-btn" onClick={() => navigate(`/clients/${client._id}`)}>
+                      <FaEdit style={{ marginRight: '4px' }} /> Edit
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))
@@ -77,19 +80,28 @@ const ClientTable = ({ clients, loading }) => {
           )}
         </tbody>
       </table>
-      
+
       <style>{`
         .action-btn {
           border: 1px solid #e2e8f0;
           background: white;
-          padding: 4px 12px;
-          border-radius: 6px;
+          padding: 6px 12px;
+          border-radius: 8px;
           font-size: 13px;
+          font-weight: 500;
           cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 70px;
+          color: #475569;
         }
         .action-btn:hover {
           background: #f8fafc;
           border-color: #cbd5e1;
+          color: var(--primary-accent);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
       `}</style>
     </div>

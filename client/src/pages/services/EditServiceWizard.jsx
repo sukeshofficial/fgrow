@@ -92,16 +92,16 @@ const EditServiceWizard = () => {
     switch (currentStep) {
       case 0:
         return (
-          <ServiceDetailsForm 
-            data={formData} 
-            onNext={handleNext} 
+          <ServiceDetailsForm
+            data={formData}
+            onNext={handleNext}
           />
         );
       case 1:
         return (
-          <ServiceBillingForm 
-            data={formData} 
-            onNext={handleNext} 
+          <ServiceBillingForm
+            data={formData}
+            onNext={handleNext}
             onPrev={handlePrev}
           />
         );
@@ -109,23 +109,23 @@ const EditServiceWizard = () => {
         return (
           <div className="step-container">
             <h2 className="form-title">Review & Update</h2>
-            <div className="review-card" style={{ 
-              padding: '48px', 
-              textAlign: 'center', 
-              background: 'white', 
-              borderRadius: '24px', 
+            <div className="review-card" style={{
+              padding: '48px',
+              textAlign: 'center',
+              background: 'white',
+              borderRadius: '24px',
               border: '1px solid var(--border-color)',
               boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)',
               marginBottom: '32px'
             }}>
-              <div className="review-icon-wrapper" style={{ 
-                width: '80px', 
-                height: '80px', 
-                background: '#f5f3ff', 
-                borderRadius: '50%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
+              <div className="review-icon-wrapper" style={{
+                width: '80px',
+                height: '80px',
+                background: '#f5f3ff',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 margin: '0 auto 24px',
                 color: 'var(--primary-accent)',
                 fontSize: '32px'
@@ -134,12 +134,12 @@ const EditServiceWizard = () => {
               </div>
               <h3 style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '8px' }}>Update Changes</h3>
               <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>Check your updated configurations before saving.</p>
-              
-              <div className="review-details" style={{ 
-                textAlign: 'left', 
-                background: '#f8fafc', 
-                padding: '24px', 
-                borderRadius: '16px', 
+
+              <div className="review-details" style={{
+                textAlign: 'left',
+                background: '#f8fafc',
+                padding: '24px',
+                borderRadius: '16px',
                 marginBottom: '32px',
                 border: '1px solid #e2e8f0'
               }}>
@@ -171,16 +171,16 @@ const EditServiceWizard = () => {
                 </div>
               </div>
 
-              <button 
-                className="next-button" 
-                onClick={() => handleSave(formData)} 
+              <button
+                className="next-button"
+                onClick={() => handleSave(formData)}
                 disabled={loading}
-                style={{ position: 'static', width: '100%', padding: '16px', borderRadius: '12px', fontSize: '16px' }}
+                style={{ position: 'static', padding: '16px', borderRadius: '12px', fontSize: '16px', marginLeft: 'auto' }}
               >
                 {loading ? "Updating..." : "Save & Update Service"}
               </button>
             </div>
-            
+
             <div className="wizard-footer">
               <button className="back-btn" onClick={handlePrev}>
                 Back to Billing

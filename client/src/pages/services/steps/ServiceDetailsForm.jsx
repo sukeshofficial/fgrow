@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import FormField from "../../../components/ui/FormField";
 
-const ServiceDetailsForm = ({ data, onNext }) => {
+const ServiceDetailsForm = ({ data, onNext, onPrev }) => {
   const [formData, setFormData] = useState({
     name: data.name || "",
     description: data.description || "",
@@ -21,34 +22,31 @@ const ServiceDetailsForm = ({ data, onNext }) => {
     <div className="step-container">
       <h2 className="form-title">Service Details</h2>
       <form onSubmit={handleSubmit}>
-        <div className="form-grid">
-          <div className="form-field" style={{ gridColumn: 'span 2' }}>
-            <label className="form-label">Service Name <span className="required-star">*</span></label>
+        <div className="form-grid" style={{ gridTemplateColumns: '1fr' }}>
+          <FormField label="Service Name" required>
             <input 
               type="text" 
-              name="name" 
+              name="name"
               className="form-input"
               value={formData.name} 
               onChange={handleChange} 
               required 
               placeholder="e.g. GST Filing"
             />
-          </div>
+          </FormField>
           
-          <div className="form-field" style={{ gridColumn: 'span 2' }}>
-            <label className="form-label">Description</label>
+          <FormField label="Description">
             <textarea 
               name="description" 
               className="form-input"
-              style={{ height: '80px', paddingTop: '8px' }}
+              style={{ height: '100px', paddingTop: '12px' }}
               value={formData.description} 
               onChange={handleChange} 
               placeholder="Brief description of the service..."
             />
-          </div>
+          </FormField>
 
-          <div className="form-field">
-            <label className="form-label">SAC Code</label>
+          <FormField label="SAC Code">
             <input 
               type="text" 
               name="sac_code" 
@@ -59,10 +57,13 @@ const ServiceDetailsForm = ({ data, onNext }) => {
               title="SAC code must be 6 digits"
               placeholder="998311"
             />
-          </div>
+          </FormField>
         </div>
 
-        <div className="wizard-footer" style={{ justifyContent: 'flex-end' }}>
+        <div className="wizard-footer">
+          <button type="button" className="back-btn" onClick={onPrev}>
+            Back
+          </button>
           <button type="submit" className="next-button" style={{ position: 'static' }}>
             Continue to Billing
           </button>
