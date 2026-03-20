@@ -49,7 +49,8 @@ const corsOptions = {
 };
 
 // Handle OPTIONS preflight explicitly (required for Vercel serverless)
-app.options("*", cors(corsOptions));
+// Note: Express 5 requires explicit wildcard syntax — bare * is not valid.
+app.options("/{*path}", cors(corsOptions));
 app.use(cors(corsOptions));
 
 app.use(express.urlencoded({ extended: true }));
