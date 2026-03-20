@@ -80,7 +80,11 @@ export default async function authMiddleware(req, res, next) {
 
     next();
   } catch (err) {
-    console.error("Auth middleware error:", err);
+    console.error("Auth middleware error:", err.name, err.message, err.stack);
+    // Common misconfiguration: JWT_SECRET not set in environment
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ message: "Server misconfiguration: JWT_SECRET not set" });
+    }
     return res.status(500).json({ message: "internal server error" });
   }
 }
