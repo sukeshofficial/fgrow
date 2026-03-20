@@ -11,16 +11,22 @@ import app from "../src/app.js";
 
 dotenv.config();
 
-// ─── DB connection (cached across hot reloads) ────────────────────────────
+// Disable buffering so we get immediate errors if connection fails
+mongoose.set("bufferCommands", false);
+
 async function connectIfNeeded() {
-  // Already connected — reuse
-  if (mongoose.connection.readyState === 1) return;
+  // 1 = connected, 2 = connecting
+  if (mongoose.connection.readyState === 1 || mongoose.connection.readyState === 2) return;
 
   const uri = process.env.MONGO_URI;
   if (!uri) throw new Error("MONGO_URI environment variable is not set");
 
-  await mongoose.connect(uri, { autoIndex: false });
-  console.log("✅ MongoDB connected:", mongoose.connection.host);
+  console.log("⏳ Connecting to MongoDB...");
+  await mongoose.connect(uri, {
+    autoIndex: false,
+    serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+  });
+  console.log("✅ MongoDB connected successfully");
 }
 
 // ─── Handler ──────────────────────────────────────────────────────────────
