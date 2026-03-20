@@ -23,6 +23,14 @@ export const acceptInvitation = (token) => {
 };
 
 /**
+ * Get Invitation Details
+ * GET /invitation/details/:token
+ */
+export const getInvitationDetails = (token) => {
+  return api.get(`/invitation/details/${token}`);
+};
+
+/**
  * Get Pending Invitations (Owner)
  */
 export const getPendingInvitations = () => {

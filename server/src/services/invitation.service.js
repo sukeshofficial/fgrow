@@ -201,3 +201,20 @@ export const revokeInvitationService = async (invitationId, tenant_id) => {
 
   return { message: "Invitation revoked successfully" };
 };
+
+/**
+ * Get invitation details by token
+ */
+export const getInvitationByTokenService = async (token) => {
+  const invitation = await UserInvitation.findOne({
+    invite_token: token,
+    accepted_at: null,
+    expires_at: { $gt: new Date() },
+  }).populate("tenant_id", "name logoUrl");
+
+  if (!invitation) {
+    throw new Error("Invalid or expired invitation");
+  }
+
+  return invitation;
+};

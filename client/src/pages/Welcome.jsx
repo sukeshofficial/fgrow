@@ -8,6 +8,8 @@ import WelcomeCard from "../components/tenant/WelcomeCard";
 import WelcomeModal from "../components/tenant/WelcomeModal";
 import CreateTenantModal from "../components/tenant/CreateTenantModal";
 import JoinAsStaff from "../components/staff/JoinAsStaff";
+import Toast from "../components/ui/Toast";
+import { getInvitationDetails } from "../api/invitation.api";
 
 import "../styles/welcome.css";
 
@@ -17,7 +19,9 @@ export const WelcomePage = () => {
   const { user, meState, isLoading, invitation } = useAuth();
 
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  const [activeFlow, setActiveFlow] = useState(null); // 'create-tenant', 'join-staff-prefilled', 'join-staff-manual'
+  const [activeFlow, setActiveFlow] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [tenantInfo, setTenantInfo] = useState(null);
 
   useEffect(() => {
     if (!isLoading && meState === "NO_TENANT") {
@@ -28,6 +32,21 @@ export const WelcomePage = () => {
       }
     }
   }, [isLoading, meState]);
+
+  useEffect(() => {
+    if (invitation?.token) {
+      fetchInvitationDetails(invitation.token);
+    }
+  }, [invitation?.token]);
+
+  const fetchInvitationDetails = async (token) => {
+    try {
+      const response = await getInvitationDetails(token);
+      setTenantInfo(response.data.data.tenant_id);
+    } catch (err) {
+      console.error("Failed to fetch invitation details in Welcome", err);
+    }
+  };
 
   if (isLoading) {
     return <Spinner />;
@@ -53,6 +72,13 @@ export const WelcomePage = () => {
 
   // The main view for NO_TENANT
   const handleCreateTenant = () => {
+    if (invitation) {
+      setToast({
+        message: `Cannot create tenant since ${tenantInfo?.name || invitation.tenantName || 'an organization'} invited you to join`,
+        type: "error"
+      });
+      return;
+    }
     setShowWelcomeModal(false);
     setActiveFlow("create-tenant");
   };
@@ -96,6 +122,15 @@ export const WelcomePage = () => {
           initialToken={activeFlow === "join-staff-prefilled" ? invitation?.token : null}
         />
       )}
+      <div className="toast-container" style={{ zIndex: 20000 }}>
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+      </div>
     </div>
   );
 };
