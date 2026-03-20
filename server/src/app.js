@@ -34,18 +34,18 @@ const allowedOrigins = [
   "http://localhost:5173" // for dev
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: "https://fgrow.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
+app.options("*", (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "https://fgrow.vercel.app");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.status(200).end();
+});
 
 app.use(express.urlencoded({ extended: true }));
 // Note: /uploads static route removed — all files are served from Cloudinary.
