@@ -29,25 +29,22 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ─── CORS ─────────────────────────────────────────────────────────────────
-// Allow both the deployed frontend URL and localhost for local dev.
-// Set FRONTEND_URL in production; CORS_ORIGIN is optional extra origin.
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  process.env.CORS_ORIGIN,
-  "http://localhost:5173",
-  "http://localhost:3000",
-].filter(Boolean);
+  "https://fgrow.vercel.app",
+  "http://localhost:5173" // for dev
+];
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. curl, Postman, server-to-server)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      callback(new Error(`CORS: origin '${origin}' not allowed`));
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
     },
     credentials: true,
-  }),
+  })
 );
 
 app.use(express.urlencoded({ extended: true }));
