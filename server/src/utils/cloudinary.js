@@ -13,18 +13,12 @@ cloudinary.config({
 
 // ─── Buffer Upload Helpers (for memory storage / Vercel) ───────────────────
 
-/**
- * Upload an image Buffer directly to Cloudinary.
- * Use this when multer uses memoryStorage (req.file.buffer).
- */
 export const uploadBufferToCloud = (buffer, folder = "users") => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       { folder, resource_type: "image" },
       (error, result) => {
-        if (error) {
-          return reject(error);
-        }
+        if (error) return reject(error);
         resolve({
           success: true,
           public_id: result.public_id,
@@ -33,9 +27,7 @@ export const uploadBufferToCloud = (buffer, folder = "users") => {
       },
     );
 
-    const readable = new stream.PassThrough();
-    readable.end(buffer);
-    readable.pipe(uploadStream);
+    stream.Readable.from(buffer).pipe(uploadStream);
   });
 };
 
