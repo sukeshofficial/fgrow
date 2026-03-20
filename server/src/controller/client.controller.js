@@ -5,7 +5,7 @@ import {
   updateClientService,
   deleteClientService,
 } from "../services/client.service.js";
-import { uploadToCloudAndUnlink } from "../utils/cloudinary.js";
+import { uploadBufferToCloud } from "../utils/cloudinary.js";
 
 
 /**
@@ -20,7 +20,7 @@ export const uploadClientPhotoController = async (req, res) => {
       });
     }
 
-    const result = await uploadToCloudAndUnlink(req.file.path, "clients");
+    const result = await uploadBufferToCloud(req.file.buffer, "clients");
 
     if (!result.success) {
       console.error("Cloudinary upload failed:", result.error);
