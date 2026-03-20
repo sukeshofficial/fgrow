@@ -29,26 +29,28 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ─── CORS ─────────────────────────────────────────────────────────────────
-// All origins are configured via environment variables only — no hardcoded URLs.
-// Set FRONTEND_URL in your .env (and on Vercel dashboard) to your deployed frontend.
-// Optionally set CORS_ORIGIN for a secondary allowed origin (e.g. staging).
+// All origins are configured via environment variables — no hardcoded URLs.
+// Set FRONTEND_URL on Vercel dashboard to your deployed frontend origin.
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.CORS_ORIGIN,
 ].filter(Boolean);
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (curl, Postman, server-to-server)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      callback(new Error(`CORS: origin '${origin}' not allowed`));
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    credentials: true,
-  }),
-);
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (curl, Postman, server-to-server)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin '${origin}' not allowed`));
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
+// Handle OPTIONS preflight explicitly (required for Vercel serverless)
+app.options("*", cors(corsOptions));
+app.use(cors(corsOptions));
 
 app.use(express.urlencoded({ extended: true }));
 // Note: /uploads static route removed — all files are served from Cloudinary.
