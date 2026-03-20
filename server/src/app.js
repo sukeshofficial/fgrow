@@ -34,13 +34,21 @@ app.use(cookieParser());
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.CORS_ORIGIN,
+  "https://fggrow.vercel.app",
+  "https://fg-crm-super-admin.vercel.app",
+  "http://localhost:5173",
 ].filter(Boolean);
 
 const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (curl, Postman, server-to-server)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+
+    // Clean the origin (remove trailing slash)
+    const cleanOrigin = origin.endsWith("/") ? origin.slice(0, -1) : origin;
+    const cleanAllowed = allowedOrigins.map((o) => (o.endsWith("/") ? o.slice(0, -1) : o));
+
+    if (cleanAllowed.includes(cleanOrigin)) return callback(null, true);
     callback(new Error(`CORS: origin '${origin}' not allowed`));
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

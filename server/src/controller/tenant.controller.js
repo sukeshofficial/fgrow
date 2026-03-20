@@ -118,14 +118,17 @@ export const approveTenant = async (req, res) => {
   try {
     const { tenantId } = req.params;
 
-    const result = await approveTenantService(tenantId, req.user.id);
+    console.log("Approve tenant request reached for ID:", tenantId, "by admin:", req.user?.id);
+    const result = await approveTenantService(tenantId, req.user?.id);
 
     if (result.error) {
+      console.log("Approve tenant service returned error:", result.error);
       return res.status(result.status).json({
         message: result.error,
       });
     }
 
+    console.log("Tenant approved successfully:", tenantId);
     return res.status(200).json({
       message: "Tenant approved successfully",
       tenantId: result.tenant._id,
