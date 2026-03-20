@@ -29,23 +29,26 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ─── CORS ─────────────────────────────────────────────────────────────────
+// All origins are configured via environment variables only — no hardcoded URLs.
+// Set FRONTEND_URL in your .env (and on Vercel dashboard) to your deployed frontend.
+// Optionally set CORS_ORIGIN for a secondary allowed origin (e.g. staging).
 const allowedOrigins = [
-  "https://fgrow.vercel.app",
-  "http://localhost:5173" // for dev
-];
+  process.env.FRONTEND_URL,
+  process.env.CORS_ORIGIN,
+].filter(Boolean);
 
-app.use(cors({
-  origin: "https://fgrow.vercel.app",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
-
-app.options("*", (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "https://fgrow.vercel.app");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.status(200).end();
-});
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (curl, Postman, server-to-server)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS: origin '${origin}' not allowed`));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+  }),
+);
 
 app.use(express.urlencoded({ extended: true }));
 // Note: /uploads static route removed — all files are served from Cloudinary.
