@@ -4,6 +4,8 @@ import { getAllTenants, approveTenant, rejectTenant } from "../../api/tenant.api
 import { Button } from "../../components/ui/Button";
 import { FaSearch, FaCheck, FaTimes, FaEye } from "react-icons/fa";
 import Sidebar from "../../components/SideBar";
+import ConfirmModal from "../../components/ui/ConfirmModal";
+import RejectionModal from "../../components/tenant/RejectionModal";
 
 import "../../styles/welcome.css";
 import "../../styles/admin-dashboard.css";
@@ -14,6 +16,9 @@ const AdminDashboard = () => {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [confirmApproveId, setConfirmApproveId] = useState(null);
+  const [rejectingTenant, setRejectingTenant] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchTenants();
@@ -32,24 +37,31 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleApprove = async (id) => {
-    if (!window.confirm("Are you sure you want to approve this tenant?")) return;
+  const handleApprove = async () => {
+    if (!confirmApproveId) return;
     try {
-      await approveTenant(id);
+      setSubmitting(true);
+      await approveTenant(confirmApproveId);
+      setConfirmApproveId(null);
       fetchTenants();
     } catch (err) {
       alert("Approval failed: " + (err.response?.data?.message || err.message));
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleReject = async (id) => {
-    const reason = window.prompt("Enter rejection reason:");
-    if (reason === null) return;
+  const handleReject = async (reason) => {
+    if (!rejectingTenant) return;
     try {
-      await rejectTenant(id, reason);
+      setSubmitting(true);
+      await rejectTenant(rejectingTenant._id, reason);
+      setRejectingTenant(null);
       fetchTenants();
     } catch (err) {
       alert("Rejection failed: " + (err.response?.data?.message || err.message));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -166,7 +178,7 @@ const AdminDashboard = () => {
                               variant="primary"
                               size="sm"
                               className="icon-btn approve-btn"
-                              onClick={() => handleApprove(tenant._id)}
+                              onClick={() => setConfirmApproveId(tenant._id)}
                             >
                               <FaCheck />
                             </Button>
@@ -175,7 +187,7 @@ const AdminDashboard = () => {
                               variant="secondary"
                               size="sm"
                               className="icon-btn reject-btn"
-                              onClick={() => handleReject(tenant._id)}
+                              onClick={() => setRejectingTenant(tenant)}
                             >
                               <FaTimes />
                             </Button>
@@ -190,6 +202,25 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
+      {confirmApproveId && (
+        <ConfirmModal
+          title="Approve Tenant"
+          message="Are you sure you want to approve this tenant? They will gain full access to the platform."
+          confirmLabel="Approve Tenant"
+          onConfirm={handleApprove}
+          onCancel={() => setConfirmApproveId(null)}
+          submitting={submitting}
+        />
+      )}
+
+      {rejectingTenant && (
+        <RejectionModal
+          tenantName={rejectingTenant.name}
+          onConfirm={handleReject}
+          onCancel={() => setRejectingTenant(null)}
+          submitting={submitting}
+        />
+      )}
     </div>
   );
 };

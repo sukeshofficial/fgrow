@@ -34,6 +34,7 @@ import EditServiceWizard from "./pages/services/EditServiceWizard";
 import CreateTaskWizard from "./pages/tasks/CreateTaskWizard";
 import EditTaskWizard from "./pages/tasks/EditTaskWizard";
 import TaskDetails from "./pages/tasks/TaskDetails";
+import TodoDashboard from "./pages/todos/TodoDashboard";
 
 /* Routing */
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -97,7 +98,7 @@ const App = () => {
             <Route path="/tasks/create" element={<CreateTaskWizard />} />
             <Route path="/tasks/:id" element={<TaskDetails />} />
             <Route path="/tasks/edit/:id" element={<EditTaskWizard />} />
-            <Route path="/todo" element={<Tasks />} />
+            <Route path="/todo" element={<TodoDashboard />} />
             <Route path="/clients/create" element={<CreateClientWizard />} />
             <Route path="/clients/:id" element={<EditClientWizard />} />
             <Route path="/clients" element={<ClientList />} />

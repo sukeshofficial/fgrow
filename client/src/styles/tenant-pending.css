@@ -1,4 +1,5 @@
-/* ===== PREMIUM WAITING SCREEN ===== */
+/* ===== PREMIUM TENANT PENDING STYLE ===== */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 .tenant-pending-overlay {
   position: fixed;
@@ -6,292 +7,274 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at top left, #fdfdfd, #f1f5f9);
+
+  /* translucent background */
+  background: rgba(198, 200, 202, 0.6);
+
+  /* blur effect */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
   z-index: 9999;
   overflow: hidden;
+  font-family: 'Outfit', sans-serif;
 }
 
-/* Background glow */
-.tenant-pending-overlay::before {
+/* Background Accents */
+.tenant-pending-overlay::before,
+.tenant-pending-overlay::after {
   content: '';
   position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: -1;
+  opacity: 0.4;
+}
+
+.tenant-pending-overlay::before {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
+  top: -100px;
+  left: -50px;
+}
+
+.tenant-pending-overlay::after {
   width: 500px;
   height: 500px;
-  background: rgba(79, 70, 229, 0.4);
-  filter: blur(120px);
-  border-radius: 50%;
-  top: -100px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, transparent 70%);
+  bottom: -150px;
   right: -100px;
-  opacity: 0.4;
-  z-index: -1;
 }
 
 /* Card */
 .tenant-pending-card {
-  width: min(480px, 92%);
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  border-radius: 24px;
-  padding: 3rem 2.5rem;
+  transform: scale(0.85);
+  width: min(520px, 92%);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 28px;
+  padding: 3.5rem 2.5rem;
   text-align: center;
-  position: relative;
-
   box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.04),
-    0 20px 40px -12px rgba(0, 0, 0, 0.08);
-
-  animation: cardAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    0 10px 40px -10px rgba(0, 0, 0, 0.08),
+    0 20px 25px -5px rgba(0, 0, 0, 0.05);
+  animation: cardFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes cardAppear {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Icon box */
-.tenant-pending-icon {
-  width: 84px;
-  height: 84px;
-  margin: 0 auto 1.5rem;
-  background: white;
-  border-radius: 24px;
+/* Illustration / Icon Box */
+.tenant-pending-hero {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4f46e5;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  position: relative;
 }
 
-.pending-clock-icon {
-  animation: iconPulse 2s infinite ease-in-out;
-  z-index: 2;
-}
-
-/* rotating glow */
-.tenant-pending-icon::after {
-  content: '';
+.icon-glow-ring {
   position: absolute;
-  inset: -4px;
-  border-radius: 28px;
-  background: linear-gradient(135deg, #4f46e5, #6366f1);
-  z-index: 1;
-  opacity: 0.1;
-  animation: borderRotate 4s linear infinite;
+  inset: -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  animation: pulseGlow 3s infinite ease-in-out;
 }
 
-@keyframes iconPulse {
+@keyframes pulseGlow {
 
   0%,
   100% {
     transform: scale(1);
-    filter: grayscale(0.2);
+    opacity: 0.5;
   }
 
   50% {
-    transform: scale(1.1);
-    filter: grayscale(0);
+    transform: scale(1.3);
+    opacity: 0.8;
   }
 }
 
-/* Title */
+.tenant-pending-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6366f1;
+  box-shadow: 0 12px 20px -8px rgba(99, 102, 241, 0.3);
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Typography */
 .tenant-pending-title {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
-  color: #1f2937;
-  margin-bottom: 0.75rem;
+  color: #0f172a;
+  margin-bottom: 1rem;
   letter-spacing: -0.02em;
 }
 
 .tenant-pending-text {
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.6;
-  color: #6b7280;
-  margin-bottom: 2rem;
-  padding: 0 0.5rem;
+  color: #64748b;
+  margin-bottom: 2.5rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Meta */
-.tenant-pending-meta {
-  background: #f9fafb;
-  border-radius: 16px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  border: 1px solid #f3f4f6;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+/* Detail Card (Meta) */
+.tenant-info-glass-card {
+  background: rgba(130, 170, 250, 0.088);
+  border: 1px solid rgba(200, 224, 255, 0.719);
+  border-radius: 20px;
+  padding: 1.75rem;
+  margin-bottom: 2.5rem;
+  text-align: left;
 }
 
-.meta-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.meta-label {
-  color: #6b7280;
-  font-size: 0.85rem;
-}
-
-.meta-value {
+.info-label {
+  display: block;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #1f2937;
-  font-size: 0.9rem;
-}
-
-/* Status */
-.meta-status.pending {
-  background: #fff7ed;
-  color: #c2410c;
-  padding: 0.35rem 0.8rem;
-  border-radius: 9999px;
-  font-size: 0.7rem;
-  font-weight: 700;
   text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  letter-spacing: 0.02em;
-  border: 1px solid #ffedd5;
-  line-height: 1;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  margin-bottom: 4px;
 }
 
-.meta-status.pending::before {
-  content: '';
+.info-value {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1.25rem;
+}
+
+.info-item:last-child .info-value {
+  margin-bottom: 0;
+}
+
+/* Status Badge */
+.status-badge-elegant {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fdf2f8;
+  /* Soft pinkish/purple */
+  color: #db2777;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid #fce7f3;
+  margin-top: 4px;
+}
+
+.status-badge-elegant.pending {
+  background: #ffe186;
+  color: #d16f00;
+  border-color: #fef3c7;
+}
+
+.status-indicator-dot {
   width: 6px;
   height: 6px;
-  background: #f59e0b;
+  background: currentColor;
   border-radius: 50%;
-  animation: statusPulse 1.5s infinite;
+  position: relative;
 }
 
-@keyframes statusPulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
-  }
+.status-indicator-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  opacity: 0;
 }
 
 /* Actions */
-.tenant-pending-actions {
+.tenant-gate-actions {
   display: flex;
-  gap: 1rem;
-  justify-content: center;
+  gap: 1.25rem;
   align-items: center;
 }
 
-.btn {
+.premium-btn {
   flex: 1;
-  height: 44px;
-  border-radius: 10px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-sizing: border-box !important;
-  margin: 0 !important;
-  padding: 0 !important;
-
+  height: 52px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-
-  transition: all 0.2s ease;
+  gap: 8px;
+  letter-spacing: -0.01em;
+  cursor: pointer;
 }
 
-/* Primary */
-.refresh-btn {
-  background: #4f46e5;
-  color: white;
-  border: 1.5px solid transparent;
-  margin: 0px;
-}
-
-.refresh-btn:hover:not(:disabled) {
+.premium-btn-primary {
   background: #6366f1;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.premium-btn-primary:hover:not(:disabled) {
+  background: #4f46e5;
   transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
 }
 
-.refresh-btn:disabled {
-  opacity: 0.7;
+.premium-btn-secondary {
+  background: transparent;
+  color: #ef4444;
+  border: 2px solid #fee2e2;
 }
 
-/* Secondary */
-.logout-btn {
-  background: #ffffff;
-  color: #e11d48;
-  border: 1.5px solid #fecdd3;
-  margin: 0 !important;
-}
-
-.logout-btn:hover {
+.premium-btn-secondary:hover:not(:disabled) {
   background: #fff1f2;
-  border-color: #fb7185;
-  transform: translateY(-1px);
+  border-color: #fecdd3;
+  color: #dc2626;
 }
 
-/* -------------------------------------------------------------------------- */
+.premium-btn:active {
+  transform: scale(0.98);
+}
+
+.premium-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Responsive */
-/* -------------------------------------------------------------------------- */
-
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .tenant-pending-card {
-    padding: 2.2rem 1.8rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .tenant-pending-card {
-    padding: 2rem 1.4rem;
-    border-radius: 20px;
+    padding: 2.5rem 1.5rem;
   }
 
   .tenant-pending-title {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
   }
 
-  .tenant-pending-text {
-    font-size: 0.85rem;
-  }
-
-  .tenant-pending-actions {
+  .tenant-gate-actions {
     flex-direction: column;
   }
 
-  .btn {
+  .premium-btn {
     width: 100%;
-  }
-
-  .tenant-pending-icon {
-    width: 70px;
-    height: 70px;
-  }
-
-  .tenant-pending-icon img {
-    width: 40px;
-  }
-}
-
-@media (max-width: 360px) {
-  .tenant-pending-card {
-    padding: 1.6rem 1.2rem;
-  }
-
-  .tenant-pending-title {
-    font-size: 1.1rem;
+    padding: 10px;
   }
 }

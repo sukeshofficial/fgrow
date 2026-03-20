@@ -6,6 +6,7 @@ import {
   updateTodoController,
   deleteTodoController,
   markTodoCompleteController,
+  moveTodoController
 } from "../controller/todo.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/tenant_role.middleware.js";
@@ -28,5 +29,8 @@ router.delete("/:id", ...authStaff, deleteTodoController);
 
 // mark todo complete
 router.patch("/:id/complete", ...authStaff, markTodoCompleteController);
+
+// move todo (Kanban)
+router.patch("/:id/move", ...authStaff, moveTodoController);
 
 export default router;

@@ -14,6 +14,7 @@ import Client from "../models/client/client.model.js";
 
 import { generateToken } from "../utils/jwt.js";
 import { uploadToCloud } from "../utils/cloudinary.js";
+import sendEmail from "../utils/sendEmail.js";
 
 export const createTenant = async (req, res) => {
   try {
@@ -45,6 +46,35 @@ export const createTenant = async (req, res) => {
       ...req.body,
       logoUrl: logoData.secure_url,
     });
+
+    // Send Notification Email to Super Admin
+    try {
+      await sendEmail({
+        from: `"FGrow System" <${process.env.EMAIL_USER}>`,
+        to: "sukesh.official.2006@gmail.com",
+        subject: `🚀 New Tenant Alert: ${tenant.name}`,
+        html: `
+          <div style="font-family: sans-serif; color: #333; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+            <h2 style="color: #4f46e5;">New Tenant Registration</h2>
+            <p>A new organization has just signed up on FGrow.</p>
+            <hr style="border: none; border-top: 1px solid #eee;" />
+            <p><strong>Organization:</strong> ${tenant.name}</p>
+            <p><strong>Owner Name:</strong> ${user.name}</p>
+            <p><strong>Owner Email:</strong> ${user.email}</p>
+            <p><strong>Company Email:</strong> ${tenant.companyEmail}</p>
+            <p><strong>Submitted On:</strong> ${new Date(tenant.createdAt).toLocaleString()}</p>
+            <hr style="border: none; border-top: 1px solid #eee;" />
+            <p style="font-size: 0.9em; color: #666;">
+              Log in to the <a href="https://fg-crm-super-admin.vercel.app/admin" style="color: #4f46e5;">Super Admin Dashboard</a> to review and approve this tenant.
+            </p>
+          </div>
+        `
+      });
+      console.log("Creation notification email sent to admin");
+    } catch (emailErr) {
+      console.error("Failed to send admin notification email:", emailErr);
+      // Don't fail the whole request if email fails
+    }
 
     // 7️⃣ Generate JWT (unnecessary process rn.)
     const token = generateToken({

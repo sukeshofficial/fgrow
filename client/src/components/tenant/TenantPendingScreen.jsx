@@ -25,8 +25,12 @@ export const TenantPendingScreen = () => {
   return (
     <div className="tenant-pending-overlay">
       <div className="tenant-pending-card">
-        <div className="tenant-pending-icon">
-          <HiOutlineClock size={48} className="pending-clock-icon" />
+        {/* Animated Hero Icon Layer */}
+        <div className="tenant-pending-hero">
+          <div className="icon-glow-ring"></div>
+          <div className="tenant-pending-icon-wrapper">
+            <HiOutlineClock size={40} className="pending-clock-icon" />
+          </div>
         </div>
 
         <h2 className="tenant-pending-title">
@@ -35,48 +39,54 @@ export const TenantPendingScreen = () => {
 
         <p className="tenant-pending-text">
           Your organization has been submitted successfully and is currently
-          under review. Once approved you will gain full access to the
-          dashboard.
+          under review. You'll gain full access once approved.
         </p>
 
         {tenant && (
-          <div className="tenant-pending-meta">
-            <div className="meta-row">
-              <span className="meta-label">Tenant</span>
-              <span className="meta-value">{tenant.name}</span>
+          <div className="tenant-info-glass-card">
+            <div className="info-item">
+              <span className="info-label">Organization</span>
+              <span className="info-value">{tenant.name}</span>
             </div>
 
             {createdAt && (
-              <div className="meta-row">
-                <span className="meta-label">Submitted on</span>
-                <span className="meta-value">
-                  {createdAt.toLocaleString()}
+              <div className="info-item">
+                <span className="info-label">Submitted on</span>
+                <span className="info-value">
+                  {createdAt.toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  })}
                 </span>
               </div>
             )}
 
-            <div className="meta-row">
-              <span className="meta-label">Status</span>
-              <span className="meta-status pending">
+            <div className="info-item">
+              <span className="info-label">Current Status</span>
+              <div className="status-badge-elegant pending">
+                <div className="status-indicator-dot"></div>
                 Pending Verification
-              </span>
+              </div>
             </div>
           </div>
         )}
 
-        <div className="tenant-pending-actions">
+        <div className="tenant-gate-actions">
           <button
             type="button"
-            className="btn refresh-btn"
+            className="premium-btn premium-btn-primary"
             onClick={handleRefresh}
             disabled={refreshing}
           >
-            {refreshing ? "Checking status..." : "Refresh Status"}
+            {refreshing ? "Checking..." : "Refresh Status"}
           </button>
 
           <button
             type="button"
-            className="btn logout-btn"
+            className="premium-btn premium-btn-secondary"
             onClick={logout}
           >
             Logout

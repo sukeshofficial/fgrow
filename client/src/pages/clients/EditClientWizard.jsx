@@ -142,6 +142,7 @@ const EditClientWizard = () => {
           <ClientDetailsForm 
             data={formData} 
             onNext={handleNext}
+            onPrev={() => navigate("/clients")}
             isEdit={true}
           />
         );

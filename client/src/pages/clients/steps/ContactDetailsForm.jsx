@@ -298,10 +298,10 @@ const ContactDetailsForm = ({ data, onNext, onPrev, isTransitioning }) => {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '12px', marginTop: '40px' }}>
+      <div className="wizard-footer">
         <button 
-          className="btn ghost" 
-          style={{ height: '44px', padding: '0 24px', borderRadius: '10px' }}
+          type="button"
+          className="back-btn" 
           onClick={onPrev}
         >
           Back

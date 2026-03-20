@@ -92,16 +92,16 @@ const EditServiceWizard = () => {
     switch (currentStep) {
       case 0:
         return (
-          <ServiceDetailsForm 
-            data={formData} 
-            onNext={handleNext} 
+          <ServiceDetailsForm
+            data={formData}
+            onNext={handleNext}
           />
         );
       case 1:
         return (
-          <ServiceBillingForm 
-            data={formData} 
-            onNext={handleNext} 
+          <ServiceBillingForm
+            data={formData}
+            onNext={handleNext}
             onPrev={handlePrev}
           />
         );
@@ -109,82 +109,127 @@ const EditServiceWizard = () => {
         return (
           <div className="step-container">
             <h2 className="form-title">Review & Update</h2>
-            <div className="review-card" style={{ 
-              padding: '48px', 
-              textAlign: 'center', 
-              background: 'white', 
-              borderRadius: '24px', 
-              border: '1px solid var(--border-color)',
-              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)',
-              marginBottom: '32px'
-            }}>
-              <div className="review-icon-wrapper" style={{ 
-                width: '80px', 
-                height: '80px', 
-                background: '#f5f3ff', 
-                borderRadius: '50%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                margin: '0 auto 24px',
-                color: 'var(--primary-accent)',
-                fontSize: '32px'
-              }}>
+
+            <div
+              className="review-card"
+              style={{
+                padding: "48px",
+                textAlign: "center",
+                background: "white",
+                borderRadius: "24px",
+                border: "1px solid var(--border-color)",
+                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05)",
+                marginBottom: "32px",
+              }}
+            >
+              <div
+                className="review-icon-wrapper"
+                style={{
+                  width: "80px",
+                  height: "80px",
+                  background: "#f5f3ff",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 24px",
+                  color: "var(--primary-accent)",
+                  fontSize: "32px",
+                }}
+              >
                 ✏️
               </div>
-              <h3 style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '8px' }}>Update Changes</h3>
-              <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>Check your updated configurations before saving.</p>
-              
-              <div className="review-details" style={{ 
-                textAlign: 'left', 
-                background: '#f8fafc', 
-                padding: '24px', 
-                borderRadius: '16px', 
-                marginBottom: '32px',
-                border: '1px solid #e2e8f0'
-              }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+
+              <h3
+                style={{
+                  fontSize: "24px",
+                  fontWeight: "700",
+                  color: "var(--text-main)",
+                  marginBottom: "8px",
+                }}
+              >
+                Update Changes
+              </h3>
+
+              <p style={{ color: "var(--text-muted)", marginBottom: "32px" }}>
+                Check your updated configurations before saving.
+              </p>
+
+              <div
+                className="review-details"
+                style={{
+                  textAlign: "left",
+                  background: "#f8fafc",
+                  padding: "24px",
+                  borderRadius: "16px",
+                  marginBottom: "32px",
+                  border: "1px solid #e2e8f0",
+                }}
+              >
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "16px",
+                  }}
+                >
                   <div className="review-item">
-                    <label style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Service Name</label>
-                    <div style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formData.name}</div>
+                    <label className="label">Service Name</label>
+                    <div>{formData.name}</div>
                   </div>
+
                   <div className="review-item">
-                    <label style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>SAC Code</label>
-                    <div style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formData.sac_code || "Not set"}</div>
+                    <label className="label">SAC Code</label>
+                    <div>{formData.sac_code || "Not set"}</div>
                   </div>
+
                   <div className="review-item">
-                    <label style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Billing Rate</label>
-                    <div style={{ fontWeight: '600', color: 'var(--text-main)' }}>₹{formData.default_billing_rate.toLocaleString()}</div>
+                    <label className="label">Billing Rate</label>
+                    <div>₹{formData.default_billing_rate.toLocaleString()}</div>
                   </div>
+
                   <div className="review-item">
-                    <label style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Tax Type</label>
-                    <div style={{ fontWeight: '600', color: 'var(--text-main)' }}>GST {formData.gst_rate}%</div>
+                    <label className="label">Tax Type</label>
+                    <div>GST {formData.gst_rate}%</div>
                   </div>
+
                   <div className="review-item">
-                    <label style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Service Type</label>
-                    <div style={{ fontWeight: '600', color: 'var(--text-main)' }}>{formData.is_recurring ? "Recurring Subscription" : "One-time Service"}</div>
+                    <label className="label">Service Type</label>
+                    <div>
+                      {formData.is_recurring
+                        ? "Recurring Subscription"
+                        : "One-time Service"}
+                    </div>
                   </div>
+
                   <div className="review-item">
-                    <label style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Status</label>
-                    <div style={{ fontWeight: '600', color: formData.is_enabled ? '#059669' : '#f43f5e' }}>{formData.is_enabled ? "Active" : "Disabled"}</div>
+                    <label className="label">Status</label>
+                    <div
+                      style={{
+                        color: formData.is_enabled ? "#059669" : "#f43f5e",
+                      }}
+                    >
+                      {formData.is_enabled ? "Active" : "Disabled"}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <button 
-                className="next-button" 
-                onClick={() => handleSave(formData)} 
-                disabled={loading}
-                style={{ position: 'static', width: '100%', padding: '16px', borderRadius: '12px', fontSize: '16px' }}
-              >
-                {loading ? "Updating..." : "Save & Update Service"}
-              </button>
-            </div>
-            
-            <div className="wizard-footer">
-              <button className="back-btn" onClick={handlePrev}>
-                Back to Billing
-              </button>
+              <div className="wizard-footer">
+                <button type="button" className="back-btn" onClick={handlePrev}>
+                  Back to Billing
+                </button>
+
+                <button
+                  type="button"
+                  className="next-button"
+                  onClick={() => handleSave(formData)}
+                  disabled={loading}
+                  style={{ position: "static" }}
+                >
+                  {loading ? "Updating..." : "Save & Update Service"}
+                </button>
+              </div>
             </div>
           </div>
         );

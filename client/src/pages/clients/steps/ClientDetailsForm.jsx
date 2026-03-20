@@ -9,7 +9,7 @@ import {
   uploadClientPhoto 
 } from "../../../api/client.api";
 
-const ClientDetailsForm = ({ data, onNext, isTransitioning }) => {
+const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) => {
   const [form, setForm] = useState(data);
   const [groups, setGroups] = useState([]);
   const [tags, setTags] = useState([]);
@@ -246,9 +246,14 @@ const ClientDetailsForm = ({ data, onNext, isTransitioning }) => {
         </div>
       </div>
 
-      <button className="next-button" onClick={handleNext}>
-        Next Step
-      </button>
+      <div className="wizard-footer">
+        <button type="button" className="back-btn" onClick={onPrev}>
+          Back
+        </button>
+        <button className="next-button" style={{ position: 'static' }} onClick={handleNext}>
+          Next Step
+        </button>
+      </div>
     </div>
   );
 };

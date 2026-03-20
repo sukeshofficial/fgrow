@@ -1,5 +1,6 @@
 import React from "react";
-import { FaSearch, FaPlus, FaFilter } from "react-icons/fa";
+import { FaSearch, FaPlus } from "react-icons/fa";
+import { FiFilter } from "react-icons/fi";
 
 const TaskFilterBar = ({ filters, onFilterChange, onCreateNew, onOpenAdvanced }) => {
   return (
@@ -44,7 +45,7 @@ const TaskFilterBar = ({ filters, onFilterChange, onCreateNew, onOpenAdvanced })
         </div>
 
         <button className="advanced-filter-btn" onClick={onOpenAdvanced}>
-          <FaFilter />
+          <FiFilter />
           Filters
         </button>
 
