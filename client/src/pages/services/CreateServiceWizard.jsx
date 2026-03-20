@@ -139,19 +139,19 @@ const CreateServiceWizard = () => {
                   </div>
                 </div>
               </div>
-
-              <button
-                className="next-button"
-                onClick={() => handleSave(formData)}
-                style={{ position: 'static', width: '100%', padding: '16px', borderRadius: '12px', fontSize: '16px' }}
-              >
-                Create & Activate Service
-              </button>
             </div>
 
             <div className="wizard-footer">
-              <button className="back-btn" onClick={handlePrev}>
+              <button type="button" className="back-btn" onClick={handlePrev}>
                 Back to Billing
+              </button>
+              <button 
+                type="button"
+                className="next-button" 
+                onClick={() => handleSave(formData)} 
+                style={{ position: 'static' }}
+              >
+                {loading ? "Creating..." : "Create & Activate Service"}
               </button>
             </div>
           </div>
