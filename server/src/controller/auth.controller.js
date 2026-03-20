@@ -76,11 +76,13 @@ export const registerUser = async (req, res) => {
 
     const username = await generateUsername(email);
 
+    console.log("Checking for existing user with email/username:", email, username);
     const existing = await User.findOne({
       $or: [{ email }, { username }],
     }).lean();
 
     if (existing) {
+      console.log("Existing user found, conflict.");
       return res.status(409).json({ message: "account already exists" });
     }
 
@@ -106,15 +108,7 @@ export const registerUser = async (req, res) => {
       };
     }
 
-    // Prevent duplicate accounts
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.status(409).json({
-        message: "account already exists",
-      });
-    }
-
+    console.log("Processing invitation for email:", email);
     const invitation = await UserInvitation.findOne({
       email,
       accepted_at: null,
@@ -152,7 +146,9 @@ export const registerUser = async (req, res) => {
     user.reset_token = hashedOtp;
     user.reset_token_expiry = Date.now() + 5 * 60 * 1000;
 
+    console.log("Saving new user...");
     await user.save();
+    console.log("User saved successfully, sending verification email...");
     // Send verification email
     await sendEmail({
       to: email,
@@ -212,6 +208,7 @@ export const registerUser = async (req, res) => {
   `,
     });
 
+    console.log("Registration complete, sending 201 response.");
     return res.status(201).json({
       message: "User registered successfully",
       user: user.toJSON(),
