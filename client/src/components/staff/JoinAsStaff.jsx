@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { checkAuth } from "../../features/auth/auth.actions";
-import { acceptInvitation } from "../../api/invitation.api";
+import { acceptInvitation, getInvitationDetails } from "../../api/invitation.api";
 
 import "../../styles/welcome.css";
 
@@ -14,6 +14,8 @@ import "../../styles/welcome.css";
 export const JoinAsStaff = ({ onClose, initialToken }) => {
   const { user, dispatch } = useAuth();
   const [token, setToken] = useState(initialToken || "");
+  const [tenantName, setTenantName] = useState("");
+  const [tenantLogo, setTenantLogo] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -21,8 +23,19 @@ export const JoinAsStaff = ({ onClose, initialToken }) => {
   useEffect(() => {
     if (initialToken) {
       setToken(initialToken);
+      fetchInvitationDetails(initialToken);
     }
   }, [initialToken]);
+
+  const fetchInvitationDetails = async (token) => {
+    try {
+      const response = await getInvitationDetails(token);
+      setTenantName(response.data.data.tenant_id.name);
+      setTenantLogo(response.data.data.tenant_id.logoUrl);
+    } catch (err) {
+      console.error("Failed to fetch invitation details", err);
+    }
+  };
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
@@ -72,9 +85,30 @@ export const JoinAsStaff = ({ onClose, initialToken }) => {
         <h2 id="join-staff-title" className="welcome-card-title">
           Join an Organization
         </h2>
+
+        {tenantLogo && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.2rem' }}>
+            <div style={{ 
+              width: '64px', 
+              height: '64px', 
+              marginTop: '10px',
+              borderRadius: '14px', 
+              overflow: 'hidden',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              border: '1px solid #eef2f6'
+            }}>
+              <img src={tenantLogo} alt={tenantName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          </div>
+        )}
+
         <p className="welcome-card-subtitle" style={{ marginBottom: "1.5rem" }}>
           {initialToken
-            ? "You have been invited to join an organization. Click join to proceed."
+            ? (
+              <>
+                You have been invited to join <strong>{tenantName || "an organization"}</strong>. Click join to proceed.
+              </>
+            )
             : "Enter the invitation token provided by your administrator."}
         </p>
 

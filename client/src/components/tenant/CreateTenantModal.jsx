@@ -147,6 +147,9 @@ export const CreateTenantModal = ({ onClose }) => {
       formData.append("companyName", form.companyName);
       formData.append("companyEmail", form.companyEmail);
       formData.append("companyPhone", form.companyPhone);
+      formData.append("gstin", form.gstin);
+      formData.append("officialAddress", form.officialAddress);
+      formData.append("gstCertificate", form.gstCertificate);
       formData.append("email", user?.email);
 
       if (logoFile) {
@@ -187,7 +190,7 @@ export const CreateTenantModal = ({ onClose }) => {
         <h2 className="tenant-modal-title">Client Creation</h2>
         <p className="tenant-modal-subtitle">Fill details for approval</p>
 
-        {error && <div className="tenant-form-error">{error}</div>}
+        {error && <div className="tenant-form-error visible">{error}</div>}
 
         <form className="tenant-form" onSubmit={handleSubmit}>
           <div className="tenant-form-main">

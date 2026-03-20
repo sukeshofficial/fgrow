@@ -22,6 +22,8 @@ import dscRoutes from "./routes/dsc.routes.js";
 import documentCollectionRequestRoutes from "./routes/documentCollectionRequest.routes.js";
 import billingEntityRoutes from "./routes/billingEntity.routes.js";
 
+import { errorMiddleware } from "./middleware/error.middleware.js";
+
 const app = express();
 
 app.use(express.json());
@@ -57,5 +59,8 @@ app.use("/api/v0/billing-entities", billingEntityRoutes);
 app.get("/api/v0/health", (req, res) => {
   res.json({ status: "OK" });
 });
+
+// Error handling middleware (must be last)
+app.use(errorMiddleware);
 
 export default app;

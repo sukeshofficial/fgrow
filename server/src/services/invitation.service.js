@@ -31,6 +31,17 @@ export const inviteUserService = async ({
     throw new Error("Tenant is inactive");
   }
 
+  // 1b Check if the inviter is the owner
+  const inviter = await User.findById(userId);
+  if (!inviter || inviter.tenant_role !== "owner") {
+    throw new Error("Only organization owners can invite new members.");
+  }
+
+  // 1c Check if the invited role is staff
+  if (tenant_role !== "staff") {
+    throw new Error("Only staff members can be invited.");
+  }
+
   // 2️⃣ Generate invite token
   const inviteToken = crypto.randomBytes(32).toString("hex");
 
@@ -189,4 +200,21 @@ export const revokeInvitationService = async (invitationId, tenant_id) => {
   await UserInvitation.findByIdAndDelete(invitationId);
 
   return { message: "Invitation revoked successfully" };
+};
+
+/**
+ * Get invitation details by token
+ */
+export const getInvitationByTokenService = async (token) => {
+  const invitation = await UserInvitation.findOne({
+    invite_token: token,
+    accepted_at: null,
+    expires_at: { $gt: new Date() },
+  }).populate("tenant_id", "name logoUrl");
+
+  if (!invitation) {
+    throw new Error("Invalid or expired invitation");
+  }
+
+  return invitation;
 };

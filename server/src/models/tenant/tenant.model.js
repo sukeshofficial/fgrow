@@ -29,6 +29,16 @@ const tenantSchema = new mongoose.Schema(
       trim: true,
     },
 
+    officialAddress: {
+      type: String,
+      trim: true,
+    },
+
+    gstCertificate: {
+      type: String,
+      trim: true,
+    },
+
     companyAddress: {
       street: String,
       city: String,

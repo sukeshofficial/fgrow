@@ -639,7 +639,7 @@ export const getMe = async (req, res) => {
           state: "INVITED",
           user,
           invitation: {
-            tenantName: invitation.tenant?.name || null,
+            tenantName: invitation.tenant_id?.name || null,
             tenant_role: invitation.tenant_role,
             token: invitation.invite_token,
           },

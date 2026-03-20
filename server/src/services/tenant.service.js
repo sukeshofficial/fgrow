@@ -9,6 +9,9 @@ export const createTenantService = async (data) => {
     companyPhone,
     email,
     logoUrl,
+    gstin,
+    officialAddress,
+    gstCertificate,
   } = data;
 
   // 1️⃣ Find user
@@ -51,6 +54,9 @@ export const createTenantService = async (data) => {
     companyPhone,
     domain: slugify(companyName, { lower: true }),
     logoUrl,
+    gstNumber: gstin,
+    officialAddress,
+    gstCertificate,
   });
 
   // 5️⃣ Attach user to tenant
