@@ -1,121 +1,337 @@
-/* Welcome UI Styles */
+/* Welcome UI Styles - Modern SaaS Onboarding */
+
+:root {
+  --primary-accent: #6366f1;
+  --primary-hover: #4f46e5;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --card-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.welcome-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-gradient);
+  padding: 40px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle Background Decoration */
+.welcome-page::before {
+  content: "";
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 40%;
+  height: 40%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+  z-index: 0;
+}
+
+.welcome-page::after {
+  content: "";
+  position: absolute;
+  bottom: -10%;
+  left: -10%;
+  width: 40%;
+  height: 40%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+  z-index: 0;
+}
+
+.welcome-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1000px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 60px;
+}
+
+/* Hero Section */
+.welcome-hero {
+  text-align: center;
+  max-width: 700px;
+}
+
+.welcome-headline {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.2;
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+}
+
+.welcome-subtext {
+  font-size: 18px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* Main Content Area */
+.welcome-content-grid {
+  display: flex;
+  align-items: center;
+  gap: 80px;
+  width: 100%;
+}
+
+.welcome-illustration-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-illustration {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 20px;
+  filter: drop-shadow(0 20px 30px rgba(99, 102, 241, 0.15));
+  animation: floating 4s ease-in-out infinite;
+}
+
+/* Brand Section */
+.welcome-brand {
+  position: relative;
+  padding: 6px 16px;
+  top: 20px;
+  left: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: 
+    linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)) padding-box, 
+    linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.3)) border-box;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  z-index: 10;
+  animation: fadeIn 1s ease-out;
+}
+
+.welcome-brand:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 15px 25px -5px rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.welcome-brand-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  
+  mix-blend-mode: multiply;
+  border-radius: 50%;
+  filter: brightness(0.95) contrast(1.2);
+}
+
+.welcome-brand-text {
+  font-size: 19px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.02em;
+  margin-right: 4px;
+}
+
+.welcome-hero {
+  text-align: center;
+  max-width: 700px;
+}
+
+.welcome-content-grid {
+  display: flex;
+  align-items: center;
+  gap: 80px;
+  width: 100%;
+}
+
+/* Decorative Flow Lines */
+.welcome-flow-svg {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  pointer-events: none;
+  z-index: -1;
+  overflow: visible;
+  /* border: 1px solid red; /* Debugging outline */
+}
+
+.welcome-flow-svg-right {
+  top: 60px;
+  right: -30%;
+  transform: rotate(90deg);
+}
+
+.welcome-flow-svg-left {
+  top: 60px;
+  left: -30%;
+  transform: rotate(-90deg) scaleX(-1);
+}
+
+.flow-line {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: drawFlow 10s linear infinite;
+  opacity: 0.8;
+}
+
+.flow-line-delayed {
+  animation-delay: -5s;
+}
+
+@keyframes drawFlow {
+  0% {
+    stroke-dashoffset: 1200;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Responsive Hide */
+@media (max-width: 1024px) {
+  .welcome-flow-svg {
+    display: none;
+  }
+}
+
+.welcome-actions-grid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Action Cards */
+.action-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #e2e8f0;
+  text-align: left;
+  text-decoration: none;
+  width: 100%;
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary-accent);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.action-card-icon {
+  width: 48px;
+  height: 48px;
+  background: #f5f3ff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-accent);
+  font-size: 24px;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.action-card:hover .action-card-icon {
+  background: var(--primary-accent);
+  color: white;
+}
+
+.action-card-content {
+  flex: 1;
+}
+
+.action-card-title {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.action-card-description {
+  display: block;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  font-weight: 500;
+}
 
 /* -------------------------------------------------------------------------- */
-/* Buttons */
+/* Button Primitives */
 /* -------------------------------------------------------------------------- */
 .welcome-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-family: inherit;
-  font-weight: 500;
-  border-radius: 8px;
+  font-weight: 600;
+  border-radius: 999px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid transparent;
   text-decoration: none;
   box-sizing: border-box;
 }
 
-.welcome-btn-disabled {
+.welcome-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  pointer-events: none;
-}
-
-/* Sizes */
-.welcome-btn-sm {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
 }
 
 .welcome-btn-md {
-  padding: 0.625rem 1rem;
-  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9375rem;
 }
 
 .welcome-btn-lg {
-  padding: 0.875rem 1.5rem;
+  padding: 1rem 2rem;
   font-size: 1.125rem;
 }
 
-/* Variants */
 .welcome-btn-primary {
-  background-color: #4f46e5;
+  background-color: var(--primary-accent);
   color: white;
 }
 
 .welcome-btn-primary:hover {
-  background-color: #4338ca;
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
 }
 
 .welcome-btn-secondary {
   background-color: white;
   color: #374151;
-  border-color: #d1d5db;
+  border-color: #e5e7eb;
 }
 
 .welcome-btn-secondary:hover {
   background-color: #f9fafb;
-}
-
-/* -------------------------------------------------------------------------- */
-/* Card Primitive */
-/* -------------------------------------------------------------------------- */
-.welcome-base-card {
-  background: white;
-  border-radius: 12px;
-  /* border: 2px solid rgba(222, 222, 222, 0.142); */
-  /* box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06); */
-  padding: 2rem;
-}
-
-/* -------------------------------------------------------------------------- */
-/* WelcomeCard Component */
-/* -------------------------------------------------------------------------- */
-.welcome-action-card {
-  max-width: 600px;
-  width: 100%;
-  text-align: center;
-  margin: 0 auto;
-}
-
-.welcome-card-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 0.5rem;
-  margin-top: 0;
-}
-
-.welcome-card-subtitle {
-  color: #6b7280;
-  font-size: 1rem;
-  margin-bottom: 2rem;
-}
-
-.welcome-card-actions {
-  display: inline-flex;
-  flex-direction: row;
-  gap: 1rem;
-}
-
-.welcome-card-actions .welcome-btn {
-  width: inherit;
-  justify-content: center;
-}
-
-/* -------------------------------------------------------------------------- */
-/* WelcomePage */
-/* -------------------------------------------------------------------------- */
-.welcome-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f3f4f6;
-  padding: 1rem;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -368,26 +584,32 @@
   flex-direction: column;
   gap: 0.5rem;
   font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
+  font-weight: 600;
+  color: var(--text-main);
+  text-align: left;
 }
 
 .tenant-required {
   color: #ef4444;
+  margin-left: 2px;
 }
 
 .tenant-input {
-  padding: 0.625rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #f8fafc;
   font-size: 0.875rem;
   width: 100%;
+  transition: all 0.2s;
+  color: var(--text-main);
 }
 
 .tenant-input:focus {
   outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  border-color: var(--primary-accent);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .tenant-actions {
@@ -425,8 +647,40 @@
 /* Responsive Design */
 /* -------------------------------------------------------------------------- */
 
+@media (max-width: 1024px) {
+  .welcome-brand {
+    position: relative;
+    top: 0;
+    left: 0;
+    justify-content: center;
+  }
+
+  .welcome-container {
+    gap: 40px;
+    padding-top: 20px;
+  }
+
+  .welcome-headline {
+    font-size: 38px;
+  }
+}
+
 /* Tablet (<= 768px) */
 @media (max-width: 768px) {
+  .welcome-content-grid {
+    flex-direction: column;
+    gap: 60px;
+  }
+
+  .welcome-illustration-container {
+    order: -1;
+    /* Move illustration above cards on mobile */
+    max-width: 80%;
+  }
+
+  .welcome-headline {
+    font-size: 32px;
+  }
 
   /* Welcome Card */
   .welcome-action-card {
