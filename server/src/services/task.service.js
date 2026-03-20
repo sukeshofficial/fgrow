@@ -8,12 +8,13 @@ const DEFAULT_LIMIT = 20;
 export const listTasks = async (filters = {}) => {
   const {
     tenant_id,
+    search,
     status,
+    priority,
     service,
     client,
     dateFrom,
     dateTo,
-    search,
     page = 1,
     limit = DEFAULT_LIMIT,
     sortBy = "createdAt",
@@ -28,6 +29,7 @@ export const listTasks = async (filters = {}) => {
   };
 
   if (status) taskQuery.status = status;
+  if (priority) taskQuery.priority = priority;
   if (service) taskQuery.service = new mongoose.Types.ObjectId(service);
   if (client) taskQuery.client = new mongoose.Types.ObjectId(client);
 
@@ -185,20 +187,18 @@ export const addChecklistItem = async (taskId, checklistItem, user = {}) => {
   if (!checklistItem || !checklistItem.title)
     throw new Error("checklist title required");
 
-  const updatedTask = await Task.findByIdAndUpdate(
-    taskId,
-    { $push: { checklist: { ...checklistItem, is_done: false } } },
-    { new: true },
-  ).lean();
+  const task = await Task.findOne({ _id: taskId, tenant_id: user.tenant_id });
+  if (!task) throw new Error("Task not found or unauthorized");
 
-  if (!updatedTask) throw new Error("Task not found");
+  task.checklist.push({ ...checklistItem, is_done: false });
+  task.markModified("checklist");
+  await task.save();
 
-  const addedChecklistItem =
-    updatedTask.checklist[updatedTask.checklist.length - 1];
+  const addedChecklistItem = task.checklist[task.checklist.length - 1];
 
   await TaskActivity.create({
-    tenant_id: updatedTask.tenant_id,
-    task: updatedTask._id,
+    tenant_id: task.tenant_id,
+    task: task._id,
     user: user.id,
     activity_type: "checklist_added",
     detail: `Checklist item added: ${checklistItem.title}`,
@@ -214,9 +214,9 @@ export const updateChecklistItem = async (
   updateData,
   user = {},
 ) => {
-  const task = await Task.findById(taskId);
+  const task = await Task.findOne({ _id: taskId, tenant_id: user.tenant_id });
 
-  if (!task) throw new Error("Task not found");
+  if (!task) throw new Error("Task not found or unauthorized");
 
   if (
     checklistIndex === undefined ||
@@ -246,6 +246,7 @@ export const updateChecklistItem = async (
     }
   }
 
+  task.markModified("checklist");
   await task.save();
 
   await TaskActivity.create({
@@ -265,9 +266,9 @@ export const deleteChecklistItem = async (
   checklistIndex,
   user = {},
 ) => {
-  const task = await Task.findById(taskId);
+  const task = await Task.findOne({ _id: taskId, tenant_id: user.tenant_id });
 
-  if (!task) throw new Error("Task not found");
+  if (!task) throw new Error("Task not found or unauthorized");
 
   if (
     checklistIndex === undefined ||
@@ -281,6 +282,7 @@ export const deleteChecklistItem = async (
 
   task.checklist.splice(checklistIndex, 1);
 
+  task.markModified("checklist");
   await task.save();
 
   await TaskActivity.create({
@@ -296,29 +298,28 @@ export const deleteChecklistItem = async (
 };
 
 /* ------------------ timelog start ------------------ */
-export const startTimelog = async (taskId, userId) => {
+export const startTimelog = async (taskId, user) => {
+  const task = await Task.findOne({ _id: taskId, tenant_id: user.tenant_id });
+  if (!task) throw new Error("Task not found or unauthorized");
+
   const timeLog = {
-    user: userId,
+    user: user.id,
     start_time: new Date(),
     end_time: null,
     duration_minutes: 0,
     note: "",
   };
 
-  const updatedTask = await Task.findByIdAndUpdate(
-    taskId,
-    { $push: { timelogs: timeLog } },
-    { new: true },
-  ).lean();
+  task.timelogs.push(timeLog);
+  task.markModified("timelogs");
+  await task.save();
 
-  if (!updatedTask) throw new Error("Task not found");
-
-  const latestTimeLog = updatedTask.timelogs[updatedTask.timelogs.length - 1];
+  const latestTimeLog = task.timelogs[task.timelogs.length - 1];
 
   await TaskActivity.create({
-    tenant_id: updatedTask.tenant_id,
-    task: updatedTask._id,
-    user: userId,
+    tenant_id: task.tenant_id,
+    task: task._id,
+    user: user.id,
     activity_type: "timelog_started",
     detail: "Time log started",
     meta: { timelog: latestTimeLog },
@@ -328,10 +329,9 @@ export const startTimelog = async (taskId, userId) => {
 };
 
 /* ------------------ timelog stop ------------------ */
-export const stopTimelog = async (taskId, timelogId = null, userId) => {
-  const task = await Task.findById(taskId);
-
-  if (!task) throw new Error("Task not found");
+export const stopTimelog = async (taskId, timelogId = null, user) => {
+  const task = await Task.findOne({ _id: taskId, tenant_id: user.tenant_id });
+  if (!task) throw new Error("Task not found or unauthorized");
 
   let timeLogIndex = -1;
 
@@ -343,7 +343,7 @@ export const stopTimelog = async (taskId, timelogId = null, userId) => {
     for (let i = task.timelogs.length - 1; i >= 0; i--) {
       if (
         !task.timelogs[i].end_time &&
-        String(task.timelogs[i].user) === String(userId)
+        String(task.timelogs[i].user) === String(user.id)
       ) {
         timeLogIndex = i;
         break;
@@ -362,12 +362,13 @@ export const stopTimelog = async (taskId, timelogId = null, userId) => {
 
   timeLog.duration_minutes = Math.round(durationMs / 60000);
 
+  task.markModified("timelogs");
   await task.save();
 
   await TaskActivity.create({
     tenant_id: task.tenant_id,
     task: task._id,
-    user: userId,
+    user: user.id,
     activity_type: "timelog_stopped",
     detail: "Time log stopped",
     meta: { timelog: timeLog },
@@ -376,10 +377,9 @@ export const stopTimelog = async (taskId, timelogId = null, userId) => {
   return timeLog;
 };
 
-export const addTimelog = async (taskId, timelogData = {}, userId) => {
-  const task = await Task.findById(taskId);
-
-  if (!task) throw new Error("Task not found");
+export const addTimelog = async (taskId, timelogData = {}, user) => {
+  const task = await Task.findOne({ _id: taskId, tenant_id: user.tenant_id });
+  if (!task) throw new Error("Task not found or unauthorized");
 
   if (!timelogData.start_time) throw new Error("start_time required");
 
@@ -394,7 +394,7 @@ export const addTimelog = async (taskId, timelogData = {}, userId) => {
   }
 
   const newTimelog = {
-    user: userId,
+    user: user.id,
     start_time: startTime,
     end_time: endTime,
     duration_minutes: durationMinutes,
@@ -402,7 +402,7 @@ export const addTimelog = async (taskId, timelogData = {}, userId) => {
   };
 
   task.timelogs.push(newTimelog);
-
+  task.markModified("timelogs");
   await task.save();
 
   const addedLog = task.timelogs[task.timelogs.length - 1];
@@ -410,7 +410,7 @@ export const addTimelog = async (taskId, timelogData = {}, userId) => {
   await TaskActivity.create({
     tenant_id: task.tenant_id,
     task: task._id,
-    user: userId,
+    user: user.id,
     activity_type: "timelog_added",
     detail: "Manual time log added",
     meta: { timelog: addedLog },
@@ -431,4 +431,19 @@ export const getActivities = async (taskId, tenant_id, opts = {}) => {
     .sort({ createdAt: -1 })
     .limit(limit)
     .lean();
+};
+
+/* ------------------ delete task ------------------ */
+export const deleteTask = async (taskId, tenantId) => {
+  const deletedTask = await Task.findOneAndDelete({
+    _id: taskId,
+    tenant_id: tenantId,
+  });
+
+  if (!deletedTask) throw new Error("Task not found or unauthorized");
+
+  // Optional: Clean up activities, but usually better to keep them or cascade delete if needed
+  await TaskActivity.deleteMany({ task: taskId });
+
+  return deletedTask;
 };

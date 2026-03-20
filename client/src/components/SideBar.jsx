@@ -320,7 +320,7 @@ export default function Sidebar() {
         <div className="sidebar-inner">
           {/* Logo / Brand */}
           <div className="navbar-logo">
-            <img src={logo} alt="ForgeGrid" className="logo-img brand-icon" />
+            <img src={logo} alt="ForgeGrid" className="logo-img" />
             <span className={`logo-text ${collapsed ? "collapsed" : ""} user-info`}>
               <span className="fg">FG</span>row
             </span>

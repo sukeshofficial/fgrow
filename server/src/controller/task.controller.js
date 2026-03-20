@@ -13,6 +13,7 @@ import {
   stopTimelog,
   addTimelog,
   getActivities,
+  deleteTask,
 } from "../services/task.service.js";
 
 const sendSuccess = (res, data) => res.json({ success: true, data });
@@ -164,7 +165,7 @@ export async function startTimelogController(req, res) {
   try {
     const currentUser = req.user;
 
-    const startedTimeLog = await startTimelog(req.params.id, currentUser.id);
+    const startedTimeLog = await startTimelog(req.params.id, currentUser);
 
     return sendSuccess(res, startedTimeLog);
   } catch (error) {
@@ -179,7 +180,7 @@ export async function stopTimelogController(req, res) {
     const stoppedTimeLog = await stopTimelog(
       req.params.id,
       req.body.timelogId,
-      currentUser.id,
+      currentUser,
     );
 
     return sendSuccess(res, stoppedTimeLog);
@@ -195,7 +196,7 @@ export async function addTimelogController(req, res) {
     const createdTimeLog = await addTimelog(
       req.params.id,
       req.body,
-      currentUser.id,
+      currentUser,
     );
 
     return sendSuccess(res, createdTimeLog);
@@ -207,11 +208,25 @@ export async function addTimelogController(req, res) {
 /* ------------------ activity ------------------ */
 export async function getActivitiesController(req, res) {
   try {
-    const tenantId = req.tenant?.id;
+    const tenantId = req.user.tenant_id;
 
     const activities = await getActivities(req.params.id, tenantId, req.query);
 
     return sendSuccess(res, activities);
+  } catch (error) {
+    return sendError(res, error);
+  }
+}
+
+/* ------------------ delete task ------------------ */
+export async function deleteTaskController(req, res) {
+  try {
+    const tenantId = req.user.tenant_id;
+    const taskId = req.params.id;
+
+    const deletedTask = await deleteTask(taskId, tenantId);
+
+    return sendSuccess(res, deletedTask);
   } catch (error) {
     return sendError(res, error);
   }

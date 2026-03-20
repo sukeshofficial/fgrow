@@ -13,6 +13,7 @@ import "./styles/dashboard.css";
 import "./styles/avatar-upload.css";
 import "./styles/otp-modal.css";
 import "./styles/password-meter.css";
+import "./styles/navbar.css"
 import "./styles/sidebar.css";
 import "./styles/welcome.css";
 
@@ -30,6 +31,9 @@ import ClientList from "./pages/clients/ClientList";
 import Services from "./pages/services/Services";
 import CreateServiceWizard from "./pages/services/CreateServiceWizard";
 import EditServiceWizard from "./pages/services/EditServiceWizard";
+import CreateTaskWizard from "./pages/tasks/CreateTaskWizard";
+import EditTaskWizard from "./pages/tasks/EditTaskWizard";
+import TaskDetails from "./pages/tasks/TaskDetails";
 
 /* Routing */
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -90,6 +94,9 @@ const App = () => {
 
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/tasks" element={<Tasks />} />
+            <Route path="/tasks/create" element={<CreateTaskWizard />} />
+            <Route path="/tasks/:id" element={<TaskDetails />} />
+            <Route path="/tasks/edit/:id" element={<EditTaskWizard />} />
             <Route path="/todo" element={<Tasks />} />
             <Route path="/clients/create" element={<CreateClientWizard />} />
             <Route path="/clients/:id" element={<EditClientWizard />} />

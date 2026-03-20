@@ -63,16 +63,27 @@ const SearchableDropdown = ({
         <div className="chip-container">
           {isMulti ? (
             Array.isArray(value) && value.length > 0 ? (
-              value.map((id) => (
-                <span key={id} className="tag-chip">
-                  {options.find((o) => o._id === id)?.name || id}
-                  <button 
-                    type="button" 
-                    className="remove-chip"
-                    onClick={(e) => { e.stopPropagation(); handleSelect(id); }}
-                  >&times;</button>
-                </span>
-              ))
+              value.map((id) => {
+                const option = options.find((o) => o._id === id);
+                const imageUrl = option?.profile_avatar?.secure_url || option?.photo?.secure_url;
+                return (
+                  <span key={id} className="tag-chip">
+                    {imageUrl && (
+                      <img 
+                        src={imageUrl} 
+                        alt="" 
+                        style={{ width: '16px', height: '16px', borderRadius: '50%', objectFit: 'cover' }} 
+                      />
+                    )}
+                    {option?.name || id}
+                    <button 
+                      type="button" 
+                      className="remove-chip"
+                      onClick={(e) => { e.stopPropagation(); handleSelect(id); }}
+                    >&times;</button>
+                  </span>
+                );
+              })
             ) : (
               <span className="placeholder">{placeholder}</span>
             )
@@ -113,7 +124,16 @@ const SearchableDropdown = ({
                   }`}
                   onClick={() => handleSelect(option._id)}
                 >
-                  {option.name}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {(option.profile_avatar?.secure_url || option.photo?.secure_url) && (
+                      <img 
+                        src={option.profile_avatar?.secure_url || option.photo?.secure_url} 
+                        alt="" 
+                        style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} 
+                      />
+                    )}
+                    {option.name}
+                  </div>
                   {(isMulti ? (Array.isArray(value) && value.includes(option._id)) : (value === option._id)) && (
                     <span className="check-icon">✓</span>
                   )}
