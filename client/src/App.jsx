@@ -45,25 +45,20 @@ import StaffRoutes from "./routes/StaffRoute";
 /* Auth */
 import { useAuth } from "./hooks/useAuth";
 import { checkAuth } from "./features/auth/auth.actions";
+import { useError } from "./context/ErrorContext";
+import { setupInterceptors } from "./api/api";
 
-/**
- * App
- *
- * Root application component responsible for
- * initializing auth state and defining routes.
- */
 const App = () => {
-  /**
-   * Auth dispatch
-   */
   const { dispatch } = useAuth();
+  const { setError } = useError();
 
-  /**
-   * Check authenticated session on app mount
-   */
   useEffect(() => {
+    // 1. Setup global axios error handling
+    setupInterceptors(setError);
+    
+    // 2. Check authenticated session
     checkAuth(dispatch);
-  }, [dispatch]);
+  }, [dispatch, setError]);
 
   return (
     <Routes>
