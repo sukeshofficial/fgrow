@@ -14,11 +14,16 @@ cloudinary.config({
 // ─── Buffer Upload Helpers (for memory storage / Vercel) ───────────────────
 
 export const uploadBufferToCloud = (buffer, folder = "users") => {
+  console.log(`☁️ Uploading buffer to Cloudinary (folder: ${folder})...`);
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       { folder, resource_type: "image" },
       (error, result) => {
-        if (error) return reject(error);
+        if (error) {
+          console.error("❌ Cloudinary upload error:", error);
+          return reject(error);
+        }
+        console.log("✅ Cloudinary upload successful");
         resolve({
           success: true,
           public_id: result.public_id,

@@ -8,15 +8,18 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  connectionTimeout: 5000, // 5 seconds
+  greetingTimeout: 5000, // 5 seconds
 });
 
 export default async function sendEmail(mail) {
   try {
+    console.log(`📧 Sending email to: ${mail.to}...`);
     const result = await transporter.sendMail(mail);
-    console.log("Email sent successfully");
+    console.log("✅ Email sent successfully");
     return result;
   } catch (err) {
-    console.error("Error sending email:", err);
+    console.error("❌ Error sending email:", err);
     throw err;
   }
 }
