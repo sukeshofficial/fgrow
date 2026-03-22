@@ -7,6 +7,7 @@ import TaskAssignmentForm from "./steps/TaskAssignmentForm";
 import { createTask } from "../../api/task.api";
 import "../../styles/CreateClient.css"; 
 import "../../styles/Tasks.css";
+import { Spinner } from "../../components/ui/Spinner";
 
 const CreateTaskWizard = () => {
   const navigate = useNavigate();
@@ -60,7 +61,13 @@ const CreateTaskWizard = () => {
   };
 
   const renderStep = () => {
-    if (loading) return <div className="step-placeholder">Creating task...</div>;
+    if (loading) {
+      return (
+        <div className="step-placeholder" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+          <Spinner />
+        </div>
+      );
+    }
 
     switch (currentStep) {
       case 0:

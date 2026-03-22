@@ -24,7 +24,10 @@ async function connectIfNeeded() {
   console.log("⏳ Connecting to MongoDB...");
   await mongoose.connect(uri, {
     autoIndex: false,
-    serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+    serverSelectionTimeoutMS: 5000,
+    maxPoolSize: 10, // Recommended for serverless to prevent connection spikes
+    socketTimeoutMS: 45000,
+    family: 4, // Use IPv4, skip trying IPv6
   });
   console.log("✅ MongoDB connected successfully");
 }

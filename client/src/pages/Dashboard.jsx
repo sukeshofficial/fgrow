@@ -8,6 +8,7 @@ import { useAuth } from "../hooks/useAuth";
 import { getTenantById } from "../api/tenant.api";
 import "../styles/welcome.css";
 import "../styles/tenant-info.css";
+import { Spinner } from "../components/ui/Spinner";
 
 /**
  * Dashboard page
@@ -17,6 +18,7 @@ import "../styles/tenant-info.css";
 const Dashboard = () => {
   const { user } = useAuth();
   const [tenantDetails, setTenantDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -24,11 +26,16 @@ const Dashboard = () => {
     const fetchTenantData = async () => {
       if (user?.tenant_id) {
         try {
+          setLoading(true);
           const response = await getTenantById(user.tenant_id);
           setTenantDetails(response.data.data);
         } catch (err) {
           console.error("Failed to fetch tenant details", err);
+        } finally {
+          setLoading(false);
         }
+      } else {
+        setLoading(false);
       }
     };
     fetchTenantData();
@@ -75,7 +82,11 @@ const Dashboard = () => {
         </div>
 
         {/* Tenant Info Section */}
-        {tenantDetails && (
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+            <Spinner />
+          </div>
+        ) : tenantDetails && (
           <div className="tenant-info-card">
             {tenantDetails.logoUrl ? (
               <img

@@ -1,5 +1,6 @@
 import React from "react";
 import { FaTrash, FaEye, FaEdit, FaClock } from "react-icons/fa";
+import { Spinner } from "../../../components/ui/Spinner";
 
 const TaskTable = ({ tasks, loading, onAction, onDelete, onStatusChange }) => {
   const getStatusClass = (status) => {
@@ -24,8 +25,8 @@ const TaskTable = ({ tasks, loading, onAction, onDelete, onStatusChange }) => {
 
   if (loading) {
     return (
-      <div className="table-container">
-        <div className="table-loading">Loading tasks...</div>
+      <div className="table-container" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+        <Spinner />
       </div>
     );
   }

@@ -93,6 +93,8 @@ const clientSchema = new Schema(
 
 clientSchema.index({ tenant_id: 1, pan: 1 });
 clientSchema.index({ tenant_id: 1, file_no: 1 });
+clientSchema.index({ tenant_id: 1, archived: 1, createdAt: -1 });
+clientSchema.index({ tenant_id: 1, archived: 1, name: 1 });
 clientSchema.index({ tenant_id: 1, name: "text", "contacts.name": "text" });
 
 export default mongoose.model("Client", clientSchema);

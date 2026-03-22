@@ -6,6 +6,7 @@ import ServiceDetailsForm from "./steps/ServiceDetailsForm";
 import ServiceBillingForm from "./steps/ServiceBillingForm";
 import { createService } from "../../api/service.api";
 import "../../styles/CreateClient.css"; // Reuse wizard styles
+import { Spinner } from "../../components/ui/Spinner";
 
 const CreateServiceWizard = () => {
   const navigate = useNavigate();
@@ -56,7 +57,13 @@ const CreateServiceWizard = () => {
   };
 
   const renderStep = () => {
-    if (loading) return <div className="step-placeholder">Processing...</div>;
+    if (loading) {
+      return (
+        <div className="step-placeholder" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+          <Spinner />
+        </div>
+      );
+    }
 
     switch (currentStep) {
       case 0:

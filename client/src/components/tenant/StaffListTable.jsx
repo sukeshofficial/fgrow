@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getTenantStaff } from "../../api/tenant.api";
 import { Card } from "../ui/Card";
 import "../../styles/welcome.css";
+import { Spinner } from "../ui/Spinner";
 
 const StaffListTable = ({ refreshKey }) => {
   const [staff, setStaff] = useState([]);
@@ -23,7 +24,13 @@ const StaffListTable = ({ refreshKey }) => {
     fetchStaff();
   }, [refreshKey]);
 
-  if (loading) return <div className="staff-loading">Loading staff members...</div>;
+  if (loading) {
+    return (
+      <div className="staff-loading" style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+        <Spinner />
+      </div>
+    );
+  }
   if (error) return <div className="staff-error">{error}</div>;
 
   return (

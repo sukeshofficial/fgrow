@@ -7,6 +7,7 @@ import { listTodos, moveTodo, deleteTodo } from "../../api/todo.api";
 import { FaSearch, FaPlus } from "react-icons/fa";
 import { FiFilter } from "react-icons/fi";
 import "../../styles/Todo.css";
+import { Spinner } from "../../components/ui/Spinner";
 
 const TodoDashboard = () => {
   const [todos, setTodos] = useState([]);
@@ -130,7 +131,9 @@ const TodoDashboard = () => {
           </header>
 
           {loading && todos.length === 0 ? (
-            <div className="loading-state">Loading board...</div>
+            <div className="loading-state" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+              <Spinner />
+            </div>
           ) : (
             <KanbanBoard
               todos={todos}

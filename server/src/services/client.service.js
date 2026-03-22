@@ -148,11 +148,12 @@ export const listClientsService = async ({
     const skip = (page - 1) * limit;
 
     const clients = await Client.find(query)
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 })
       .populate("group", "name")
       .populate("tags", "name color")
+      .select("name file_no type pan gstin is_active createdAt primary_contact_name primary_contact_mobile primary_contact_email group tags")
       .lean();
 
     const total = await Client.countDocuments(query);
@@ -380,6 +381,7 @@ export const listClientsByTenantIdService = async ({ tenant_id, page = 1, limit 
       .limit(limit)
       .populate("group", "name")
       .populate("tags", "name color")
+      .select("name file_no type pan gstin is_active createdAt group tags")
       .lean();
 
     const total = await Client.countDocuments(query);

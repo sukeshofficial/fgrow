@@ -83,10 +83,12 @@ export const listInvoices = async (user, query) => {
 
   const [items, total] = await Promise.all([
     Invoice.find(filter)
-      .populate([{ path: "client" }, { path: "billing_entity" }])
+      .populate("client", "name email")
+      .populate("billing_entity", "name")
       .sort(sort)
       .skip(skip)
       .limit(limit)
+      .select("invoice_no date total_amount amount_received balance_due status client billing_entity createdAt")
       .lean(),
     Invoice.countDocuments(filter),
   ]);

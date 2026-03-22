@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 /* Global styles */
@@ -17,24 +17,33 @@ import "./styles/navbar.css"
 import "./styles/sidebar.css";
 import "./styles/welcome.css";
 
-/* Pages */
-import Register from "./pages/auth/Register";
-import Login from "./pages/auth/Login";
-import Dashboard from "./pages/Dashboard";
-import Tasks from "./pages/Tasks";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import TenantDetailView from "./pages/admin/TenantDetailView";
-import Users from "./pages/Users";
-import CreateClientWizard from "./pages/clients/CreateClientWizard";
-import EditClientWizard from "./pages/clients/EditClientWizard";
-import ClientList from "./pages/clients/ClientList";
-import Services from "./pages/services/Services";
-import CreateServiceWizard from "./pages/services/CreateServiceWizard";
-import EditServiceWizard from "./pages/services/EditServiceWizard";
-import CreateTaskWizard from "./pages/tasks/CreateTaskWizard";
-import EditTaskWizard from "./pages/tasks/EditTaskWizard";
-import TaskDetails from "./pages/tasks/TaskDetails";
-import TodoDashboard from "./pages/todos/TodoDashboard";
+/* Pages - Lazy Loaded */
+const Register = lazy(() => import("./pages/auth/Register"));
+const Login = lazy(() => import("./pages/auth/Login"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Tasks = lazy(() => import("./pages/Tasks"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const TenantDetailView = lazy(() => import("./pages/admin/TenantDetailView"));
+const Users = lazy(() => import("./pages/Users"));
+const CreateClientWizard = lazy(() => import("./pages/clients/CreateClientWizard"));
+const EditClientWizard = lazy(() => import("./pages/clients/EditClientWizard"));
+const ClientList = lazy(() => import("./pages/clients/ClientList"));
+const Services = lazy(() => import("./pages/services/Services"));
+const CreateServiceWizard = lazy(() => import("./pages/services/CreateServiceWizard"));
+const EditServiceWizard = lazy(() => import("./pages/services/EditServiceWizard"));
+const CreateTaskWizard = lazy(() => import("./pages/tasks/CreateTaskWizard"));
+const EditTaskWizard = lazy(() => import("./pages/tasks/EditTaskWizard"));
+const TaskDetails = lazy(() => import("./pages/tasks/TaskDetails"));
+const TodoDashboard = lazy(() => import("./pages/todos/TodoDashboard"));
+
+import { Spinner } from "./components/ui/Spinner";
+
+/* Loading Spinner for Suspense */
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <Spinner />
+  </div>
+);
 
 /* Routing */
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -61,59 +70,61 @@ const App = () => {
   }, [dispatch, setError]);
 
   return (
-    <Routes>
-
-      {/* Default */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-      {/* Public */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-
-      {/* ---------------- ADMIN PORTAL ---------------- */}
-      <Route element={<ProtectedRoute />}>
-        <Route element={<SuperAdminRoute />}>
-
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/tenants/:tenantId" element={<TenantDetailView />} />
-
-        </Route>
-      </Route>
-
-
-      {/* ---------------- TENANT APP ---------------- */}
-      <Route element={<ProtectedRoute />}>
-
-        <Route element={<TenantRoutes />}>
-
-          <Route element={<StaffRoutes />}>
-
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/tasks" element={<Tasks />} />
-            <Route path="/tasks/create" element={<CreateTaskWizard />} />
-            <Route path="/tasks/:id" element={<TaskDetails />} />
-            <Route path="/tasks/edit/:id" element={<EditTaskWizard />} />
-            <Route path="/todo" element={<TodoDashboard />} />
-            <Route path="/clients/create" element={<CreateClientWizard />} />
-            <Route path="/clients/:id" element={<EditClientWizard />} />
-            <Route path="/clients" element={<ClientList />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/services/create" element={<CreateServiceWizard />} />
-            <Route path="/services/edit/:id" element={<EditServiceWizard />} />
-            <Route path="/finance" element={<Tasks />} />
-            <Route path="/documents" element={<Tasks />} />
-            <Route path="/reports" element={<Tasks />} />
-            <Route path="/users" element={<Users />} />
-            <Route path="/notifications" element={<Tasks />} />
-            <Route path="/settings" element={<Tasks />} />
-
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+  
+        {/* Default */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+  
+        {/* Public */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+  
+        {/* ---------------- ADMIN PORTAL ---------------- */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<SuperAdminRoute />}>
+  
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/tenants/:tenantId" element={<TenantDetailView />} />
+  
           </Route>
-
         </Route>
-
-      </Route>
-
-    </Routes>
+  
+  
+        {/* ---------------- TENANT APP ---------------- */}
+        <Route element={<ProtectedRoute />}>
+  
+          <Route element={<TenantRoutes />}>
+  
+            <Route element={<StaffRoutes />}>
+  
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/tasks" element={<Tasks />} />
+              <Route path="/tasks/create" element={<CreateTaskWizard />} />
+              <Route path="/tasks/:id" element={<TaskDetails />} />
+              <Route path="/tasks/edit/:id" element={<EditTaskWizard />} />
+              <Route path="/todo" element={<TodoDashboard />} />
+              <Route path="/clients/create" element={<CreateClientWizard />} />
+              <Route path="/clients/:id" element={<EditClientWizard />} />
+              <Route path="/clients" element={<ClientList />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/services/create" element={<CreateServiceWizard />} />
+              <Route path="/services/edit/:id" element={<EditServiceWizard />} />
+              <Route path="/finance" element={<Tasks />} />
+              <Route path="/documents" element={<Tasks />} />
+              <Route path="/reports" element={<Tasks />} />
+              <Route path="/users" element={<Users />} />
+              <Route path="/notifications" element={<Tasks />} />
+              <Route path="/settings" element={<Tasks />} />
+  
+            </Route>
+  
+          </Route>
+  
+        </Route>
+  
+      </Routes>
+    </Suspense>
   );
 };
 

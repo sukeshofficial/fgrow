@@ -7,6 +7,7 @@ import TaskAssignmentForm from "./steps/TaskAssignmentForm";
 import { getTask, updateTask } from "../../api/task.api";
 import "../../styles/CreateClient.css"; 
 import "../../styles/Tasks.css";
+import { Spinner } from "../../components/ui/Spinner";
 
 const EditTaskWizard = () => {
   const { id } = useParams();
@@ -78,10 +79,22 @@ const EditTaskWizard = () => {
     }
   };
 
-  if (loading) return <div className="loading">Loading task...</div>;
+  if (loading) {
+    return (
+      <div className="loading" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+        <Spinner />
+      </div>
+    );
+  }
 
   const renderStep = () => {
-    if (saving) return <div className="step-placeholder">Saving changes...</div>;
+    if (saving) {
+      return (
+        <div className="step-placeholder" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+          <Spinner />
+        </div>
+      );
+    }
 
     switch (currentStep) {
       case 0:

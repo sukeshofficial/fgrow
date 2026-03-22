@@ -7,6 +7,7 @@ import ContactDetailsForm from "./steps/ContactDetailsForm";
 import ClientServicesForm from "./steps/ClientServicesForm";
 import { createClient } from "../../api/client.api";
 import "../../styles/CreateClient.css";
+import { Spinner } from "../../components/ui/Spinner";
 
 const CreateClientWizard = () => {
   const navigate = useNavigate();
@@ -78,7 +79,13 @@ const CreateClientWizard = () => {
   };
 
   const renderStep = () => {
-    if (loading) return <div className="step-placeholder">Processing...</div>;
+    if (loading) {
+      return (
+        <div className="step-placeholder" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+          <Spinner />
+        </div>
+      );
+    }
 
     switch (currentStep) {
       case 0:

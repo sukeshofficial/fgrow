@@ -14,6 +14,7 @@ import {
 } from "../../api/task.api.js";
 import { FaCheckCircle, FaRegCircle, FaTrash, FaPlay, FaStop, FaPlus, FaHistory, FaClock, FaArrowLeft } from "react-icons/fa";
 import "../../styles/Tasks.css";
+import { Spinner } from "../../components/ui/Spinner";
 
 const TaskDetails = () => {
   const { id } = useParams();
@@ -111,7 +112,13 @@ const TaskDetails = () => {
     }
   };
 
-  if (loading) return <div className="loading">Loading task details...</div>;
+  if (loading) {
+    return (
+      <div className="loading" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+        <Spinner />
+      </div>
+    );
+  }
   if (!task) return <div className="error">Task not found</div>;
 
   return (

@@ -1,14 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEdit } from "react-icons/fa";
+import { Spinner } from "../../../components/ui/Spinner";
 
 const ClientTable = ({ clients, loading }) => {
   const navigate = useNavigate();
 
   if (loading) {
     return (
-      <div className="table-loading">
-        <div className="loading-shimmer" style={{ height: '400px' }}></div>
+      <div className="table-loading" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+        <Spinner />
       </div>
     );
   }

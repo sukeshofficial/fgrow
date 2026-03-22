@@ -52,7 +52,7 @@ export default async function authMiddleware(req, res, next) {
 
     // Load fresh user and validate account state
     const user = await User.findById(userId).select(
-      "-password_hash -reset_token -reset_token_expiry -locked_until",
+      "name email tenant_id platform_role tenant_role status profile_avatar",
     );
 
     if (!user) {

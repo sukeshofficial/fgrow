@@ -8,6 +8,7 @@ import { FaUserPlus, FaEnvelope, FaTrashAlt, FaClock } from "react-icons/fa";
 import { useAuth } from "../hooks/useAuth";
 import "../styles/dashboard.css";
 import "../styles/welcome.css";
+import { Spinner } from "../components/ui/Spinner";
 
 const Users = () => {
   const { user } = useAuth();
@@ -105,7 +106,9 @@ const Users = () => {
           ) : (
             <div className="staff-table-container">
               {loading ? (
-                <div className="staff-loading">Fetching invitations...</div>
+                <div className="staff-loading" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+                  <Spinner />
+                </div>
               ) : invites.length === 0 ? (
                 <div className="staff-loading">You don't have any invite</div>
               ) : (

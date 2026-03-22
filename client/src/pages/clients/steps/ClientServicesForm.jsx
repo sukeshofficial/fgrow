@@ -4,6 +4,7 @@ import SearchableDropdown from "../../../components/ui/SearchableDropdown";
 import { listServicesByTenant } from "../../../api/service.api";
 import { listBillingEntities, listStaff } from "../../../api/client.api";
 import { FiCheck } from "react-icons/fi";
+import { Spinner } from "../../../components/ui/Spinner";
 
 const ClientServicesForm = ({ data, onNext, onPrev, isEdit }) => {
   const [form, setForm] = useState({
@@ -141,7 +142,13 @@ const ClientServicesForm = ({ data, onNext, onPrev, isEdit }) => {
     onNext(form);
   };
 
-  if (loading) return <div className="step-placeholder">Loading resources...</div>;
+  if (loading) {
+    return (
+      <div className="step-placeholder" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div className="step-container">

@@ -12,6 +12,7 @@ import Toast from "../../components/ui/Toast";
 import RejectionModal from "../../components/tenant/RejectionModal";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import "../../styles/welcome.css";
+import { Spinner } from "../../components/ui/Spinner";
 
 // Shared style for section headings inside the profile card
 const sectionLabel = {
@@ -112,7 +113,13 @@ const TenantDetailView = () => {
     }
   };
 
-  if (loading) return <div className="staff-loading">Loading tenant details...</div>;
+  if (loading) {
+    return (
+      <div className="staff-loading" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
+        <Spinner />
+      </div>
+    );
+  }
   if (error) return <div className="staff-error">{error}</div>;
   if (!tenant) return <div className="staff-error">Tenant not found.</div>;
 
