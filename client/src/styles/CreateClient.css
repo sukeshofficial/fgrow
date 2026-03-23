@@ -383,6 +383,38 @@
   font-weight: 400;
 }
 
+.no-options {
+  padding: 24px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  background: white;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.add-new-btn {
+  border-top: 1px solid var(--border-color);
+  padding: 12px 14px;
+  color: var(--primary-accent);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  background: #fdfdfd;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.add-new-btn:hover {
+  background: #f5f3ff;
+}
+
 .dropdown-toggle .selected-value {
   color: var(--text-main);
   font-weight: 500;

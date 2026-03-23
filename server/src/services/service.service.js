@@ -182,7 +182,7 @@ export const unassignClientService = async ({ tenant_id, service_id, client_id }
 };
 
 export const listServicesByTenantService = async ({ tenant_id }) => {
-    return await Service.find({ tenant_id, archived: false })
+    return await Service.find({ tenant_id, archived: false, is_enabled: true })
         .select("name description is_enabled is_recurring gst_rate default_billing_rate sac_code createdAt")
         .sort({ name: 1 })
         .lean();
