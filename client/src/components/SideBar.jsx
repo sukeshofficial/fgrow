@@ -102,7 +102,7 @@ const ADMIN_MENU = [
 /*                              FLYOUT PANEL                                  */
 /* -------------------------------------------------------------------------- */
 
-function FlyoutPanel({ item, top, onClose }) {
+const FlyoutPanel = React.memo(({ item, top, onClose }) => {
   const location = useLocation();
   const panelRef = useRef(null);
 
@@ -141,7 +141,7 @@ function FlyoutPanel({ item, top, onClose }) {
       })}
     </div>
   );
-}
+});
 
 /* -------------------------------------------------------------------------- */
 /*                                  SIDEBAR                                   */
@@ -218,11 +218,11 @@ export default function Sidebar() {
 
   /* ----------------------------- Menu Sections ----------------------------- */
 
-  const topItems = MENU.filter((item) => !item.isBottom);
-  const bottomItems = [
+  const topItems = React.useMemo(() => MENU.filter((item) => !item.isBottom), []);
+  const bottomItems = React.useMemo(() => [
     ...MENU.filter((item) => item.isBottom),
     ...(user?.platform_role === "super_admin" ? ADMIN_MENU : []),
-  ];
+  ], [user?.platform_role]);
 
   /* -------------------------------------------------------------------------- */
 

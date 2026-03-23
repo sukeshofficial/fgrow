@@ -38,9 +38,10 @@ export const listTasks = async (filters = {}) => {
   if (dateTo) taskQuery.creation_date.$lte = new Date(dateTo);
 
   if (search) {
+    const searchRegex = new RegExp(search, "i");
     taskQuery.$or = [
-      { title: new RegExp(search, "i") },
-      { description: new RegExp(search, "i") },
+      { title: searchRegex },
+      { description: searchRegex },
     ];
   }
 
@@ -55,6 +56,7 @@ export const listTasks = async (filters = {}) => {
       .sort({ [sortBy]: sortDir })
       .skip(skip)
       .limit(Number(limit))
+      .select("title priority status creation_date due_date client service users tags")
       .lean(),
     Task.countDocuments(taskQuery),
   ]);

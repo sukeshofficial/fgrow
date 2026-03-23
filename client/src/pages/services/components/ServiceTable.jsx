@@ -1,15 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
-import { Spinner } from "../../../components/ui/Spinner";
+import TableSkeleton from "../../../components/skeletons/TableSkeleton";
 
 const ServiceTable = ({ services, loading, onDelete, onToggleStatus }) => {
   const navigate = useNavigate();
 
   if (loading) {
     return (
-      <div className="table-loading" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
-        <Spinner />
+      <div className="table-container" style={{ padding: '20px 0' }}>
+        <TableSkeleton rows={5} columns={7} />
       </div>
     );
   }

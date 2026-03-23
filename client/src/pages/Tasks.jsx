@@ -5,6 +5,7 @@ import TaskTable from "./tasks/components/TaskTable";
 import TaskFilterBar from "./tasks/components/TaskFilterBar";
 import TaskAdvancedFilterModal from "./tasks/components/TaskAdvancedFilterModal";
 import { listTasks, deleteTask } from "../api/task.api";
+import { useDelayedLoading } from "../hooks/useDelayedLoading";
 import "../styles/ClientList.css"; 
 import "../styles/Tasks.css";
 
@@ -17,6 +18,7 @@ const Tasks = () => {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const showLoading = useDelayedLoading(loading, 300);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
   const [filters, setFilters] = useState({
@@ -145,12 +147,12 @@ const Tasks = () => {
 
           <TaskTable
             tasks={tasks}
-            loading={loading}
+            loading={showLoading}
             onAction={handleAction}
             onDelete={handleDeleteTask}
           />
 
-          {!loading && tasks.length > 0 && (
+          {!showLoading && tasks.length > 0 && (
             <div className="pagination">
               <span className="pagination-info">
                 Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}

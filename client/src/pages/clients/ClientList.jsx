@@ -5,7 +5,17 @@ import ClientTable from "./components/ClientTable";
 import AdvancedFilterModal from "./components/AdvancedFilterModal";
 import Sidebar from "../../components/SideBar";
 import { listClients } from "../../api/client.api";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import "../../styles/ClientList.css";
+
+// Debounce helper moved outside to avoid recreation on every render
+const debounce = (func, wait) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
 
 const ClientList = () => {
   const navigate = useNavigate();
@@ -23,14 +33,7 @@ const ClientList = () => {
     gstin: ""
   });
 
-  // Debounce helper
-  const debounce = (func, wait) => {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), wait);
-    };
-  };
+  const showLoading = useDelayedLoading(loading, 300);
 
   const fetchClients = async (currentFilters, currentPage) => {
     setLoading(true);
@@ -60,8 +63,10 @@ const ClientList = () => {
 
   // Debounced version of fetch
   const debouncedFetch = useCallback(
-    debounce((f, p) => fetchClients(f, p), 500),
-    []
+    debounce((f, p) => {
+      fetchClients(f, p);
+    }, 500),
+    [] // debounce is stable now
   );
 
   useEffect(() => {
@@ -109,9 +114,9 @@ const ClientList = () => {
             })}
           />
 
-          <ClientTable clients={clients} loading={loading} />
+          <ClientTable clients={clients} loading={showLoading} />
 
-          {!loading && clients.length > 0 && (
+          {!showLoading && clients.length > 0 && (
             <div className="pagination">
               <span className="pagination-info">
                 Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} entries

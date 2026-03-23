@@ -1,13 +1,17 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getTenantStaff } from "../../api/tenant.api";
 import { Card } from "../ui/Card";
 import "../../styles/welcome.css";
 import { Spinner } from "../ui/Spinner";
+import TableSkeleton from "../skeletons/TableSkeleton";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 
 const StaffListTable = ({ refreshKey }) => {
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const showLoading = useDelayedLoading(loading, 300);
 
   useEffect(() => {
     const fetchStaff = async () => {
@@ -23,12 +27,14 @@ const StaffListTable = ({ refreshKey }) => {
     };
     fetchStaff();
   }, [refreshKey]);
-
-  if (loading) {
+  if (showLoading) {
     return (
-      <div className="staff-loading" style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
-        <Spinner />
-      </div>
+      <Card className="staff-list-card">
+        <h3 className="staff-title">Joined Members</h3>
+        <div style={{ padding: '20px' }}>
+          <TableSkeleton rows={3} columns={5} />
+        </div>
+      </Card>
     );
   }
   if (error) return <div className="staff-error">{error}</div>;
@@ -90,4 +96,4 @@ const StaffListTable = ({ refreshKey }) => {
   );
 };
 
-export default StaffListTable;
+export default React.memo(StaffListTable);

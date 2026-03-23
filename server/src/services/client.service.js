@@ -135,13 +135,14 @@ export const listClientsService = async ({
 
     // search logic
     if (search) {
+      const searchRegex = { $regex: search, $options: "i" };
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { pan: { $regex: search, $options: "i" } },
-        { gstin: { $regex: search, $options: "i" } },
-        { primary_contact_name: { $regex: search, $options: "i" } },
-        { primary_contact_mobile: { $regex: search, $options: "i" } },
-        { primary_contact_email: { $regex: search, $options: "i" } },
+        { name: searchRegex },
+        { pan: searchRegex },
+        { gstin: searchRegex },
+        { primary_contact_name: searchRegex },
+        { primary_contact_mobile: searchRegex },
+        { primary_contact_email: searchRegex },
       ];
     }
 
@@ -153,7 +154,7 @@ export const listClientsService = async ({
       .limit(limit)
       .populate("group", "name")
       .populate("tags", "name color")
-      .select("name file_no type pan gstin is_active createdAt primary_contact_name primary_contact_mobile primary_contact_email group tags")
+      .select("name file_no type pan gstin is_active createdAt primary_contact_name primary_contact_mobile primary_contact_email group tags photo.secure_url")
       .lean();
 
     const total = await Client.countDocuments(query);
@@ -367,10 +368,11 @@ export const listClientsByTenantIdService = async ({ tenant_id, page = 1, limit 
     };
 
     if (search) {
+      const searchRegex = { $regex: search, $options: "i" };
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { pan: { $regex: search, $options: "i" } },
-        { file_no: { $regex: search, $options: "i" } }
+        { name: searchRegex },
+        { pan: searchRegex },
+        { file_no: searchRegex }
       ];
     }
 

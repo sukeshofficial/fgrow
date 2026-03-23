@@ -9,18 +9,39 @@ import { getTenantById } from "../api/tenant.api";
 import "../styles/welcome.css";
 import "../styles/tenant-info.css";
 import { Spinner } from "../components/ui/Spinner";
+import DashboardSkeleton from "../components/skeletons/DashboardSkeleton";
+import { useDelayedLoading } from "../hooks/useDelayedLoading";
 
 /**
  * Dashboard page
  *
  * Main authenticated landing page.
  */
+const getAvatarColorClass = (name) => {
+  const classes = [
+    'bg-indigo',
+    'bg-deep-blue',
+    'bg-violet',
+    'bg-blue',
+    'bg-cyan',
+    'bg-emerald',
+  ];
+  if (!name) return classes[0];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return classes[Math.abs(hash) % classes.length];
+};
+
 const Dashboard = () => {
   const { user } = useAuth();
   const [tenantDetails, setTenantDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const showLoading = useDelayedLoading(loading, 300);
 
   useEffect(() => {
     const fetchTenantData = async () => {
@@ -45,23 +66,6 @@ const Dashboard = () => {
     setRefreshKey((prev) => prev + 1);
   };
 
-  const getAvatarColorClass = (name) => {
-    const classes = [
-      'bg-indigo',
-      'bg-deep-blue',
-      'bg-violet',
-      'bg-blue',
-      'bg-cyan',
-      'bg-emerald',
-    ];
-    if (!name) return classes[0];
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return classes[Math.abs(hash) % classes.length];
-  };
-
   return (
     <>
       {/* <Navbar /> */}
@@ -82,10 +86,8 @@ const Dashboard = () => {
         </div>
 
         {/* Tenant Info Section */}
-        {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
-            <Spinner />
-          </div>
+        {showLoading ? (
+          <DashboardSkeleton />
         ) : tenantDetails && (
           <div className="tenant-info-card">
             {tenantDetails.logoUrl ? (

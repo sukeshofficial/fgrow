@@ -1,0 +1,24 @@
+/* client/src/components/skeletons/skeleton.css */
+
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+.skeleton-base {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: #e2e8f0; /* Tailwind gray-200 */
+}
+
+/* Optional utilities for specific skeleton contexts if needed */
+.skeleton-bg-light {
+  background-color: #f1f5f9; /* Tailwind slate-100 */
+}
+
+.skeleton-bg-dark {
+  background-color: #cbd5e1; /* Tailwind slate-300 */
+}

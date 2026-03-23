@@ -6,6 +6,8 @@ import ClientDetailsForm from "./steps/ClientDetailsForm";
 import ContactDetailsForm from "./steps/ContactDetailsForm";
 import ClientServicesForm from "./steps/ClientServicesForm";
 import { getClientById, updateClient } from "../../api/client.api";
+import FormSkeleton from "../../components/skeletons/FormSkeleton";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import "../../styles/CreateClient.css";
 
 const EditClientWizard = () => {
@@ -46,6 +48,8 @@ const EditClientWizard = () => {
         currency: "INR"
     }
   });
+
+  const showLoading = useDelayedLoading(loading, 300);
 
   const steps = [
     { label: "Client Details" },
@@ -133,7 +137,13 @@ const EditClientWizard = () => {
   };
 
   const renderStep = () => {
-    if (loading && currentStep === 0) return <div className="step-placeholder">Loading client data...</div>;
+    if (showLoading && currentStep === 0) {
+      return (
+        <div style={{ padding: '20px' }}>
+          <FormSkeleton fields={6} />
+        </div>
+      );
+    }
     if (error) return <div className="step-placeholder">{error}</div>;
 
     switch (currentStep) {

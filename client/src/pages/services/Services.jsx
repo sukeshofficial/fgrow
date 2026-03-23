@@ -5,6 +5,7 @@ import ServiceTable from "./components/ServiceTable";
 import ServiceFilterBar from "./components/ServiceFilterBar";
 import ServiceAdvancedFilterModal from "./components/ServiceAdvancedFilterModal";
 import { listServices, updateService, deleteService } from "../../api/service.api";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import "../../styles/ClientList.css"; // Reuse client list styles
 import "../../styles/Services.css";
 
@@ -12,6 +13,7 @@ const Services = () => {
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const showLoading = useDelayedLoading(loading, 300);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
   const [filters, setFilters] = useState({
@@ -129,12 +131,12 @@ const Services = () => {
 
           <ServiceTable 
             services={services} 
-            loading={loading} 
+            loading={showLoading} 
             onDelete={handleDeleteService}
             onToggleStatus={handleToggleStatus}
           />
 
-          {!loading && services.length > 0 && (
+          {!showLoading && services.length > 0 && (
             <div className="pagination">
               <span className="pagination-info">
                 Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} entries

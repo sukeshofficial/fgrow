@@ -146,5 +146,11 @@ const taskSchema = new Schema(
 
 taskSchema.index({ tenant_id: 1, client: 1 });
 taskSchema.index({ tenant_id: 1, service: 1 });
+taskSchema.index({ tenant_id: 1, client: 1, archived: 1, createdAt: -1 });
+taskSchema.index({ tenant_id: 1, service: 1, archived: 1, createdAt: -1 });
+taskSchema.index({ tenant_id: 1, status: 1, archived: 1, createdAt: -1 });
+taskSchema.index({ tenant_id: 1, priority: 1, archived: 1, createdAt: -1 });
+taskSchema.index({ tenant_id: 1, archived: 1, creation_date: 1 });
+taskSchema.index({ tenant_id: 1, archived: 1, due_date: 1 });
 
 export default mongoose.model("Task", taskSchema);
