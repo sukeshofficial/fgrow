@@ -6,6 +6,7 @@ import DeleteModal from "../../components/ui/DeleteModal";
 import { listTodos, moveTodo, deleteTodo } from "../../api/todo.api";
 import { FaSearch, FaPlus } from "react-icons/fa";
 import { FiFilter } from "react-icons/fi";
+import TodoFilterModal from "./components/TodoFilterModal";
 import "../../styles/Todo.css";
 import TableSkeleton from "../../components/skeletons/TableSkeleton";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
@@ -15,6 +16,16 @@ const TodoDashboard = () => {
   const [loading, setLoading] = useState(true);
   const showLoading = useDelayedLoading(loading, 300);
   const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState({
+    user: "",
+    priority: "",
+    client: "",
+    service: "",
+    due_from: "",
+    due_to: "",
+    status: "all",
+  });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState(null);
 
@@ -34,7 +45,7 @@ const TodoDashboard = () => {
       setLoading(true);
       // Fetch todos, clients, services, and staff in parallel
       const [tResp, cResp, sResp, stResp] = await Promise.all([
-        listTodos({ status: "all", q: search }),
+        listTodos({ status: filters.status || "all", q: search, ...filters }),
         import("../../api/client.api").then(m => m.listClientsByTenantId()),
         import("../../api/service.api").then(m => m.listServicesByTenant()),
         import("../../api/client.api").then(m => m.listStaff())
@@ -49,7 +60,7 @@ const TodoDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [search, filters]);
 
   useEffect(() => {
     fetchData();
@@ -107,30 +118,54 @@ const TodoDashboard = () => {
             <div className="todo-title-section">
               <h1>To-do</h1>
             </div>
+          </header>
 
-            <div className="todo-actions">
-              <div className="todo-search-wrapper">
-                <FaSearch className="search-icon" />
-                <input
-                  type="text"
-                  className="todo-search-input"
-                  placeholder="Search to-dos..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+          <div className="todo-filters-bar">
+            <div className="todo-search-wrapper">
+              <FaSearch className="search-icon" />
+              <input
+                type="text"
+                className="todo-search-input"
+                placeholder="Search tasks..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            <div className="todo-actions-right">
+              <div className="status-toggle">
+                <button 
+                  className={`status-toggle-btn ${filters.status === "all" || !filters.status ? "active" : ""}`}
+                  onClick={() => setFilters({...filters, status: "all"})}
+                >All</button>
+                <button 
+                  className={`status-toggle-btn ${filters.status === "pending" || filters.status === "new" ? "active" : ""}`}
+                  onClick={() => setFilters({...filters, status: "new"})}
+                >Pending</button>
+                <button 
+                  className={`status-toggle-btn ${filters.status === "in_progress" ? "active" : ""}`}
+                  onClick={() => setFilters({...filters, status: "in_progress"})}
+                >In Progress</button>
+                <button 
+                  className={`status-toggle-btn ${filters.status === "completed" ? "active" : ""}`}
+                  onClick={() => setFilters({...filters, status: "completed"})}
+                >Completed</button>
               </div>
 
-              <button className="filter-btn">
+              <button 
+                className={`filter-btn ${Object.entries(filters).some(([k,v]) => v && k !== 'status' && v !== 'all') ? 'active' : ''}`}
+                onClick={() => setIsFilterOpen(true)}
+              >
                 <FiFilter />
                 Filters
               </button>
 
               <button className="new-todo-btn" onClick={handleCreate}>
                 <FaPlus />
-                New To-do
+                New Task
               </button>
             </div>
-          </header>
+          </div>
 
           {showLoading && todos.length === 0 ? (
             <div style={{ padding: '20px' }}>
@@ -173,6 +208,26 @@ const TodoDashboard = () => {
                 setTodoToDelete(null);
               }}
               submitting={deleting}
+            />
+          )}
+
+          {isFilterOpen && (
+            <TodoFilterModal
+              isOpen={isFilterOpen}
+              onClose={() => setIsFilterOpen(false)}
+              filters={filters}
+              onApply={(newFilters) => setFilters(newFilters)}
+              onClear={() => setFilters({
+                user: "",
+                priority: "",
+                client: "",
+                service: "",
+                due_from: "",
+                due_to: "",
+              })}
+              clients={clients}
+              services={services}
+              staff={staff}
             />
           )}
         </div>
