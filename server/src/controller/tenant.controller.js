@@ -50,6 +50,14 @@ export const createTenant = async (req, res) => {
         subject: `🚀 New Tenant Alert: ${tenant.name}`,
         html: `
           <div style="font-family: sans-serif; color: #333; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+            <!-- Circular Image -->
+            <div style="text-align: center; margin-bottom: 20px;">
+              <img 
+                src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" 
+                alt="Profile"
+                style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #e0e0e0;"
+              />
+            </div>
             <h2 style="color: #4f46e5;">New Tenant Registration</h2>
             <p>A new organization has just signed up on FGrow.</p>
             <hr style="border: none; border-top: 1px solid #eee;" />

@@ -84,6 +84,14 @@ export const inviteUserService = async ({
     subject: "You're invited to join FGrow",
     html: `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <!-- Circular Image -->
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img 
+          src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" 
+          alt="Profile"
+          style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #e0e0e0;"
+        />
+      </div>
       <h2 style="color: #2c3e50;">You're invited to join FGrow 🎉</h2>
       
       <p>Hello,</p>

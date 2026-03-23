@@ -161,7 +161,7 @@ export const registerUser = async (req, res) => {
       <!-- Circular Image -->
       <div style="text-align: center; margin-bottom: 20px;">
         <img 
-          src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1773973712/users/t1dpnedlvx0ilutwbi6c.png" 
+          src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" 
           alt="Profile"
           style="
             width: 80px;
@@ -312,7 +312,7 @@ export const resendSignupOtp = async (req, res) => {
       <!-- Circular Image -->
       <div style="text-align: center; margin-bottom: 20px;">
         <img 
-          src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1773973712/users/t1dpnedlvx0ilutwbi6c.png" 
+          src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" 
           alt="Profile"
           style="
             width: 80px;
@@ -447,7 +447,7 @@ export const loginUser = async (req, res) => {
         <!-- Circular Image -->
         <div style="text-align: center; margin-bottom: 20px;">
           <img 
-            src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1773973712/users/t1dpnedlvx0ilutwbi6c.png" 
+            src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" 
             alt="Profile"
             style="
               width: 80px;

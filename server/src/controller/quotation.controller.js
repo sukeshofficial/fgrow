@@ -185,6 +185,19 @@ export const sendQuotationController = async (req, res) => {
       text:
         message ||
         `Please find attached the quotation ${quotation.quotation_no || quotationId}.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; padding: 20px;">
+          <!-- Circular Image -->
+          <div style="text-align: center; margin-bottom: 20px;">
+            <img 
+              src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" 
+              alt="Profile"
+              style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #e0e0e0;"
+            />
+          </div>
+          <p>${(message || "Please find attached the quotation details.").replace(/\\n/g, '<br/>')}</p>
+        </div>
+      `,
       attachments: [
         {
           filename: `quotation-${quotation.quotation_no || quotationId}.pdf`,
