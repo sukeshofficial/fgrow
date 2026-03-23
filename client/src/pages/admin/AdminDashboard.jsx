@@ -6,6 +6,8 @@ import { FaSearch, FaCheck, FaTimes, FaEye } from "react-icons/fa";
 import Sidebar from "../../components/SideBar";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import RejectionModal from "../../components/tenant/RejectionModal";
+import TableSkeleton from "../../components/skeletons/TableSkeleton";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 
 import "../../styles/welcome.css";
 import "../../styles/admin-dashboard.css";
@@ -13,6 +15,7 @@ import "../../styles/admin-dashboard.css";
 const AdminDashboard = () => {
   const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const showLoading = useDelayedLoading(loading, 300);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
@@ -112,8 +115,10 @@ const AdminDashboard = () => {
 
       <div className="staff-list-card no-margin">
         <div className="staff-table-container">
-          {loading ? (
-            <div className="staff-loading">Fetching tenants...</div>
+          {showLoading ? (
+            <div style={{ padding: '20px' }}>
+              <TableSkeleton rows={5} columns={5} />
+            </div>
           ) : error ? (
             <div className="staff-error">{error}</div>
           ) : filteredTenants.length === 0 ? (

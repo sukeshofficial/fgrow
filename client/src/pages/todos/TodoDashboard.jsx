@@ -7,11 +7,13 @@ import { listTodos, moveTodo, deleteTodo } from "../../api/todo.api";
 import { FaSearch, FaPlus } from "react-icons/fa";
 import { FiFilter } from "react-icons/fi";
 import "../../styles/Todo.css";
-import { Spinner } from "../../components/ui/Spinner";
+import TableSkeleton from "../../components/skeletons/TableSkeleton";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 
 const TodoDashboard = () => {
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const showLoading = useDelayedLoading(loading, 300);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState(null);
@@ -130,9 +132,9 @@ const TodoDashboard = () => {
             </div>
           </header>
 
-          {loading && todos.length === 0 ? (
-            <div className="loading-state" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
-              <Spinner />
+          {showLoading && todos.length === 0 ? (
+            <div style={{ padding: '20px' }}>
+              <TableSkeleton rows={3} columns={3} />
             </div>
           ) : (
             <KanbanBoard
