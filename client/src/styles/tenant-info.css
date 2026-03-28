@@ -70,9 +70,63 @@
 }
 
 /* Placeholder Theme Colors */
-.bg-indigo { background-color: #4f46e5; }
-.bg-deep-blue { background-color: #0c0066; }
-.bg-violet { background-color: #7c3aed; }
-.bg-blue { background-color: #2563eb; }
-.bg-cyan { background-color: #0891b2; }
-.bg-emerald { background-color: #059669; }
+.bg-indigo {
+  background-color: #4f46e5;
+}
+
+.bg-deep-blue {
+  background-color: #0c0066;
+}
+
+.bg-violet {
+  background-color: #7c3aed;
+}
+
+.bg-blue {
+  background-color: #2563eb;
+}
+
+.bg-cyan {
+  background-color: #0891b2;
+}
+
+.bg-emerald {
+  background-color: #059669;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────── */
+/* RESPONSIVE ENHANCEMENTS (Added)                                               */
+/* ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .tenant-info-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    text-align: left;
+  }
+
+  .tenant-info-logo,
+  .tenant-info-placeholder {
+    width: 56px;
+    height: 56px;
+  }
+
+  .tenant-info-name {
+    font-size: 1.15rem;
+  }
+
+  .tenant-info-details {
+    font-size: 0.8rem;
+    word-break: break-all;
+    word-break: break-word;
+    /* modern alias for overflow-wrap */
+    overflow-wrap: anywhere;
+    line-height: 1.4;
+  }
+
+  .tenant-info-badge-container {
+    margin-top: 10px;
+  }
+}

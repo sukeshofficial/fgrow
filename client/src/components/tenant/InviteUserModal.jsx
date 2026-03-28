@@ -67,8 +67,8 @@ const InviteUserModal = ({ onClose, onSuccess }) => {
               <select
                 className="tenant-input"
                 value={role}
-                onChange={(e) => setRole(e.target.value)}
-                required
+                disabled
+                style={{ cursor: "not-allowed", opacity: 0.7 }}
               >
                 <option value="staff">Staff</option>
               </select>

@@ -3,7 +3,7 @@ import SideBar from "../components/SideBar";
 import StaffListTable from "../components/tenant/StaffListTable";
 import InviteUserModal from "../components/tenant/InviteUserModal";
 import { Button } from "../components/ui/Button";
-import { FaUserPlus, FaExclamationCircle  } from "react-icons/fa";
+import { FaUserPlus, FaExclamationCircle } from "react-icons/fa";
 import { useAuth } from "../hooks/useAuth";
 import { getTenantById } from "../api/tenant.api";
 import "../styles/welcome.css";
@@ -11,6 +11,7 @@ import "../styles/tenant-info.css";
 import { Spinner } from "../components/ui/Spinner";
 import DashboardSkeleton from "../components/skeletons/DashboardSkeleton";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
+import ScrollingCredits from "../components/dashboard/ScrollingCredits";
 
 /**
  * Dashboard page
@@ -71,6 +72,7 @@ const Dashboard = () => {
       {/* <Navbar /> */}
       <SideBar />
       <div className="dashboard">
+        <ScrollingCredits />
         <div className="dashboard-header-row">
           <h1 className="dashboard-title">Dashboard</h1>
           {user?.tenant_role === "owner" && (

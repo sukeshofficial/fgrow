@@ -5,9 +5,10 @@ import Sidebar from "../../components/SideBar";
 import InvoiceDetailsForm from "./steps/InvoiceDetailsForm";
 import InvoiceItemsForm from "./steps/InvoiceItemsForm";
 import InvoiceReviewForm from "./steps/InvoiceReviewForm";
-import { createInvoice } from "../../features/invoices/invoiceService";
+import { createInvoice, getNextInvoiceNumber } from "../../features/invoices/invoiceService";
 import { Spinner } from "../../components/ui/Spinner";
 import { useModal } from "../../context/ModalContext";
+import { useEffect } from "react";
 import "../../styles/CreateClient.css";
 import "./InvoiceWizard.css";
 
@@ -30,6 +31,20 @@ const CreateInvoiceWizard = () => {
     total_gst: 0,
     total_amount: 0
   });
+
+  useEffect(() => {
+    const fetchNextNumber = async () => {
+      try {
+        const response = await getNextInvoiceNumber();
+        if (response.data?.invoice_no) {
+          setFormData(prev => ({ ...prev, invoice_no: response.data.invoice_no }));
+        }
+      } catch (err) {
+        console.error("Failed to fetch next invoice number", err);
+      }
+    };
+    fetchNextNumber();
+  }, []);
 
   const steps = [
     { label: "Invoice Details" },

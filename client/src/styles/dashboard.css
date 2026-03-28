@@ -28,7 +28,7 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  
+
   .dashboard--left {
     max-width: 100%;
   }
@@ -65,4 +65,201 @@
 
 .dashboard-logout:hover {
   background-color: #c0392b;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────── */
+/* RESPONSIVE ENHANCEMENTS (Added)                                               */
+/* ───────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 980px) {
+  .dashboard {
+    margin-left: 72px !important;
+    margin-top: 60px;
+    padding: 15px;
+  }
+
+  .dashboard-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 1.5rem;
+  }
+
+  .admin-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .filter-tabs {
+    width: 100%;
+    overflow-x: auto;
+    padding: 2px;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    border-radius: 12px;
+  }
+
+  .filter-tabs-btn {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+  }
+
+  .staff-list-card {
+    padding: 12px !important;
+    margin-top: 1rem;
+    overflow: hidden;
+  }
+
+  .staff-table-container {
+    margin: 0 -12px;
+    padding: 0 12px 10px 12px;
+    overflow-x: auto;
+  }
+
+  .staff-table th,
+  .staff-table td {
+    padding: 12px 10px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .staff-info .staff-name {
+    font-size: 0.85rem;
+  }
+
+  .staff-info .staff-username {
+    font-size: 0.75rem;
+  }
+
+  .action-buttons {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-title {
+    font-size: 1.5rem;
+  }
+
+  .filter-tabs-btn {
+    padding: 6px 10px;
+  }
+
+  .icon-btn {
+    padding: 4px 8px !important;
+  }
+}
+
+/* ───────────────────────────────────────────────────────────────────────────── */
+/* MEMBER SPOTLIGHT CREDITS (One by One)                                        */
+/* ───────────────────────────────────────────────────────────────────────────── */
+
+.scrolling-credits-container {
+  width: 100%;
+  height: 52px;
+  margin-bottom: 44px;
+  margin-top: -50px;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  background: #fdfdfd;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.credits-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.credit-slide {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  opacity: 0;
+  visibility: hidden;
+  animation: spotlight-cycle 12s infinite linear;
+}
+
+.credit-role {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.credit-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--primary-accent);
+  letter-spacing: 0.02em;
+}
+
+@keyframes spotlight-cycle {
+  0% {
+    transform: translateY(15px);
+    opacity: 0;
+    visibility: visible;
+  }
+
+  5% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  28% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  33% {
+    transform: translateY(-15px);
+    opacity: 0;
+  }
+
+  33.001% {
+    visibility: hidden;
+  }
+
+  100% {
+    visibility: hidden;
+  }
+}
+
+/* Pause on hover */
+.scrolling-credits-container:hover .credit-slide {
+  animation-play-state: paused;
+}
+
+@media (max-width: 768px) {
+  .scrolling-credits-container {
+    height: 48px;
+    margin-bottom: 20px;
+  }
+
+  .credit-role {
+    font-size: 10px;
+  }
+
+  .credit-name {
+    font-size: 11px;
+  }
 }

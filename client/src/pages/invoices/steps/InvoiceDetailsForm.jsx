@@ -15,6 +15,12 @@ const InvoiceDetailsForm = ({ data, onNext, onPrev }) => {
     remark: data.remark || ""
   });
 
+  useEffect(() => {
+    if (data.invoice_no && !formData.invoice_no) {
+      setFormData(prev => ({ ...prev, invoice_no: data.invoice_no }));
+    }
+  }, [data.invoice_no]);
+
   const [clients, setClients] = useState([]);
   const [loadingClients, setLoadingClients] = useState(true);
 

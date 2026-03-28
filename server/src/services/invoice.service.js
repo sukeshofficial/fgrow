@@ -39,7 +39,7 @@ const syncTaskLinks = async (user, invoiceId, items) => {
   } catch (e) {
     return;
   }
-  
+
   const taskIds = items
     .filter((it) => it.source_id)
     .map((it) => it.source_id);
@@ -61,30 +61,26 @@ const syncTaskLinks = async (user, invoiceId, items) => {
 
 const maybeSyncCounter = async (user, invoiceNo) => {
   if (!invoiceNo) return;
-  
+
   const parts = invoiceNo.split("-");
   if (parts.length < 2) return;
-  
+
   const yearStr = parts[parts.length - 2];
   const seqStr = parts[parts.length - 1];
   const year = parseInt(yearStr);
   const seq = parseInt(seqStr);
-  
+
   if (isNaN(year) || isNaN(seq)) return;
-  
-  const InvoiceCounter = mongoose.model("InvoiceCounter");
-  const counter = await InvoiceCounter.findOne({ tenant_id: user.tenant_id, year });
-  
-  if (counter) {
-    if (seq >= counter.seq) {
-      await InvoiceCounter.updateOne({ _id: counter._id }, { $set: { seq: seq } });
-    }
-  } else {
-    try {
-      await InvoiceCounter.create({ tenant_id: user.tenant_id, year, seq });
-    } catch (e) {
-      // Ignore
-    }
+
+  try {
+    const updated = await InvoiceCounter.findOneAndUpdate(
+      { tenant_id: user.tenant_id, year },
+      { $max: { seq: seq } },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+    console.log(`[SyncCounter] Counter for tenant ${user.tenant_id} and year ${year} is now at ${updated.seq}`);
+  } catch (e) {
+    console.error(`[SyncCounter] Failed to sync counter for ${invoiceNo}:`, e.message);
   }
 };
 
@@ -161,7 +157,7 @@ export const createInvoice = async (user, payload) => {
   const doc = {
     // FIX: tenant_id always comes from the authenticated user, never from the payload
     tenant_id: user.tenant_id,
-    invoice_no: payload.invoice_no || (await getNextInvoiceNumber(user.tenant_id)),
+    invoice_no: payload.invoice_no || (await findAndIncrementInvoiceNumber(user.tenant_id)),
     billing_entity: payload.billing_entity || user.tenant_id,
     client: payload.client,
     date: payload.date || new Date(),
@@ -176,13 +172,15 @@ export const createInvoice = async (user, payload) => {
 
   applyTotals(doc, computeInvoiceTotals(doc.items));
 
+  console.log(`[InvoiceService] Creating invoice for tenant ${user.tenant_id}. Invoice No: ${doc.invoice_no}`);
   const invoice = await Invoice.create(doc);
-  
+
   // Sync task links
   await syncTaskLinks(user, invoice._id, invoice.items);
 
   // Sync counter if manual number used
   if (payload.invoice_no) {
+    console.log(`[InvoiceService] Manual invoice number provided: ${payload.invoice_no}. Syncing counter...`);
     await maybeSyncCounter(user, payload.invoice_no);
   }
 
@@ -192,12 +190,45 @@ export const createInvoice = async (user, payload) => {
 export const getNextInvoiceNumber = async (tenantId) => {
   const year = new Date().getFullYear();
 
+  // 1. Get current counter
+  const counter = await InvoiceCounter.findOne({ tenant_id: tenantId, year });
+  let nextSeq = counter ? counter.seq + 1 : 1;
+
+  // 2. Double check against actual invoices to prevent desync
+  const latestInvoice = await Invoice.findOne({
+    tenant_id: tenantId,
+    invoice_no: new RegExp(`^INV-${year}-`, 'i'),
+    archived: false
+  }).sort({ invoice_no: -1 }).select('invoice_no').lean();
+
+  if (latestInvoice) {
+    const parts = latestInvoice.invoice_no.split("-");
+    const latestSeq = parseInt(parts[parts.length - 1]);
+    if (!isNaN(latestSeq) && latestSeq >= nextSeq) {
+      console.log(`[NextNumber] Found higher existing sequence in collection: ${latestSeq}. Adjusting suggestion.`);
+      nextSeq = latestSeq + 1;
+    }
+  }
+
+  const finalNo = `INV-${year}-${String(nextSeq).padStart(4, "0")}`;
+  console.log(`[NextNumber] Suggested invoice number for tenant ${tenantId}: ${finalNo}`);
+  return finalNo;
+};
+
+export const findAndIncrementInvoiceNumber = async (tenantId) => {
+  const year = new Date().getFullYear();
+
+  // 1. Get the real next sequence by checking both counter and actual invoices
+  const suggested = await getNextInvoiceNumber(tenantId);
+  const nextSeq = parseInt(suggested.split('-').pop());
+
+  // 2. Update counter to this new sequence
   const counter = await InvoiceCounter.findOneAndUpdate(
-    { tenant_id: tenantId, year }, // find this tenant's counter for this year
-    { $inc: { seq: 1 } }, // atomically bump the sequence
+    { tenant_id: tenantId, year },
+    { $set: { seq: nextSeq } },
     {
-      new: true, // return the document AFTER the increment
-      upsert: true, // create the counter document if it doesn't exist yet
+      new: true,
+      upsert: true,
       setDefaultsOnInsert: true,
     },
   );
@@ -248,7 +279,7 @@ export const updateInvoice = async (user, id, payload) => {
   // Sync balance due
   const paid = inv.amount_received || 0;
   inv.balance_due = Math.max(0, inv.total_amount - paid);
-  
+
   // Auto-status update
   if (inv.balance_due === 0 && inv.total_amount > 0 && inv.status !== 'cancelled') {
     inv.status = 'paid';
@@ -258,7 +289,7 @@ export const updateInvoice = async (user, id, payload) => {
 
   inv.updated_by = user._id;
   inv.markModified('items');
-  
+
   await inv.save();
 
   // Sync task links
@@ -268,6 +299,7 @@ export const updateInvoice = async (user, id, payload) => {
 
   // Sync counter if manual number used
   if (payload.invoice_no) {
+    console.log(`[InvoiceService] Update payload has invoice number: ${payload.invoice_no}. Syncing counter...`);
     await maybeSyncCounter(user, payload.invoice_no);
   }
 
@@ -309,7 +341,7 @@ export const deleteInvoice = async (user, id, force = false) => {
   // 3. Decrement counter ONLY if this was the latest invoice issued for this tenant/year
   const InvoiceCounter = mongoose.model("InvoiceCounter");
   const currentCounter = await InvoiceCounter.findOne({ tenant_id: user.tenant_id, year });
-  
+
   if (currentCounter && currentCounter.seq === seq) {
     await InvoiceCounter.updateOne(
       { _id: currentCounter._id },
