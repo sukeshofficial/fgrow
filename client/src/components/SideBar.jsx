@@ -15,11 +15,13 @@ import {
   FaChevronRight,
   FaChevronDown,
   FaPlus,
+  FaBug,
 } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 
 import { useAuth } from "../hooks/useAuth.js";
 import logo from "/FGrow.png";
+import ReportIssueModal from "./ui/ReportIssueModal";
 
 /* -------------------------------------------------------------------------- */
 /*                                   MENU                                     */
@@ -159,6 +161,7 @@ export default function Sidebar() {
   const [flyout, setFlyout] = useState(null);
   // tooltip: { label, top } | null
   const [tooltip, setTooltip] = useState(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   /* ----------------------------- Menu Helpers ------------------------------ */
 
@@ -352,6 +355,17 @@ export default function Sidebar() {
               );
             })}
 
+            <button
+              onClick={() => setIsReportModalOpen(true)}
+              className="menu-item"
+              style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', color: '#64748b' }}
+              onMouseEnter={(e) => handleMouseEnter(e, "Report an Issue")}
+              onMouseLeave={handleMouseLeave}
+            >
+              <span className="menu-icon"><FaBug /></span>
+              <span className="menu-label">Report Issue</span>
+            </button>
+
             {/* User Section */}
             <div className="user-area">
               <div className="user-left">
@@ -395,6 +409,11 @@ export default function Sidebar() {
           {tooltip.label}
         </div>
       )}
+
+      <ReportIssueModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+      />
     </>
   );
 }

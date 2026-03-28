@@ -172,4 +172,19 @@ export const uploadToCloudAndUnlink = async (file_path, folder = "clients") => {
   }
 };
 
+/**
+ * Batch upload bug report screenshots
+ * Use a specific folder for bug reports
+ */
+export const uploadBugScreenshots = async (files) => {
+  if (!files || files.length === 0) return [];
+
+  const uploadPromises = files.map((file) =>
+    uploadBufferToCloud(file.buffer, "bug-reports")
+  );
+
+  const results = await Promise.all(uploadPromises);
+  return results.filter(r => r.success).map(r => r.secure_url);
+};
+
 export default cloudinary;

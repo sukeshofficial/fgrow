@@ -21,6 +21,7 @@ import documentRoutes from "./routes/document.routes.js";
 import dscRoutes from "./routes/dsc.routes.js";
 import documentCollectionRequestRoutes from "./routes/documentCollectionRequest.routes.js";
 import billingEntityRoutes from "./routes/billingEntity.routes.js";
+import reportRoutes from "./routes/report.routes.js";
 
 import { errorMiddleware } from "./middleware/error.middleware.js";
 
@@ -85,6 +86,7 @@ app.use("/api/v0/documents", documentRoutes);
 app.use("/api/v0/dsc", dscRoutes);
 app.use("/api/v0/collection-requests", documentCollectionRequestRoutes);
 app.use("/api/v0/billing-entities", billingEntityRoutes);
+app.use("/api/v0/reports", reportRoutes);
 
 app.get("/api/v0/health", (req, res) => {
   res.json({ status: "OK" });

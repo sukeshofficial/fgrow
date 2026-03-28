@@ -8,6 +8,7 @@ import ConfirmModal from "../../components/ui/ConfirmModal";
 import RejectionModal from "../../components/tenant/RejectionModal";
 import TableSkeleton from "../../components/skeletons/TableSkeleton";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
+import BugReportsList from "./BugReportsList";
 
 import "../../styles/welcome.css";
 import "../../styles/admin-dashboard.css";
@@ -22,6 +23,7 @@ const AdminDashboard = () => {
   const [confirmApproveId, setConfirmApproveId] = useState(null);
   const [rejectingTenant, setRejectingTenant] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState("tenants");
 
   useEffect(() => {
     fetchTenants();
@@ -80,151 +82,163 @@ const AdminDashboard = () => {
       <div className="dashboard-header-row">
         <h1 className="dashboard-title">Super Admin Dashboard</h1>
 
-        <div className="admin-stats-summary">
-          <div className="stat-item">
-            <span className="stat-label">Total Tenants:</span>
-            <span className="stat-value">{tenants.length}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="admin-controls">
-        <div className="search-box">
-          <FaSearch className="search-icon" />
-          <input
-            type="text"
-            placeholder="Search tenants by name or email..."
-            className="tenant-input search-input"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-
-        <div className="filter-tabs">
-          {['all', 'pending', 'verified', 'rejected'].map(f => (
+        <div className="filter-tabs" style={{ margin: 0 }}>
+          {['tenants', 'reports'].map(tab => (
             <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`filter-tabs-btn ${filter === f ? 'active' : ''}`}
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`filter-tabs-btn ${activeTab === tab ? 'active' : ''}`}
+              style={{ textTransform: 'capitalize' }}
             >
-              {f}
+              {tab === 'reports' ? 'Bug Reports' : 'Tenants'}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="staff-list-card no-margin">
-        <div className="staff-table-container">
-          {showLoading ? (
-            <div style={{ padding: '20px' }}>
-              <TableSkeleton rows={5} columns={5} />
+      {activeTab === 'tenants' ? (
+        <>
+          <div className="admin-controls">
+            <div className="search-box">
+              <FaSearch className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search tenants by name or email..."
+                className="tenant-input search-input"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
-          ) : error ? (
-            <div className="staff-error">{error}</div>
-          ) : filteredTenants.length === 0 ? (
-            <div className="staff-loading">No tenants found matching your criteria.</div>
-          ) : (
-            <table className="staff-table">
-              <thead>
-                <tr>
-                  <th>Tenant / Company</th>
-                  <th>Owner</th>
-                  <th>Status</th>
-                  <th>Joined</th>
-                  <th className="text-right">Actions</th>
-                </tr>
-              </thead>
 
-              <tbody>
-                {filteredTenants.map((tenant) => (
-                  <tr key={tenant._id}>
-                    <td>
-                      <div className="staff-member-cell">
-                        <div className="staff-avatar-placeholder avatar-bg">
-                          <img src={tenant.logoUrl} alt="logo" className="tenant-logo-super-admin" />
-                        </div>
-                        <div className="staff-info">
-                          <span className="staff-name">{tenant.name}</span>
-                          <span className="staff-username">{tenant.companyEmail}</span>
-                        </div>
-                      </div>
-                    </td>
+            <div className="filter-tabs">
+              {['all', 'pending', 'verified', 'rejected'].map(f => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`filter-tabs-btn ${filter === f ? 'active' : ''}`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
 
-                    <td>
-                      <div className="staff-info">
-                        <span className="staff-name">{tenant.ownerUserId?.name || 'Unknown'}</span>
-                        <span className="staff-username">{tenant.ownerUserId?.email || 'N/A'}</span>
-                      </div>
-                    </td>
+          <div className="staff-list-card no-margin">
+            <div className="staff-table-container">
+              {showLoading ? (
+                <div style={{ padding: '20px' }}>
+                  <TableSkeleton rows={5} columns={5} />
+                </div>
+              ) : error ? (
+                <div className="staff-error">{error}</div>
+              ) : filteredTenants.length === 0 ? (
+                <div className="staff-loading">No tenants found matching your criteria.</div>
+              ) : (
+                <table className="staff-table">
+                  <thead>
+                    <tr>
+                      <th>Tenant / Company</th>
+                      <th>Owner</th>
+                      <th>Status</th>
+                      <th>Joined</th>
+                      <th className="text-right">Actions</th>
+                    </tr>
+                  </thead>
 
-                    <td>
-                      <span className={`staff-role-badge ${tenant.verificationStatus}`}>
-                        {tenant.verificationStatus}
-                      </span>
-                    </td>
+                  <tbody>
+                    {filteredTenants.map((tenant) => (
+                      <tr key={tenant._id}>
+                        <td>
+                          <div className="staff-member-cell">
+                            <div className="staff-avatar-placeholder avatar-bg">
+                              <img src={tenant.logoUrl} alt="logo" className="tenant-logo-super-admin" />
+                            </div>
+                            <div className="staff-info">
+                              <span className="staff-name">{tenant.name}</span>
+                              <span className="staff-username">{tenant.companyEmail}</span>
+                            </div>
+                          </div>
+                        </td>
 
-                    <td>
-                      <span className="staff-username">
-                        {new Date(tenant.createdAt).toLocaleDateString()}
-                      </span>
-                    </td>
+                        <td>
+                          <div className="staff-info">
+                            <span className="staff-name">{tenant.ownerUserId?.name || 'Unknown'}</span>
+                            <span className="staff-username">{tenant.ownerUserId?.email || 'N/A'}</span>
+                          </div>
+                        </td>
 
-                    <td className="text-right">
-                      <div className="action-buttons">
-                        <Link to={`/admin/tenants/${tenant._id}`}>
-                          <Button variant="secondary" size="sm" className="icon-btn">
-                            <FaEye />
-                          </Button>
-                        </Link>
+                        <td>
+                          <span className={`staff-role-badge ${tenant.verificationStatus}`}>
+                            {tenant.verificationStatus}
+                          </span>
+                        </td>
 
-                        {tenant.verificationStatus === 'pending' && (
-                          <>
-                            <Button
-                              variant="primary"
-                              size="sm"
-                              className="icon-btn approve-btn"
-                              onClick={() => setConfirmApproveId(tenant._id)}
-                            >
-                              <FaCheck />
-                            </Button>
+                        <td>
+                          <span className="staff-username">
+                            {new Date(tenant.createdAt).toLocaleDateString()}
+                          </span>
+                        </td>
 
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="icon-btn reject-btn"
-                              onClick={() => setRejectingTenant(tenant)}
-                            >
-                              <FaTimes />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        <td className="text-right">
+                          <div className="action-buttons">
+                            <Link to={`/admin/tenants/${tenant._id}`}>
+                              <Button variant="secondary" size="sm" className="icon-btn">
+                                <FaEye />
+                              </Button>
+                            </Link>
+
+                            {tenant.verificationStatus === 'pending' && (
+                              <>
+                                <Button
+                                  variant="primary"
+                                  size="sm"
+                                  className="icon-btn approve-btn"
+                                  onClick={() => setConfirmApproveId(tenant._id)}
+                                >
+                                  <FaCheck />
+                                </Button>
+
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  className="icon-btn reject-btn"
+                                  onClick={() => setRejectingTenant(tenant)}
+                                >
+                                  <FaTimes />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+          {confirmApproveId && (
+            <ConfirmModal
+              title="Approve Tenant"
+              message="Are you sure you want to approve this tenant? They will gain full access to the platform."
+              confirmLabel="Approve Tenant"
+              onConfirm={handleApprove}
+              onCancel={() => setConfirmApproveId(null)}
+              submitting={submitting}
+            />
           )}
-        </div>
-      </div>
-      {confirmApproveId && (
-        <ConfirmModal
-          title="Approve Tenant"
-          message="Are you sure you want to approve this tenant? They will gain full access to the platform."
-          confirmLabel="Approve Tenant"
-          onConfirm={handleApprove}
-          onCancel={() => setConfirmApproveId(null)}
-          submitting={submitting}
-        />
-      )}
 
-      {rejectingTenant && (
-        <RejectionModal
-          tenantName={rejectingTenant.name}
-          onConfirm={handleReject}
-          onCancel={() => setRejectingTenant(null)}
-          submitting={submitting}
-        />
+          {rejectingTenant && (
+            <RejectionModal
+              tenantName={rejectingTenant.name}
+              onConfirm={handleReject}
+              onCancel={() => setRejectingTenant(null)}
+              submitting={submitting}
+            />
+          )}
+        </>
+      ) : (
+        <BugReportsList />
       )}
     </div>
   );
