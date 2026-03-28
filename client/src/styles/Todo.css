@@ -314,14 +314,7 @@
 }
 
 .todo-header {
-<<<<<<< HEAD
-  display: block;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-=======
   margin-bottom: 24px;
->>>>>>> e80dee49334342ba0b5c4ad24d7b704ccdd287b4
 }
 
 .todo-title-section h1 {
@@ -344,6 +337,7 @@
 }
 
 .todo-actions-right {
+  margin-left: auto;
   display: flex;
   gap: 12px;
   align-items: center;
