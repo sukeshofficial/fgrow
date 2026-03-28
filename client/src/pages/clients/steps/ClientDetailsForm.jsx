@@ -19,6 +19,9 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
+  // Inline input modal state (replaces browser prompt)
+  const [inputModal, setInputModal] = useState({ open: false, type: "", value: "", loading: false, error: "" });
+
   useEffect(() => {
     fetchGroups();
     fetchTags();
@@ -59,7 +62,6 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file type and size
     const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!allowed.includes(file.type)) {
       await showAlert("Invalid File", "Only JPG, PNG and WebP files are allowed.", "error");
@@ -100,32 +102,51 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
     }
   };
 
-  const handleAddGroup = async () => {
-    const name = prompt("Enter new Group name:");
-    if (!name) return;
+  // Open modal for group or tag
+  const handleAddGroup = () => {
+    setInputModal({ open: true, type: "group", value: "", loading: false, error: "" });
+  };
+
+  const handleAddTag = () => {
+    setInputModal({ open: true, type: "tag", value: "", loading: false, error: "" });
+  };
+
+  // Confirm modal submission
+  const handleInputModalConfirm = async () => {
+    const name = inputModal.value.trim();
+    if (!name) {
+      setInputModal(prev => ({ ...prev, error: "Name cannot be empty." }));
+      return;
+    }
+    setInputModal(prev => ({ ...prev, loading: true, error: "" }));
     try {
-      const resp = await createClientGroup({ name });
-      const newGroup = resp.data.data;
-      setGroups(prev => [...prev, newGroup]);
-      handleChange("group", newGroup._id);
+      if (inputModal.type === "group") {
+        const resp = await createClientGroup({ name });
+        const newGroup = resp.data.data;
+        setGroups(prev => [...prev, newGroup]);
+        handleChange("group", newGroup._id);
+      } else {
+        const resp = await createTag({ name });
+        const newTag = resp.data.data;
+        setTags(prev => [...prev, newTag]);
+        const currentTags = Array.isArray(form.tags) ? form.tags : [];
+        handleChange("tags", [...currentTags, newTag._id]);
+      }
+      setInputModal({ open: false, type: "", value: "", loading: false, error: "" });
     } catch (e) {
-      await showAlert("Error", e.response?.data?.message || "Failed to create group", "error");
+      setInputModal(prev => ({
+        ...prev,
+        loading: false,
+        error: e.response?.data?.message || `Failed to create ${inputModal.type}`
+      }));
     }
   };
 
-  const handleAddTag = async () => {
-    const name = prompt("Enter new Tag name:");
-    if (!name) return;
-    try {
-      const resp = await createTag({ name });
-      const newTag = resp.data.data;
-      setTags(prev => [...prev, newTag]);
-      const currentTags = Array.isArray(form.tags) ? form.tags : [];
-      handleChange("tags", [...currentTags, newTag._id]);
-    } catch (e) {
-      await showAlert("Error", e.response?.data?.message || "Failed to create tag", "error");
-    }
+  const handleInputModalClose = () => {
+    setInputModal({ open: false, type: "", value: "", loading: false, error: "" });
   };
+
+  const modalLabel = inputModal.type === "group" ? "Group" : "Tag";
 
   return (
     <div className={`step-container ${isTransitioning ? "slide-down-active" : ""}`}>
@@ -256,8 +277,74 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
           Next Step
         </button>
       </div>
+
+      {/* Inline Input Modal — replaces browser prompt() */}
+      {inputModal.open && (
+        <div style={overlayStyle}>
+          <div style={modalBoxStyle}>
+            <h3 style={{ margin: "0 0 16px", fontSize: "17px", fontWeight: 700, color: "#1f2937" }}>
+              Add New {modalLabel}
+            </h3>
+            <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#374151", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              {modalLabel} Name *
+            </label>
+            <input
+              type="text"
+              autoFocus
+              value={inputModal.value}
+              onChange={(e) => setInputModal(prev => ({ ...prev, value: e.target.value, error: "" }))}
+              onKeyDown={(e) => { if (e.key === "Enter") handleInputModalConfirm(); if (e.key === "Escape") handleInputModalClose(); }}
+              placeholder={`e.g. ${inputModal.type === "group" ? "Corporate Clients" : "VIP"}`}
+              style={inputStyle}
+            />
+            {inputModal.error && (
+              <p style={{ color: "#ef4444", fontSize: "12px", marginTop: "6px", marginBottom: 0 }}>{inputModal.error}</p>
+            )}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
+              <button type="button" onClick={handleInputModalClose} style={cancelBtnStyle}>
+                Cancel
+              </button>
+              <button type="button" onClick={handleInputModalConfirm} disabled={inputModal.loading} style={confirmBtnStyle}>
+                {inputModal.loading ? "Creating..." : `Create ${modalLabel}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
+// Inline styles for the modal (scoped, no class conflicts)
+const overlayStyle = {
+  position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+  background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)",
+  display: "flex", alignItems: "center", justifyContent: "center",
+  zIndex: 9999,
+};
+
+const modalBoxStyle = {
+  background: "white", borderRadius: "16px", padding: "28px 32px",
+  width: "100%", maxWidth: "420px",
+  boxShadow: "0 20px 25px -5px rgba(0,0,0,0.12), 0 10px 10px -5px rgba(0,0,0,0.06)",
+};
+
+const inputStyle = {
+  width: "100%", padding: "10px 14px", border: "1.5px solid #e2e8f0",
+  borderRadius: "8px", fontSize: "14px", outline: "none",
+  transition: "border-color 0.2s", boxSizing: "border-box",
+};
+
+const cancelBtnStyle = {
+  padding: "9px 20px", borderRadius: "8px", border: "1px solid #e2e8f0",
+  background: "white", fontWeight: 600, color: "#6b7280", cursor: "pointer", fontSize: "14px",
+};
+
+const confirmBtnStyle = {
+  padding: "9px 20px", borderRadius: "8px", border: "none",
+  background: "#6366f1", color: "white", fontWeight: 600,
+  cursor: "pointer", fontSize: "14px", opacity: 1, transition: "background 0.2s",
+};
+
 export default ClientDetailsForm;
+

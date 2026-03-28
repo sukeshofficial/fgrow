@@ -35,7 +35,12 @@ const ClientServicesForm = ({ data, onNext, onPrev, isEdit }) => {
           listBillingEntities()
         ]);
         setAvailableServices(servicesResp.data.data);
-        setStaff(staffResp.data.data.map(u => ({ _id: u._id, name: u.name || u.username })));
+        setStaff(staffResp.data.data.map(u => ({ 
+            _id: u._id, 
+            name: u.name || u.username,
+            profile_avatar: u.profile_avatar,
+            photo: u.photo 
+        })));
         
         // Add "Current Tenant" as the first option
         const entities = billingResp.data.data || [];

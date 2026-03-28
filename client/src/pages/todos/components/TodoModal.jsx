@@ -23,11 +23,33 @@ const TodoModal = ({ todo, onClose, onSuccess, clients: initialClients, services
     }
   });
 
-  const [clients] = useState(initialClients || []);
-  const [services] = useState(initialServices || []);
+  const [clients, setClients] = useState(initialClients || []);
+  const [services, setServices] = useState(initialServices || []);
   const [staff] = useState(initialStaff || []);
+  const [loadingData, setLoadingData] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Fetch clients and services fresh inside the modal
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      setLoadingData(true);
+      try {
+        const [cResp, sResp] = await Promise.all([
+          listClientsByTenantId(),
+          listServicesByTenant(),
+        ]);
+        if (cResp.data.success) setClients(cResp.data.data || []);
+        if (sResp.data.success) setServices(sResp.data.data || []);
+      } catch (err) {
+        console.error("Failed to fetch dropdown data", err);
+      } finally {
+        setLoadingData(false);
+      }
+    };
+    fetchDropdownData();
+  }, []);
+
 
   useEffect(() => {
     if (todo) {
@@ -185,19 +207,23 @@ const TodoModal = ({ todo, onClose, onSuccess, clients: initialClients, services
               <div className="form-group">
                 <label className="standard-label"><FiBriefcase /> Client</label>
                 <SearchableDropdown
-                  options={clients}
+                  options={[{ _id: "", name: "No Client" }, ...clients]}
                   value={formData.client}
                   onChange={(val) => setFormData(prev => ({ ...prev, client: val }))}
                   placeholder="No Client"
+                  loading={loadingData}
                 />
               </div>
 
               <div className="form-group">
                 <label className="standard-label"><FiPackage /> Service</label>
-                <select name="service" value={formData.service} onChange={handleChange} className="standard-select">
-                  <option value="">No Service</option>
-                  {services.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
-                </select>
+                <SearchableDropdown
+                  options={[{ _id: "", name: "No Service" }, ...services]}
+                  value={formData.service}
+                  onChange={(val) => setFormData(prev => ({ ...prev, service: val }))}
+                  placeholder="No Service"
+                  loading={loadingData}
+                />
               </div>
             </div>
 

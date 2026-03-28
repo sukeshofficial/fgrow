@@ -161,7 +161,7 @@
 
 .page-btn.active {
   background: var(--primary-blue);
-  color: white;
+  color: rgb(136, 136, 136);
   border-color: var(--primary-blue);
 }
 
