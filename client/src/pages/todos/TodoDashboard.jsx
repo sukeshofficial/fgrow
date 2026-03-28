@@ -121,33 +121,6 @@ const TodoDashboard = () => {
             </div>
           </header>
 
-<<<<<<< HEAD
-            <div className="filter-bar">
-              <div className="search-wrapper">
-                <FaSearch className="search-icon" />
-                <input
-                  type="text"
-                  id="todo-search"
-                  name="todo-search"
-                  className="table-search-input"
-                  placeholder="Search to-dos..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-
-              <div className="quick-filters">
-                <button className="advanced-filter-btn">
-                  <FiFilter />
-                  Filters
-                </button>
-
-                <button className="create-btn" onClick={handleCreate}>
-                  <FaPlus />
-                  New To-do
-                </button>
-              </div>
-=======
           <div className="todo-filters-bar">
             <div className="todo-search-wrapper">
               <FaSearch className="search-icon" />
@@ -192,7 +165,6 @@ const TodoDashboard = () => {
                 <FaPlus />
                 New Task
               </button>
->>>>>>> e80dee49334342ba0b5c4ad24d7b704ccdd287b4
             </div>
           </div>
 
