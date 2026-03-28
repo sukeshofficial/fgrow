@@ -18,8 +18,8 @@ const invoiceItemSchema = new Schema({
 
   unit_price: { type: Number, default: 0, min: 0 },
 
-  // Percentage discount (0-100)
-  discount: { type: Number, default: 0, min: 0, max: 100 },
+  // Flat discount amount (₹)
+  discount: { type: Number, default: 0, min: 0 },
 
   // GST rate in percent (e.g. 18 for 18%)
   gst_rate: { type: Number, default: 0, min: 0 },

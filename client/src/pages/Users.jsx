@@ -9,9 +9,11 @@ import { useAuth } from "../hooks/useAuth";
 import "../styles/dashboard.css";
 import "../styles/welcome.css";
 import { Spinner } from "../components/ui/Spinner";
+import { useModal } from "../context/ModalContext";
 
 const Users = () => {
   const { user } = useAuth();
+  const { showAlert, showConfirm } = useModal();
   const [activeTab, setActiveTab] = useState("joined"); // joined, pending
   const [invites, setInvites] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -37,12 +39,18 @@ const Users = () => {
   };
 
   const handleUninvite = async (id) => {
-    if (!window.confirm("Are you sure you want to revoke this invitation?")) return;
+    const confirmed = await showConfirm(
+      "Revoke Invitation",
+      "Are you sure you want to revoke this invitation?",
+      "delete"
+    );
+    if (!confirmed) return;
+
     try {
       await revokeInvitation(id);
       fetchInvites();
     } catch (err) {
-      alert("Failed to revoke invitation");
+      await showAlert("Error", "Failed to revoke invitation", "error");
     }
   };
 
@@ -54,7 +62,7 @@ const Users = () => {
   return (
     <div className="dashboard">
       <SideBar />
-      
+
       <div className="dashboard-content" style={{ padding: '2rem' }}>
         <div className="dashboard-header-row">
           <h1 className="dashboard-title">User Management</h1>
@@ -147,15 +155,15 @@ const Users = () => {
                           </span>
                         </td>
                         <td>
-                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '0.875rem' }}>
-                              <FaClock style={{ fontSize: '0.75rem' }} />
-                              {new Date(invite.expires_at).toLocaleDateString()}
-                           </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '0.875rem' }}>
+                            <FaClock style={{ fontSize: '0.75rem' }} />
+                            {new Date(invite.expires_at).toLocaleDateString()}
+                          </div>
                         </td>
                         <td style={{ textAlign: 'right' }}>
-                          <Button 
-                            variant="secondary" 
-                            size="sm" 
+                          <Button
+                            variant="secondary"
+                            size="sm"
                             style={{ color: '#ef4444', padding: '6px 12px' }}
                             onClick={() => handleUninvite(invite._id)}
                           >
@@ -173,8 +181,8 @@ const Users = () => {
       </div>
 
       {isInviteModalOpen && (
-        <InviteUserModal 
-          onClose={() => setIsInviteModalOpen(false)} 
+        <InviteUserModal
+          onClose={() => setIsInviteModalOpen(false)}
           onSuccess={handleInviteSuccess}
         />
       )}

@@ -82,7 +82,11 @@ const EditServiceWizard = () => {
   };
 
   const handlePrev = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 0));
+    if (currentStep === 0) {
+      navigate("/services");
+    } else {
+      setCurrentStep(prev => Math.max(prev - 1, 0));
+    }
   };
 
   const renderStep = () => {
@@ -95,6 +99,7 @@ const EditServiceWizard = () => {
           <ServiceDetailsForm
             data={formData}
             onNext={handleNext}
+            onPrev={handlePrev}
           />
         );
       case 1:

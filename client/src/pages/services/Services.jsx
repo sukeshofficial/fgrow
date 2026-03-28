@@ -6,11 +6,13 @@ import ServiceFilterBar from "./components/ServiceFilterBar";
 import ServiceAdvancedFilterModal from "./components/ServiceAdvancedFilterModal";
 import { listServices, updateService, deleteService } from "../../api/service.api";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
+import { useModal } from "../../context/ModalContext";
 import "../../styles/ClientList.css"; // Reuse client list styles
 import "../../styles/Services.css";
 
 const Services = () => {
   const navigate = useNavigate();
+  const { showAlert, showConfirm } = useModal();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const showLoading = useDelayedLoading(loading, 300);
@@ -44,7 +46,7 @@ const Services = () => {
         sac_code: currentFilters.sac_code,
         ...activeFilter
       };
-      
+
       const resp = await listServices(params);
       if (resp.data.success) {
         setServices(resp.data.data);
@@ -88,14 +90,22 @@ const Services = () => {
   };
 
   const handleDeleteService = async (id) => {
-    if (window.confirm("Are you sure you want to archive this service?")) {
+    const confirmed = await showConfirm(
+      "Archive Service",
+      "Are you sure you want to archive this service? This will hide it from active selections.",
+      "delete"
+    );
+
+    if (confirmed) {
       try {
         const resp = await deleteService(id);
         if (resp.data.success) {
           fetchServices(filters, pagination.page);
+          await showAlert("Archived", "Service has been archived successfully.", "success");
         }
       } catch (e) {
         console.error("Failed to delete service", e);
+        await showAlert("Error", "Failed to archive service. Please try again.", "error");
       }
     }
   };
@@ -109,14 +119,14 @@ const Services = () => {
             <h1 className="client-list-title">Services</h1>
           </div>
 
-          <ServiceFilterBar 
-            filters={filters} 
+          <ServiceFilterBar
+            filters={filters}
             onFilterChange={handleFilterChange}
             onOpenAdvanced={() => setIsFilterModalOpen(true)}
             onCreateNew={() => navigate("/services/create")}
           />
 
-          <ServiceAdvancedFilterModal 
+          <ServiceAdvancedFilterModal
             isOpen={isFilterModalOpen}
             onClose={() => setIsFilterModalOpen(false)}
             filters={filters}
@@ -129,9 +139,9 @@ const Services = () => {
             })}
           />
 
-          <ServiceTable 
-            services={services} 
-            loading={showLoading} 
+          <ServiceTable
+            services={services}
+            loading={showLoading}
             onDelete={handleDeleteService}
             onToggleStatus={handleToggleStatus}
           />
@@ -142,24 +152,24 @@ const Services = () => {
                 Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} entries
               </span>
               <div className="pagination-controls">
-                <button 
-                  className="page-btn" 
+                <button
+                  className="page-btn"
                   disabled={pagination.page === 1}
                   onClick={() => handlePageChange(pagination.page - 1)}
                 >
                   &lt;
                 </button>
                 {[...Array(pagination.total_pages || 0)].map((_, i) => (
-                  <button 
-                    key={i} 
+                  <button
+                    key={i}
                     className={`page-btn ${pagination.page === i + 1 ? 'active' : ''}`}
                     onClick={() => handlePageChange(i + 1)}
                   >
                     {i + 1}
                   </button>
                 ))}
-                <button 
-                  className="page-btn" 
+                <button
+                  className="page-btn"
                   disabled={pagination.page === pagination.total_pages}
                   onClick={() => handlePageChange(pagination.page + 1)}
                 >

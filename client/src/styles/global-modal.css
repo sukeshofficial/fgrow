@@ -1,0 +1,159 @@
+.global-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    backdrop-filter: blur(8px);
+    animation: modalFadeIn 0.2s ease-out;
+}
+
+.global-modal-container {
+    background: white;
+    border-radius: 28px;
+    width: 100%;
+    max-width: 440px;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    padding: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.global-modal-content {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.global-modal-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 20px;
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+}
+
+/* Types */
+.icon-info {
+    background: #f0f9ff;
+    color: #0ea5e9;
+}
+
+.icon-success {
+    background: #f0fdf4;
+    color: #10b981;
+}
+
+.icon-warning {
+    background: #fffbeb;
+    color: #f59e0b;
+}
+
+.icon-error {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.icon-confirm {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+.icon-delete {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.global-modal-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.global-modal-message {
+    font-size: 15px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.global-modal-actions {
+    display: flex;
+    gap: 16px;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-family: inherit;
+}
+
+.btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-accent, #6366f1) 0%, #4f46e5 100%);
+    color: white;
+    box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px -5px rgba(99, 102, 241, 0.4);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px -5px rgba(239, 68, 68, 0.4);
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}

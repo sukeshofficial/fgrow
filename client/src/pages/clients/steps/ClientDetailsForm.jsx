@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import FormField from "../../../components/ui/FormField";
 import SearchableDropdown from "../../../components/ui/SearchableDropdown";
-import { 
-  listClientGroups, 
-  listTags, 
-  createClientGroup, 
+import {
+  listClientGroups,
+  listTags,
+  createClientGroup,
   createTag,
-  uploadClientPhoto 
+  uploadClientPhoto
 } from "../../../api/client.api";
+import { useModal } from "../../../context/ModalContext";
 
 const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) => {
+  const { showAlert } = useModal();
   const [form, setForm] = useState(data);
   const [groups, setGroups] = useState([]);
   const [tags, setTags] = useState([]);
@@ -60,11 +62,11 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
     // Validate file type and size
     const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!allowed.includes(file.type)) {
-      alert("Only JPG, PNG and WebP files are allowed.");
+      await showAlert("Invalid File", "Only JPG, PNG and WebP files are allowed.", "error");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert("File size should be less than 5MB.");
+      await showAlert("File Too Large", "File size should be less than 5MB.", "warning");
       return;
     }
 
@@ -76,7 +78,7 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
     } catch (err) {
       console.error("Upload failed", err);
       const msg = err.response?.data?.error || err.response?.data?.message || "Failed to upload photo";
-      alert(msg);
+      await showAlert("Upload Error", msg, "error");
     } finally {
       setIsUploading(false);
     }
@@ -87,7 +89,7 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
     if (!form.name) newErrors.name = "Name is required";
     if (!form.group) newErrors.group = "Group is required";
     if (!form.tags || form.tags.length === 0) newErrors.tags = "At least one tag is required";
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -107,7 +109,7 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
       setGroups(prev => [...prev, newGroup]);
       handleChange("group", newGroup._id);
     } catch (e) {
-      alert(e.response?.data?.message || "Failed to create group");
+      await showAlert("Error", e.response?.data?.message || "Failed to create group", "error");
     }
   };
 
@@ -121,62 +123,62 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
       const currentTags = Array.isArray(form.tags) ? form.tags : [];
       handleChange("tags", [...currentTags, newTag._id]);
     } catch (e) {
-      alert(e.response?.data?.message || "Failed to create tag");
+      await showAlert("Error", e.response?.data?.message || "Failed to create tag", "error");
     }
   };
 
   return (
     <div className={`step-container ${isTransitioning ? "slide-down-active" : ""}`}>
       <h2 className="form-title">Client Details</h2>
-      
+
       <div className="form-layout">
         <div className="form-fields-column">
           <div className="form-grid">
             <FormField label="Name" required error={errors.name}>
-              <input 
-                type="text" 
-                className="form-input" 
-                value={form.name} 
-                onChange={(e) => handleChange("name", e.target.value)} 
+              <input
+                type="text"
+                className="form-input"
+                value={form.name}
+                onChange={(e) => handleChange("name", e.target.value)}
                 placeholder="Enter client name"
               />
             </FormField>
-            
+
             <FormField label="File No">
-              <input 
-                type="text" 
-                className="form-input" 
-                value={form.file_no} 
-                onChange={(e) => handleChange("file_no", e.target.value)} 
+              <input
+                type="text"
+                className="form-input"
+                value={form.file_no}
+                onChange={(e) => handleChange("file_no", e.target.value)}
                 placeholder="Enter file number"
               />
             </FormField>
-            
+
             <FormField label="GSTIN">
-              <input 
-                type="text" 
-                className="form-input" 
-                value={form.gstin} 
-                onChange={(e) => handleChange("gstin", e.target.value.toUpperCase())} 
+              <input
+                type="text"
+                className="form-input"
+                value={form.gstin}
+                onChange={(e) => handleChange("gstin", e.target.value.toUpperCase())}
                 placeholder="Enter GSTIN"
               />
             </FormField>
-            
+
             <FormField label="PAN">
-              <input 
-                type="text" 
-                className="form-input" 
-                value={form.pan} 
-                onChange={(e) => handleChange("pan", e.target.value.toUpperCase())} 
+              <input
+                type="text"
+                className="form-input"
+                value={form.pan}
+                onChange={(e) => handleChange("pan", e.target.value.toUpperCase())}
                 placeholder="Enter PAN"
               />
             </FormField>
 
             <FormField label="Select Group" required error={errors.group}>
-              <SearchableDropdown 
-                options={groups} 
-                value={form.group} 
-                onChange={(val) => handleChange("group", val)} 
+              <SearchableDropdown
+                options={groups}
+                value={form.group}
+                onChange={(val) => handleChange("group", val)}
                 placeholder="Search group"
                 onAddNew={handleAddGroup}
                 addNewLabel="Add Group"
@@ -184,11 +186,11 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
             </FormField>
 
             <FormField label="Select Tags" required error={errors.tags}>
-              <SearchableDropdown 
-                isMulti 
-                options={tags} 
-                value={form.tags} 
-                onChange={(val) => handleChange("tags", val)} 
+              <SearchableDropdown
+                isMulti
+                options={tags}
+                value={form.tags}
+                onChange={(val) => handleChange("tags", val)}
                 placeholder="Search tags"
                 onAddNew={handleAddTag}
                 addNewLabel="Add Tag"
@@ -199,15 +201,15 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
 
         <div className="logo-column">
           <label className="form-label">Client Photo / Logo</label>
-          <div 
+          <div
             className={`logo-upload-container ${isUploading ? "uploading" : ""}`}
             onClick={() => fileInputRef.current?.click()}
           >
             {form.photo?.secure_url ? (
-              <img 
-                src={form.photo.secure_url} 
-                alt="Client" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} 
+              <img
+                src={form.photo.secure_url}
+                alt="Client"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
               />
             ) : (
               <>
@@ -222,18 +224,18 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
                 )}
               </>
             )}
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              style={{ display: 'none' }} 
-              onChange={handleFileChange} 
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
               accept="image/*"
             />
           </div>
           {form.photo?.secure_url && (
-            <button 
-              type="button" 
-              className="link-btn" 
+            <button
+              type="button"
+              className="link-btn"
               style={{ marginTop: '8px', fontSize: '12px' }}
               onClick={(e) => {
                 e.stopPropagation();

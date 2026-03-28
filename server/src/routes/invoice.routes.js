@@ -21,14 +21,14 @@ router.post("/bulk", ...authOwner, controller.bulkOperations);
 // Single-invoice CRUD
 router.get("/:id", ...authStaff, controller.getInvoiceById);
 router.patch("/:id", ...authStaff, validate("update"), controller.updateInvoice);
-router.delete("/:id", ...authOwner, controller.deleteInvoice);
+router.delete("/:id", ...authStaff, controller.deleteInvoice);
 
 // Items
 router.post("/:id/items", ...authStaff, validate("addItems"), controller.addItems);
 router.patch("/:id/items/:itemId", ...authStaff, validate("updateItem"), controller.updateItem);
 router.delete("/:id/items/:itemId", ...authStaff, controller.deleteItem);
 
-router.get("/:id/unbilled-tasks", ...authStaff, controller.getUnbilledTasks);
+router.get("/unbilled-tasks/:clientId", ...authStaff, controller.getUnbilledTasks);
 
 // Payments & status
 router.post("/:id/payments", ...authStaff, validate("addPayment"), controller.addPayment);
@@ -37,7 +37,7 @@ router.post("/:id/mark-paid", ...authStaff, controller.markPaid);
 
 // Preview / Send / PDF
 router.get("/:id/preview", ...authStaff, controller.previewInvoice);
-router.post("/:id/send", ...authOwner, validate("send"), controller.sendInvoice);
+router.post("/:id/send", ...authStaff, validate("send"), controller.sendInvoice);
 router.get("/:id/pdf", ...authStaff, controller.getPdf);
 
 // Utilities

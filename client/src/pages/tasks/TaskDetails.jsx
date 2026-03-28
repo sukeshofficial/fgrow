@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import SideBar from "../../components/SideBar";
-import { 
-  getTask, 
-  updateTaskStatus, 
-  addChecklistItem, 
-  updateChecklistItem, 
+import {
+  getTask,
+  updateTaskStatus,
+  addChecklistItem,
+  updateChecklistItem,
   deleteChecklistItem,
   startTimelog,
   stopTimelog,
@@ -13,6 +13,7 @@ import {
   getTaskActivities
 } from "../../api/task.api.js";
 import { FaCheckCircle, FaRegCircle, FaTrash, FaPlay, FaStop, FaPlus, FaHistory, FaClock, FaArrowLeft } from "react-icons/fa";
+import "../../styles/ClientList.css";
 import "../../styles/Tasks.css";
 import { Spinner } from "../../components/ui/Spinner";
 
@@ -126,15 +127,15 @@ const TaskDetails = () => {
       <SideBar />
       <div className="clients">
         <div className="client-list-container">
-          <button 
-            onClick={() => navigate("/tasks")} 
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px', 
-              background: 'none', 
-              border: 'none', 
-              color: 'var(--text-muted)', 
+          <button
+            onClick={() => navigate("/tasks")}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-muted)',
               cursor: 'pointer',
               marginBottom: '16px',
               fontSize: '14px',
@@ -150,9 +151,9 @@ const TaskDetails = () => {
               <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>{task.description || "No description provided."}</p>
             </div>
             <div className="task-actions" style={{ display: 'flex', gap: '12px' }}>
-              <select 
-                className="status-dropdown" 
-                value={task.status} 
+              <select
+                className="status-dropdown"
+                value={task.status}
                 onChange={(e) => handleStatusChange(e.target.value)}
                 style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border-color)', fontWeight: '600' }}
               >
@@ -162,19 +163,19 @@ const TaskDetails = () => {
                 <option value="verified">Verified</option>
                 <option value="cancelled">Cancelled</option>
               </select>
-              <button 
+              <button
                 onClick={handleToggleTimer}
-                style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '8px', 
-                    padding: '8px 16px', 
-                    borderRadius: '8px', 
-                    border: 'none', 
-                    background: isTimerRunning ? 'var(--error-red)' : 'var(--primary-accent)',
-                    color: 'white',
-                    fontWeight: '600',
-                    cursor: 'pointer'
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: isTimerRunning ? 'var(--error-red)' : 'var(--primary-accent)',
+                  color: 'white',
+                  fontWeight: '600',
+                  cursor: 'pointer'
                 }}
               >
                 {isTimerRunning ? <FaStop /> : <FaPlay />}
@@ -190,32 +191,86 @@ const TaskDetails = () => {
                 <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <FaCheckCircle color="var(--primary-accent)" /> Checklist
                 </h3>
-                <div className="checklist-items">
+                <div className="checklist-items" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {task.checklist?.map((item, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
-                      <span onClick={() => handleToggleChecklist(idx, item.is_done)} style={{ cursor: 'pointer', display: 'flex' }}>
-                        {item.is_done ? <FaCheckCircle color="var(--primary-accent)" /> : <FaRegCircle color="var(--text-muted)" />}
+                    <div key={idx} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '12px 16px',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      background: item.is_done ? '#f8fafc' : 'white',
+                      transition: 'all 0.2s ease'
+                    }}>
+                      <span onClick={() => handleToggleChecklist(idx, item.is_done)} style={{ cursor: 'pointer', display: 'flex', fontSize: '18px' }}>
+                        {item.is_done ? <FaCheckCircle color="var(--primary-accent)" /> : <FaRegCircle color="#cbd5e1" />}
                       </span>
-                      <span style={{ flex: 1, textDecoration: item.is_done ? 'line-through' : 'none', color: item.is_done ? 'var(--text-muted)' : 'inherit' }}>
+                      <span style={{
+                        flex: 1,
+                        textDecoration: item.is_done ? 'line-through' : 'none',
+                        color: item.is_done ? '#94a3b8' : '#1e293b',
+                        fontWeight: item.is_done ? '400' : '500',
+                        fontSize: '14px'
+                      }}>
                         {item.title}
                       </span>
-                      <button onClick={() => handleDeleteChecklist(idx)} style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer' }}>
-                        <FaTrash />
+                      <button onClick={() => handleDeleteChecklist(idx)} style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#94a3b8',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '6px',
+                        transition: 'all 0.2s'
+                      }}
+                        onMouseOver={(e) => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = '#fef2f2'; }}
+                        onMouseOut={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'none'; }}
+                      >
+                        <FaTrash size={14} />
                       </button>
                     </div>
                   ))}
                 </div>
-                <form onSubmit={handleAddChecklist} style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
-                  <input 
-                    type="text" 
-                    placeholder="Add a checklist item..." 
-                    className="form-input" 
+                <form onSubmit={handleAddChecklist} style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
+                  <input
+                    type="text"
+                    placeholder="Add a new checklist item..."
                     value={newChecklistItem}
                     onChange={(e) => setNewChecklistItem(e.target.value)}
-                    style={{ flex: 1 }}
+                    style={{
+                      flex: 1,
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      border: '1px solid #e2e8f0',
+                      background: '#f8fafc',
+                      fontSize: '14px',
+                      color: '#1e293b',
+                      outline: 'none',
+                      transition: 'all 0.2s'
+                    }}
+                    onFocus={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)'; }}
+                    onBlur={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}
                   />
-                  <button type="submit" style={{ background: 'var(--primary-accent)', color: 'white', border: 'none', padding: '0 16px', borderRadius: '8px', cursor: 'pointer' }}>
-                    <FaPlus />
+                  <button type="submit" disabled={!newChecklistItem.trim()} style={{
+                    background: newChecklistItem.trim() ? 'var(--primary-accent)' : '#94a3b8',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0 20px',
+                    borderRadius: '12px',
+                    cursor: newChecklistItem.trim() ? 'pointer' : 'not-allowed',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    transition: 'all 0.2s'
+                  }}>
+                    <FaPlus size={12} /> Add
                   </button>
                 </form>
               </div>

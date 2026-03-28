@@ -56,30 +56,23 @@ const TodoCard = ({ todo, index, onEdit, onDelete, clients, services, staff, onS
     <Draggable draggableId={todo._id} index={index}>
       {(provided, snapshot) => (
         <div
-          className={`todo-card-v2 ${snapshot.isDragging ? "dragging" : ""} ${isEditing ? "editing" : ""}`}
+          className={`todo-card-v2 ${snapshot.isDragging ? "dragging" : ""}`}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           ref={provided.innerRef}
+          onClick={() => onEdit(todo)} /* Open modal on click anywhere on card */
+          style={{ ...provided.draggableProps.style, cursor: 'pointer' }}
         >
           {/* Card Top Section */}
           <div className="card-v2-header">
             <div className="header-left">
               <span className={`priority-pill ${todo.priority?.toLowerCase()}`}>{todo.priority}</span>
-              {isEditing ? (
-                <input 
-                  className="inline-title-input" 
-                  value={editedData.title} 
-                  onChange={(e) => handleChange("title", e.target.value)} 
-                  autoFocus
-                />
-              ) : (
-                <h3 className="card-v2-title">{todo.title}</h3>
-              )}
+              <h3 className="card-v2-title">{todo.title}</h3>
             </div>
-            
+
             <div className="header-right">
               {todo.recurrence?.enabled && <FiRefreshCw className="recurrence-icon" title="Recurring to-do" />}
-               <div className="created-by-badge">
+              <div className="created-by-badge">
                 {todo.created_by?.profile_avatar?.secure_url ? (
                   <img src={todo.created_by.profile_avatar.secure_url} alt="" className="avatar-img-v2" style={{ width: 16, height: 16 }} />
                 ) : (
@@ -98,64 +91,25 @@ const TodoCard = ({ todo, index, onEdit, onDelete, clients, services, staff, onS
           <div className="card-v2-body">
             <div className="pill-row">
               <span className="pill-label">Details:</span>
-              {isEditing ? (
-                <input 
-                  className="inline-pill-input" 
-                  value={editedData.details || ""} 
-                  onChange={(e) => handleChange("details", e.target.value)} 
-                />
-              ) : (
-                <span className="pill-value">{todo.details || "No details"}</span>
-              )}
+              <span className="pill-value">{todo.details || "No details"}</span>
             </div>
 
             <div className="pill-row">
               <span className="pill-label">Due date:</span>
-              {isEditing ? (
-                <input 
-                  type="date"
-                  className="inline-pill-input" 
-                  value={editedData.due_date ? new Date(editedData.due_date).toISOString().split('T')[0] : ""} 
-                  onChange={(e) => handleChange("due_date", e.target.value)} 
-                />
-              ) : (
-                <div className="pill-value-with-icon">
-                  <span className="pill-value">{formatDate(todo.due_date)}</span>
-                  <FiCalendar className="pill-icon" />
-                </div>
-              )}
+              <div className="pill-value-with-icon">
+                <span className="pill-value">{formatDate(todo.due_date)}</span>
+                <FiCalendar className="pill-icon" />
+              </div>
             </div>
 
             <div className="pill-row">
               <span className="pill-label">Service:</span>
-              {isEditing ? (
-                <div style={{ flex: 1 }}>
-                  <SearchableDropdown
-                    options={services || []}
-                    value={editedData.service?._id || editedData.service || ""}
-                    onChange={(val) => handleChange("service", val)}
-                    placeholder="Not specified"
-                  />
-                </div>
-              ) : (
-                <span className="pill-value">{todo.service?.name || "Not specified"}</span>
-              )}
+              <span className="pill-value">{todo.service?.name || "Not specified"}</span>
             </div>
 
             <div className="pill-row">
               <span className="pill-label">Client:</span>
-              {isEditing ? (
-                <div style={{ flex: 1 }}>
-                  <SearchableDropdown
-                    options={clients || []}
-                    value={editedData.client?._id || editedData.client || ""}
-                    onChange={(val) => handleChange("client", val)}
-                    placeholder="Not specified"
-                  />
-                </div>
-              ) : (
-                <span className="pill-value">{todo.client?.name || "Not specified"}</span>
-              )}
+              <span className="pill-value">{todo.client?.name || "Not specified"}</span>
             </div>
           </div>
 
@@ -163,53 +117,29 @@ const TodoCard = ({ todo, index, onEdit, onDelete, clients, services, staff, onS
           <div className="card-v2-footer">
             <div className="avatars-section">
               <div className="avatar-stack">
-                 <div className="avatar-v2" title={todo.user?.name || "Unassigned"}>
+                <div className="avatar-v2" title={todo.user?.name || "Unassigned"}>
                   {todo.user?.profile_avatar?.secure_url ? (
                     <img src={todo.user.profile_avatar.secure_url} alt="" className="avatar-img-v2" />
                   ) : (
                     <FiUser />
                   )}
                 </div>
-                {isEditing ? (
-                  <div style={{ width: 140, marginLeft: 8 }}>
-                    <SearchableDropdown
-                      options={staff || []}
-                      value={editedData.user?._id || editedData.user || ""}
-                      onChange={(val) => handleChange("user", val)}
-                      placeholder="Assignee"
-                    />
-                  </div>
-                ) : (
-                  <button className="add-avatar-btn" onClick={() => setIsEditing(true)}>
-                    <FiPlus />
-                  </button>
-                )}
+                <button className="add-avatar-btn" onClick={(e) => { e.stopPropagation(); onEdit(todo); }}>
+                  <FiPlus />
+                </button>
               </div>
             </div>
 
             <div className="action-buttons-v2">
-              {isEditing ? (
-                <>
-                  <button className="icon-btn success" onClick={handleSave} disabled={saving}>
-                    <FiCheck />
-                  </button>
-                  <button className="icon-btn" onClick={handleCancel}>
-                    <FiX />
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="icon-btn primary" onClick={() => setIsEditing(true)}>
-                    <FiEdit2 />
-                  </button>
-                   <button className="icon-btn danger" onClick={() => onDelete(todo._id)}>
-                    <FiTrash2 />
-                  </button>
-                  <button className="icon-btn secondary" onClick={() => onEdit(todo)} title="Full Edit">
-                    <FiMoreHorizontal />
-                  </button>
-                </>
-              )}
+              <button className="icon-btn primary" onClick={(e) => { e.stopPropagation(); onEdit(todo); }}>
+                <FiEdit2 />
+              </button>
+              <button className="icon-btn danger" onClick={(e) => { e.stopPropagation(); onDelete(todo._id); }}>
+                <FiTrash2 />
+              </button>
+              <button className="icon-btn secondary" onClick={(e) => { e.stopPropagation(); onEdit(todo); }} title="Full Edit">
+                <FiMoreHorizontal />
+              </button>
             </div>
           </div>
         </div>

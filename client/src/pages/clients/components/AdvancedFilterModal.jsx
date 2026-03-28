@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import SearchableDropdown from "../../../components/ui/SearchableDropdown";
 import FormField from "../../../components/ui/FormField";
 import { listClientGroups, listTags } from "../../../api/client.api";
+import { FiX, FiFilter } from "react-icons/fi";
+import "../../../styles/AdvancedFilters.css";
 
 const AdvancedFilterModal = ({ isOpen, onClose, filters, onApply, onClear }) => {
   const [localFilters, setLocalFilters] = useState(filters);
@@ -37,20 +39,21 @@ const AdvancedFilterModal = ({ isOpen, onClose, filters, onApply, onClear }) => 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content advanced-filter-modal">
-        <div className="modal-header">
-          <h3>Advanced Filters</h3>
-          <button className="close-btn" onClick={onClose}>&times;</button>
+    <div className="filter-modal-overlay">
+      <div className="filter-modal-container" style={{ maxWidth: '500px' }}>
+        <div className="filter-modal-header">
+          <h3><FiFilter style={{ marginRight: '8px' }} /> Advanced Filters</h3>
+          <button className="filter-close-btn" onClick={onClose}><FiX size={20} /></button>
         </div>
-        
-        <div className="modal-body">
-          <div className="filter-grid">
-            <FormField label="Client Type">
-              <select 
-                className="form-input" 
-                value={localFilters.type || ""} 
-                onChange={(e) => setLocalFilters({...localFilters, type: e.target.value})}
+
+        <div className="filter-modal-body">
+          <div className="filter-grid-layout">
+            <div className="filter-field-group">
+              <label className="filter-field-label">Client Type</label>
+              <select
+                className="filter-input-styled"
+                value={localFilters.type || ""}
+                onChange={(e) => setLocalFilters({ ...localFilters, type: e.target.value })}
               >
                 <option value="">All Types</option>
                 <option value="Individual">Individual</option>
@@ -60,101 +63,61 @@ const AdvancedFilterModal = ({ isOpen, onClose, filters, onApply, onClear }) => 
                 <option value="Private Limited">Private Limited</option>
                 <option value="Limited Company">Limited Company</option>
               </select>
-            </FormField>
+            </div>
 
-            <FormField label="Client Group">
-              <SearchableDropdown 
+            <div className="filter-field-group">
+              <label className="filter-field-label">Client Group</label>
+              <SearchableDropdown
                 options={groups}
                 value={localFilters.group}
-                onChange={(val) => setLocalFilters({...localFilters, group: val})}
+                onChange={(val) => setLocalFilters({ ...localFilters, group: val })}
                 placeholder="Select Group"
               />
-            </FormField>
+            </div>
 
-            <FormField label="Tags">
-              <SearchableDropdown 
+            <div className="filter-field-group">
+              <label className="filter-field-label">Tags</label>
+              <SearchableDropdown
                 isMulti
                 options={tags}
                 value={localFilters.tags}
-                onChange={(val) => setLocalFilters({...localFilters, tags: val})}
+                onChange={(val) => setLocalFilters({ ...localFilters, tags: val })}
                 placeholder="Select Tags"
               />
-            </FormField>
+            </div>
 
-            <FormField label="PAN">
-              <input 
-                type="text" 
-                className="form-input" 
+            <div className="filter-field-group">
+              <label className="filter-field-label">PAN</label>
+              <input
+                type="text"
+                className="filter-input-styled"
                 placeholder="Filter by PAN"
                 value={localFilters.pan || ""}
-                onChange={(e) => setLocalFilters({...localFilters, pan: e.target.value.toUpperCase()})}
+                onChange={(e) => setLocalFilters({ ...localFilters, pan: e.target.value.toUpperCase() })}
               />
-            </FormField>
+            </div>
 
-            <FormField label="GSTIN">
-              <input 
-                type="text" 
-                className="form-input" 
+            <div className="filter-field-group">
+              <label className="filter-field-label">GSTIN</label>
+              <input
+                type="text"
+                className="filter-input-styled"
                 placeholder="Filter by GSTIN"
                 value={localFilters.gstin || ""}
-                onChange={(e) => setLocalFilters({...localFilters, gstin: e.target.value.toUpperCase()})}
+                onChange={(e) => setLocalFilters({ ...localFilters, gstin: e.target.value.toUpperCase() })}
               />
-            </FormField>
+            </div>
           </div>
         </div>
 
-        <div className="modal-footer">
-          <button className="clear-link" onClick={() => { onClear(); onClose(); }}>Clear All</button>
-          <div className="footer-actions">
-            <button className="cancel-btn" onClick={onClose}>Cancel</button>
-            <button className="apply-btn" onClick={() => { onApply(localFilters); onClose(); }}>Apply Filters</button>
+        <div className="filter-modal-footer">
+          <button className="filter-clear-all" onClick={() => { onClear(); onClose(); }}>Clear All</button>
+          <div className="filter-footer-btns">
+            <button className="filter-btn-secondary" onClick={onClose}>Cancel</button>
+            <button className="filter-btn-primary" onClick={() => { onApply(localFilters); onClose(); }}>Apply Filters</button>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0,0,0,0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-        }
-        .advanced-filter-modal {
-          background: white;
-          width: 500px;
-          border-radius: 12px;
-          display: flex;
-          flex-direction: column;
-        }
-        .modal-header {
-          padding: 16px 20px;
-          border-bottom: 1px solid #e2e8f0;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .modal-header h3 { margin: 0; font-size: 18px; }
-        .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
-        .modal-body { padding: 20px; overflow-y: auto; max-height: 70vh; }
-        .filter-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-        .modal-footer {
-          padding: 16px 20px;
-          border-top: 1px solid #e2e8f0;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .clear-link { background: none; border: none; color: #ef4444; font-weight: 500; cursor: pointer; }
-        .footer-actions { display: flex; gap: 12px; }
-        .cancel-btn { background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; }
-        .apply-btn { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; }
-      `}</style>
     </div>
   );
 };

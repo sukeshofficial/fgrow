@@ -7,14 +7,14 @@ const itemSchema = Joi.object({
   unit_price: Joi.number().min(0).default(0),
   discount: Joi.number().min(0).default(0),
   gst_rate: Joi.number().min(0).default(0),
-  source_id: Joi.string().optional(),
+  source_id: Joi.string().allow(null, "").optional(),
   meta: Joi.object().optional(),
 });
 
 const createSchema = Joi.object({
-  tenant_id: Joi.string().required(),
+  tenant_id: Joi.string().optional(),
   // invoice_no: Joi.string().required(),
-  billing_entity: Joi.string().required(),
+  billing_entity: Joi.string().optional(),
   client: Joi.string().required(),
   date: Joi.date().optional(),
   due_date: Joi.date().optional().allow(null),
@@ -24,6 +24,7 @@ const createSchema = Joi.object({
   status: Joi.string()
     .valid("draft", "sent", "partially_paid", "paid", "cancelled")
     .optional(),
+  invoice_no: Joi.string().optional(),
 });
 
 const updateSchema = Joi.object({
@@ -32,10 +33,12 @@ const updateSchema = Joi.object({
   date: Joi.date().optional(),
   due_date: Joi.date().optional().allow(null),
   payment_term: Joi.string().optional(),
+  items: Joi.array().items(itemSchema).optional(),
   remark: Joi.string().allow("").optional(),
   status: Joi.string()
     .valid("draft", "sent", "partially_paid", "paid", "cancelled")
     .optional(),
+  invoice_no: Joi.string().optional(),
 });
 
 const addPaymentSchema = Joi.object({
@@ -75,7 +78,7 @@ export const validate = (type) => {
       }).unknown(true);
     else if (type === "send")
       schema = Joi.object({
-        to: Joi.string().email().required(),
+        to: Joi.string().required(),
         cc: Joi.string().optional(),
         subject: Joi.string().optional(),
         message: Joi.string().optional(),

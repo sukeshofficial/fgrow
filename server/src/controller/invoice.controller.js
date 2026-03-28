@@ -154,7 +154,7 @@ export const deleteItem = async (req, res, next) => {
 
 export const getUnbilledTasks = async (req, res, next) => {
   try {
-    const tasks = await service.getUnbilledTasks(req.user, req.params.id);
+    const tasks = await service.getUnbilledTasks(req.user, req.params.clientId);
     res.json(tasks);
   } catch (err) {
     next(err);

@@ -1,6 +1,7 @@
 import React from "react";
 import { FaTrash, FaEye, FaEdit, FaClock } from "react-icons/fa";
 import TableSkeleton from "../../../components/skeletons/TableSkeleton";
+import "./TaskTable.css";
 
 const TaskTable = ({ tasks, loading, onAction, onDelete, onStatusChange }) => {
   const getStatusClass = (status) => {
@@ -76,15 +77,15 @@ const TaskTable = ({ tasks, loading, onAction, onDelete, onStatusChange }) => {
                   </span>
                 </td>
                 <td style={{ width: "1%", whiteSpace: "nowrap" }}>
-                  <div className="action-buttons" style={{ justifyContent: "flex-end" }}>
-                    <button className="action-btn view" title="View Details" onClick={() => onAction("view", task)}>
-                      <FaEye />
+                  <div className="task-table-action-buttons">
+                    <button className="task-table-action-btn view" title="View Details" onClick={() => onAction("view", task)}>
+                      <FaEye /> View
                     </button>
-                    <button className="action-btn edit" title="Edit Task" onClick={() => onAction("edit", task)}>
-                      <FaEdit />
+                    <button className="task-table-action-btn edit" title="Edit Task" onClick={() => onAction("edit", task)}>
+                      <FaEdit /> Edit
                     </button>
-                    <button className="action-btn delete" title="Delete Task" onClick={() => onDelete(task._id)}>
-                      <FaTrash />
+                    <button className="task-table-action-btn delete" title="Delete Task" onClick={() => onDelete(task._id)}>
+                      <FaTrash /> Delete
                     </button>
                   </div>
                 </td>
@@ -93,44 +94,6 @@ const TaskTable = ({ tasks, loading, onAction, onDelete, onStatusChange }) => {
           )}
         </tbody>
       </table>
-      <style>{`
-        .priority-tag {
-          padding: 2px 8px;
-          border-radius: 4px;
-          font-size: 11px;
-          font-weight: 700;
-          text-transform: uppercase;
-        }
-        .priority-high { background: #fee2e2; color: #991b1b; }
-        .priority-medium { background: #fef3c7; color: #92400e; }
-        .priority-low { background: #f0fdf4; color: #166534; }
-        
-        .status-badge.in-progress { background: #e0f2fe; color: #075985; }
-        .status-badge.verified { background: #dcfce7; color: #166534; }
-        .status-badge.cancelled { background: #f1f5f9; color: #475569; }
-
-        .action-buttons { display: flex; gap: 8px;}
-        .action-btn {
-          background: none;
-          border: none;
-          cursor: pointer;
-          color: var(--text-muted);
-          transition: color 0.2s;
-          padding: 4px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .action-btn.view:hover { color: var(--primary-accent); }
-        .action-btn.edit:hover { color: var(--primary-blue); }
-        .action-btn.delete:hover { color: var(--error-red); }
-
-        .table-loading {
-          padding: 40px;
-          text-align: center;
-          color: var(--text-muted);
-        }
-      `}</style>
     </div>
   );
 };

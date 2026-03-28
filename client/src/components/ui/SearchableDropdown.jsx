@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FiChevronDown } from "react-icons/fi";
 
-const SearchableDropdown = ({ 
-  options = [], 
-  value, 
-  onChange, 
-  placeholder = "Select...", 
-  onAddNew, 
+const SearchableDropdown = ({
+  options = [],
+  value,
+  onChange,
+  placeholder = "Select...",
+  onAddNew,
   addNewLabel = "Add New",
   isMulti = false,
   loading = false,
@@ -16,7 +16,7 @@ const SearchableDropdown = ({
   const [search, setSearch] = useState("");
   const dropdownRef = useRef(null);
 
-  const filteredOptions = options.filter(opt => 
+  const filteredOptions = options.filter(opt =>
     opt.name?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -56,8 +56,8 @@ const SearchableDropdown = ({
 
   return (
     <div className={`custom-dropdown ${isOpen ? "open" : ""}`} ref={dropdownRef}>
-      <div 
-        className={`dropdown-toggle form-input ${isOpen ? "open" : ""} ${error ? "has-error" : ""}`} 
+      <div
+        className={`dropdown-toggle form-input ${isOpen ? "open" : ""} ${error ? "has-error" : ""}`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="chip-container">
@@ -69,15 +69,15 @@ const SearchableDropdown = ({
                 return (
                   <span key={id} className="tag-chip">
                     {imageUrl && (
-                      <img 
-                        src={imageUrl} 
-                        alt="" 
-                        style={{ width: '16px', height: '16px', borderRadius: '50%', objectFit: 'cover' }} 
+                      <img
+                        src={imageUrl}
+                        alt=""
+                        style={{ width: '16px', height: '16px', borderRadius: '50%', objectFit: 'cover' }}
                       />
                     )}
                     {option?.name || id}
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       className="remove-chip"
                       onClick={(e) => { e.stopPropagation(); handleSelect(id); }}
                     >&times;</button>
@@ -88,20 +88,21 @@ const SearchableDropdown = ({
               <span className="placeholder">{placeholder}</span>
             )
           ) : (
-            <div className="selected-value-wrapper">
+            <div className="selected-value-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', gap: '12px', width: '100%', height: '100%' }}>
               {(() => {
                 const selectedOpt = options.find((o) => o._id === value);
                 const imageUrl = selectedOpt?.profile_avatar?.secure_url || selectedOpt?.photo?.secure_url;
                 return (
                   <>
                     {imageUrl && (
-                      <img 
-                        src={imageUrl} 
-                        alt="" 
+                      <img
+                        src={imageUrl}
+                        alt=""
                         className="dropdown-selected-img"
+                        style={{ maxHeight: '24px', width: '24px', objectFit: 'cover', flexShrink: 0, borderRadius: '50%' }}
                       />
                     )}
-                    <span className={value ? "selected-value" : "placeholder"}>
+                    <span className={value ? "selected-value" : "placeholder"} style={{ fontWeight: 600 }}>
                       {selectedOpt?.name || placeholder}
                     </span>
                   </>
@@ -134,19 +135,18 @@ const SearchableDropdown = ({
               filteredOptions.map((option) => (
                 <div
                   key={option._id}
-                  className={`dropdown-item ${
-                    isMulti 
-                      ? (Array.isArray(value) && value.includes(option._id) ? "selected" : "") 
+                  className={`dropdown-item ${isMulti
+                      ? (Array.isArray(value) && value.includes(option._id) ? "selected" : "")
                       : (value === option._id ? "selected" : "")
-                  }`}
+                    }`}
                   onClick={() => handleSelect(option._id)}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {(option.profile_avatar?.secure_url || option.photo?.secure_url) && (
-                      <img 
-                        src={option.profile_avatar?.secure_url || option.photo?.secure_url} 
-                        alt="" 
-                        style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} 
+                      <img
+                        src={option.profile_avatar?.secure_url || option.photo?.secure_url}
+                        alt=""
+                        style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }}
                       />
                     )}
                     {option.name}

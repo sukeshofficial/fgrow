@@ -1,9 +1,9 @@
 import React from "react";
 import { FiSearch, FiFilter, FiPlus } from "react-icons/fi";
 
-const FilterBar = ({ 
-  filters, 
-  onFilterChange, 
+const FilterBar = ({
+  filters,
+  onFilterChange,
   onOpenAdvanced,
   onCreateNew
 }) => {
@@ -11,10 +11,12 @@ const FilterBar = ({
     <div className="filter-bar">
       <div className="search-wrapper">
         <FiSearch className="search-icon" />
-        <input 
-          type="text" 
-          className="table-search-input" 
-          placeholder="Search by name, PAN, mobile..." 
+        <input
+          type="text"
+          id="client-search"
+          name="client-search"
+          className="table-search-input"
+          placeholder="Search by name, PAN, mobile..."
           value={filters.search || ""}
           onChange={(e) => onFilterChange("search", e.target.value)}
         />
@@ -22,19 +24,19 @@ const FilterBar = ({
 
       <div className="quick-filters">
         <div className="status-toggle">
-          <button 
+          <button
             className={`toggle-btn ${filters.is_active === 'all' || filters.is_active === undefined ? 'active' : ''}`}
             onClick={() => onFilterChange("is_active", 'all')}
           >
             All
           </button>
-          <button 
+          <button
             className={`toggle-btn ${filters.is_active === true ? 'active' : ''}`}
             onClick={() => onFilterChange("is_active", true)}
           >
             Active
           </button>
-          <button 
+          <button
             className={`toggle-btn ${filters.is_active === false ? 'active' : ''}`}
             onClick={() => onFilterChange("is_active", false)}
           >

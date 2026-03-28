@@ -1,0 +1,94 @@
+.priority-tag {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.priority-high {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.priority-medium {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.priority-low {
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.status-badge.in-progress {
+    background: #e0f2fe;
+    color: #075985;
+}
+
+.status-badge.verified {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.cancelled {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.task-table-action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.task-table-action-btn {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    color: #475569;
+    transition: all 0.2s;
+    padding: 6px 14px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    font-size: 13px;
+    margin-left: 8px;
+}
+
+.task-table-action-btn:first-child {
+    margin-left: 0;
+}
+
+.task-table-action-btn svg {
+    display: inline-block !important;
+    margin-right: 6px;
+    width: 14px;
+    height: 14px;
+}
+
+.task-table-action-btn.view:hover {
+    color: #6366f1;
+    border-color: #6366f1;
+    background: #eef2ff;
+}
+
+.task-table-action-btn.edit:hover {
+    color: #3b82f6;
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.task-table-action-btn.delete:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+.table-loading {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-muted);
+}

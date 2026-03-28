@@ -9,6 +9,8 @@ const TaskFilterBar = ({ filters, onFilterChange, onCreateNew, onOpenAdvanced })
         <FaSearch className="search-icon" />
         <input
           type="text"
+          id="task-search"
+          name="task-search"
           className="table-search-input"
           placeholder="Search tasks..."
           value={filters.search}

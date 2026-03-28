@@ -7,6 +7,7 @@ import { listTodos, moveTodo, deleteTodo } from "../../api/todo.api";
 import { FaSearch, FaPlus } from "react-icons/fa";
 import { FiFilter } from "react-icons/fi";
 import "../../styles/Todo.css";
+import "../../styles/modal.css";
 import TableSkeleton from "../../components/skeletons/TableSkeleton";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 
@@ -108,27 +109,31 @@ const TodoDashboard = () => {
               <h1>To-do</h1>
             </div>
 
-            <div className="todo-actions">
-              <div className="todo-search-wrapper">
+            <div className="filter-bar">
+              <div className="search-wrapper">
                 <FaSearch className="search-icon" />
                 <input
                   type="text"
-                  className="todo-search-input"
+                  id="todo-search"
+                  name="todo-search"
+                  className="table-search-input"
                   placeholder="Search to-dos..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
 
-              <button className="filter-btn">
-                <FiFilter />
-                Filters
-              </button>
+              <div className="quick-filters">
+                <button className="advanced-filter-btn">
+                  <FiFilter />
+                  Filters
+                </button>
 
-              <button className="new-todo-btn" onClick={handleCreate}>
-                <FaPlus />
-                New To-do
-              </button>
+                <button className="create-btn" onClick={handleCreate}>
+                  <FaPlus />
+                  New To-do
+                </button>
+              </div>
             </div>
           </header>
 

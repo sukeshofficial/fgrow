@@ -1,9 +1,9 @@
 import React from "react";
 import { FiSearch, FiFilter, FiPlus } from "react-icons/fi";
 
-const ServiceFilterBar = ({ 
-  filters, 
-  onFilterChange, 
+const ServiceFilterBar = ({
+  filters,
+  onFilterChange,
   onOpenAdvanced,
   onCreateNew
 }) => {
@@ -11,10 +11,12 @@ const ServiceFilterBar = ({
     <div className="filter-bar">
       <div className="search-wrapper">
         <FiSearch className="search-icon" />
-        <input 
-          type="text" 
-          className="table-search-input" 
-          placeholder="Search services by name, SAC, description..." 
+        <input
+          type="text"
+          id="service-search"
+          name="service-search"
+          className="table-search-input"
+          placeholder="Search services by name, SAC, description..."
           value={filters.search || ""}
           onChange={(e) => onFilterChange("search", e.target.value)}
         />
@@ -22,19 +24,19 @@ const ServiceFilterBar = ({
 
       <div className="quick-filters">
         <div className="status-toggle">
-          <button 
+          <button
             className={`toggle-btn ${filters.is_enabled === 'all' || filters.is_enabled === undefined ? 'active' : ''}`}
             onClick={() => onFilterChange("is_enabled", 'all')}
           >
             All
           </button>
-          <button 
+          <button
             className={`toggle-btn ${filters.is_enabled === true ? 'active' : ''}`}
             onClick={() => onFilterChange("is_enabled", true)}
           >
             Enabled
           </button>
-          <button 
+          <button
             className={`toggle-btn ${filters.is_enabled === false ? 'active' : ''}`}
             onClick={() => onFilterChange("is_enabled", false)}
           >
@@ -42,13 +44,13 @@ const ServiceFilterBar = ({
           </button>
         </div>
 
-        <button className="filter-btn-secondary" onClick={onOpenAdvanced} style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '8px', 
-          padding: '8px 16px', 
-          borderRadius: '10px', 
-          border: '1px solid var(--border-color)', 
+        <button className="filter-btn-secondary" onClick={onOpenAdvanced} style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 16px',
+          borderRadius: '10px',
+          border: '1px solid var(--border-color)',
           background: 'white',
           color: 'var(--text-main)',
           fontWeight: '500',

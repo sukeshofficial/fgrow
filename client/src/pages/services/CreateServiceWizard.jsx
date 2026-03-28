@@ -53,7 +53,11 @@ const CreateServiceWizard = () => {
   };
 
   const handlePrev = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 0));
+    if (currentStep === 0) {
+      navigate("/services");
+    } else {
+      setCurrentStep(prev => Math.max(prev - 1, 0));
+    }
   };
 
   const renderStep = () => {
@@ -71,6 +75,7 @@ const CreateServiceWizard = () => {
           <ServiceDetailsForm
             data={formData}
             onNext={handleNext}
+            onPrev={handlePrev}
           />
         );
       case 1:
@@ -152,10 +157,10 @@ const CreateServiceWizard = () => {
               <button type="button" className="back-btn" onClick={handlePrev}>
                 Back to Billing
               </button>
-              <button 
+              <button
                 type="button"
-                className="next-button" 
-                onClick={() => handleSave(formData)} 
+                className="next-button"
+                onClick={() => handleSave(formData)}
                 style={{ position: 'static' }}
               >
                 {loading ? "Creating..." : "Create & Activate Service"}

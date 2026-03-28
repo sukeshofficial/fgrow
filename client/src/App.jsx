@@ -35,6 +35,10 @@ const CreateTaskWizard = lazy(() => import("./pages/tasks/CreateTaskWizard"));
 const EditTaskWizard = lazy(() => import("./pages/tasks/EditTaskWizard"));
 const TaskDetails = lazy(() => import("./pages/tasks/TaskDetails"));
 const TodoDashboard = lazy(() => import("./pages/todos/TodoDashboard"));
+const InvoiceList = lazy(() => import("./pages/invoices/InvoiceList"));
+const CreateInvoiceWizard = lazy(() => import("./pages/invoices/CreateInvoiceWizard"));
+const EditInvoiceWizard = lazy(() => import("./pages/invoices/EditInvoiceWizard"));
+const InvoiceDetail = lazy(() => import("./pages/invoices/InvoiceDetail"));
 
 import { Spinner } from "./components/ui/Spinner";
 
@@ -56,6 +60,7 @@ import { useAuth } from "./hooks/useAuth";
 import { checkAuth } from "./features/auth/auth.actions";
 import { useError } from "./context/ErrorContext";
 import { setupInterceptors } from "./api/api";
+import GlobalModal from "./components/ui/GlobalModal";
 
 const App = () => {
   const { dispatch } = useAuth();
@@ -64,40 +69,41 @@ const App = () => {
   useEffect(() => {
     // 1. Setup global axios error handling
     setupInterceptors(setError);
-    
+
     // 2. Check authenticated session
     checkAuth(dispatch);
   }, [dispatch, setError]);
 
   return (
     <Suspense fallback={<PageLoader />}>
+      <GlobalModal />
       <Routes>
-  
+
         {/* Default */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-  
+
         {/* Public */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-  
+
         {/* ---------------- ADMIN PORTAL ---------------- */}
         <Route element={<ProtectedRoute />}>
           <Route element={<SuperAdminRoute />}>
-  
+
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/tenants/:tenantId" element={<TenantDetailView />} />
-  
+
           </Route>
         </Route>
-  
-  
+
+
         {/* ---------------- TENANT APP ---------------- */}
         <Route element={<ProtectedRoute />}>
-  
+
           <Route element={<TenantRoutes />}>
-  
+
             <Route element={<StaffRoutes />}>
-  
+
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/tasks" element={<Tasks />} />
               <Route path="/tasks/create" element={<CreateTaskWizard />} />
@@ -110,19 +116,23 @@ const App = () => {
               <Route path="/services" element={<Services />} />
               <Route path="/services/create" element={<CreateServiceWizard />} />
               <Route path="/services/edit/:id" element={<EditServiceWizard />} />
+              <Route path="/finance/invoices" element={<InvoiceList />} />
+              <Route path="/finance/invoices/create" element={<CreateInvoiceWizard />} />
+              <Route path="/finance/invoices/edit/:id" element={<EditInvoiceWizard />} />
+              <Route path="/finance/invoices/:id" element={<InvoiceDetail />} />
               <Route path="/finance" element={<Tasks />} />
               <Route path="/documents" element={<Tasks />} />
               <Route path="/reports" element={<Tasks />} />
               <Route path="/users" element={<Users />} />
               <Route path="/notifications" element={<Tasks />} />
               <Route path="/settings" element={<Tasks />} />
-  
+
             </Route>
-  
+
           </Route>
-  
+
         </Route>
-  
+
       </Routes>
     </Suspense>
   );

@@ -28,8 +28,66 @@ const applyTotals = (inv, totals) => {
   inv.total_gst = totals.total_gst;
   inv.discount_total = totals.discount_total;
   inv.total_amount = totals.total_amount;
+  inv.total_amount = totals.total_amount;
   inv.round_off = totals.round_off;
 };
+
+const syncTaskLinks = async (user, invoiceId, items) => {
+  let Task;
+  try {
+    Task = mongoose.model("Task");
+  } catch (e) {
+    return;
+  }
+  
+  const taskIds = items
+    .filter((it) => it.source_id)
+    .map((it) => it.source_id);
+
+  // 1. Unlink tasks that were previously linked to this invoice but are no longer in the items
+  await Task.updateMany(
+    { invoice_id: invoiceId, _id: { $nin: taskIds }, ...tenantFilter(user) },
+    { $unset: { invoice_id: "" } }
+  );
+
+  // 2. Link tasks that are now in the items
+  if (taskIds.length > 0) {
+    await Task.updateMany(
+      { _id: { $in: taskIds }, ...tenantFilter(user) },
+      { $set: { invoice_id: invoiceId } }
+    );
+  }
+};
+
+const maybeSyncCounter = async (user, invoiceNo) => {
+  if (!invoiceNo) return;
+  
+  const parts = invoiceNo.split("-");
+  if (parts.length < 2) return;
+  
+  const yearStr = parts[parts.length - 2];
+  const seqStr = parts[parts.length - 1];
+  const year = parseInt(yearStr);
+  const seq = parseInt(seqStr);
+  
+  if (isNaN(year) || isNaN(seq)) return;
+  
+  const InvoiceCounter = mongoose.model("InvoiceCounter");
+  const counter = await InvoiceCounter.findOne({ tenant_id: user.tenant_id, year });
+  
+  if (counter) {
+    if (seq >= counter.seq) {
+      await InvoiceCounter.updateOne({ _id: counter._id }, { $set: { seq: seq } });
+    }
+  } else {
+    try {
+      await InvoiceCounter.create({ tenant_id: user.tenant_id, year, seq });
+    } catch (e) {
+      // Ignore
+    }
+  }
+};
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A. CRUD & listing
@@ -88,7 +146,7 @@ export const listInvoices = async (user, query) => {
       .sort(sort)
       .skip(skip)
       .limit(limit)
-      .select("invoice_no date total_amount amount_received balance_due status client billing_entity createdAt")
+      .select("invoice_no date due_date total_amount amount_received balance_due status client billing_entity createdAt")
       .lean(),
     Invoice.countDocuments(filter),
   ]);
@@ -103,8 +161,8 @@ export const createInvoice = async (user, payload) => {
   const doc = {
     // FIX: tenant_id always comes from the authenticated user, never from the payload
     tenant_id: user.tenant_id,
-    invoice_no: await getNextInvoiceNumber(user.tenant_id),
-    billing_entity: payload.billing_entity,
+    invoice_no: payload.invoice_no || (await getNextInvoiceNumber(user.tenant_id)),
+    billing_entity: payload.billing_entity || user.tenant_id,
     client: payload.client,
     date: payload.date || new Date(),
     due_date: payload.due_date || null,
@@ -119,6 +177,15 @@ export const createInvoice = async (user, payload) => {
   applyTotals(doc, computeInvoiceTotals(doc.items));
 
   const invoice = await Invoice.create(doc);
+  
+  // Sync task links
+  await syncTaskLinks(user, invoice._id, invoice.items);
+
+  // Sync counter if manual number used
+  if (payload.invoice_no) {
+    await maybeSyncCounter(user, payload.invoice_no);
+  }
+
   return invoice.toObject();
 };
 
@@ -156,6 +223,7 @@ export const updateInvoice = async (user, id, payload) => {
     "remark",
     "status",
     "linked_sources",
+    "invoice_no",
   ];
 
   const update = {};
@@ -165,15 +233,44 @@ export const updateInvoice = async (user, id, payload) => {
   const inv = await Invoice.findOne({ _id: id, ...tenantFilter(user) });
   if (!inv) throw new Error("Invoice not found");
 
+  // Apply updates
   Object.assign(inv, update);
 
   if (payload.items) {
-    inv.items = payload.items;
+    // Robust replacement of subdocuments
+    inv.items.splice(0, inv.items.length, ...payload.items);
   }
 
-  applyTotals(inv, computeInvoiceTotals(inv.items));
+  // Recalculate totals
+  const totals = computeInvoiceTotals(inv.items);
+  applyTotals(inv, totals);
+
+  // Sync balance due
+  const paid = inv.amount_received || 0;
+  inv.balance_due = Math.max(0, inv.total_amount - paid);
+  
+  // Auto-status update
+  if (inv.balance_due === 0 && inv.total_amount > 0 && inv.status !== 'cancelled') {
+    inv.status = 'paid';
+  } else if (inv.balance_due < inv.total_amount && inv.balance_due > 0) {
+    inv.status = 'partially_paid';
+  }
+
   inv.updated_by = user._id;
+  inv.markModified('items');
+  
   await inv.save();
+
+  // Sync task links
+  if (payload.items) {
+    await syncTaskLinks(user, inv._id, inv.items);
+  }
+
+  // Sync counter if manual number used
+  if (payload.invoice_no) {
+    await maybeSyncCounter(user, payload.invoice_no);
+  }
+
   return inv.toObject();
 };
 
@@ -191,11 +288,34 @@ export const deleteInvoice = async (user, id, force = false) => {
     throw new Error("Invoice already deleted");
   }
 
-  await Invoice.updateOne(filter, {
-    archived: true,
-    archived_at: new Date(),
-    archived_by: user.id,
-  });
+  // 1. Identify Year and Seq from invoice number (Format: INV-2026-0002)
+  const parts = invoice.invoice_no.split("-");
+  const year = parseInt(parts[parts.length - 2]);
+  const seq = parseInt(parts[parts.length - 1]);
+
+  if (force) {
+    await Invoice.deleteOne(filter);
+  } else {
+    // RENAME the invoice number to free it up for reuse, then archive
+    const deletedNo = `${invoice.invoice_no}-DEL-${Date.now()}`;
+    await Invoice.updateOne(filter, {
+      invoice_no: deletedNo,
+      archived: true,
+      archived_at: new Date(),
+      archived_by: user.id,
+    });
+  }
+
+  // 3. Decrement counter ONLY if this was the latest invoice issued for this tenant/year
+  const InvoiceCounter = mongoose.model("InvoiceCounter");
+  const currentCounter = await InvoiceCounter.findOne({ tenant_id: user.tenant_id, year });
+  
+  if (currentCounter && currentCounter.seq === seq) {
+    await InvoiceCounter.updateOne(
+      { _id: currentCounter._id },
+      { $inc: { seq: -1 } }
+    );
+  }
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -214,6 +334,10 @@ export const addItems = async (user, invoiceId, items = []) => {
   applyTotals(inv, computeInvoiceTotals(inv.items));
   inv.updated_by = user._id;
   await inv.save();
+
+  // Sync task links
+  await syncTaskLinks(user, inv._id, inv.items);
+
   return inv.items;
 };
 
@@ -258,14 +382,7 @@ export const deleteItem = async (user, invoiceId, itemId) => {
   await inv.save();
 };
 
-export const getUnbilledTasks = async (user, invoiceId) => {
-  // FIX: Scoped to tenant
-  const invoice = await Invoice.findOne({
-    _id: invoiceId,
-    ...tenantFilter(user),
-  }).lean();
-  if (!invoice) throw new Error("Invoice not found");
-
+export const getUnbilledTasks = async (user, clientId) => {
   let Task;
   try {
     Task = mongoose.model("Task");
@@ -273,8 +390,10 @@ export const getUnbilledTasks = async (user, invoiceId) => {
     return [];
   }
 
+  // Scoped to tenant and specified client
   const tasks = await Task.find({
-    client: invoice.client,
+    ...tenantFilter(user),
+    client: clientId,
     invoice_id: { $exists: false },
     archived: { $ne: true },
   }).lean();

@@ -106,9 +106,11 @@
 .form-content {
   flex: 1;
   padding: 48px;
-  padding-bottom: 110px; /* Increased to avoid overlap with Next button */
+  padding-bottom: 110px;
+  /* Increased to avoid overlap with Next button */
   position: relative;
-  min-height: 400px; /* Ensure a minimum height for the card */
+  min-height: 400px;
+  /* Ensure a minimum height for the card */
 }
 
 .step-container {
@@ -286,6 +288,14 @@
 .dropdown-list {
   max-height: 180px;
   overflow-y: auto;
+}
+
+.no-options {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-style: italic;
 }
 
 .dropdown-item {
@@ -502,7 +512,7 @@
 @media (max-width: 947px) {
   .stepper-container {
     width: fit-content;
-  }  
+  }
 }
 
 .step-placeholder {

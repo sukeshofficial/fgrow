@@ -1,5 +1,5 @@
 export const computeInvoiceTotals = (items = []) => {
-  let subtotal = 0;
+  let subtotal = 0; // This will be the GROSS subtotal (Qty * Price)
   let total_gst = 0;
   let discount_total = 0;
 
@@ -12,15 +12,23 @@ export const computeInvoiceTotals = (items = []) => {
     const lineNet = qty * unit;
     const lineAfterDiscount = Math.max(0, lineNet - discount);
     const gstAmount = (lineAfterDiscount * gst_rate) / 100;
+    const totalLine = lineAfterDiscount + gstAmount;
 
-    subtotal += lineAfterDiscount;
+    // Update the item object in-place for persistence
+    it.gst_amount = gstAmount;
+    it.total_amount = totalLine;
+
+    subtotal += lineNet; // Gross!
     total_gst += gstAmount;
     discount_total += discount;
   }
 
-  const raw_total = subtotal + total_gst;
+  // Final Total = (Gross Subtotal - Total Discount) + Total GST
+  const net_base = subtotal - discount_total;
+  const raw_total = net_base + total_gst;
+  
   const total_amount = Math.round((raw_total + Number.EPSILON) * 100) / 100;
-  const round_off = Math.round((total_amount - raw_total) * 100) / 100; // usually 0
+  const round_off = Math.round((total_amount - raw_total) * 100) / 100;
 
   return { subtotal, total_gst, discount_total, total_amount, round_off };
 };
