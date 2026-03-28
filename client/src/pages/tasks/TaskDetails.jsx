@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import SideBar from "../../components/SideBar";
+import StatusDropdown from "../../components/tasks/StatusDropdown";
 import {
   getTask,
   updateTaskStatus,
@@ -151,18 +152,10 @@ const TaskDetails = () => {
               <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>{task.description || "No description provided."}</p>
             </div>
             <div className="task-actions" style={{ display: 'flex', gap: '12px' }}>
-              <select
-                className="status-dropdown"
+              <StatusDropdown
                 value={task.status}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border-color)', fontWeight: '600' }}
-              >
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="verified">Verified</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+                onChange={handleStatusChange}
+              />
               <button
                 onClick={handleToggleTimer}
                 style={{

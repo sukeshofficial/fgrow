@@ -363,3 +363,118 @@
     justify-content: center;
   }
 }
+
+/* ───────────────────────────────────────────────────────────────────────────── */
+/* PREMIUM STATUS DROPDOWN                                                     */
+/* ───────────────────────────────────────────────────────────────────────────── */
+
+.status-custom-dropdown {
+  position: relative;
+  width: 180px;
+  user-select: none;
+}
+
+.status-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 42px;
+}
+
+.status-dropdown-toggle:hover {
+  border-color: var(--primary-accent);
+}
+
+.status-selected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.status-chevron {
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+
+.status-chevron.up {
+  transform: rotate(180deg);
+}
+
+.status-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 100%;
+  min-width: 180px;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 6px;
+  animation: dropdown-fade-in 0.2s ease-out;
+}
+
+.status-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.status-dropdown-item:hover {
+  background: #f8fafc;
+}
+
+.status-dropdown-item.selected {
+  background: #f1f5f9;
+  color: var(--primary-accent);
+}
+
+.status-check {
+  margin-left: auto;
+  font-weight: 700;
+}
+
+@keyframes dropdown-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .status-custom-dropdown {
+    width: 100%;
+  }
+}

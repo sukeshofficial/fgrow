@@ -73,6 +73,29 @@ const Dashboard = () => {
       <SideBar />
       <div className="dashboard">
         <ScrollingCredits />
+        <div className="dashboard-notice-box">
+          <div className="notice-icon">
+            <FaExclamationCircle />
+          </div>
+          <div className="notice-content">
+            <p>
+              This is a <strong>test version</strong> of the FGrow application.
+              {" "}If you encounter any bugs, please report them to{" "}
+              <a
+                href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=sukesh.official.2006@gmail.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="feedback-link"
+              >
+                feedback@forgegrid.in
+              </a>
+            </p>
+            <p className="notice-subtext" style={{ marginTop: '8px' }}>
+              <strong>Note: No data is stored permanently right now.</strong>
+            </p>
+          </div>
+        </div>
+
         <div className="dashboard-header-row">
           <h1 className="dashboard-title">Dashboard</h1>
           {user?.tenant_role === "owner" && (
@@ -127,26 +150,6 @@ const Dashboard = () => {
             onSuccess={handleInviteSuccess}
           />
         )}
-
-        <div className="dashboard-notice-box">
-          <div className="notice-icon">
-            <FaExclamationCircle />
-          </div>
-          <div className="notice-content">
-            <p>
-              This is a <strong>test version</strong> of the FGrow application.
-              If you encounter any bugs, please report them to{" "}
-              <a
-                href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=sukesh.official.2006@gmail.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="feedback-link"
-              >
-                feedback@forgegrid.in
-              </a>
-            </p>
-          </div>
-        </div>
       </div>
     </>
   );
