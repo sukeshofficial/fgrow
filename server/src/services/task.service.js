@@ -71,6 +71,21 @@ export const listTasks = async (filters = {}) => {
   };
 };
 
+/* ------------------ helper ------------------ */
+const isUserAuthorized = (task, user) => {
+  if (!task || !user) return false;
+
+  // Super admins are always authorized
+  if (user.platform_role === "super_admin") return true;
+
+  // Tenant owners are always authorized
+  if (user.tenant_role === "owner") return true;
+
+  // Check if user is in assigned list
+  const assignedUserIds = task.users?.map((u) => u._id?.toString() || u.toString()) || [];
+  return assignedUserIds.includes(user.id);
+};
+
 /* ------------------ create task ------------------ */
 export const createTask = async (payload, user) => {
   if (!payload.tenant_id) throw new Error("tenant_id required");
@@ -154,12 +169,11 @@ export const updateTask = async (taskId, patch, user = {}) => {
 
 /* ------------------ update status ------------------ */
 export const updateStatus = async (taskId, status, user = {}) => {
-  if (
-    !["pending", "in_progress", "completed", "verified", "cancelled"].includes(
-      status,
-    )
-  ) {
-    throw new Error("invalid status");
+  const task = await Task.findOne({ _id: taskId, tenant_id: user.tenant_id });
+  if (!task) throw new Error("Task not found or unauthorized");
+
+  if (!isUserAuthorized(task, user)) {
+    throw new Error("You are not authorized to perform actions on this task");
   }
 
   const updatePayload = { status, updated_by: user.id };
@@ -195,6 +209,10 @@ export const addChecklistItem = async (taskId, checklistItem, user = {}) => {
   const task = await Task.findOne({ _id: taskId, tenant_id: user.tenant_id });
   if (!task) throw new Error("Task not found or unauthorized");
 
+  if (!isUserAuthorized(task, user)) {
+    throw new Error("You are not authorized to perform actions on this task");
+  }
+
   task.checklist.push({ ...checklistItem, is_done: false });
   task.markModified("checklist");
   await task.save();
@@ -222,6 +240,10 @@ export const updateChecklistItem = async (
   const task = await Task.findOne({ _id: taskId, tenant_id: user.tenant_id });
 
   if (!task) throw new Error("Task not found or unauthorized");
+
+  if (!isUserAuthorized(task, user)) {
+    throw new Error("You are not authorized to perform actions on this task");
+  }
 
   if (
     checklistIndex === undefined ||
@@ -275,6 +297,10 @@ export const deleteChecklistItem = async (
 
   if (!task) throw new Error("Task not found or unauthorized");
 
+  if (!isUserAuthorized(task, user)) {
+    throw new Error("You are not authorized to perform actions on this task");
+  }
+
   if (
     checklistIndex === undefined ||
     checklistIndex < 0 ||
@@ -307,6 +333,10 @@ export const startTimelog = async (taskId, user) => {
   const task = await Task.findOne({ _id: taskId, tenant_id: user.tenant_id });
   if (!task) throw new Error("Task not found or unauthorized");
 
+  if (!isUserAuthorized(task, user)) {
+    throw new Error("You are not authorized to perform actions on this task");
+  }
+
   const timeLog = {
     user: user.id,
     start_time: new Date(),
@@ -336,7 +366,11 @@ export const startTimelog = async (taskId, user) => {
 /* ------------------ timelog stop ------------------ */
 export const stopTimelog = async (taskId, timelogId = null, user) => {
   const task = await Task.findOne({ _id: taskId, tenant_id: user.tenant_id });
-  if (!task) throw new Error("Task not found or unauthorized");
+  if (!task) throw new Error("Task not found");
+
+  if (!isUserAuthorized(task, user)) {
+    throw new Error("You are not authorized to perform actions on this task");
+  }
 
   let timeLogIndex = -1;
 

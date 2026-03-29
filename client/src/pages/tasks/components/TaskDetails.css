@@ -353,3 +353,117 @@
         justify-content: center;
     }
 }
+
+/* ─── Title Row with Avatar Stack ─────────────────── */
+.td-title-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.td-title-row h1 {
+    margin: 0;
+}
+
+/* ─── Header Avatar Stack ─────────────────────────── */
+.td-header-avatar-stack {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.td-avatar-circle {
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    border: 2px solid white;
+    overflow: hidden;
+    margin-left: -8px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    cursor: default;
+}
+
+.td-avatar-circle:first-child {
+    margin-left: 0;
+}
+
+.td-avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.td-avatar-more {
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ─── Team Section in Sidebar ─────────────────────── */
+.td-team-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.td-team-member {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.td-team-member-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.td-team-member-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.td-team-member-email {
+    font-size: 12px;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.td-you-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    background: #eef2ff;
+    color: #4f46e5;
+    border-radius: 20px;
+    flex-shrink: 0;
+}
+
+/* ─── Read-only Notice ────────────────────────────── */
+.td-readonly-notice {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 8px 14px;
+    background: #fffbeb;
+    color: #92400e;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #fde68a;
+}
