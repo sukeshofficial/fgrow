@@ -7,6 +7,7 @@ import ServiceBillingForm from "./steps/ServiceBillingForm";
 import { getServiceById, updateService } from "../../api/service.api";
 import logger from "../../utils/logger.js";
 import "../../styles/CreateClient.css";
+import { FaCog, FaMoneyBillWave, FaCheckDouble } from "react-icons/fa";
 
 const EditServiceWizard = () => {
   const { id } = useParams();
@@ -26,9 +27,9 @@ const EditServiceWizard = () => {
   });
 
   const steps = [
-    { label: "Service Details" },
-    { label: "Billing & Config" },
-    { label: "Review & Update" }
+    { label: "Service Details", icon: <FaCog /> },
+    { label: "Billing & Config", icon: <FaMoneyBillWave /> },
+    { label: "Review & Update", icon: <FaCheckDouble /> }
   ];
 
   useEffect(() => {

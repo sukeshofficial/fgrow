@@ -10,6 +10,7 @@ import { Spinner } from "../../components/ui/Spinner";
 import logger from "../../utils/logger.js";
 import "../../styles/CreateClient.css";
 import "./InvoiceWizard.css";
+import { FaFileInvoice, FaListUl, FaCheckDouble } from "react-icons/fa";
 
 const EditInvoiceWizard = () => {
   const { id } = useParams();
@@ -63,9 +64,9 @@ const EditInvoiceWizard = () => {
   }, [id, navigate]);
 
   const steps = [
-    { label: "Invoice Details" },
-    { label: "Invoice Items" },
-    { label: "Review & Update" }
+    { label: "Invoice Details", icon: <FaFileInvoice /> },
+    { label: "Invoice Items", icon: <FaListUl /> },
+    { label: "Review & Update", icon: <FaCheckDouble /> }
   ];
 
   const handleNext = (data) => {

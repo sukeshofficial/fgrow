@@ -73,6 +73,13 @@
   transition: all 0.2s ease;
 }
 
+.step-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
 .step-item.active .step-circle {
   border-color: var(--primary-accent);
   background: var(--primary-accent);

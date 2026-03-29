@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FaClipboardList, FaArrowRight } from "react-icons/fa";
 
 const TaskBasicInfoForm = ({ data, onNext }) => {
   const [formData, setFormData] = useState({
@@ -26,19 +27,22 @@ const TaskBasicInfoForm = ({ data, onNext }) => {
     e.preventDefault();
     const newErrors = {};
     if (!formData.title) newErrors.title = "Title is required";
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    
+
     onNext(formData);
   };
 
   return (
     <form onSubmit={handleSubmit} className="step-container">
-      <h2 className="form-title">Basic Task Information</h2>
-      
+      <h2 className="form-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <span style={{ color: 'var(--primary-accent)', fontSize: '22px', display: 'flex' }}><FaClipboardList /></span>
+        Basic Task Information
+      </h2>
+
       <div className="form-field">
         <label className="form-label">Task Title <span className="required-star">*</span></label>
         <input
@@ -103,8 +107,8 @@ const TaskBasicInfoForm = ({ data, onNext }) => {
       </div>
 
       <div className="wizard-footer" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '32px' }}>
-        <button type="submit" className="next-button" style={{ position: 'static', margin: 0 }}>
-          Next: Links & Assignment
+        <button type="submit" className="next-button" style={{ position: 'static', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          Next: Links & Assignment <FaArrowRight size={12} />
         </button>
       </div>
     </form>

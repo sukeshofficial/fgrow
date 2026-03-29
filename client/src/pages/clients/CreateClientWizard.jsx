@@ -9,6 +9,7 @@ import { createClient } from "../../api/client.api";
 import "../../styles/CreateClient.css";
 import { Spinner } from "../../components/ui/Spinner";
 import logger from "../../utils/logger.js";
+import { FaUser, FaAddressBook, FaLayerGroup } from "react-icons/fa";
 
 const CreateClientWizard = () => {
   const navigate = useNavigate();
@@ -47,9 +48,9 @@ const CreateClientWizard = () => {
   });
 
   const steps = [
-    { label: "Client Details" },
-    { label: "Contact Details" },
-    { label: "Services" }
+    { label: "Client Details", icon: <FaUser /> },
+    { label: "Contact Details", icon: <FaAddressBook /> },
+    { label: "Services", icon: <FaLayerGroup /> }
   ];
 
   const handleNext = (stepData) => {

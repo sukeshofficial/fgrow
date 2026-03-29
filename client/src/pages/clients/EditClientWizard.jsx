@@ -10,6 +10,7 @@ import FormSkeleton from "../../components/skeletons/FormSkeleton";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import "../../styles/CreateClient.css";
 import logger from "../../utils/logger.js";
+import { FaUser, FaAddressBook, FaLayerGroup } from "react-icons/fa";
 
 const EditClientWizard = () => {
   const { id } = useParams();
@@ -53,9 +54,9 @@ const EditClientWizard = () => {
   const showLoading = useDelayedLoading(loading, 300);
 
   const steps = [
-    { label: "Client Details" },
-    { label: "Contact Details" },
-    { label: "Services" }
+    { label: "Client Details", icon: <FaUser /> },
+    { label: "Contact Details", icon: <FaAddressBook /> },
+    { label: "Services", icon: <FaLayerGroup /> }
   ];
 
   useEffect(() => {

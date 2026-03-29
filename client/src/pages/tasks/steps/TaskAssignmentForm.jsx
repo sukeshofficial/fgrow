@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { listClients, listStaff } from "../../../api/client.api";
 import { listServices } from "../../../api/service.api";
 import SearchableDropdown from "../../../components/ui/SearchableDropdown";
+import { FaLink, FaArrowRight, FaArrowLeft } from "react-icons/fa";
 
 const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
   const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
           listServices({ limit: 100 }),
           listStaff(),
         ]);
-        
+
         setClients(clientsResp.data.data);
         setServices(servicesResp.data.data);
         setStaff(staffResp.data.data);
@@ -57,7 +58,10 @@ const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
 
   return (
     <form onSubmit={handleSubmit} className="step-container">
-      <h2 className="form-title">Links & Assignment</h2>
+      <h2 className="form-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <span style={{ color: 'var(--primary-accent)', fontSize: '22px', display: 'flex' }}><FaLink /></span>
+        Links & Assignment
+      </h2>
 
       <div className="form-grid">
         <div className="form-field">
@@ -96,9 +100,11 @@ const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
       </div>
 
       <div className="wizard-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '32px' }}>
-        <button type="button" className="back-btn" onClick={onPrev}>Back</button>
-        <button type="submit" className="next-button" style={{ position: 'static', margin: 0 }}>
-          Next: Review & Create
+        <button type="button" className="back-btn" onClick={onPrev} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <FaArrowLeft size={12} /> Back
+        </button>
+        <button type="submit" className="next-button" style={{ position: 'static', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          Next: Review <FaArrowRight size={12} />
         </button>
       </div>
     </form>

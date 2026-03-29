@@ -8,13 +8,19 @@ const Stepper = ({ steps, currentStep }) => {
         const isCompleted = index < currentStep;
 
         return (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className={`step-item ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""}`}
             aria-current={isActive ? "step" : undefined}
           >
             <div className="step-circle">
-              {isCompleted ? "✓" : index + 1}
+              {isCompleted ? (
+                "✓"
+              ) : step.icon ? (
+                <span className="step-icon">{step.icon}</span>
+              ) : (
+                index + 1
+              )}
             </div>
             <span className="step-label">{step.label}</span>
           </div>

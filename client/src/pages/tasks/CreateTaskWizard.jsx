@@ -9,6 +9,7 @@ import "../../styles/CreateClient.css";
 import "../../styles/Tasks.css";
 import { Spinner } from "../../components/ui/Spinner";
 import logger from "../../utils/logger.js";
+import { FaClipboardList, FaLink, FaCheckDouble, FaArrowRight, FaArrowLeft } from "react-icons/fa";
 
 const CreateTaskWizard = () => {
   const navigate = useNavigate();
@@ -27,9 +28,9 @@ const CreateTaskWizard = () => {
   });
 
   const steps = [
-    { label: "Basic Info" },
-    { label: "Links & Assignment" },
-    { label: "Review & Create" }
+    { label: "Basic Info", icon: <FaClipboardList /> },
+    { label: "Links & Assignment", icon: <FaLink /> },
+    { label: "Review & Create", icon: <FaCheckDouble /> }
   ];
 
   const handleNext = (stepData) => {
@@ -86,7 +87,10 @@ const CreateTaskWizard = () => {
       case 2:
         return (
           <div className="step-container">
-            <h2 className="form-title">Review & Create</h2>
+            <h2 className="form-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ color: 'var(--primary-accent)', fontSize: '22px', display: 'flex' }}><FaCheckDouble /></span>
+              Review & Create
+            </h2>
             <div className="review-card" style={{ padding: '32px', background: 'white', borderRadius: '16px', border: '1px solid var(--border-color)', marginBottom: '32px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                 <div>
@@ -108,9 +112,11 @@ const CreateTaskWizard = () => {
               </div>
             </div>
             <div className="wizard-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <button className="back-btn" onClick={handlePrev}>Back</button>
-              <button className="next-button" onClick={() => handleSave(formData)} style={{ position: 'static', margin: 0 }}>
-                Create Task
+              <button className="back-btn" onClick={handlePrev} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FaArrowLeft size={12} /> Back
+              </button>
+              <button className="next-button" onClick={() => handleSave(formData)} style={{ position: 'static', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Create Task <FaArrowRight size={12} />
               </button>
             </div>
           </div>

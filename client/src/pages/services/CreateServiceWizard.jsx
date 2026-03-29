@@ -7,6 +7,7 @@ import ServiceBillingForm from "./steps/ServiceBillingForm";
 import { createService } from "../../api/service.api";
 import { Spinner } from "../../components/ui/Spinner";
 import logger from "../../utils/logger.js";
+import { FaCog, FaMoneyBillWave, FaCheckDouble } from "react-icons/fa";
 
 const CreateServiceWizard = () => {
   const navigate = useNavigate();
@@ -24,9 +25,9 @@ const CreateServiceWizard = () => {
   });
 
   const steps = [
-    { label: "Service Details" },
-    { label: "Billing & Config" },
-    { label: "Review & Activate" }
+    { label: "Service Details", icon: <FaCog /> },
+    { label: "Billing & Config", icon: <FaMoneyBillWave /> },
+    { label: "Review & Activate", icon: <FaCheckDouble /> }
   ];
 
   const handleNext = (stepData) => {
