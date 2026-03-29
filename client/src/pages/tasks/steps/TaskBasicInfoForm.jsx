@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaClipboardList, FaArrowRight } from "react-icons/fa";
 
-const TaskBasicInfoForm = ({ data, onNext }) => {
+const TaskBasicInfoForm = ({ data, onPrev, onNext }) => {
   const [formData, setFormData] = useState({
     title: data.title || "",
     description: data.description || "",
@@ -106,8 +106,11 @@ const TaskBasicInfoForm = ({ data, onNext }) => {
         <label htmlFor="is_billable" className="form-label" style={{ marginBottom: 0 }}>This task is billable</label>
       </div>
 
-      <div className="wizard-footer" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '32px' }}>
-        <button type="submit" className="next-button" style={{ position: 'static', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="wizard-footer">
+        <button type="button" className="back-btn" onClick={onPrev}>
+          Back
+        </button>
+        <button type="submit" className="next-button" style={{ position: 'static', marginLeft: 'auto', }}>
           Next: Links & Assignment <FaArrowRight size={12} />
         </button>
       </div>

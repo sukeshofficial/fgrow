@@ -114,7 +114,7 @@ const TodoCard = ({ todo, index, onEdit, onDelete, clients, services, staff, onS
           {/* Card Footer */}
           <div className="card-v2-footer">
             <div className="avatars-section">
-              <div className="avatar-stack">
+              <div className="avatar-stack-todo">
                 <div className="avatar-v2" title={todo.user?.name || "Unassigned"}>
                   {todo.user?.profile_avatar?.secure_url ? (
                     <img src={todo.user.profile_avatar.secure_url} alt="" className="avatar-img-v2" />

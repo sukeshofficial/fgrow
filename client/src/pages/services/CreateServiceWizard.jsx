@@ -7,6 +7,7 @@ import ServiceBillingForm from "./steps/ServiceBillingForm";
 import { createService } from "../../api/service.api";
 import { Spinner } from "../../components/ui/Spinner";
 import logger from "../../utils/logger.js";
+import "../../styles/CreateClient.css";
 import { FaCog, FaMoneyBillWave, FaCheckDouble } from "react-icons/fa";
 
 const CreateServiceWizard = () => {

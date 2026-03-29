@@ -11,6 +11,11 @@ const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
     users: data.users || [],
   });
 
+  // Full resolved objects for the review step
+  const [clientObj, setClientObj] = useState(data._clientObj || null);
+  const [serviceObj, setServiceObj] = useState(data._serviceObj || null);
+  const [userObjects, setUserObjects] = useState(data._userObjects || []);
+
   const [clients, setClients] = useState([]);
   const [services, setServices] = useState([]);
   const [staff, setStaff] = useState([]);
@@ -25,9 +30,24 @@ const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
           listStaff(),
         ]);
 
-        setClients(clientsResp.data.data);
-        setServices(servicesResp.data.data);
-        setStaff(staffResp.data.data);
+        const clientList = clientsResp.data.data;
+        const serviceList = servicesResp.data.data;
+        const staffList = staffResp.data.data;
+
+        setClients(clientList);
+        setServices(serviceList);
+        setStaff(staffList);
+
+        // Resolve initial IDs → objects (for EditWizard pre-population)
+        if (data.client && !data._clientObj) {
+          setClientObj(clientList.find(c => c._id === data.client) || null);
+        }
+        if (data.service && !data._serviceObj) {
+          setServiceObj(serviceList.find(s => s._id === data.service) || null);
+        }
+        if (data.users?.length && !data._userObjects?.length) {
+          setUserObjects(staffList.filter(u => data.users.includes(u._id)));
+        }
       } catch (err) {
         console.error("Failed to load assignment options", err);
       } finally {
@@ -37,23 +57,29 @@ const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
     fetchData();
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleClientChange = (val) => {
+    setFormData(prev => ({ ...prev, client: val }));
+    setClientObj(clients.find(c => c._id === val) || null);
   };
 
-  const handleUserToggle = (userId) => {
-    setFormData((prev) => {
-      const users = prev.users.includes(userId)
-        ? prev.users.filter((id) => id !== userId)
-        : [...prev.users, userId];
-      return { ...prev, users };
-    });
+  const handleServiceChange = (val) => {
+    setFormData(prev => ({ ...prev, service: val }));
+    setServiceObj(services.find(s => s._id === val) || null);
+  };
+
+  const handleUsersChange = (newUserIds) => {
+    setFormData(prev => ({ ...prev, users: newUserIds }));
+    setUserObjects(staff.filter(u => newUserIds.includes(u._id)));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onNext(formData);
+    onNext({
+      ...formData,
+      _clientObj: clientObj,
+      _serviceObj: serviceObj,
+      _userObjects: userObjects,
+    });
   };
 
   return (
@@ -69,7 +95,7 @@ const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
           <SearchableDropdown
             options={clients}
             value={formData.client}
-            onChange={(val) => setFormData(prev => ({ ...prev, client: val }))}
+            onChange={handleClientChange}
             placeholder="Select Client"
             loading={loading}
           />
@@ -80,7 +106,7 @@ const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
           <SearchableDropdown
             options={services}
             value={formData.service}
-            onChange={(val) => setFormData(prev => ({ ...prev, service: val }))}
+            onChange={handleServiceChange}
             placeholder="Select Service"
             loading={loading}
           />
@@ -92,7 +118,7 @@ const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
         <SearchableDropdown
           options={staff}
           value={formData.users}
-          onChange={(newUsers) => setFormData(prev => ({ ...prev, users: newUsers }))}
+          onChange={handleUsersChange}
           isMulti={true}
           placeholder="Select staff members..."
           loading={loading}

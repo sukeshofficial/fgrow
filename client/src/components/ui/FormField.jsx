@@ -15,7 +15,7 @@ const FormField = ({ label, required, error, children, helpText }) => {
       {error && <span className="error-message">{error}</span>}
       {!error && helpText && <span className="help-text">{helpText}</span>}
 
-      <style jsx>{`
+      <style>{`
         .help-text {
           font-size: 11px;
           color: #94a3b8;

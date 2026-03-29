@@ -163,7 +163,7 @@ const TodoDashboard = () => {
 
               <button className="new-todo-btn" onClick={handleCreate}>
                 <FaPlus />
-                New Task
+                New To-do
               </button>
             </div>
           </div>
