@@ -5,6 +5,7 @@ import Sidebar from "../../components/SideBar";
 import ServiceDetailsForm from "./steps/ServiceDetailsForm";
 import ServiceBillingForm from "./steps/ServiceBillingForm";
 import { getServiceById, updateService } from "../../api/service.api";
+import logger from "../../utils/logger.js";
 import "../../styles/CreateClient.css";
 
 const EditServiceWizard = () => {
@@ -49,7 +50,7 @@ const EditServiceWizard = () => {
           });
         }
       } catch (err) {
-        console.error("Failed to fetch service", err);
+        logger.error("EditServiceWizard", "Failed to fetch service", err);
         setError("Failed to load service details. It might have been deleted.");
       } finally {
         setLoading(false);
@@ -74,7 +75,7 @@ const EditServiceWizard = () => {
       await updateService(id, dataToSave);
       navigate("/services");
     } catch (err) {
-      console.error("Update failed", err);
+      logger.error("EditServiceWizard", "Update failed", err);
       alert("Failed to update service: " + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);

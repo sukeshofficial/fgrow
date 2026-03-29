@@ -17,6 +17,7 @@ import fs from "fs";
 
 import sendEmail from "../utils/sendEmail.js";
 import Tenant from "../models/tenant/tenant.model.js";
+import logger from "../utils/logger.js";
 
 import { User } from "../models/auth/user.model.js";
 import { generateToken } from "../utils/jwt.js";
@@ -75,14 +76,11 @@ export const registerUser = async (req, res) => {
     }
 
     const username = await generateUsername(email);
-
-    console.log("Checking for existing user with email/username:", email, username);
     const existing = await User.findOne({
       $or: [{ email }, { username }],
     }).lean();
 
     if (existing) {
-      console.log("Existing user found, conflict.");
       return res.status(409).json({ message: "account already exists" });
     }
 
@@ -108,7 +106,6 @@ export const registerUser = async (req, res) => {
       };
     }
 
-    console.log("Processing invitation for email:", email);
     const invitation = await UserInvitation.findOne({
       email,
       accepted_at: null,
@@ -146,9 +143,7 @@ export const registerUser = async (req, res) => {
     user.reset_token = hashedOtp;
     user.reset_token_expiry = Date.now() + 5 * 60 * 1000;
 
-    console.log("Saving new user...");
     await user.save();
-    console.log("User saved successfully, sending verification email...");
     // Send verification email
     await sendEmail({
       to: email,
@@ -208,13 +203,12 @@ export const registerUser = async (req, res) => {
   `,
     });
 
-    console.log("Registration complete, sending 201 response.");
     return res.status(201).json({
       message: "User registered successfully",
       user: user.toJSON(),
     });
   } catch (err) {
-    console.error("Register error:", err);
+    logger.error("Register error:", err);
 
     if (err.code === 11000) {
       const field = Object.keys(err.keyValue || {})[0] || "field";
@@ -263,7 +257,7 @@ export const verifyOtp = async (req, res) => {
       message: "Email verified and authenticated successfully",
     });
   } catch (err) {
-    console.error("Verify-Otp error:", err);
+    logger.error("Verify-Otp error:", err);
     return res.status(500).json({
       message: "internal server error",
     });
@@ -365,7 +359,7 @@ export const resendSignupOtp = async (req, res) => {
 
     return res.status(200).json({ message: "Verification code resent" });
   } catch (err) {
-    console.error("Resend Signup-Otp error:", err);
+    logger.error("Resend Signup-Otp error:", err);
     return res.status(500).json({
       message: "internal server error",
     });
@@ -504,7 +498,7 @@ export const loginUser = async (req, res) => {
   `,
             });
           } catch (e) {
-            console.error("Failed to send lock email", e);
+            logger.error("Failed to send lock email", e);
           }
         }
       }
@@ -529,7 +523,7 @@ export const loginUser = async (req, res) => {
 
     return sendAuthSuccess(res, user);
   } catch (err) {
-    console.error("Login User error:", err);
+    logger.error("Login User error:", err);
     return res.status(500).json({
       message: "internal server error",
     });
@@ -575,7 +569,7 @@ export const resetPassword = async (req, res) => {
       message: "password reset successful — please login",
     });
   } catch (err) {
-    console.error("Reset Password error:", err);
+    logger.error("Reset Password error:", err);
     return res.status(500).json({
       message: "internal server error",
     });
@@ -590,7 +584,7 @@ export const logoutUser = async (_req, res) => {
     res.clearCookie("auth_token", COOKIE_OPTIONS);
     return res.status(200).json({ message: "logged out" });
   } catch (err) {
-    console.error("Logout User error:", err);
+    logger.error("Logout User error:", err);
     return res.status(500).json({
       message: "internal server error",
     });
@@ -724,7 +718,7 @@ export const getMe = async (req, res) => {
         });
     }
   } catch (err) {
-    console.error("Get Me error:", err);
+    logger.error("Get Me error:", err);
     return res.status(500).json({
       message: "internal server error",
     });
@@ -758,7 +752,7 @@ export const userPreview = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("User Preview error:", err);
+    logger.error("User Preview error:", err);
     return res.status(500).json({
       message: "internal server error",
     });

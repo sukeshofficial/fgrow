@@ -6,6 +6,7 @@ import {
   deleteClientService,
 } from "../services/client.service.js";
 import { uploadBufferToCloud } from "../utils/cloudinary.js";
+import logger from "../utils/logger.js";
 
 
 /**
@@ -23,7 +24,7 @@ export const uploadClientPhotoController = async (req, res) => {
     const result = await uploadBufferToCloud(req.file.buffer, "clients");
 
     if (!result.success) {
-      console.error("Cloudinary upload failed:", result.error);
+      logger.error(`Cloudinary upload failed: ${result.error}`);
       return res.status(500).json({
         success: false,
         message: "Failed to upload photo to Cloudinary",
@@ -40,7 +41,7 @@ export const uploadClientPhotoController = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Upload controller error:", error);
+    logger.error("Upload controller error:", error);
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -227,7 +228,7 @@ export const listClientsByTenantIdController = async (req, res) => {
     const { page = 1, limit = 10, search = "" } = req.query;
 
     const { listClientsByTenantIdService } = await import("../services/client.service.js");
-    
+
     const result = await listClientsByTenantIdService({
       tenant_id,
       page: Number(page),

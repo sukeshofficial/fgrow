@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import ErrorPage from "../../pages/ErrorPage";
+import logger from "../../utils/logger.js";
 
 /**
  * ErrorBoundary
@@ -20,16 +21,16 @@ class ErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     // You can also log the error to an error reporting service
-    console.error("Uncaught error:", error, errorInfo);
+    logger.error("ErrorBoundary", "Uncaught error caught by boundary", error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       // You can render any custom fallback UI
       return (
-        <ErrorPage 
-          type="default" 
-          message={this.state.error?.message || "A rendering error occurred in the application."} 
+        <ErrorPage
+          type="default"
+          message={this.state.error?.message || "A rendering error occurred in the application."}
           onRetry={() => window.location.reload()}
         />
       );

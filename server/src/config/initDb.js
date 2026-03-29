@@ -7,6 +7,7 @@
 
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import logger from "../utils/logger.js";
 
 /**
  * Load environment variables
@@ -29,9 +30,9 @@ const connectDB = async () => {
       },
     );
 
-    console.log(`✅ MongoDB connected: ${conn.connection.host}`);
+    logger.info(`✅ MongoDB connected: ${conn.connection.host}`);
   } catch (err) {
-    console.error("❌ MongoDB connection failed:", err.message);
+    logger.error("❌ MongoDB connection failed:", err.message);
 
     process.exit(1);
   }
@@ -42,9 +43,7 @@ const connectDB = async () => {
  */
 process.on("SIGINT", async () => {
   await mongoose.connection.close();
-  console.log(
-    "🛑 MongoDB connection closed due to app termination",
-  );
+  logger.info("🛑 MongoDB connection closed due to app termination");
   process.exit(0);
 });
 

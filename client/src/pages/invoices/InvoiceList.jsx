@@ -6,6 +6,7 @@ import AdvancedFilterModal from "./components/AdvancedFilterModal";
 import Sidebar from "../../components/SideBar";
 import { getInvoices } from "../../features/invoices/invoiceService";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
+import logger from "../../utils/logger.js";
 import "../../styles/InvoiceList.css";
 
 const debounce = (func, wait) => {
@@ -58,7 +59,7 @@ const InvoiceList = () => {
         total_pages: Math.ceil(meta.total / meta.per_page)
       });
     } catch (e) {
-      console.error("Failed to fetch invoices", e);
+      logger.error("InvoiceList", "Failed to fetch invoices", e);
     } finally {
       setLoading(false);
     }

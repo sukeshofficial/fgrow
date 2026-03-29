@@ -5,8 +5,8 @@ import Sidebar from "../../components/SideBar";
 import ServiceDetailsForm from "./steps/ServiceDetailsForm";
 import ServiceBillingForm from "./steps/ServiceBillingForm";
 import { createService } from "../../api/service.api";
-import "../../styles/CreateClient.css"; // Reuse wizard styles
 import { Spinner } from "../../components/ui/Spinner";
+import logger from "../../utils/logger.js";
 
 const CreateServiceWizard = () => {
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ const CreateServiceWizard = () => {
       await createService(dataToSave);
       navigate("/services");
     } catch (err) {
-      console.error("Create failed", err);
+      logger.error("CreateServiceWizard", "Create failed", err);
       alert("Failed to create service: " + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);

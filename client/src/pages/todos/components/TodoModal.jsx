@@ -4,6 +4,7 @@ import { listClientsByTenantId, listStaff } from "../../../api/client.api";
 import { listServicesByTenant } from "../../../api/service.api";
 import { FiX, FiCalendar, FiUser, FiPackage, FiBriefcase, FiRepeat, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import SearchableDropdown from "../../../components/ui/SearchableDropdown";
+import logger from "../../../utils/logger.js";
 
 const TodoModal = ({ todo, onClose, onSuccess, clients: initialClients, services: initialServices, staff: initialStaff }) => {
   const [formData, setFormData] = useState({
@@ -42,7 +43,7 @@ const TodoModal = ({ todo, onClose, onSuccess, clients: initialClients, services
         if (cResp.data.success) setClients(cResp.data.data || []);
         if (sResp.data.success) setServices(sResp.data.data || []);
       } catch (err) {
-        console.error("Failed to fetch dropdown data", err);
+        logger.error("TodoModal", "Failed to fetch dropdown data", err);
       } finally {
         setLoadingData(false);
       }
@@ -93,7 +94,7 @@ const TodoModal = ({ todo, onClose, onSuccess, clients: initialClients, services
     e.preventDefault();
     setLoading(true);
     try {
-      const payload = { 
+      const payload = {
         ...formData,
         has_due_date: !!formData.due_date,
         assign_to_user: !!formData.user,
@@ -114,7 +115,7 @@ const TodoModal = ({ todo, onClose, onSuccess, clients: initialClients, services
       }
       onSuccess();
     } catch (err) {
-      console.error("Save failed", err);
+      logger.error("TodoModal", "Save failed", err);
       alert(err.response?.data?.message || "Failed to save to-do");
     } finally {
       setLoading(false);
@@ -134,12 +135,12 @@ const TodoModal = ({ todo, onClose, onSuccess, clients: initialClients, services
             <div className="form-grid">
               <div className="form-group full-width">
                 <label className="standard-label">To-do Title *</label>
-                <input 
-                  type="text" 
-                  name="title" 
-                  value={formData.title} 
-                  onChange={handleChange} 
-                  required 
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  required
                   placeholder="e.g. Follow up with client"
                   className="standard-input"
                   autoFocus
@@ -148,10 +149,10 @@ const TodoModal = ({ todo, onClose, onSuccess, clients: initialClients, services
 
               <div className="form-group full-width">
                 <label className="standard-label">Description</label>
-                <textarea 
-                  name="details" 
-                  value={formData.details} 
-                  onChange={handleChange} 
+                <textarea
+                  name="details"
+                  value={formData.details}
+                  onChange={handleChange}
                   rows="3"
                   placeholder="To-do details and notes..."
                   className="standard-textarea"
@@ -170,11 +171,11 @@ const TodoModal = ({ todo, onClose, onSuccess, clients: initialClients, services
 
               <div className="form-group">
                 <label className="standard-label"><FiCalendar /> Due Date</label>
-                <input 
-                  type="date" 
-                  name="due_date" 
-                  value={formData.due_date} 
-                  onChange={handleChange} 
+                <input
+                  type="date"
+                  name="due_date"
+                  value={formData.due_date}
+                  onChange={handleChange}
                   className="standard-input"
                 />
               </div>
@@ -235,11 +236,11 @@ const TodoModal = ({ todo, onClose, onSuccess, clients: initialClients, services
               <div className="advanced-section-content">
                 <div className="standard-checkbox-container">
                   <label className="checkbox-flex">
-                    <input 
-                      type="checkbox" 
-                      name="recurrence.enabled" 
-                      checked={formData.recurrence.enabled} 
-                      onChange={handleChange} 
+                    <input
+                      type="checkbox"
+                      name="recurrence.enabled"
+                      checked={formData.recurrence.enabled}
+                      onChange={handleChange}
                     />
                     <span className="checkbox-text"><FiRepeat /> Enable Recurrence</span>
                   </label>

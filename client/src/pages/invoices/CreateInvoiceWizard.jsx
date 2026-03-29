@@ -9,6 +9,7 @@ import { createInvoice, getNextInvoiceNumber } from "../../features/invoices/inv
 import { Spinner } from "../../components/ui/Spinner";
 import { useModal } from "../../context/ModalContext";
 import { useEffect } from "react";
+import logger from "../../utils/logger.js";
 import "../../styles/CreateClient.css";
 import "./InvoiceWizard.css";
 
@@ -40,7 +41,7 @@ const CreateInvoiceWizard = () => {
           setFormData(prev => ({ ...prev, invoice_no: response.data.invoice_no }));
         }
       } catch (err) {
-        console.error("Failed to fetch next invoice number", err);
+        logger.error("CreateInvoiceWizard", "Failed to fetch next invoice number", err);
       }
     };
     fetchNextNumber();
@@ -77,7 +78,7 @@ const CreateInvoiceWizard = () => {
       const response = await createInvoice(payload);
       navigate(`/finance/invoices/${response.data._id}`);
     } catch (err) {
-      console.error("Create invoice failed", err);
+      logger.error("CreateInvoiceWizard", "Create invoice failed", err);
       await showAlert(
         "Creation Failed",
         "Failed to create invoice: " + (err.response?.data?.message || err.message),

@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth.js";
 import { register } from "../../features/auth/auth.actions.js";
 import AvatarUpload from "../../components/auth/AvatarUpload";
+import logger from "../../utils/logger.js";
 
 import "../../styles/register-form.css";
 
@@ -107,7 +108,7 @@ const RegisterForm = ({ onSuccess }) => {
         return;
       }
 
-      console.error("Register failed", err);
+      logger.error("RegisterForm", "Registration failed", err);
     }
   };
 

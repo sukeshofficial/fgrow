@@ -7,6 +7,7 @@ import Sidebar from "../../components/SideBar";
 import { listClients } from "../../api/client.api";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import "../../styles/ClientList.css";
+import logger from "../../utils/logger.js";
 
 // Debounce helper moved outside to avoid recreation on every render
 const debounce = (func, wait) => {
@@ -50,12 +51,12 @@ const ClientList = () => {
         pan: currentFilters.pan,
         gstin: currentFilters.gstin
       };
-      
+
       const resp = await listClients(params);
       setClients(resp.data.data);
       setPagination(prev => ({ ...prev, ...resp.data.pagination }));
     } catch (e) {
-      console.error("Failed to fetch clients", e);
+      logger.error("ClientList", "Failed to fetch clients", e);
     } finally {
       setLoading(false);
     }
@@ -91,14 +92,14 @@ const ClientList = () => {
             <h1 className="client-list-title">Clients</h1>
           </div>
 
-          <FilterBar 
-            filters={filters} 
+          <FilterBar
+            filters={filters}
             onFilterChange={handleFilterChange}
             onCreateNew={() => navigate("/clients/create")}
             onOpenAdvanced={() => setIsFilterModalOpen(true)}
           />
 
-          <AdvancedFilterModal 
+          <AdvancedFilterModal
             isOpen={isFilterModalOpen}
             onClose={() => setIsFilterModalOpen(false)}
             filters={filters}
@@ -122,24 +123,24 @@ const ClientList = () => {
                 Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} entries
               </span>
               <div className="pagination-controls">
-                <button 
-                  className="page-btn" 
+                <button
+                  className="page-btn"
                   disabled={pagination.page === 1}
                   onClick={() => handlePageChange(pagination.page - 1)}
                 >
                   &lt;
                 </button>
                 {[...Array(pagination.total_pages || 0)].map((_, i) => (
-                  <button 
-                    key={i} 
+                  <button
+                    key={i}
                     className={`page-btn ${pagination.page === i + 1 ? 'active' : ''}`}
                     onClick={() => handlePageChange(i + 1)}
                   >
                     {i + 1}
                   </button>
                 ))}
-                <button 
-                  className="page-btn" 
+                <button
+                  className="page-btn"
                   disabled={pagination.page === pagination.total_pages}
                   onClick={() => handlePageChange(pagination.page + 1)}
                 >

@@ -7,6 +7,7 @@ import ServiceAdvancedFilterModal from "./components/ServiceAdvancedFilterModal"
 import { listServices, updateService, deleteService } from "../../api/service.api";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import { useModal } from "../../context/ModalContext";
+import logger from "../../utils/logger.js";
 import "../../styles/ClientList.css"; // Reuse client list styles
 import "../../styles/Services.css";
 
@@ -53,7 +54,7 @@ const Services = () => {
         setPagination(prev => ({ ...prev, ...resp.data.pagination }));
       }
     } catch (e) {
-      console.error("Failed to fetch services", e);
+      logger.error("ServicesPage", "Failed to fetch services", e);
     } finally {
       setLoading(false);
     }
@@ -85,7 +86,7 @@ const Services = () => {
         fetchServices(filters, pagination.page);
       }
     } catch (e) {
-      console.error("Failed to toggle service status", e);
+      logger.error("ServicesPage", "Failed to toggle service status", e);
     }
   };
 
@@ -104,7 +105,7 @@ const Services = () => {
           await showAlert("Archived", "Service has been archived successfully.", "success");
         }
       } catch (e) {
-        console.error("Failed to delete service", e);
+        logger.error("ServicesPage", "Failed to delete service", e);
         await showAlert("Error", "Failed to archive service. Please try again.", "error");
       }
     }

@@ -3,6 +3,7 @@ import { listClientsByTenantId } from "../../../api/client.api";
 import { listServicesByTenant } from "../../../api/service.api";
 import SearchableDropdown from "../../../components/ui/SearchableDropdown";
 import { FiX, FiFilter } from "react-icons/fi";
+import logger from "../../../utils/logger.js";
 import "../../../styles/AdvancedFilters.css";
 
 const TaskAdvancedFilterModal = ({ isOpen, onClose, filters, onApply, onClear }) => {
@@ -20,7 +21,7 @@ const TaskAdvancedFilterModal = ({ isOpen, onClose, filters, onApply, onClear })
           if (clientsResp.data.success) setClients(clientsResp.data.data.items || clientsResp.data.data);
           if (servicesResp.data.success) setServices(servicesResp.data.data.items || servicesResp.data.data);
         } catch (err) {
-          console.error("Failed to fetch filter options", err);
+          logger.error("TaskAdvancedFilter", "Failed to fetch filter options", err);
         }
       };
       fetchData();

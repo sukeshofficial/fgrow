@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { checkAuth } from "../../features/auth/auth.actions";
 import { acceptInvitation, getInvitationDetails } from "../../api/invitation.api";
+import logger from "../../utils/logger.js";
 
 import "../../styles/welcome.css";
 
@@ -33,7 +34,7 @@ export const JoinAsStaff = ({ onClose, initialToken }) => {
       setTenantName(response.data.data.tenant_id.name);
       setTenantLogo(response.data.data.tenant_id.logoUrl);
     } catch (err) {
-      console.error("Failed to fetch invitation details", err);
+      logger.error("JoinAsStaff", "Failed to fetch invitation details", err);
     }
   };
 
@@ -88,11 +89,11 @@ export const JoinAsStaff = ({ onClose, initialToken }) => {
 
         {tenantLogo && (
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.2rem' }}>
-            <div style={{ 
-              width: '64px', 
-              height: '64px', 
+            <div style={{
+              width: '64px',
+              height: '64px',
               marginTop: '10px',
-              borderRadius: '14px', 
+              borderRadius: '14px',
               overflow: 'hidden',
               boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
               border: '1px solid #eef2f6'

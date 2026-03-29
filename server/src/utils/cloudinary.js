@@ -2,6 +2,7 @@ import { v2 as cloudinary } from "cloudinary";
 import "dotenv/config";
 import fs from "fs";
 import stream from "stream";
+import logger from "./logger.js";
 
 // config
 cloudinary.config({
@@ -14,16 +15,16 @@ cloudinary.config({
 // ─── Buffer Upload Helpers (for memory storage / Vercel) ───────────────────
 
 export const uploadBufferToCloud = (buffer, folder = "users") => {
-  console.log(`☁️ Uploading buffer to Cloudinary (folder: ${folder})...`);
+  logger.info(`☁️ Uploading buffer to Cloudinary (folder: ${folder})...`);
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       { folder, resource_type: "image" },
       (error, result) => {
         if (error) {
-          console.error("❌ Cloudinary upload error:", error);
+          logger.error("❌ Cloudinary upload error:", error);
           return reject(error);
         }
-        console.log("✅ Cloudinary upload successful");
+        logger.info("✅ Cloudinary upload successful");
         resolve({
           success: true,
           public_id: result.public_id,
@@ -93,7 +94,7 @@ export const uploadToCloud = async (file_path) => {
       secure_url: result.secure_url,
     };
   } catch (error) {
-    console.error("Cloudinary upload error:", error.message);
+    logger.error("Cloudinary upload error:", error.message);
 
     return {
       success: false,
@@ -154,7 +155,7 @@ export const uploadToCloudAndUnlink = async (file_path, folder = "clients") => {
       secure_url: result.secure_url,
     };
   } catch (error) {
-    console.error("Cloudinary upload & unlink error:", error.message);
+    logger.error("Cloudinary upload & unlink error:", error.message);
 
     // Try to unlink even if upload fails
     try {
@@ -162,7 +163,7 @@ export const uploadToCloudAndUnlink = async (file_path, folder = "clients") => {
         fs.unlinkSync(file_path);
       }
     } catch (e) {
-      console.error("Error unlinking file after failed upload:", e.message);
+      logger.error("Error unlinking file after failed upload:", e.message);
     }
 
     return {

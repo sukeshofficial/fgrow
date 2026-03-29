@@ -10,6 +10,7 @@ import CreateTenantModal from "../components/tenant/CreateTenantModal";
 import JoinAsStaff from "../components/staff/JoinAsStaff";
 import Toast from "../components/ui/Toast";
 import { getInvitationDetails } from "../api/invitation.api";
+import logger from "../utils/logger.js";
 
 import "../styles/welcome.css";
 
@@ -44,7 +45,7 @@ export const WelcomePage = () => {
       const response = await getInvitationDetails(token);
       setTenantInfo(response.data.data.tenant_id);
     } catch (err) {
-      console.error("Failed to fetch invitation details in Welcome", err);
+      logger.error("WelcomePage", "Failed to fetch invitation details", err);
     }
   };
 
@@ -58,7 +59,7 @@ export const WelcomePage = () => {
 
   // Fallback edge case handler: if state is unrecognized but we somehow end up here
   if (!["NO_TENANT", "INVITED", "PENDING_VERIFICATION", "ACTIVE", "TENANT_INACTIVE", "TENANT_MISSING", "REJECTED_VERIFICATION"].includes(meState)) {
-    console.error("Unrecognized meState:", meState, "Full state:", { meState, user, invitation });
+    logger.error("WelcomePage", "Unrecognized meState", { meState, user, invitation });
     return (
       <div className="welcome-page">
         <div style={{ textAlign: 'center', background: 'white', padding: '2rem', borderRadius: '12px' }}>

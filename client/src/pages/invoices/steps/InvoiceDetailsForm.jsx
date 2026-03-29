@@ -3,6 +3,7 @@ import FormField from "../../../components/ui/FormField";
 import SearchableDropdown from "../../../components/ui/SearchableDropdown";
 import { listClients } from "../../../api/client.api";
 import { FiFile, FiCalendar, FiClock, FiMessageSquare, FiHash } from "react-icons/fi";
+import logger from "../../../utils/logger.js";
 
 const InvoiceDetailsForm = ({ data, onNext, onPrev }) => {
   const [formData, setFormData] = useState({
@@ -30,7 +31,7 @@ const InvoiceDetailsForm = ({ data, onNext, onPrev }) => {
         const response = await listClients({ is_active: true, limit: 100 });
         setClients(response.data.data || []);
       } catch (error) {
-        console.error("Failed to fetch clients:", error);
+        logger.error("InvoiceDetailsForm", "Failed to fetch clients", error);
       } finally {
         setLoadingClients(false);
       }

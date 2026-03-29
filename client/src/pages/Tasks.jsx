@@ -4,9 +4,11 @@ import SideBar from "../components/SideBar";
 import TaskTable from "./tasks/components/TaskTable";
 import TaskFilterBar from "./tasks/components/TaskFilterBar";
 import TaskAdvancedFilterModal from "./tasks/components/TaskAdvancedFilterModal";
+import DeleteModal from "../components/ui/DeleteModal";
 import { listTasks, deleteTask } from "../api/task.api";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
-import "../styles/ClientList.css"; 
+import logger from "../utils/logger.js";
+import "../styles/ClientList.css";
 import "../styles/Tasks.css";
 
 /**
@@ -20,6 +22,12 @@ const Tasks = () => {
   const [loading, setLoading] = useState(true);
   const showLoading = useDelayedLoading(loading, 300);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
+  // Delete Modal State
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
   const [filters, setFilters] = useState({
     search: "",
@@ -66,7 +74,7 @@ const Tasks = () => {
         }));
       }
     } catch (e) {
-      console.error("Failed to fetch tasks", e);
+      logger.error("TasksPage", "Failed to fetch tasks", e);
     } finally {
       setLoading(false);
     }
@@ -95,16 +103,26 @@ const Tasks = () => {
     if (type === "edit") navigate(`/tasks/edit/${task._id}`);
   };
 
-  const handleDeleteTask = async (id) => {
-    if (window.confirm("Are you sure you want to delete this task?")) {
-      try {
-        const resp = await deleteTask(id);
-        if (resp.data.success) {
-          fetchTasks(filters, pagination.page);
-        }
-      } catch (e) {
-        console.error("Failed to delete task", e);
+  const handleDeleteTask = (task) => {
+    setTaskToDelete(task);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!taskToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const resp = await deleteTask(taskToDelete._id);
+      if (resp.data.success) {
+        setIsDeleteModalOpen(false);
+        setTaskToDelete(null);
+        fetchTasks(filters, pagination.page);
       }
+    } catch (e) {
+      logger.error("TasksPage", "Failed to delete task", e);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -187,6 +205,19 @@ const Tasks = () => {
           )}
         </div>
       </div>
+
+      {isDeleteModalOpen && (
+        <DeleteModal
+          title="Delete Task"
+          message={`Are you sure you want to delete "${taskToDelete?.title}"? This action cannot be undone.`}
+          onConfirm={confirmDelete}
+          onCancel={() => {
+            setIsDeleteModalOpen(false);
+            setTaskToDelete(null);
+          }}
+          submitting={isDeleting}
+        />
+      )}
     </>
   );
 };

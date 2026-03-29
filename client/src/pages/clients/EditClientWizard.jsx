@@ -9,6 +9,7 @@ import { getClientById, updateClient } from "../../api/client.api";
 import FormSkeleton from "../../components/skeletons/FormSkeleton";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import "../../styles/CreateClient.css";
+import logger from "../../utils/logger.js";
 
 const EditClientWizard = () => {
   const { id } = useParams();
@@ -16,7 +17,7 @@ const EditClientWizard = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     name: "",
     file_no: "",
@@ -41,11 +42,11 @@ const EditClientWizard = () => {
     service_assignments: [],
     billing_profile: "",
     opening_balance: {
-        enabled: false,
-        amount: 0,
-        type: "debit",
-        as_of: new Date().toISOString().split('T')[0],
-        currency: "INR"
+      enabled: false,
+      amount: 0,
+      type: "debit",
+      as_of: new Date().toISOString().split('T')[0],
+      currency: "INR"
     }
   });
 
@@ -62,7 +63,7 @@ const EditClientWizard = () => {
       try {
         const resp = await getClientById(id);
         const clientData = resp.data.data;
-        
+
         // Map backend data to frontend form state
         setFormData({
           name: clientData.name || "",
@@ -96,7 +97,7 @@ const EditClientWizard = () => {
           }
         });
       } catch (err) {
-        console.error("Failed to fetch client:", err);
+        logger.error("EditClientWizard", "Failed to fetch client", err);
         setError("Could not load client details");
       } finally {
         setLoading(false);
@@ -125,7 +126,7 @@ const EditClientWizard = () => {
       await updateClient(id, dataToSave);
       navigate("/clients");
     } catch (err) {
-      console.error("Failed to update client:", err);
+      logger.error("EditClientWizard", "Failed to update client", err);
       alert("Failed to update client: " + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
@@ -149,8 +150,8 @@ const EditClientWizard = () => {
     switch (currentStep) {
       case 0:
         return (
-          <ClientDetailsForm 
-            data={formData} 
+          <ClientDetailsForm
+            data={formData}
             onNext={handleNext}
             onPrev={() => navigate("/clients")}
             isEdit={true}
@@ -158,18 +159,18 @@ const EditClientWizard = () => {
         );
       case 1:
         return (
-          <ContactDetailsForm 
-            data={formData} 
-            onNext={handleNext} 
+          <ContactDetailsForm
+            data={formData}
+            onNext={handleNext}
             onPrev={handlePrev}
             isEdit={true}
           />
         );
       case 2:
         return (
-          <ClientServicesForm 
-            data={formData} 
-            onNext={handleNext} 
+          <ClientServicesForm
+            data={formData}
+            onNext={handleNext}
             onPrev={handlePrev}
             isEdit={true}
           />

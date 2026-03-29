@@ -10,6 +10,7 @@ import {
 } from "../services/quotation.service.js";
 import { generateQuotationPdfBuffer } from "../utils/pdf.helper.js";
 import sendEmail from "../utils/sendEmail.js";
+import logger from "../utils/logger.js";
 
 export const createQuotationController = async (req, res) => {
   try {
@@ -212,7 +213,7 @@ export const sendQuotationController = async (req, res) => {
     // OPTIONAL: update DB to record that it was sent / who it was sent to (not implemented here)
     return res.json({ success: true, message: "Quotation sent", info });
   } catch (err) {
-    console.error("sendQuotationController error:", err);
+    logger.error("sendQuotationController error:", err);
     return res.status(500).json({
       success: false,
       message: err.message || "Failed to send quotation",

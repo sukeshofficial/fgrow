@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FiX } from "react-icons/fi";
+import logger from "../../../utils/logger.js";
 
 const CreateServiceModal = ({ isOpen, onClose, onSubmit }) => {
   const [loading, setLoading] = useState(false);
@@ -41,7 +42,7 @@ const CreateServiceModal = ({ isOpen, onClose, onSubmit }) => {
       });
       onClose();
     } catch (error) {
-      console.error("Error creating service:", error);
+      logger.error("CreateServiceModal", "Error creating service", error);
     } finally {
       setLoading(false);
     }
@@ -59,22 +60,22 @@ const CreateServiceModal = ({ isOpen, onClose, onSubmit }) => {
             <div className="form-grid">
               <div className="form-group full-width">
                 <label>Service Name *</label>
-                <input 
-                  type="text" 
-                  name="name" 
-                  value={formData.name} 
-                  onChange={handleChange} 
-                  required 
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
                   placeholder="e.g. GST Filing"
                 />
               </div>
-              
+
               <div className="form-group full-width">
                 <label>Description</label>
-                <textarea 
-                  name="description" 
-                  value={formData.description} 
-                  onChange={handleChange} 
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
                   rows="3"
                   placeholder="Service details..."
                 />
@@ -82,11 +83,11 @@ const CreateServiceModal = ({ isOpen, onClose, onSubmit }) => {
 
               <div className="form-group">
                 <label>SAC Code</label>
-                <input 
-                  type="text" 
-                  name="sac_code" 
-                  value={formData.sac_code} 
-                  onChange={handleChange} 
+                <input
+                  type="text"
+                  name="sac_code"
+                  value={formData.sac_code}
+                  onChange={handleChange}
                   pattern="[0-9]{6}"
                   title="SAC code must be 6 digits"
                   placeholder="998311"
@@ -106,23 +107,23 @@ const CreateServiceModal = ({ isOpen, onClose, onSubmit }) => {
 
               <div className="form-group">
                 <label>Default Billing Rate (₹)</label>
-                <input 
-                  type="number" 
-                  name="default_billing_rate" 
-                  value={formData.default_billing_rate} 
-                  onChange={handleChange} 
+                <input
+                  type="number"
+                  name="default_billing_rate"
+                  value={formData.default_billing_rate}
+                  onChange={handleChange}
                   min="0"
                 />
               </div>
 
               <div className="form-group" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <div className="checkbox-group">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     id="is_recurring"
-                    name="is_recurring" 
-                    checked={formData.is_recurring} 
-                    onChange={handleChange} 
+                    name="is_recurring"
+                    checked={formData.is_recurring}
+                    onChange={handleChange}
                   />
                   <label htmlFor="is_recurring" style={{ marginBottom: 0 }}>Recurring Service</label>
                 </div>
@@ -130,12 +131,12 @@ const CreateServiceModal = ({ isOpen, onClose, onSubmit }) => {
 
               <div className="form-group">
                 <div className="checkbox-group">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     id="billable_by_default"
-                    name="billable_by_default" 
-                    checked={formData.billable_by_default} 
-                    onChange={handleChange} 
+                    name="billable_by_default"
+                    checked={formData.billable_by_default}
+                    onChange={handleChange}
                   />
                   <label htmlFor="billable_by_default" style={{ marginBottom: 0 }}>Billable by Default</label>
                 </div>
@@ -143,12 +144,12 @@ const CreateServiceModal = ({ isOpen, onClose, onSubmit }) => {
 
               <div className="form-group">
                 <div className="checkbox-group">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     id="is_enabled"
-                    name="is_enabled" 
-                    checked={formData.is_enabled} 
-                    onChange={handleChange} 
+                    name="is_enabled"
+                    checked={formData.is_enabled}
+                    onChange={handleChange}
                   />
                   <label htmlFor="is_enabled" style={{ marginBottom: 0 }}>Auto Enable</label>
                 </div>

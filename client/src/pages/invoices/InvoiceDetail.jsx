@@ -20,6 +20,7 @@ import {
 } from "../../features/invoices/invoiceService";
 import { Spinner } from "../../components/ui/Spinner";
 import { useModal } from "../../context/ModalContext";
+import logger from "../../utils/logger.js";
 import "./InvoiceDetail.css";
 
 const InvoiceDetail = () => {
@@ -36,7 +37,7 @@ const InvoiceDetail = () => {
       const response = await getInvoiceById(id);
       setInvoice(response.data);
     } catch (err) {
-      console.error("Failed to load invoice", err);
+      logger.error("InvoiceDetail", "Failed to load invoice", err);
     } finally {
       setLoading(false);
     }
@@ -102,7 +103,7 @@ const InvoiceDetail = () => {
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
     } catch (error) {
-      console.error("Print failed:", error);
+      logger.error("InvoiceDetail", "Print failed", error);
       await showAlert("Print Error", "Failed to generate print document.", "error");
     } finally {
       setActionLoading(false);

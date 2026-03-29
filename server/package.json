@@ -32,7 +32,8 @@
     "pdfkit": "^0.17.2",
     "slugify": "^1.6.6",
     "stream": "^0.0.3",
-    "validator": "^13.15.26"
+    "validator": "^13.15.26",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "eslint": "^10.0.0",

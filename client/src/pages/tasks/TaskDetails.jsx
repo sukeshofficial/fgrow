@@ -17,6 +17,7 @@ import { FaCheckCircle, FaRegCircle, FaTrash, FaPlay, FaStop, FaPlus, FaHistory,
 import "../../styles/ClientList.css";
 import "../../styles/Tasks.css";
 import { Spinner } from "../../components/ui/Spinner";
+import logger from "../../utils/logger.js";
 
 const TaskDetails = () => {
   const { id } = useParams();
@@ -50,7 +51,7 @@ const TaskDetails = () => {
         setActivities(activitiesResp.data.data);
       }
     } catch (err) {
-      console.error("Failed to fetch task details", err);
+      logger.error("TaskDetails", "Failed to fetch task details", err);
     } finally {
       setLoading(false);
     }
@@ -128,23 +129,25 @@ const TaskDetails = () => {
       <SideBar />
       <div className="clients">
         <div className="client-list-container">
-          <button
-            onClick={() => navigate("/tasks")}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              marginBottom: '16px',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}
-          >
-            <FaArrowLeft /> Back to Tasks
-          </button>
+          <div className="back-btn-container">
+            <button
+              onClick={() => navigate("/tasks")}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                marginBottom: '16px',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}
+            >
+              <FaArrowLeft /> Back to Tasks
+            </button>
+          </div>
 
           <div className="task-details-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
             <div>

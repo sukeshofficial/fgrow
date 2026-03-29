@@ -3,6 +3,7 @@ import SearchableDropdown from "../../../components/ui/SearchableDropdown";
 import FormField from "../../../components/ui/FormField";
 import { listClientGroups, listTags } from "../../../api/client.api";
 import { FiX, FiFilter } from "react-icons/fi";
+import logger from "../../../utils/logger.js";
 import "../../../styles/AdvancedFilters.css";
 
 const AdvancedFilterModal = ({ isOpen, onClose, filters, onApply, onClear }) => {
@@ -23,7 +24,7 @@ const AdvancedFilterModal = ({ isOpen, onClose, filters, onApply, onClear }) => 
       const resp = await listClientGroups();
       setGroups(resp.data.data);
     } catch (e) {
-      console.error(e);
+      logger.error("ClientAdvancedFilter", "Failed to fetch groups", e);
     }
   };
 
@@ -32,7 +33,7 @@ const AdvancedFilterModal = ({ isOpen, onClose, filters, onApply, onClear }) => 
       const resp = await listTags();
       setTags(resp.data.data);
     } catch (e) {
-      console.error(e);
+      logger.error("ClientAdvancedFilter", "Failed to fetch tags", e);
     }
   };
 

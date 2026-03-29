@@ -3,6 +3,7 @@ import { Draggable } from "@hello-pangea/dnd";
 import { FiEdit2, FiTrash2, FiCalendar, FiUser, FiPackage, FiBriefcase, FiPlus, FiRefreshCw, FiCheck, FiX, FiMoreHorizontal } from "react-icons/fi";
 import { updateTodo } from "../../../api/todo.api";
 import SearchableDropdown from "../../../components/ui/SearchableDropdown";
+import logger from "../../../utils/logger.js";
 
 const TodoCard = ({ todo, index, onEdit, onDelete, clients, services, staff, onSuccess }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -10,7 +11,6 @@ const TodoCard = ({ todo, index, onEdit, onDelete, clients, services, staff, onS
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    console.log("TodoCard: todo prop updated", todo._id, todo.title);
     setEditedData({ ...todo });
   }, [todo]);
 
@@ -25,18 +25,16 @@ const TodoCard = ({ todo, index, onEdit, onDelete, clients, services, staff, onS
 
   const handleSave = async () => {
     setSaving(true);
-    console.log("TodoCard: saving", todo._id, editedData);
     try {
       await updateTodo(todo._id, editedData);
-      console.log("TodoCard: save successful, calling onSuccess");
       setIsEditing(false);
       if (onSuccess) {
         onSuccess();
       } else {
-        console.warn("TodoCard: onSuccess is undefined!");
+        logger.warn("TodoCard", "onSuccess is undefined!");
       }
     } catch (err) {
-      console.error("Failed to update todo", err);
+      logger.error("TodoCard", "Failed to update todo", err);
       alert("Failed to save changes");
     } finally {
       setSaving(false);

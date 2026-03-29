@@ -5,9 +5,10 @@ import SideBar from "../../components/SideBar";
 import TaskBasicInfoForm from "./steps/TaskBasicInfoForm";
 import TaskAssignmentForm from "./steps/TaskAssignmentForm";
 import { createTask } from "../../api/task.api";
-import "../../styles/CreateClient.css"; 
+import "../../styles/CreateClient.css";
 import "../../styles/Tasks.css";
 import { Spinner } from "../../components/ui/Spinner";
+import logger from "../../utils/logger.js";
 
 const CreateTaskWizard = () => {
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ const CreateTaskWizard = () => {
         navigate("/tasks");
       }
     } catch (err) {
-      console.error("Task creation failed", err);
+      logger.error("CreateTaskWizard", "Task creation failed", err);
       alert("Failed to create task: " + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
@@ -76,10 +77,10 @@ const CreateTaskWizard = () => {
         );
       case 1:
         return (
-          <TaskAssignmentForm 
-            data={formData} 
-            onNext={handleNext} 
-            onPrev={handlePrev} 
+          <TaskAssignmentForm
+            data={formData}
+            onNext={handleNext}
+            onPrev={handlePrev}
           />
         );
       case 2:
@@ -101,8 +102,8 @@ const CreateTaskWizard = () => {
                   <p style={{ fontWeight: '600', margin: '4px 0 16px' }}>{formData.due_date || "Not set"}</p>
                 </div>
                 <div>
-                    <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Billable</label>
-                    <p style={{ fontWeight: '600', margin: '4px 0 16px' }}>{formData.is_billable ? "Yes" : "No"}</p>
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Billable</label>
+                  <p style={{ fontWeight: '600', margin: '4px 0 16px' }}>{formData.is_billable ? "Yes" : "No"}</p>
                 </div>
               </div>
             </div>

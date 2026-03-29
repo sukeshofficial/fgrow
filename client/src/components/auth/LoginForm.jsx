@@ -6,6 +6,7 @@ import { useAuth } from "../../hooks/useAuth.js";
 import { verifyOtp, login } from "../../features/auth/auth.actions.js";
 import { userPreview } from "../../api/auth.api.js";
 import { SET_PROFILE_PREVIEW } from "../../features/auth/auth.types.js";
+import logger from "../../utils/logger.js";
 
 import "../../styles/login-form.css";
 
@@ -80,7 +81,7 @@ const LoginForm = ({ onSuccess }) => {
 
         setAvatar(res.data.preview.avatar);
       } catch (err) {
-        console.error("Preview failed", err);
+        logger.error("LoginForm", "Preview failed", err);
         setAvatar(null);
       }
     }, 400);

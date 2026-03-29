@@ -15,6 +15,7 @@
 
 import jwt from "jsonwebtoken";
 import { User } from "../models/auth/user.model.js";
+import logger from "../utils/logger.js";
 
 export default async function authMiddleware(req, res, next) {
   try {
@@ -67,7 +68,7 @@ export default async function authMiddleware(req, res, next) {
     // Dynamic Platform Role check (ensure .env list is respected)
     const superAdminEmails = (process.env.SUPER_ADMIN_EMAILS || "").split(",").map(e => e.trim());
     const isSuperAdmin = superAdminEmails.includes(user.email);
-    
+
     // Attach minimal user object to request
     req.user = {
       id: user._id,
@@ -80,7 +81,7 @@ export default async function authMiddleware(req, res, next) {
 
     next();
   } catch (err) {
-    console.error("Auth middleware error:", err.name, err.message, err.stack);
+    logger.error("Auth middleware error:", err);
     // Common misconfiguration: JWT_SECRET not set in environment
     if (!process.env.JWT_SECRET) {
       return res.status(500).json({ message: "Server misconfiguration: JWT_SECRET not set" });

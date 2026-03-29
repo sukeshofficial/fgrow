@@ -1,6 +1,7 @@
 import { Report } from '../models/report/report.model.js';
 import sendEmail from '../utils/sendEmail.js';
 import { uploadBugScreenshots } from '../utils/cloudinary.js';
+import logger from '../utils/logger.js';
 
 export const createReport = async (req, res, next) => {
     try {
@@ -63,13 +64,13 @@ export const createReport = async (req, res, next) => {
 
             // Fire and forget email
             sendEmail(mailOptions).catch(err => {
-                console.error("Failed to send email for report", err);
+                logger.error("Failed to send email for report", err);
             });
         }
 
         res.status(201).json({ success: true, message: "Report submitted successfully", data: report });
     } catch (error) {
-        console.error("Create report err:", error);
+        logger.error("Create report err:", error);
         res.status(500).json({ message: "Error submitting report" });
     }
 };
@@ -88,7 +89,7 @@ export const getReports = async (req, res, next) => {
 
         res.status(200).json({ success: true, message: "Reports fetched successfully", data: reports });
     } catch (error) {
-        console.error("Get reports err:", error);
+        logger.error("Get reports err:", error);
         res.status(500).json({ message: "Error fetching reports" });
     }
 };
@@ -114,7 +115,7 @@ export const updateReportStatus = async (req, res, next) => {
 
         res.status(200).json({ success: true, message: "Report status updated", data: report });
     } catch (error) {
-        console.error("Update report status err:", error);
+        logger.error("Update report status err:", error);
         res.status(500).json({ message: "Error updating report" });
     }
 };

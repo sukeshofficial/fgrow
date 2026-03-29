@@ -7,6 +7,7 @@ import InvoiceItemsForm from "./steps/InvoiceItemsForm";
 import InvoiceReviewForm from "./steps/InvoiceReviewForm";
 import { getInvoiceById, updateInvoice } from "../../features/invoices/invoiceService";
 import { Spinner } from "../../components/ui/Spinner";
+import logger from "../../utils/logger.js";
 import "../../styles/CreateClient.css";
 import "./InvoiceWizard.css";
 
@@ -52,7 +53,7 @@ const EditInvoiceWizard = () => {
           total_amount: inv.total_amount || 0
         });
       } catch (err) {
-        console.error("Failed to fetch invoice", err);
+        logger.error("EditInvoiceWizard", "Failed to fetch invoice", err);
         navigate("/finance/invoices");
       } finally {
         setLoading(false);
@@ -91,7 +92,7 @@ const EditInvoiceWizard = () => {
       await updateInvoice(id, payload);
       navigate(`/finance/invoices/${id}`);
     } catch (err) {
-      console.error("Update invoice failed", err);
+      logger.error("EditInvoiceWizard", "Update invoice failed", err);
       alert("Failed to update invoice: " + (err.response?.data?.message || err.message));
     } finally {
       setSubmitting(false);

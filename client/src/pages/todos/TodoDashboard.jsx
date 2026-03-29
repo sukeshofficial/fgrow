@@ -11,6 +11,7 @@ import "../../styles/Todo.css";
 import "../../styles/modal.css";
 import TableSkeleton from "../../components/skeletons/TableSkeleton";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
+import logger from "../../utils/logger.js";
 
 const TodoDashboard = () => {
   const [todos, setTodos] = useState([]);
@@ -41,7 +42,6 @@ const TodoDashboard = () => {
   const [deleting, setDeleting] = useState(false);
 
   const fetchData = useCallback(async () => {
-    console.log("TodoDashboard: fetchData triggered", search);
     try {
       setLoading(true);
       // Fetch todos, clients, services, and staff in parallel
@@ -57,7 +57,7 @@ const TodoDashboard = () => {
       if (sResp.data.success) setServices(sResp.data.data || []);
       if (stResp.data.success) setStaff(stResp.data.data || []);
     } catch (err) {
-      console.error("Failed to fetch dashboard data", err);
+      logger.error("TodoDashboard", "Failed to fetch dashboard data", err);
     } finally {
       setLoading(false);
     }
@@ -74,7 +74,7 @@ const TodoDashboard = () => {
       await moveTodo(todoId, newStatus, newPosition);
       fetchTodos();
     } catch (err) {
-      console.error("Move failed", err);
+      logger.error("TodoDashboard", "Move failed", err);
       fetchTodos();
     }
   };
@@ -98,7 +98,7 @@ const TodoDashboard = () => {
       setTodoToDelete(null);
       fetchTodos();
     } catch (err) {
-      console.error("Delete failed", err);
+      logger.error("TodoDashboard", "Delete failed", err);
       alert("Failed to delete to-do");
     } finally {
       setDeleting(false);
@@ -135,26 +135,26 @@ const TodoDashboard = () => {
 
             <div className="todo-actions-right">
               <div className="status-toggle">
-                <button 
+                <button
                   className={`status-toggle-btn ${filters.status === "all" || !filters.status ? "active" : ""}`}
-                  onClick={() => setFilters({...filters, status: "all"})}
+                  onClick={() => setFilters({ ...filters, status: "all" })}
                 >All</button>
-                <button 
+                <button
                   className={`status-toggle-btn ${filters.status === "pending" || filters.status === "new" ? "active" : ""}`}
-                  onClick={() => setFilters({...filters, status: "new"})}
+                  onClick={() => setFilters({ ...filters, status: "new" })}
                 >Pending</button>
-                <button 
+                <button
                   className={`status-toggle-btn ${filters.status === "in_progress" ? "active" : ""}`}
-                  onClick={() => setFilters({...filters, status: "in_progress"})}
+                  onClick={() => setFilters({ ...filters, status: "in_progress" })}
                 >In Progress</button>
-                <button 
+                <button
                   className={`status-toggle-btn ${filters.status === "completed" ? "active" : ""}`}
-                  onClick={() => setFilters({...filters, status: "completed"})}
+                  onClick={() => setFilters({ ...filters, status: "completed" })}
                 >Completed</button>
               </div>
 
-              <button 
-                className={`filter-btn ${Object.entries(filters).some(([k,v]) => v && k !== 'status' && v !== 'all') ? 'active' : ''}`}
+              <button
+                className={`filter-btn ${Object.entries(filters).some(([k, v]) => v && k !== 'status' && v !== 'all') ? 'active' : ''}`}
                 onClick={() => setIsFilterOpen(true)}
               >
                 <FiFilter />

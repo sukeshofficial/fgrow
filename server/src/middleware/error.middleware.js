@@ -1,7 +1,8 @@
 import multer from "multer";
+import logger from "../utils/logger.js";
 
 export const errorMiddleware = (err, req, res, next) => {
-  console.error("Error Middleware Caught:", err);
+  logger.error("Error Middleware Caught:", err);
 
   // Handle Multer errors
   if (err instanceof multer.MulterError) {

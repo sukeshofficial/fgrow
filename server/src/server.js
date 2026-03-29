@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 
 import app from "./app.js";
 import connectDB from "./config/initDb.js";
+import logger from "./utils/logger.js";
 
 dotenv.config();
 
@@ -14,11 +15,11 @@ const start = async () => {
     const PORT = process.env.PORT || 5000;
     if (process.env.NODE_ENV !== "production") {
       server.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
+        logger.info(`Server running on port ${PORT}`);
       });
     }
   } catch (err) {
-    console.error("Failed to start server:", err);
+    logger.error("Failed to start server:", err);
     process.exit(1);
   }
 };

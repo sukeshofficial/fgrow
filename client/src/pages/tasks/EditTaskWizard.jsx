@@ -5,9 +5,10 @@ import SideBar from "../../components/SideBar";
 import TaskBasicInfoForm from "./steps/TaskBasicInfoForm";
 import TaskAssignmentForm from "./steps/TaskAssignmentForm";
 import { getTask, updateTask } from "../../api/task.api";
-import "../../styles/CreateClient.css"; 
+import "../../styles/CreateClient.css";
 import "../../styles/Tasks.css";
 import { Spinner } from "../../components/ui/Spinner";
+import logger from "../../utils/logger.js";
 
 const EditTaskWizard = () => {
   const { id } = useParams();
@@ -32,11 +33,11 @@ const EditTaskWizard = () => {
             service: task.service?._id || "",
             users: task.users?.map(u => u._id) || [],
             tags: task.tags?.map(t => t._id) || [],
-            is_billable: task.is_billable,
+            set_billable: task.is_billable,
           });
         }
       } catch (err) {
-        console.error("Failed to fetch task", err);
+        logger.error("EditTaskWizard", "Failed to fetch task", err);
       } finally {
         setLoading(false);
       }
@@ -72,7 +73,7 @@ const EditTaskWizard = () => {
         navigate(`/tasks/${id}`);
       }
     } catch (err) {
-      console.error("Task update failed", err);
+      logger.error("EditTaskWizard", "Task update failed", err);
       alert("Failed to update task: " + (err.response?.data?.message || err.message));
     } finally {
       setSaving(false);
@@ -103,10 +104,10 @@ const EditTaskWizard = () => {
         );
       case 1:
         return (
-          <TaskAssignmentForm 
-            data={formData} 
-            onNext={handleNext} 
-            onPrev={handlePrev} 
+          <TaskAssignmentForm
+            data={formData}
+            onNext={handleNext}
+            onPrev={handlePrev}
           />
         );
       case 2:

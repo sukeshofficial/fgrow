@@ -3,6 +3,7 @@ import { getUnbilledTasks } from "../../../features/invoices/invoiceService";
 import { FiTrash2, FiPlus, FiInfo, FiCheck } from "react-icons/fi";
 import { Spinner } from "../../../components/ui/Spinner";
 import { useModal } from "../../../context/ModalContext";
+import logger from "../../../utils/logger.js";
 
 const InvoiceItemsForm = ({ data, onNext, onPrev }) => {
   const { showAlert } = useModal();
@@ -25,7 +26,7 @@ const InvoiceItemsForm = ({ data, onNext, onPrev }) => {
           const response = await getUnbilledTasks(data.client);
           setUnbilledTasks(response.data || []);
         } catch (error) {
-          console.error("Failed to fetch unbilled tasks:", error);
+          logger.error("InvoiceItemsForm", "Failed to fetch unbilled tasks", error);
         } finally {
           setLoading(false);
         }

@@ -9,6 +9,7 @@ import { Parser as Json2csvParser } from "json2csv";
 import stream from "stream";
 import { generatePdfBuffer } from "../utils/pdf.helper.js";
 import sendEmail from "../utils/sendEmail.js";
+import logger from "../utils/logger.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -78,9 +79,9 @@ const maybeSyncCounter = async (user, invoiceNo) => {
       { $max: { seq: seq } },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
-    console.log(`[SyncCounter] Counter for tenant ${user.tenant_id} and year ${year} is now at ${updated.seq}`);
+    logger.info(`[SyncCounter] Counter for tenant ${user.tenant_id} and year ${year} is now at ${updated.seq}`);
   } catch (e) {
-    console.error(`[SyncCounter] Failed to sync counter for ${invoiceNo}:`, e.message);
+    logger.error(`[SyncCounter] Failed to sync counter for ${invoiceNo}:`, e.message);
   }
 };
 
@@ -172,7 +173,7 @@ export const createInvoice = async (user, payload) => {
 
   applyTotals(doc, computeInvoiceTotals(doc.items));
 
-  console.log(`[InvoiceService] Creating invoice for tenant ${user.tenant_id}. Invoice No: ${doc.invoice_no}`);
+  logger.info(`[InvoiceService] Creating invoice for tenant ${user.tenant_id}. Invoice No: ${doc.invoice_no}`);
   const invoice = await Invoice.create(doc);
 
   // Sync task links
@@ -180,7 +181,7 @@ export const createInvoice = async (user, payload) => {
 
   // Sync counter if manual number used
   if (payload.invoice_no) {
-    console.log(`[InvoiceService] Manual invoice number provided: ${payload.invoice_no}. Syncing counter...`);
+    logger.info(`[InvoiceService] Manual invoice number provided: ${payload.invoice_no}. Syncing counter...`);
     await maybeSyncCounter(user, payload.invoice_no);
   }
 
@@ -205,13 +206,13 @@ export const getNextInvoiceNumber = async (tenantId) => {
     const parts = latestInvoice.invoice_no.split("-");
     const latestSeq = parseInt(parts[parts.length - 1]);
     if (!isNaN(latestSeq) && latestSeq >= nextSeq) {
-      console.log(`[NextNumber] Found higher existing sequence in collection: ${latestSeq}. Adjusting suggestion.`);
+      logger.info(`[NextNumber] Found higher existing sequence in collection: ${latestSeq}. Adjusting suggestion.`);
       nextSeq = latestSeq + 1;
     }
   }
 
   const finalNo = `INV-${year}-${String(nextSeq).padStart(4, "0")}`;
-  console.log(`[NextNumber] Suggested invoice number for tenant ${tenantId}: ${finalNo}`);
+  logger.info(`[NextNumber] Suggested invoice number for tenant ${tenantId}: ${finalNo}`);
   return finalNo;
 };
 
@@ -299,7 +300,7 @@ export const updateInvoice = async (user, id, payload) => {
 
   // Sync counter if manual number used
   if (payload.invoice_no) {
-    console.log(`[InvoiceService] Update payload has invoice number: ${payload.invoice_no}. Syncing counter...`);
+    logger.info(`[InvoiceService] Update payload has invoice number: ${payload.invoice_no}. Syncing counter...`);
     await maybeSyncCounter(user, payload.invoice_no);
   }
 
@@ -541,7 +542,6 @@ export const getPdf = async (user, invoiceId) => {
     .lean();
 
   if (!inv) throw new Error("Invoice not found");
-  console.log(inv);
   const buffer = await generatePdfBuffer(inv);
 
   const rs = new stream.PassThrough();

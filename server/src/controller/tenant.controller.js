@@ -13,6 +13,7 @@ import Client from "../models/client/client.model.js";
 import { generateToken } from "../utils/jwt.js";
 import { uploadBufferToCloud } from "../utils/cloudinary.js";
 import sendEmail from "../utils/sendEmail.js";
+import logger from "../utils/logger.js";
 
 export const createTenant = async (req, res) => {
   try {
@@ -73,9 +74,9 @@ export const createTenant = async (req, res) => {
           </div>
         `
       });
-      console.log("Creation notification email sent to admin");
+      logger.info("Creation notification email sent to admin");
     } catch (emailErr) {
-      console.error("Failed to send admin notification email:", emailErr);
+      logger.error("Failed to send admin notification email:", emailErr);
       // Don't fail the whole request if email fails
     }
 
@@ -112,7 +113,7 @@ export const getPendingTenants = async (req, res) => {
       tenants,
     });
   } catch (err) {
-    console.error("Get Pending Tenants Error:", err);
+    logger.error("Get Pending Tenants Error:", err);
     return res.status(500).json({
       message: "internal server error",
     });
@@ -126,23 +127,23 @@ export const approveTenant = async (req, res) => {
   try {
     const { tenantId } = req.params;
 
-    console.log("Approve tenant request reached for ID:", tenantId, "by admin:", req.user?.id);
+    logger.info(`Approve tenant request reached for ID: ${tenantId} by admin: ${req.user?.id}`);
     const result = await approveTenantService(tenantId, req.user?.id);
 
     if (result.error) {
-      console.log("Approve tenant service returned error:", result.error);
+      logger.info(`Approve tenant service returned error: ${result.error}`);
       return res.status(result.status).json({
         message: result.error,
       });
     }
 
-    console.log("Tenant approved successfully:", tenantId);
+    logger.info(`Tenant approved successfully: ${tenantId}`);
     return res.status(200).json({
       message: "Tenant approved successfully",
       tenantId: result.tenant._id,
     });
   } catch (err) {
-    console.error("Approve Tenant Error:", err);
+    logger.error("Approve Tenant Error:", err);
     return res.status(500).json({
       message: "internal server error",
     });
@@ -170,7 +171,7 @@ export const rejectTenant = async (req, res) => {
       tenantId: result.tenant._id,
     });
   } catch (err) {
-    console.error("Reject Tenant Error:", err);
+    logger.error("Reject Tenant Error:", err);
     return res.status(500).json({
       message: "internal server error",
     });
@@ -231,7 +232,7 @@ export const getTenantStaff = async (req, res) => {
       data: users,
     });
   } catch (err) {
-    console.error("Get Tenant Staff Error:", err);
+    logger.error("Get Tenant Staff Error:", err);
     return res.status(500).json({
       message: err.message || "internal server error",
     });
@@ -251,7 +252,7 @@ export const getAllTenants = async (req, res) => {
       data: tenants,
     });
   } catch (err) {
-    console.error("Get All Tenants Error:", err);
+    logger.error("Get All Tenants Error:", err);
     return res.status(500).json({
       message: "internal server error",
     });
@@ -286,7 +287,7 @@ export const getTenantById = async (req, res) => {
       data: tenant,
     });
   } catch (err) {
-    console.error("Get Tenant By ID Error:", err);
+    logger.error("Get Tenant By ID Error:", err);
     return res.status(500).json({
       message: "internal server error",
     });
@@ -309,7 +310,7 @@ export const getTenantStaffAdmin = async (req, res) => {
       data: users,
     });
   } catch (err) {
-    console.error("Get Tenant Staff Admin Error:", err);
+    logger.error("Get Tenant Staff Admin Error:", err);
     return res.status(500).json({
       message: "internal server error",
     });
@@ -331,7 +332,7 @@ export const getTenantClientsAdmin = async (req, res) => {
       data: clients,
     });
   } catch (err) {
-    console.error("Get Tenant Clients Admin Error:", err);
+    logger.error("Get Tenant Clients Admin Error:", err);
     return res.status(500).json({
       message: "internal server error",
     });

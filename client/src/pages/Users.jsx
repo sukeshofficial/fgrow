@@ -10,6 +10,7 @@ import "../styles/dashboard.css";
 import "../styles/welcome.css";
 import { Spinner } from "../components/ui/Spinner";
 import { useModal } from "../context/ModalContext";
+import logger from "../utils/logger.js";
 
 const Users = () => {
   const { user } = useAuth();
@@ -32,7 +33,7 @@ const Users = () => {
       const response = await getPendingInvitations();
       setInvites(response.data.data);
     } catch (err) {
-      console.error("Failed to fetch invitations", err);
+      logger.error("UsersPage", "Failed to fetch invitations", err);
     } finally {
       setLoading(false);
     }

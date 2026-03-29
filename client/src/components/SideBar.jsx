@@ -209,7 +209,6 @@ export default function Sidebar() {
   useEffect(() => {
     const handleResize = () => {
       const isCollapsed = window.innerWidth <= 992;
-      console.log("Resize: width", window.innerWidth, "isCollapsed", isCollapsed);
       setCollapsed(isCollapsed);
     };
 

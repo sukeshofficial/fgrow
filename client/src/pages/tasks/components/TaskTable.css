@@ -87,6 +87,110 @@
     background: #fef2f2;
 }
 
+/* ── Responsive Actions ── */
+
+.mobile-only {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .desktop-only {
+        display: none !important;
+    }
+
+    .mobile-only {
+        display: flex !important;
+        /* Changed from block to flex to match container */
+    }
+}
+
+.action-dropdown-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.more-actions-btn {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.more-actions-btn:hover {
+    background: #f1f5f9;
+    border-color: var(--primary-accent);
+    color: var(--primary-accent);
+}
+
+.action-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    /* Higher z-index */
+    padding: 8px;
+    min-width: 180px;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    animation: dropdown-fade-in 0.2s ease-out;
+}
+
+.action-dropdown-menu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+}
+
+.action-dropdown-menu button:hover {
+    background: #f8fafc;
+    color: var(--primary-accent);
+}
+
+.action-dropdown-menu button.delete-action:hover {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.action-dropdown-menu button svg {
+    font-size: 14px;
+}
+
+@keyframes dropdown-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .table-loading {
     padding: 40px;
     text-align: center;

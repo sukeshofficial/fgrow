@@ -231,13 +231,33 @@
 
   .task-details-grid {
     grid-template-columns: 1fr !important;
-    gap: 20px !important;
+    gap: 24px !important;
   }
 
   .task-details-header {
     flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 20px !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+  }
+
+  .task-details-header>div:first-child {
+    width: 100% !important;
+  }
+
+  .task-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  .task-actions>* {
+    flex: 1 !important;
+    min-width: 140px !important;
+  }
+
+  .status-custom-dropdown {
+    width: 100% !important;
   }
 
   .modal-content {
@@ -254,18 +274,6 @@
 
   .modal-body>div>div {
     grid-column: span 2 !important;
-  }
-
-  .task-table-action-buttons {
-    flex-direction: column;
-    align-items: stretch !important;
-    gap: 8px;
-  }
-
-  .task-table-action-btn {
-    margin-left: 0 !important;
-    width: 100%;
-    justify-content: center !important;
   }
 
   .modern-table th,
@@ -292,7 +300,14 @@
   }
 
   .checklist-items form {
-    flex-direction: column;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .checklist-items form button {
+    width: 100% !important;
+    height: 44px !important;
+    justify-content: center !important;
   }
 
   /* Wizard Responsiveness 🎉 */
@@ -346,21 +361,34 @@
 
 @media (max-width: 480px) {
   .client-list-title {
-    font-size: 20px !important;
+    font-size: 22px !important;
+    line-height: 1.3 !important;
   }
 
   .task-actions {
-    width: 100%;
-    flex-direction: column;
+    flex-direction: column !important;
   }
 
-  .status-dropdown {
-    width: 100%;
+  .task-actions>* {
+    width: 100% !important;
+    flex: none !important;
   }
 
-  .task-actions button {
-    width: 100%;
-    justify-content: center;
+  .task-card {
+    padding: 16px !important;
+    border-radius: 12px !important;
+  }
+
+  .checklist-items>div {
+    padding: 10px !important;
+  }
+
+  .back-btn-container button {
+    width: 100% !important;
+    padding: 12px !important;
+    justify-content: center !important;
+    background: #f1f5f9 !important;
+    border-radius: 10px !important;
   }
 }
 

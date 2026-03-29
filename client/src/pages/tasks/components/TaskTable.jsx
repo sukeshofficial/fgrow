@@ -1,9 +1,43 @@
-import React from "react";
-import { FaTrash, FaEye, FaEdit, FaClock } from "react-icons/fa";
+import React, { useState, useRef, useEffect } from "react";
+import { FaTrash, FaEye, FaEdit, FaClock, FaEllipsisV } from "react-icons/fa";
 import TableSkeleton from "../../../components/skeletons/TableSkeleton";
 import "./TaskTable.css";
 
 const TaskTable = ({ tasks, loading, onAction, onDelete, onStatusChange }) => {
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", () => setActiveDropdown(null), true);
+    window.addEventListener("resize", () => setActiveDropdown(null));
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", () => setActiveDropdown(null), true);
+      window.removeEventListener("resize", () => setActiveDropdown(null));
+    };
+  }, []);
+
+  const toggleDropdown = (e, id) => {
+    e.stopPropagation();
+    if (activeDropdown === id) {
+      setActiveDropdown(null);
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + window.scrollY,
+        left: rect.right + window.scrollX
+      });
+      setActiveDropdown(id);
+    }
+  };
+
   const getStatusClass = (status) => {
     switch (status) {
       case "completed": return "status-badge active";
@@ -77,16 +111,47 @@ const TaskTable = ({ tasks, loading, onAction, onDelete, onStatusChange }) => {
                   </span>
                 </td>
                 <td style={{ width: "1%", whiteSpace: "nowrap" }}>
-                  <div className="task-table-action-buttons">
+                  {/* Desktop Actions */}
+                  <div className="task-table-action-buttons desktop-only">
                     <button className="task-table-action-btn view" title="View Details" onClick={() => onAction("view", task)}>
                       <FaEye /> View
                     </button>
                     <button className="task-table-action-btn edit" title="Edit Task" onClick={() => onAction("edit", task)}>
                       <FaEdit /> Edit
                     </button>
-                    <button className="task-table-action-btn delete" title="Delete Task" onClick={() => onDelete(task._id)}>
+                    <button className="task-table-action-btn delete" title="Delete Task" onClick={() => onDelete(task)}>
                       <FaTrash /> Delete
                     </button>
+                  </div>
+
+                  {/* Mobile Actions Dropdown */}
+                  <div className="mobile-only action-dropdown-container">
+                    <button className="more-actions-btn" onClick={(e) => toggleDropdown(e, task._id)}>
+                      <FaEllipsisV />
+                    </button>
+                    {activeDropdown === task._id && (
+                      <div
+                        className="action-dropdown-menu flyout"
+                        ref={dropdownRef}
+                        style={{
+                          position: 'fixed',
+                          top: dropdownPos.top - window.scrollY,
+                          left: dropdownPos.left - window.scrollX,
+                          transform: 'translateX(-100%)',
+                          marginTop: '8px'
+                        }}
+                      >
+                        <button onClick={() => { onAction("view", task); setActiveDropdown(null); }}>
+                          <FaEye /> View Details
+                        </button>
+                        <button onClick={() => { onAction("edit", task); setActiveDropdown(null); }}>
+                          <FaEdit /> Edit Task
+                        </button>
+                        <button className="delete-action" onClick={() => { onDelete(task); setActiveDropdown(null); }}>
+                          <FaTrash /> Delete Task
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </td>
               </tr>

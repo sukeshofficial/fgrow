@@ -8,6 +8,7 @@ import ClientServicesForm from "./steps/ClientServicesForm";
 import { createClient } from "../../api/client.api";
 import "../../styles/CreateClient.css";
 import { Spinner } from "../../components/ui/Spinner";
+import logger from "../../utils/logger.js";
 
 const CreateClientWizard = () => {
   const navigate = useNavigate();
@@ -37,11 +38,11 @@ const CreateClientWizard = () => {
     service_assignments: [],
     billing_profile: "",
     opening_balance: {
-        enabled: false,
-        amount: 0,
-        type: "debit",
-        as_of: new Date().toISOString().split('T')[0],
-        currency: "INR"
+      enabled: false,
+      amount: 0,
+      type: "debit",
+      as_of: new Date().toISOString().split('T')[0],
+      currency: "INR"
     }
   });
 
@@ -67,7 +68,7 @@ const CreateClientWizard = () => {
       await createClient(dataToSave);
       navigate("/clients");
     } catch (err) {
-      console.error("Create failed", err);
+      logger.error("CreateClientWizard", "Create failed", err);
       alert("Failed to create client: " + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
@@ -90,25 +91,25 @@ const CreateClientWizard = () => {
     switch (currentStep) {
       case 0:
         return (
-          <ClientDetailsForm 
-            data={formData} 
-            onNext={handleNext} 
+          <ClientDetailsForm
+            data={formData}
+            onNext={handleNext}
             onPrev={() => navigate("/clients")}
           />
         );
       case 1:
         return (
-          <ContactDetailsForm 
-            data={formData} 
-            onNext={handleNext} 
+          <ContactDetailsForm
+            data={formData}
+            onNext={handleNext}
             onPrev={handlePrev}
           />
         );
       case 2:
         return (
-          <ClientServicesForm 
-            data={formData} 
-            onNext={handleNext} 
+          <ClientServicesForm
+            data={formData}
+            onNext={handleNext}
             onPrev={handlePrev}
           />
         );

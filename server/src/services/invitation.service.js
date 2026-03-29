@@ -2,6 +2,7 @@ import crypto from "crypto";
 
 import Tenant from "../models/tenant/tenant.model.js";
 import sendEmail from "../utils/sendEmail.js";
+import logger from "../utils/logger.js";
 
 import { User } from "../models/auth/user.model.js";
 import { UserInvitation } from "../models/auth/userInvitation.model.js";
@@ -14,7 +15,7 @@ export const inviteUserService = async ({
   frontendUrl,
 }) => {
   // 1️⃣ Check tenant verification status
-  console.log("Inviting user to tenant:", tenant_id, "email:", email);
+  logger.info(`Inviting user to tenant: ${tenant_id} email: ${email}`);
   const tenant = await Tenant.findById(tenant_id);
 
   if (!tenant) {

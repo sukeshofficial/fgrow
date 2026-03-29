@@ -12,6 +12,7 @@ import { Spinner } from "../components/ui/Spinner";
 import DashboardSkeleton from "../components/skeletons/DashboardSkeleton";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
 import ScrollingCredits from "../components/dashboard/ScrollingCredits";
+import logger from "../utils/logger.js";
 
 /**
  * Dashboard page
@@ -52,7 +53,7 @@ const Dashboard = () => {
           const response = await getTenantById(user.tenant_id);
           setTenantDetails(response.data.data);
         } catch (err) {
-          console.error("Failed to fetch tenant details", err);
+          logger.error("Dashboard", "Failed to fetch tenant details", err);
         } finally {
           setLoading(false);
         }
