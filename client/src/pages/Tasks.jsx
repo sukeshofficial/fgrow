@@ -7,6 +7,7 @@ import TaskAdvancedFilterModal from "./tasks/components/TaskAdvancedFilterModal"
 import DeleteModal from "../components/ui/DeleteModal";
 import { listTasks, deleteTask } from "../api/task.api";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
+import { useAuth } from "../hooks/useAuth";
 import logger from "../utils/logger.js";
 import "../styles/ClientList.css";
 import "../styles/Tasks.css";
@@ -18,6 +19,7 @@ import "../styles/Tasks.css";
  */
 const Tasks = () => {
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const showLoading = useDelayedLoading(loading, 300);
@@ -35,6 +37,7 @@ const Tasks = () => {
     priority: "",
     service: "",
     client: "",
+    user: "",
     dateFrom: "",
     dateTo: "",
   });
@@ -59,6 +62,7 @@ const Tasks = () => {
         priority: currentFilters.priority,
         service: currentFilters.service,
         client: currentFilters.client,
+        user: currentFilters.user,
         dateFrom: currentFilters.dateFrom,
         dateTo: currentFilters.dateTo,
         ...statusFilter,
@@ -140,6 +144,7 @@ const Tasks = () => {
             onFilterChange={handleFilterChange}
             onCreateNew={() => navigate("/tasks/create")}
             onOpenAdvanced={() => setIsFilterModalOpen(true)}
+            currentUser={currentUser}
           />
 
           <TaskAdvancedFilterModal
@@ -157,6 +162,7 @@ const Tasks = () => {
                 priority: "",
                 service: "",
                 client: "",
+                user: "",
                 dateFrom: "",
                 dateTo: "",
               })

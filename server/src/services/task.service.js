@@ -13,6 +13,7 @@ export const listTasks = async (filters = {}) => {
     priority,
     service,
     client,
+    user,
     dateFrom,
     dateTo,
     page = 1,
@@ -32,6 +33,7 @@ export const listTasks = async (filters = {}) => {
   if (priority) taskQuery.priority = priority;
   if (service) taskQuery.service = new mongoose.Types.ObjectId(service);
   if (client) taskQuery.client = new mongoose.Types.ObjectId(client);
+  if (user) taskQuery.users = new mongoose.Types.ObjectId(user);
 
   if (dateFrom || dateTo) taskQuery.creation_date = {};
   if (dateFrom) taskQuery.creation_date.$gte = new Date(dateFrom);
@@ -51,7 +53,7 @@ export const listTasks = async (filters = {}) => {
     Task.find(taskQuery)
       .populate("client", "name")
       .populate("service", "name")
-      .populate("users", "name email")
+      .populate("users")
       .populate("tags", "name")
       .sort({ [sortBy]: sortDir })
       .skip(skip)
@@ -114,8 +116,9 @@ export const getTaskById = async (taskId, tenant_id) => {
   return Task.findOne(taskQuery)
     .populate("client")
     .populate("service")
-    .populate("users", "name email")
+    .populate("users", "name email profile_avatar")
     .populate("tags", "name")
+    .populate("timelogs.user", "name profile_avatar")
     .lean();
 };
 
@@ -430,6 +433,7 @@ export const getActivities = async (taskId, tenant_id, opts = {}) => {
   const limit = opts.limit ? Number(opts.limit) : 50;
 
   return TaskActivity.find(activityQuery)
+    .populate("user", "name profile_avatar")
     .sort({ createdAt: -1 })
     .limit(limit)
     .lean();

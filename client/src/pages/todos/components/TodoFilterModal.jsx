@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SearchableDropdown from "../../../components/ui/SearchableDropdown";
-import FormField from "../../../components/ui/FormField";
+import { FiX, FiFilter } from "react-icons/fi";
+import "../../../styles/AdvancedFilters.css";
 
 const TodoFilterModal = ({ isOpen, onClose, filters, onApply, onClear, clients, services, staff }) => {
   const [localFilters, setLocalFilters] = useState(filters);
@@ -13,135 +14,116 @@ const TodoFilterModal = ({ isOpen, onClose, filters, onApply, onClear, clients, 
 
   if (!isOpen) return null;
 
+  const handleApply = () => {
+    onApply(localFilters);
+    onClose();
+  };
+
+  const handleClear = () => {
+    onClear();
+    onClose();
+  };
+
   return (
-    <div className="filter-modal-overlay">
-      <div className="modal-content advanced-filter-modal">
-        <div className="modal-header">
-          <h3>Filters</h3>
-          <button className="close-btn" onClick={onClose}>&times;</button>
+    <div className="filter-modal-overlay" onClick={onClose}>
+      <div className="filter-modal-container" onClick={(e) => e.stopPropagation()}>
+        <div className="filter-modal-header">
+          <h3><FiFilter /> Advanced Filters</h3>
+          <button className="filter-close-btn" onClick={onClose}><FiX /></button>
         </div>
-        
-        <div className="modal-body">
-          <div className="filter-grid">
-            <FormField label="Assigned To">
-              <SearchableDropdown 
+
+        <div className="filter-modal-body">
+          <div className="filter-grid-layout" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+            <div className="filter-field-group">
+              <label className="filter-field-label">Assigned To</label>
+              <SearchableDropdown
                 options={staff}
                 value={localFilters.user}
-                onChange={(val) => setLocalFilters({...localFilters, user: val})}
+                onChange={(val) => setLocalFilters({ ...localFilters, user: val })}
                 placeholder="Select Staff"
               />
-            </FormField>
+            </div>
 
-            <FormField label="Priority">
-              <select 
-                className="form-input" 
-                value={localFilters.priority || ""} 
-                onChange={(e) => setLocalFilters({...localFilters, priority: e.target.value})}
+            <div className="filter-field-group">
+              <label className="filter-field-label">Priority</label>
+              <select
+                className="filter-input-styled"
+                value={localFilters.priority || ""}
+                onChange={(e) => setLocalFilters({ ...localFilters, priority: e.target.value })}
               >
                 <option value="">All Priorities</option>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
               </select>
-            </FormField>
+            </div>
 
-            <FormField label="Client">
-              <SearchableDropdown 
+            <div className="filter-field-group">
+              <label className="filter-field-label">Client</label>
+              <SearchableDropdown
                 options={clients}
                 value={localFilters.client}
-                onChange={(val) => setLocalFilters({...localFilters, client: val})}
+                onChange={(val) => setLocalFilters({ ...localFilters, client: val })}
                 placeholder="Select Client"
               />
-            </FormField>
+            </div>
 
-            <FormField label="Service">
-              <SearchableDropdown 
+            <div className="filter-field-group">
+              <label className="filter-field-label">Service</label>
+              <SearchableDropdown
                 options={services}
                 value={localFilters.service}
-                onChange={(val) => setLocalFilters({...localFilters, service: val})}
+                onChange={(val) => setLocalFilters({ ...localFilters, service: val })}
                 placeholder="Select Service"
               />
-            </FormField>
+            </div>
 
-            <FormField label="Due From">
-              <input 
-                type="date" 
-                className="form-input" 
+            <div className="filter-field-group">
+              <label className="filter-field-label">Due From</label>
+              <input
+                type="date"
+                className="filter-input-styled"
                 value={localFilters.due_from || ""}
-                onChange={(e) => setLocalFilters({...localFilters, due_from: e.target.value})}
+                onChange={(e) => setLocalFilters({ ...localFilters, due_from: e.target.value })}
               />
-            </FormField>
+            </div>
 
-            <FormField label="Due To">
-              <input 
-                type="date" 
-                className="form-input" 
+            <div className="filter-field-group">
+              <label className="filter-field-label">Due To</label>
+              <input
+                type="date"
+                className="filter-input-styled"
                 value={localFilters.due_to || ""}
-                onChange={(e) => setLocalFilters({...localFilters, due_to: e.target.value})}
+                onChange={(e) => setLocalFilters({ ...localFilters, due_to: e.target.value })}
               />
-            </FormField>
+            </div>
+
+            <div className="filter-field-group">
+              <label className="filter-field-label">Status</label>
+              <select
+                className="filter-input-styled"
+                value={localFilters.status || "all"}
+                onChange={(e) => setLocalFilters({ ...localFilters, status: e.target.value })}
+              >
+                <option value="all">Any Status</option>
+                <option value="new">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="verified">Verified</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <div className="modal-footer">
-          <button className="clear-link" onClick={() => { onClear(); onClose(); }}>Clear All</button>
-          <div className="footer-actions">
-            <button className="cancel-btn" onClick={onClose}>Cancel</button>
-            <button className="apply-btn" onClick={() => { onApply(localFilters); onClose(); }}>Apply Filters</button>
+        <div className="filter-modal-footer">
+          <button className="filter-clear-all" onClick={handleClear}>Reset Filters</button>
+          <div className="filter-footer-btns">
+            <button className="filter-btn-secondary" onClick={onClose}>Cancel</button>
+            <button className="filter-btn-primary" onClick={handleApply}>Apply Filters</button>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .filter-modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0,0,0,0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-        }
-        .advanced-filter-modal {
-          background: white;
-          width: 500px;
-          border-radius: 12px;
-          display: flex;
-          flex-direction: column;
-        }
-        .modal-header {
-          padding: 16px 20px;
-          border-bottom: 1px solid #e2e8f0;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .modal-header h3 { margin: 0; font-size: 18px; color: var(--text-main); }
-        .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
-        .modal-body { padding: 20px; overflow-y: auto; max-height: 70vh; }
-        .filter-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-        .modal-footer {
-          padding: 16px 20px;
-          border-top: 1px solid #e2e8f0;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .clear-link { background: none; border: none; color: #ef4444; font-weight: 500; cursor: pointer; }
-        .footer-actions { display: flex; gap: 12px; }
-        .cancel-btn { background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; color: var(--text-main); }
-        .apply-btn { background: var(--primary-accent, #2563eb); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; }
-        .form-input {
-          width: 100%;
-          padding: 8px 12px;
-          border: 1px solid var(--border-color, #e2e8f0);
-          border-radius: 8px;
-          font-size: 14px;
-        }
-      `}</style>
     </div>
   );
 };

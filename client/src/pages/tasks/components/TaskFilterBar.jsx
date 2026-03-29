@@ -2,7 +2,7 @@ import React from "react";
 import { FaSearch, FaPlus } from "react-icons/fa";
 import { FiFilter } from "react-icons/fi";
 
-const TaskFilterBar = ({ filters, onFilterChange, onCreateNew, onOpenAdvanced }) => {
+const TaskFilterBar = ({ filters, onFilterChange, onCreateNew, onOpenAdvanced, currentUser }) => {
   return (
     <div className="filter-bar">
       <div className="search-wrapper">
@@ -21,10 +21,22 @@ const TaskFilterBar = ({ filters, onFilterChange, onCreateNew, onOpenAdvanced })
       <div className="quick-filters">
         <div className="status-toggle">
           <button
-            className={`toggle-btn ${filters.status === "all" ? "active" : ""}`}
-            onClick={() => onFilterChange("status", "all")}
+            className={`toggle-btn ${filters.status === "all" && !filters.user ? "active" : ""}`}
+            onClick={() => {
+              onFilterChange("status", "all");
+              onFilterChange("user", "");
+            }}
           >
             All
+          </button>
+          <button
+            className={`toggle-btn ${filters.user === currentUser?._id ? "active" : ""}`}
+            onClick={() => {
+              const newValue = filters.user === currentUser?._id ? "" : currentUser?._id;
+              onFilterChange("user", newValue);
+            }}
+          >
+            My Tasks
           </button>
           <button
             className={`toggle-btn ${filters.status === "pending" ? "active" : ""}`}

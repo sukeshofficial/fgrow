@@ -1,0 +1,355 @@
+/* Task Details Premium UI */
+
+.task-details-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 24px;
+    transition: color 0.2s;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: var(--primary-accent);
+}
+
+.task-header-section {
+    margin-bottom: 32px;
+}
+
+.task-header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.task-title-area h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+}
+
+.task-completion-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: #f0fdf4;
+    color: #16a34a;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #dcfce7;
+}
+
+.task-description {
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-top: 12px;
+    max-width: 800px;
+}
+
+.task-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Checklist Styling */
+.section-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 24px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 20px 0;
+}
+
+.checklist-items-simple {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.checklist-item-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    transition: background 0.2s;
+}
+
+.checklist-item-row:hover {
+    background: #f8fafc;
+}
+
+.checklist-checkbox {
+    cursor: pointer;
+    display: flex;
+    font-size: 20px;
+    color: #cbd5e1;
+    transition: color 0.2s;
+}
+
+.checklist-checkbox.checked {
+    color: var(--primary-accent);
+}
+
+.checklist-text {
+    flex: 1;
+    font-size: 15px;
+    color: #1e293b;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.checklist-text.checked {
+    color: #94a3b8;
+    text-decoration: line-through;
+}
+
+.checklist-delete-btn {
+    opacity: 0;
+    padding: 8px;
+    border-radius: 8px;
+    color: #94a3b8;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.checklist-item-row:hover .checklist-delete-btn {
+    opacity: 1;
+}
+
+.checklist-delete-btn:hover {
+    color: #ef4444;
+    background: #fef2f2;
+}
+
+/* Activity Feed Styling */
+.activity-list-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.activity-item-simple {
+    display: flex;
+    gap: 12px;
+    position: relative;
+}
+
+.activity-item-simple:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 24px;
+    bottom: -16px;
+    width: 2px;
+    background: #f1f5f9;
+}
+
+.activity-icon-container {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    color: #64748b;
+    font-size: 10px;
+}
+
+.activity-content-main {
+    flex: 1;
+}
+
+.activity-msg {
+    font-size: 14px;
+    color: #334155;
+    font-weight: 500;
+}
+
+.activity-msg strong {
+    color: #0f172a;
+}
+
+.activity-time-relative {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+/* Time Logs Collapsible */
+.timelogs-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.timelogs-summary:hover {
+    background: #f1f5f9;
+}
+
+.total-time-badge {
+    background: #eef2ff;
+    color: #4f46e5;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.timelogs-table-container {
+    margin-top: 16px;
+    overflow-x: auto;
+}
+
+.timelogs-table-compact {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.timelogs-table-compact th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #64748b;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.timelogs-table-compact td {
+    padding: 12px;
+    font-size: 13px;
+    color: #334155;
+    border-bottom: 1px solid #f8fafc;
+}
+
+/* Responsive Grid */
+.detail-layout-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 1024px) {
+    .detail-layout-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Tablet & Mobile Enhancements ( < 768px ) */
+@media (max-width: 768px) {
+    .task-details-container {
+        padding: 20px;
+    }
+
+    .task-header-main {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .task-header-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .task-header-actions>* {
+        width: 100%;
+    }
+
+    .task-header-actions button {
+        height: 44px;
+        /* Better touch target */
+        justify-content: center;
+    }
+
+    .task-title-area h1 {
+        font-size: 24px;
+    }
+}
+
+/* Handheld Mobile ( < 640px ) */
+@media (max-width: 640px) {
+
+    /* Reclaim space from sidebar margin if applicable */
+    :global(.clients) {
+        margin-left: 0 !important;
+        padding-top: 60px;
+        /* Space for a top bar if needed */
+    }
+
+    .task-details-container {
+        padding: 16px;
+    }
+
+    .task-header-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .section-card {
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    .checklist-item-row {
+        padding: 10px;
+    }
+
+    .checklist-text {
+        font-size: 14px;
+    }
+
+    .timelogs-summary {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .total-time-badge {
+        width: 100%;
+        text-align: center;
+    }
+
+    .back-link {
+        width: 100%;
+        padding: 12px;
+        background: #f1f5f9;
+        border-radius: 8px;
+        justify-content: center;
+    }
+}

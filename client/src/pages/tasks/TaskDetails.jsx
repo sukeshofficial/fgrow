@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import SideBar from "../../components/SideBar";
 import StatusDropdown from "../../components/tasks/StatusDropdown";
 import {
@@ -13,11 +13,37 @@ import {
   addTimelog,
   getTaskActivities
 } from "../../api/task.api.js";
-import { FaCheckCircle, FaRegCircle, FaTrash, FaPlay, FaStop, FaPlus, FaHistory, FaClock, FaArrowLeft } from "react-icons/fa";
-import "../../styles/ClientList.css";
-import "../../styles/Tasks.css";
+import {
+  FaCheckCircle,
+  FaRegCircle,
+  FaTrash,
+  FaPlay,
+  FaStop,
+  FaPlus,
+  FaHistory,
+  FaClock,
+  FaArrowLeft,
+  FaChevronDown,
+  FaChevronUp,
+  FaInfoCircle
+} from "react-icons/fa";
+import "./components/TaskDetails.css";
 import { Spinner } from "../../components/ui/Spinner";
 import logger from "../../utils/logger.js";
+
+/**
+ * Relative time helper
+ */
+const getRelativeTime = (date) => {
+  const now = new Date();
+  const diff = Math.floor((now - new Date(date)) / 1000);
+
+  if (diff < 60) return "just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+  return new Date(date).toLocaleDateString();
+};
 
 const TaskDetails = () => {
   const { id } = useParams();
@@ -28,6 +54,7 @@ const TaskDetails = () => {
   const [newChecklistItem, setNewChecklistItem] = useState("");
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [activeTimelogId, setActiveTimelogId] = useState(null);
+  const [showLogs, setShowLogs] = useState(false);
 
   const fetchTaskDetails = useCallback(async () => {
     try {
@@ -37,7 +64,6 @@ const TaskDetails = () => {
       ]);
       if (taskResp.data.success) {
         setTask(taskResp.data.data);
-        // Check for active timer
         const activeLog = taskResp.data.data.timelogs?.find(log => !log.end_time);
         if (activeLog) {
           setIsTimerRunning(true);
@@ -68,7 +94,7 @@ const TaskDetails = () => {
         fetchTaskDetails();
       }
     } catch (err) {
-      alert("Failed to update status");
+      logger.error("TaskDetails", "Status update failed", err);
     }
   };
 
@@ -80,7 +106,7 @@ const TaskDetails = () => {
       setNewChecklistItem("");
       fetchTaskDetails();
     } catch (err) {
-      alert("Failed to add checklist item");
+      logger.error("TaskDetails", "Checklist add failed", err);
     }
   };
 
@@ -89,7 +115,7 @@ const TaskDetails = () => {
       await updateChecklistItem(id, idx, { is_done: !isDone });
       fetchTaskDetails();
     } catch (err) {
-      alert("Failed to update checklist item");
+      logger.error("TaskDetails", "Checklist toggle failed", err);
     }
   };
 
@@ -98,7 +124,7 @@ const TaskDetails = () => {
       await deleteChecklistItem(id, idx);
       fetchTaskDetails();
     } catch (err) {
-      alert("Failed to delete checklist item: " + (err.response?.data?.message || err.message));
+      logger.error("TaskDetails", "Checklist delete failed", err);
     }
   };
 
@@ -111,9 +137,27 @@ const TaskDetails = () => {
       }
       fetchTaskDetails();
     } catch (err) {
-      alert("Failed to toggle timer");
+      logger.error("TaskDetails", "Timer toggle failed", err);
     }
   };
+
+  const totalTime = useMemo(() => {
+    if (!task?.timelogs) return 0;
+    return task.timelogs.reduce((acc, log) => acc + (log.duration_minutes || 0), 0);
+  }, [task]);
+
+  const processedActivities = useMemo(() => {
+    if (!activities) return [];
+    // Group repetitive status changes
+    return activities.filter((activity, index, self) => {
+      if (index === 0) return true;
+      const prev = self[index - 1];
+      if (activity.activity_type === "status_changed" && prev.activity_type === "status_changed") {
+        return false; // Skip if it's back-to-back status change
+      }
+      return true;
+    });
+  }, [activities]);
 
   if (loading) {
     return (
@@ -128,111 +172,83 @@ const TaskDetails = () => {
     <>
       <SideBar />
       <div className="clients">
-        <div className="client-list-container">
-          <div className="back-btn-container">
-            <button
-              onClick={() => navigate("/tasks")}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: 'none',
-                border: 'none',
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                marginBottom: '16px',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
-            >
-              <FaArrowLeft /> Back to Tasks
-            </button>
-          </div>
+        <div className="task-details-container">
+          {/* Header Navigation */}
+          <Link to="/tasks" className="back-link">
+            <FaArrowLeft size={12} /> Back to Tasks
+          </Link>
 
-          <div className="task-details-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
-            <div>
-              <h1 className="client-list-title">{task.title}</h1>
-              <p style={{ color: 'var(--text-muted)', marginTop: '8px' }}>{task.description || "No description provided."}</p>
-            </div>
-            <div className="task-actions" style={{ display: 'flex', gap: '12px' }}>
-              <StatusDropdown
-                value={task.status}
-                onChange={handleStatusChange}
-              />
-              <button
-                onClick={handleToggleTimer}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: isTimerRunning ? 'var(--error-red)' : 'var(--primary-accent)',
-                  color: 'white',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}
-              >
-                {isTimerRunning ? <FaStop /> : <FaPlay />}
-                {isTimerRunning ? "Stop Timer" : "Start Timer"}
-              </button>
+          {/* Main Header Section */}
+          <div className="task-header-section">
+            <div className="task-header-main">
+              <div className="task-title-area">
+                <h1>{task.title}</h1>
+                {task.status === "completed" && task.completed_at && (
+                  <div className="task-completion-badge">
+                    <FaCheckCircle /> Completed on {new Date(task.completed_at).toLocaleDateString()}
+                  </div>
+                )}
+                <p className="task-description">{task.description || "No description provided."}</p>
+              </div>
+
+              <div className="task-header-actions">
+                <StatusDropdown value={task.status} onChange={handleStatusChange} />
+                <button
+                  onClick={handleToggleTimer}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 20px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    background: isTimerRunning ? '#ef4444' : 'var(--primary-accent)',
+                    color: 'white',
+                    fontWeight: '700',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)'
+                  }}
+                >
+                  {isTimerRunning ? <FaStop /> : <FaPlay />}
+                  {isTimerRunning ? "Stop Session" : "Start Session"}
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="task-details-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px' }}>
-            <div className="main-content">
+          <div className="detail-layout-grid">
+            <div className="main-detail-column">
               {/* Checklist Section */}
-              <div className="task-card" style={{ background: 'white', borderRadius: '16px', border: '1px solid var(--border-color)', padding: '24px', marginBottom: '32px' }}>
-                <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div className="section-card">
+                <h3 className="section-title">
                   <FaCheckCircle color="var(--primary-accent)" /> Checklist
                 </h3>
-                <div className="checklist-items" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {task.checklist?.map((item, idx) => (
-                    <div key={idx} style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 16px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px',
-                      background: item.is_done ? '#f8fafc' : 'white',
-                      transition: 'all 0.2s ease'
-                    }}>
-                      <span onClick={() => handleToggleChecklist(idx, item.is_done)} style={{ cursor: 'pointer', display: 'flex', fontSize: '18px' }}>
-                        {item.is_done ? <FaCheckCircle color="var(--primary-accent)" /> : <FaRegCircle color="#cbd5e1" />}
-                      </span>
-                      <span style={{
-                        flex: 1,
-                        textDecoration: item.is_done ? 'line-through' : 'none',
-                        color: item.is_done ? '#94a3b8' : '#1e293b',
-                        fontWeight: item.is_done ? '400' : '500',
-                        fontSize: '14px'
-                      }}>
-                        {item.title}
-                      </span>
-                      <button onClick={() => handleDeleteChecklist(idx)} style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#94a3b8',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '6px',
-                        transition: 'all 0.2s'
-                      }}
-                        onMouseOver={(e) => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = '#fef2f2'; }}
-                        onMouseOut={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'none'; }}
-                      >
-                        <FaTrash size={14} />
-                      </button>
-                    </div>
-                  ))}
+
+                <div className="checklist-items-simple">
+                  {task.checklist?.length === 0 ? (
+                    <p style={{ color: '#94a3b8', fontSize: '14px', padding: '12px 0' }}>No tasks in checklist.</p>
+                  ) : (
+                    task.checklist.map((item, idx) => (
+                      <div key={idx} className="checklist-item-row">
+                        <div
+                          className={`checklist-checkbox ${item.is_done ? 'checked' : ''}`}
+                          onClick={() => handleToggleChecklist(idx, item.is_done)}
+                        >
+                          {item.is_done ? <FaCheckCircle /> : <FaRegCircle />}
+                        </div>
+                        <div className={`checklist-text ${item.is_done ? 'checked' : ''}`}>
+                          {item.title}
+                        </div>
+                        <button onClick={() => handleDeleteChecklist(idx)} className="checklist-delete-btn">
+                          <FaTrash size={14} />
+                        </button>
+                      </div>
+                    ))
+                  )}
                 </div>
-                <form onSubmit={handleAddChecklist} style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
+
+                <form onSubmit={handleAddChecklist} style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
                   <input
                     type="text"
                     placeholder="Add a new checklist item..."
@@ -240,83 +256,106 @@ const TaskDetails = () => {
                     onChange={(e) => setNewChecklistItem(e.target.value)}
                     style={{
                       flex: 1,
-                      padding: '12px 16px',
+                      padding: '12px 18px',
                       borderRadius: '12px',
                       border: '1px solid #e2e8f0',
                       background: '#f8fafc',
                       fontSize: '14px',
-                      color: '#1e293b',
                       outline: 'none',
                       transition: 'all 0.2s'
                     }}
-                    onFocus={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)'; }}
-                    onBlur={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}
                   />
                   <button type="submit" disabled={!newChecklistItem.trim()} style={{
-                    background: newChecklistItem.trim() ? 'var(--primary-accent)' : '#94a3b8',
+                    background: newChecklistItem.trim() ? 'var(--primary-accent)' : '#cbd5e1',
                     color: 'white',
                     border: 'none',
                     padding: '0 20px',
                     borderRadius: '12px',
-                    cursor: newChecklistItem.trim() ? 'pointer' : 'not-allowed',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
+                    cursor: 'pointer',
                     fontWeight: '600',
-                    fontSize: '14px',
-                    transition: 'all 0.2s'
+                    fontSize: '14px'
                   }}>
-                    <FaPlus size={12} /> Add
+                    <FaPlus size={12} />
                   </button>
                 </form>
               </div>
 
               {/* Time Logs Section */}
-              <div className="task-card" style={{ background: 'white', borderRadius: '16px', border: '1px solid var(--border-color)', padding: '24px' }}>
-                <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <FaClock color="var(--primary-accent)" /> Time Logs
+              <div className="section-card">
+                <h3 className="section-title">
+                  <FaClock color="var(--primary-accent)" /> Time Tracking
                 </h3>
-                <div className="timelogs-list">
-                  {task.timelogs?.length === 0 ? <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>No time logged yet.</p> : (
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+
+                <div className="timelogs-summary" onClick={() => setShowLogs(!showLogs)}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span className="total-time-badge">{totalTime} minutes logged</span>
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>
+                      {showLogs ? "Click to hide details" : "Click to view logs"}
+                    </span>
+                  </div>
+                  {showLogs ? <FaChevronUp size={12} color="#94a3b8" /> : <FaChevronDown size={12} color="#94a3b8" />}
+                </div>
+
+                {showLogs && (
+                  <div className="timelogs-table-container">
+                    <table className="timelogs-table-compact">
                       <thead>
-                        <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>
-                          <th style={{ padding: '8px 0' }}>User</th>
-                          <th>Start</th>
-                          <th>End</th>
+                        <tr>
+                          <th>User</th>
+                          <th>Started</th>
                           <th>Duration</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {task.timelogs.map((log, idx) => (
-                          <tr key={idx} style={{ borderBottom: '1px solid #f8fafc' }}>
-                            <td style={{ padding: '12px 0' }}>{log.user?.name || "Staff"}</td>
-                            <td>{new Date(log.start_time).toLocaleString()}</td>
-                            <td>{log.end_time ? new Date(log.end_time).toLocaleString() : <span style={{ color: 'var(--primary-accent)', fontWeight: '600' }}>Active...</span>}</td>
-                            <td>{log.end_time ? `${log.duration_minutes || 0}m` : "-"}</td>
+                        {task.timelogs?.map((log, idx) => (
+                          <tr key={idx}>
+                            <td style={{ fontWeight: '600' }}>{log.user?.name || "Member"}</td>
+                            <td>{new Date(log.start_time).toLocaleDateString()}</td>
+                            <td>{log.end_time ? `${log.duration_minutes || 0}m` : <span style={{ color: 'var(--primary-accent)', fontWeight: '700' }}>Active</span>}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="sidebar-content">
-              {/* Activity Feed */}
-              <div className="task-card" style={{ background: 'white', borderRadius: '16px', border: '1px solid var(--border-color)', padding: '24px' }}>
-                <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <FaHistory color="var(--primary-accent)" /> Activity
+            <div className="sidebar-detail-column">
+              {/* Activity Section */}
+              <div className="section-card">
+                <h3 className="section-title">
+                  <FaHistory color="#64748b" size={16} /> Recent Activity
                 </h3>
-                <div className="activity-feed" style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '500px', overflowY: 'auto' }}>
-                  {activities.map((activity) => (
-                    <div key={activity._id} style={{ fontSize: '13px' }}>
-                      <div style={{ fontWeight: '600' }}>{activity.activity_type.replace('_', ' ')}</div>
-                      <div style={{ color: 'var(--text-muted)' }}>{activity.detail}</div>
-                      <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>{new Date(activity.createdAt).toLocaleString()}</div>
-                    </div>
-                  ))}
+                <div className="activity-list-compact">
+                  {processedActivities.slice(0, 10).map((activity) => {
+                    let msg = activity.detail;
+                    if (activity.activity_type === "status_changed") {
+                      msg = `Changed status to `;
+                      return (
+                        <div key={activity._id} className="activity-item-simple">
+                          <div className="activity-icon-container"><FaInfoCircle /></div>
+                          <div className="activity-content-main">
+                            <div className="activity-msg">
+                              <strong>{activity.user?.name || "Member"}</strong> marked as <strong>{activity.meta?.status?.replace('_', ' ')}</strong>
+                            </div>
+                            <div className="activity-time-relative">{getRelativeTime(activity.createdAt)}</div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={activity._id} className="activity-item-simple">
+                        <div className="activity-icon-container"><FaInfoCircle /></div>
+                        <div className="activity-content-main">
+                          <div className="activity-msg">
+                            <strong>{activity.user?.name || "Member"}</strong> {activity.detail.toLowerCase()}
+                          </div>
+                          <div className="activity-time-relative">{getRelativeTime(activity.createdAt)}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>

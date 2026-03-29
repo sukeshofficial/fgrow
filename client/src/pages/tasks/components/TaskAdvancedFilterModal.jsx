@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { listClientsByTenantId } from "../../../api/client.api";
+import { listClientsByTenantId, listStaff } from "../../../api/client.api";
 import { listServicesByTenant } from "../../../api/service.api";
 import SearchableDropdown from "../../../components/ui/SearchableDropdown";
 import { FiX, FiFilter } from "react-icons/fi";
@@ -9,17 +9,20 @@ import "../../../styles/AdvancedFilters.css";
 const TaskAdvancedFilterModal = ({ isOpen, onClose, filters, onApply, onClear }) => {
   const [clients, setClients] = useState([]);
   const [services, setServices] = useState([]);
+  const [staff, setStaff] = useState([]);
 
   useEffect(() => {
     if (isOpen) {
       const fetchData = async () => {
         try {
-          const [clientsResp, servicesResp] = await Promise.all([
+          const [clientsResp, servicesResp, staffResp] = await Promise.all([
             listClientsByTenantId({ limit: 100 }),
-            listServicesByTenant()
+            listServicesByTenant(),
+            listStaff()
           ]);
           if (clientsResp.data.success) setClients(clientsResp.data.data.items || clientsResp.data.data);
           if (servicesResp.data.success) setServices(servicesResp.data.data.items || servicesResp.data.data);
+          if (staffResp.data.success) setStaff(staffResp.data.data.items || staffResp.data.data);
         } catch (err) {
           logger.error("TaskAdvancedFilter", "Failed to fetch filter options", err);
         }
@@ -40,6 +43,16 @@ const TaskAdvancedFilterModal = ({ isOpen, onClose, filters, onApply, onClear })
 
         <div className="filter-modal-body">
           <div className="filter-grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div className="filter-field-group">
+              <label className="filter-field-label">Assigned To</label>
+              <SearchableDropdown
+                options={staff}
+                value={filters.user}
+                onChange={(val) => onApply({ ...filters, user: val })}
+                placeholder="Any Staff"
+              />
+            </div>
+
             <div className="filter-field-group">
               <label className="filter-field-label">Priority</label>
               <select

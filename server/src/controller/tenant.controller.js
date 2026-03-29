@@ -224,7 +224,6 @@ export const getTenantStaff = async (req, res) => {
     const { User } = await import("../models/auth/user.model.js");
 
     const users = await User.find({ tenant_id: req.user.tenant_id })
-      .select("name email username tenant_role status joined_at profile_avatar")
       .sort({ joined_at: -1 });
 
     return res.status(200).json({
