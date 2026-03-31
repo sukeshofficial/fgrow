@@ -3,8 +3,8 @@ import '../../styles/dashboard.css';
 
 const ScrollingCredits = () => {
     const credits = [
-        { role: 'DEVELOPER, DESIGNER', name: 'SUKESH' },
-        { role: 'DESIGNER', name: 'PRITHIVIRAAJ J N' },
+        { role: 'DEVELOPER, DESIGNER, TESTER', name: 'SUKESH' },
+        { role: 'DESIGNER, TESTER', name: 'PRITHIVIRAAJ J N' },
         { role: 'TESTER', name: 'VERAADITHYA N' },
     ];
 

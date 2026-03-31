@@ -193,6 +193,37 @@
   }
 }
 
+/* 1050px Breakpoint: Filter bar wrapping for narrow desktop / wide tablet */
+@media (max-width: 1050px) {
+  .filter-bar {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+
+  .search-wrapper {
+    max-width: 100% !important;
+    width: 100% !important;
+    flex-basis: 100% !important;
+  }
+
+  .quick-filters {
+    width: 100% !important;
+    flex-wrap: wrap !important;
+  }
+
+  .status-toggle {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .toggle-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
 /* 768px Breakpoint: Major Stacking and Tablet-to-Mobile transition */
 @media (max-width: 768px) {
   .client-list-container {

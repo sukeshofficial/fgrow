@@ -10,8 +10,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
-  padding: 16px 24px;
+  margin-bottom: 24px;
+  padding: 12px 20px;
   background: white;
   border-radius: 20px;
   border: 1px solid #e2e8f0;
@@ -24,7 +24,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--text-color);
 }
@@ -35,9 +35,10 @@
   align-items: center;
   color: #7c3aed;
   font-weight: 700;
-  padding: 8px 16px;
+  padding: 6px 12px;
   background: #f5f3ff;
   border-radius: 999px;
+  font-size: 13px;
   transition: all 0.2s;
 }
 
@@ -100,7 +101,7 @@
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 999px;
-  padding: 12px;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -116,7 +117,7 @@
   padding: 8px 16px;
   border-radius: 8px;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   border: 1px solid transparent;
   transition: all 0.2s;
@@ -156,6 +157,18 @@
   border-radius: 999px;
 }
 
+.btn-record-payment {
+  background: #0ea5e9;
+  color: white;
+  border: none;
+}
+
+.btn-mark-paid {
+  background: #10b981;
+  color: white;
+  border: none;
+}
+
 .btn-pdf:hover,
 .btn-print:hover,
 .btn-edit:hover,
@@ -165,10 +178,10 @@
 }
 
 .action-btn-styled {
-  padding: 10px 20px;
+  padding: 6px 14px;
   border-radius: 999px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   border: 1px solid;
   display: flex;

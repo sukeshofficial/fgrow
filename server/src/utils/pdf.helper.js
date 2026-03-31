@@ -168,10 +168,10 @@ export const generatePdfBuffer = (invoice) => {
         doc.fontSize(9).fillColor("#64748b").font("SpaceMono").text(invoice.remark, 50, summaryY + 25, { width: 280, lineGap: 2 });
       }
 
-      const drawTotalRow = (label, value, y, isBold = false, isFinal = false) => {
-        doc.fontSize(isBold ? 11 : 9).fillColor(isFinal ? "#7c3aed" : "#64748b").font(isBold ? "SpaceMono-Bold" : "SpaceMono");
+      const drawTotalRow = (label, value, y, isBold = false, isFinal = false, color = "#64748b") => {
+        doc.fontSize(isBold ? 11 : 9).fillColor(color).font(isBold ? "SpaceMono-Bold" : "SpaceMono");
         doc.text(label, 355, y);
-        doc.text(`₹${(value || 0).toLocaleString('en-IN')}`, 465, y, { width: 70, align: "right" });
+        doc.text(`₹${(value || 0).toLocaleString('en-IN')}`, 450, y, { width: 85, align: "right" });
       };
 
       let finalY = summaryY + 15;
@@ -186,12 +186,18 @@ export const generatePdfBuffer = (invoice) => {
         finalY += 18;
         drawTotalRow("Round Off", invoice.round_off || 0, finalY);
       }
+      if (invoice.amount_received > 0) {
+        finalY += 18;
+        drawTotalRow("Amount Received", invoice.amount_received || 0, finalY, false, false, "#64748b");
+      }
 
       finalY += 22;
       doc.moveTo(355, finalY - 8).lineTo(530, finalY - 8).strokeColor("#e2e8f0").lineWidth(1).dash(2, { space: 2 }).stroke().undash();
+
+      // Fixed: Increased width to prevent breaking
       doc.fontSize(12).fillColor("#7c3aed").font("SpaceMono-Bold");
       doc.text("TOTAL", 355, finalY);
-      doc.text(`₹${(invoice.total_amount || 0).toLocaleString('en-IN')}`, 465, finalY, { width: 70, align: "right" });
+      doc.text(`₹${(invoice.total_amount || 0).toLocaleString('en-IN')}`, 440, finalY, { width: 95, align: "right" });
 
       // 6. FOOTER
 

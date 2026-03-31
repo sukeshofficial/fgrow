@@ -7,13 +7,16 @@ import {
   FiPrinter,
   FiCheckCircle,
   FiEdit3,
-  FiTrash2
+  FiTrash2,
+  FiDollarSign,
 } from "react-icons/fi";
 import Sidebar from "../../components/SideBar";
 import ShareModal from "./components/ShareModal";
+import RecordPaymentModal from "./components/RecordPaymentModal";
 import {
   getInvoiceById,
   markPaid,
+  addPayment,
   deleteInvoice,
   getPdf,
   sendInvoice
@@ -31,6 +34,7 @@ const InvoiceDetail = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const fetchInvoice = async () => {
     try {
@@ -64,6 +68,24 @@ const InvoiceDetail = () => {
       await showAlert(
         "Failed",
         "Failed to mark as paid: " + (err.response?.data?.message || err.message),
+        "error"
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRecordPayment = async (paymentData) => {
+    try {
+      setActionLoading(true);
+      await addPayment(id, paymentData);
+      setIsPaymentModalOpen(false);
+      await fetchInvoice();
+      await showAlert("Success", "Payment recorded successfully!", "success");
+    } catch (err) {
+      await showAlert(
+        "Failed",
+        "Failed to record payment: " + (err.response?.data?.message || err.message),
         "error"
       );
     } finally {
@@ -227,14 +249,22 @@ const InvoiceDetail = () => {
               </div>
 
               {invoice.status !== 'paid' && (
-                <button
-                  className="action-btn-styled btn-mark-paid"
-                  onClick={handleMarkPaid}
-                  disabled={actionLoading}
-                  style={{ background: '#10b981', color: 'white', border: 'none' }}
-                >
-                  <FiCheckCircle /> Mark Paid
-                </button>
+                <>
+                  <button
+                    className="action-btn-styled btn-record-payment"
+                    onClick={() => setIsPaymentModalOpen(true)}
+                    disabled={actionLoading}
+                  >
+                    <FiDollarSign /> Record Payment
+                  </button>
+                  <button
+                    className="action-btn-styled btn-mark-paid"
+                    onClick={handleMarkPaid}
+                    disabled={actionLoading}
+                  >
+                    <FiCheckCircle /> Mark Paid
+                  </button>
+                </>
               )}
 
               <button
@@ -378,6 +408,18 @@ const InvoiceDetail = () => {
                   <span>TOTAL</span>
                   <span className="grand-total-value">₹{invoice.total_amount?.toLocaleString('en-IN') || "0.00"}</span>
                 </div>
+                {invoice.amount_received > 0 && (
+                  <>
+                    <div className="total-row" style={{ marginTop: '12px' }}>
+                      <span>Amount Received</span>
+                      <span style={{ fontWeight: 700, color: '#10b981' }}>-₹{invoice.amount_received?.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="total-row grand-total" style={{ borderTop: '1px dashed #e2e8f0', marginTop: '12px', paddingTop: '12px', color: '#ef4444' }}>
+                      <span>BALANCE DUE</span>
+                      <span className="grand-total-value" style={{ color: '#ef4444' }}>₹{invoice.balance_due?.toLocaleString('en-IN')}</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -390,6 +432,14 @@ const InvoiceDetail = () => {
         onSend={handleShare}
         initialEmail={invoice?.client?.email}
         businessName={billingEntity.name}
+        loading={actionLoading}
+      />
+
+      <RecordPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onRecord={handleRecordPayment}
+        balanceDue={invoice.balance_due}
         loading={actionLoading}
       />
     </>
