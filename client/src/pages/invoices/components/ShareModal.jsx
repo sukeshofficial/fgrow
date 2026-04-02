@@ -2,19 +2,19 @@ import React, { useState, useEffect } from "react";
 import { FiX, FiSend, FiMail, FiMessageSquare, FiType } from "react-icons/fi";
 import "./ShareModal.css";
 
-const ShareModal = ({ isOpen, onClose, onSend, initialEmail, businessName, loading }) => {
+const ShareModal = ({ isOpen, onClose, onSend, initialEmail, businessName, loading, type = "Invoice" }) => {
   const [emails, setEmails] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("Please find the attached invoice for your reference.");
+  const [message, setMessage] = useState(`Please find the attached ${type.toLowerCase()} for your reference.`);
 
   useEffect(() => {
     if (isOpen) {
       setEmails(initialEmail ? [initialEmail] : []);
-      setSubject(`Invoice from ${businessName || "Your Company"}`);
+      setSubject(`${type} from ${businessName || "Your Company"}`);
       setInputValue("");
     }
-  }, [isOpen, initialEmail, businessName]);
+  }, [isOpen, initialEmail, businessName, type]);
 
   if (!isOpen) return null;
 
@@ -90,7 +90,7 @@ const ShareModal = ({ isOpen, onClose, onSend, initialEmail, businessName, loadi
             </div>
             <div>
               <h2 className="share-modal-title-title">Share via Email</h2>
-              <p className="share-modal-subtitle">Send this invoice directly to your client</p>
+              <p className="share-modal-subtitle">Send this {type.toLowerCase()} directly to your client</p>
             </div>
           </div>
         </div>
@@ -174,7 +174,7 @@ const ShareModal = ({ isOpen, onClose, onSend, initialEmail, businessName, loadi
               {loading ? (
                 <div className="share-spinner"></div>
               ) : (
-                <><FiSend size={18} /> Send Invoice</>
+                <><FiSend size={18} /> Send {type}</>
               )}
             </button>
           </div>

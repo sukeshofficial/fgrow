@@ -29,8 +29,11 @@ const applyTotals = (inv, totals) => {
   inv.total_gst = totals.total_gst;
   inv.discount_total = totals.discount_total;
   inv.total_amount = totals.total_amount;
-  inv.total_amount = totals.total_amount;
   inv.round_off = totals.round_off;
+
+  // Sync balance_due whenever totals change
+  const paid = inv.amount_received || 0;
+  inv.balance_due = Math.max(0, inv.total_amount - paid);
 };
 
 const syncTaskLinks = async (user, invoiceId, items) => {
@@ -172,6 +175,7 @@ export const createInvoice = async (user, payload) => {
   };
 
   applyTotals(doc, computeInvoiceTotals(doc.items));
+  doc.balance_due = Math.max(0, (doc.total_amount || 0) - (doc.amount_received || 0));
 
   logger.info(`[InvoiceService] Creating invoice for tenant ${user.tenant_id}. Invoice No: ${doc.invoice_no}`);
   const invoice = await Invoice.create(doc);

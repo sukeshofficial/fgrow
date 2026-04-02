@@ -1,0 +1,106 @@
+.service-actions-cell {
+    display: flex !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    min-width: 280px !important;
+    /* Ensure enough space for 3 buttons */
+}
+
+.service-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #475569;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.service-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e1;
+}
+
+.service-action-btn:active {
+    transform: translateY(0);
+}
+
+.service-action-btn svg {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* Edit Button specific */
+.btn-edit-service {
+    color: #4f46e5;
+    background: #f5f3ff;
+    border-color: #ddd6fe;
+}
+
+.btn-edit-service:hover {
+    background: #ede9fe;
+    border-color: #c4b5fd;
+    color: #4338ca;
+}
+
+/* Status Toggles */
+.btn-toggle-enable {
+    color: #059669;
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+}
+
+.btn-toggle-enable:hover {
+    background: #d1fae5;
+    border-color: #6ee7b7;
+}
+
+.btn-toggle-disable {
+    color: #d97706;
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.btn-toggle-disable:hover {
+    background: #fef3c7;
+    border-color: #fbbf24;
+}
+
+/* Delete Button */
+.btn-delete-service {
+    color: #dc2626;
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.btn-delete-service:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #b91c1c;
+}
+
+/* Table container fix */
+.service-table-wrapper {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 4px 20px -10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+}
+
+.modern-table th:last-child,
+.modern-table td:last-child {
+    text-align: right;
+    padding-right: 24px;
+}

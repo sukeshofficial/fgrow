@@ -8,9 +8,10 @@ import {
     autoApplyService,
     unapplyReceiptService,
     listUnpaidInvoicesForClient,
+    sendReceiptService,
 } from "../services/receipt.service.js";
 
-import {generateReceiptPdfBuffer} from "../utils/pdf.helper.js"; // see helper below
+import { generateReceiptPdfBuffer } from "../utils/pdf.helper.js"; // see helper below
 
 export const createReceiptController = async (req, res) => {
     try {
@@ -32,6 +33,19 @@ export const listReceiptsController = async (req, res) => {
         return res.json({ success: true, data: result.items, pagination: result.pagination });
     } catch (e) {
         return res.status(500).json({ success: false, message: e.message });
+    }
+};
+
+/* Send receipt via email */
+export const sendReceiptController = async (req, res) => {
+    try {
+        const user = req.user;
+        const receipt_id = req.params.id;
+        const body = req.body; // { to, cc, subject, message }
+        const result = await sendReceiptService(user, receipt_id, body);
+        return res.json({ success: true, data: result });
+    } catch (e) {
+        return res.status(400).json({ success: false, message: e.message });
     }
 };
 

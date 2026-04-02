@@ -8,6 +8,7 @@ const appliedInvoiceSchema = new Schema(
         invoice_no: { type: String, trim: true },
         invoice_date: { type: Date },
         invoice_amount: { type: Number, default: 0 },
+        invoice_balance: { type: Number, default: 0 }, // remaining balance on invoice after this application
         amount_applied: { type: Number, required: true }, // amount of this receipt applied
     },
     { _id: true }

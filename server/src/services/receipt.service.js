@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 import Receipt from "../models/receipt/receipt.model.js";
 import Invoice from "../models/invoice/invoice.model.js";
 import ReceiptCounter from "../models/receipt/schemas/receiptCounter.model.js";
+import { generateReceiptPdfBuffer } from "../utils/pdf.helper.js";
+import sendEmail from "../utils/sendEmail.js";
+import stream from "stream";
 
 const { Types } = mongoose;
 
@@ -139,7 +142,12 @@ export const listReceiptsService = async ({
 
   const skip = (page - 1) * limit;
   const [items, total] = await Promise.all([
-    Receipt.find(query).sort({ date: -1 }).skip(skip).limit(limit).lean(),
+    Receipt.find(query)
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("client", "name file_no")
+      .lean(),
     Receipt.countDocuments(query),
   ]);
 
@@ -290,9 +298,9 @@ export const autoApplyService = async ({ tenant_id, user_id, receipt_id }) => {
       typeof inv.balance_due === "number"
         ? Number(inv.balance_due)
         : Math.max(
-            0,
-            Number(inv.total_amount || 0) - Number(inv.amount_received || 0),
-          );
+          0,
+          Number(inv.total_amount || 0) - Number(inv.amount_received || 0),
+        );
     const toApply = Math.min(available, invBalance);
     if (toApply <= 0) continue;
     allocations.push({ invoiceId: inv._id, amount: toApply });
@@ -393,13 +401,28 @@ export const applyToInvoicesService = async ({
         for (const item of invoiceUpdates) {
           const inv = item.invoice;
           const amt = item.amt;
+
+          const currentBalance =
+            typeof inv.balance_due === "number"
+              ? Number(inv.balance_due)
+              : Math.max(0, (inv.total_amount || 0) - (inv.amount_received || 0));
+
+          const newBalance = Math.max(0, currentBalance - amt);
+          const newAmountReceived = (inv.amount_received || 0) + amt;
+
           appliedEntries.push({
             invoice: inv._id,
             invoice_no: inv.invoice_no,
             invoice_date: inv.date,
             invoice_amount: inv.total_amount || 0,
+            invoice_balance: newBalance,
             amount_applied: amt,
           });
+
+          inv.amount_received = newAmountReceived;
+          inv.balance_due = newBalance;
+          if (newBalance === 0 && inv.total_amount > 0) inv.status = "paid";
+          else if (newBalance < inv.total_amount) inv.status = "partially_paid";
 
           inv.payments = inv.payments || [];
           inv.payments.push({
@@ -410,10 +433,6 @@ export const applyToInvoicesService = async ({
             note: `Applied from receipt ${receipt.receipt_no}`,
             created_by: user_id,
           });
-          inv.amount_received = Number(inv.amount_received || 0) + amt;
-          inv.balance_due = Number(inv.total_amount || 0) - inv.amount_received;
-          if (inv.balance_due <= 0) inv.status = "paid";
-          else if (inv.amount_received > 0) inv.status = "partially_paid";
           await inv.save({ session });
         }
 
@@ -498,6 +517,14 @@ export const applyToInvoicesService = async ({
       const inv = item.invoice;
       const amt = item.amt;
 
+      const currentBalance =
+        typeof inv.balance_due === "number"
+          ? Number(inv.balance_due)
+          : Math.max(0, (inv.total_amount || 0) - (inv.amount_received || 0));
+
+      const newBalance = Math.max(0, currentBalance - amt);
+      const newAmountReceived = (inv.amount_received || 0) + amt;
+
       inv.payments = inv.payments || [];
       inv.payments.push({
         amount: amt,
@@ -507,17 +534,21 @@ export const applyToInvoicesService = async ({
         note: `Applied from receipt ${receipt.receipt_no}`,
         created_by: user_id,
       });
-      inv.amount_received = Number(inv.amount_received || 0) + amt;
-      inv.balance_due = Number(inv.total_amount || 0) - inv.amount_received;
-      if (inv.balance_due <= 0) inv.status = "paid";
-      else if (inv.amount_received > 0) inv.status = "partially_paid";
+
+      inv.amount_received = newAmountReceived;
+      inv.balance_due = newBalance;
+      if (newBalance === 0 && inv.total_amount > 0) inv.status = "paid";
+      else if (newAmountReceived > 0) inv.status = "partially_paid";
+
       // persist invoice
       await inv.save();
+
       appliedEntries.push({
         invoice: inv._id,
         invoice_no: inv.invoice_no,
         invoice_date: inv.date,
         invoice_amount: inv.total_amount || 0,
+        invoice_balance: newBalance,
         amount_applied: amt,
       });
     }
@@ -705,4 +736,65 @@ export const listUnpaidInvoicesForClient = async ({
     items,
     pagination: { total, page, limit, total_pages: Math.ceil(total / limit) },
   };
+};
+
+/**
+ * Send receipt PDF via email
+ */
+export const sendReceiptService = async (user, receiptId, body) => {
+  if (!body.to) throw new Error("Recipient email address (to) is required");
+
+  const receipt = await Receipt.findOne({
+    _id: receiptId,
+    tenant_id: user.tenant_id,
+    archived: false,
+  })
+    .populate("client billing_entity")
+    .lean();
+
+  if (!receipt) throw new Error("Receipt not found");
+
+  const pdfBuffer = await generateReceiptPdfBuffer(receipt);
+
+  const mailResult = await sendEmail({
+    to: body.to,
+    cc: body.cc,
+    subject: body.subject || `Receipt ${receipt.receipt_no}`,
+    text: body.message || "Please find the attached payment receipt.",
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img 
+            src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" 
+            alt="Profile"
+            style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #e0e0e0;"
+          />
+        </div>
+        <p>${(body.message || "Please find the attached payment receipt.").replace(/\n/g, "<br/>")}</p>
+      </div>
+    `,
+    attachments: [{ filename: `${receipt.receipt_no}.pdf`, content: pdfBuffer }],
+  });
+
+  return mailResult;
+};
+
+/**
+ * Get Receipt PDF Stream
+ */
+export const getReceiptPdfStream = async (user, receiptId) => {
+  const receipt = await Receipt.findOne({
+    _id: receiptId,
+    tenant_id: user.tenant_id,
+    archived: false,
+  })
+    .populate("client billing_entity")
+    .lean();
+
+  if (!receipt) throw new Error("Receipt not found");
+  const buffer = await generateReceiptPdfBuffer(receipt);
+
+  const rs = new stream.PassThrough();
+  rs.end(buffer);
+  return rs;
 };

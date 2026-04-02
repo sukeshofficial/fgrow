@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import TableSkeleton from "../../../components/skeletons/TableSkeleton";
+import "./ServiceTable.css";
 
 const ServiceTable = ({ services, loading, onDelete, onToggleStatus }) => {
   const navigate = useNavigate();
@@ -14,8 +15,15 @@ const ServiceTable = ({ services, loading, onDelete, onToggleStatus }) => {
     );
   }
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR'
+    }).format(amount || 0);
+  };
+
   return (
-    <div className="table-container">
+    <div className="service-table-wrapper">
       <table className="modern-table">
         <thead>
           <tr>
@@ -25,7 +33,7 @@ const ServiceTable = ({ services, loading, onDelete, onToggleStatus }) => {
             <th>Billing Rate</th>
             <th>Type</th>
             <th>Status</th>
-            <th>Actions</th>
+            <th style={{ textAlign: 'right', paddingRight: '40px' }}>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -34,14 +42,17 @@ const ServiceTable = ({ services, loading, onDelete, onToggleStatus }) => {
               <tr key={service._id}>
                 <td>
                   <div className="service-info">
-                    <span className="service-name">{service.name}</span>
+                    <span className="service-name" style={{ fontWeight: 600, color: '#1e293b' }}>{service.name}</span>
                   </div>
                 </td>
-                <td>{service.sac_code || "-"}</td>
+                <td><code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontSize: '12px' }}>{service.sac_code || "-"}</code></td>
                 <td>{service.gst_rate}%</td>
-                <td>₹{service.default_billing_rate?.toLocaleString() || 0}</td>
+                <td>{formatCurrency(service.default_billing_rate)}</td>
                 <td>
-                  <span className={`status-badge ${service.is_recurring ? "active" : "inactive"}`} style={{ background: service.is_recurring ? "#ecfdf5" : "#fef3c7", color: service.is_recurring ? "#059669" : "#d97706" }}>
+                  <span className={`status-badge ${service.is_recurring ? "paid" : "sent"}`} style={{
+                    background: service.is_recurring ? "#ecfdf5" : "#eff6ff",
+                    color: service.is_recurring ? "#065f46" : "#1e40af"
+                  }}>
                     {service.is_recurring ? "Recurring" : "One-time"}
                   </span>
                 </td>
@@ -51,16 +62,28 @@ const ServiceTable = ({ services, loading, onDelete, onToggleStatus }) => {
                   </span>
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'nowrap' }}>
-                    <button className="action-btn" title="Edit Service" onClick={() => navigate(`/services/edit/${service._id}`)}>
-                      <FaEdit style={{ marginRight: '4px' }} /> Edit
+                  <div className="service-actions-cell" style={{ justifyContent: 'flex-end' }}>
+                    <button
+                      className="service-action-btn btn-edit-service"
+                      title="Edit Service"
+                      onClick={() => navigate(`/services/edit/${service._id}`)}
+                    >
+                      <FaEdit /> Edit
                     </button>
-                    <button className="action-btn" title={service.is_enabled ? "Disable Service" : "Enable Service"} onClick={() => onToggleStatus(service)}>
-                      {service.is_enabled ? <FaToggleOn style={{ marginRight: '4px', color: '#10b981' }} /> : <FaToggleOff style={{ marginRight: '4px', color: '#94a3b8' }} />}
+                    <button
+                      className={`service-action-btn ${service.is_enabled ? 'btn-toggle-disable' : 'btn-toggle-enable'}`}
+                      title={service.is_enabled ? "Disable Service" : "Enable Service"}
+                      onClick={() => onToggleStatus(service)}
+                    >
+                      {service.is_enabled ? <FaToggleOn /> : <FaToggleOff />}
                       {service.is_enabled ? "Disable" : "Enable"}
                     </button>
-                    <button className="action-btn delete-btn" title="Archive Service" onClick={() => onDelete(service._id)}>
-                      <FaTrash style={{ marginRight: '4px' }} /> Delete
+                    <button
+                      className="service-action-btn btn-delete-service"
+                      title="Archive Service"
+                      onClick={() => onDelete(service._id)}
+                    >
+                      <FaTrash /> Delete
                     </button>
                   </div>
                 </td>
@@ -75,39 +98,6 @@ const ServiceTable = ({ services, loading, onDelete, onToggleStatus }) => {
           )}
         </tbody>
       </table>
-
-      <style>{`
-        .action-btn {
-          border: 1px solid #e2e8f0;
-          background: white;
-          padding: 6px 12px;
-          border-radius: 8px;
-          font-size: 13px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-width: 70px;
-          color: #475569;
-        }
-        .action-btn:hover {
-          background: #f8fafc;
-          border-color: #cbd5e1;
-          color: var(--primary-accent);
-          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .action-btn.delete-btn {
-          color: #ef4444;
-          border-color: #fee2e2;
-        }
-        .action-btn.delete-btn:hover {
-          background: #fef2f2;
-          border-color: #fca5a5;
-          color: #dc2626;
-        }
-      `}</style>
     </div>
   );
 };

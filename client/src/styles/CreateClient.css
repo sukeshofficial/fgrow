@@ -30,13 +30,30 @@
   overflow: hidden;
 }
 
-/* Stepper Styles */
-.stepper-container {
+/* Stepper Styles & Sidebar */
+.wizard-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  padding: 48px 32px;
+  background-color: #f8fafc;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Also support the old way for existing pages */
+.wizard-card>.stepper-container {
   width: 280px;
   flex-shrink: 0;
   padding: 48px 24px;
   background-color: #f9fafb;
   border-right: 1px solid var(--border-color);
+}
+
+.stepper-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .step-item {

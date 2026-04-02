@@ -297,6 +297,10 @@ const InvoiceDetail = () => {
                   </div>
                 )}
                 <div className="business-name">{billingEntity.name}</div>
+                <div className="business-address">{billingEntity.officialAddress || formatAddress(billingEntity.companyAddress)}</div>
+                {billingEntity.companyPhone && <div className="business-address">P: {billingEntity.companyPhone}</div>}
+                {billingEntity.companyEmail && <div className="business-address">E: {billingEntity.companyEmail}</div>}
+                {billingEntity.gstNumber && <div className="business-address" style={{ marginTop: '4px', fontWeight: 700 }}>GSTIN: {billingEntity.gstNumber}</div>}
               </div>
 
               <div className="invoice-meta-header">

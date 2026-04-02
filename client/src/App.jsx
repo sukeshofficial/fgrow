@@ -39,6 +39,10 @@ const InvoiceList = lazy(() => import("./pages/invoices/InvoiceList"));
 const CreateInvoiceWizard = lazy(() => import("./pages/invoices/CreateInvoiceWizard"));
 const EditInvoiceWizard = lazy(() => import("./pages/invoices/EditInvoiceWizard"));
 const InvoiceDetail = lazy(() => import("./pages/invoices/InvoiceDetail"));
+const ReceiptList = lazy(() => import("./pages/receipts/ReceiptList"));
+const CreateReceiptWizard = lazy(() => import("./pages/receipts/CreateReceiptWizard"));
+const ReceiptDetail = lazy(() => import("./pages/receipts/ReceiptDetail"));
+const EditReceiptWizard = lazy(() => import("./pages/receipts/EditReceiptWizard"));
 
 import { Spinner } from "./components/ui/Spinner";
 
@@ -120,7 +124,11 @@ const App = () => {
               <Route path="/finance/invoices/create" element={<CreateInvoiceWizard />} />
               <Route path="/finance/invoices/edit/:id" element={<EditInvoiceWizard />} />
               <Route path="/finance/invoices/:id" element={<InvoiceDetail />} />
-              <Route path="/finance" element={<Tasks />} />
+              <Route path="/finance/receipts" element={<ReceiptList />} />
+              <Route path="/finance/receipts/create" element={<CreateReceiptWizard />} />
+              <Route path="/finance/receipts/edit/:id" element={<EditReceiptWizard />} />
+              <Route path="/finance/receipts/:id" element={<ReceiptDetail />} />
+              <Route path="/finance" element={<Navigate to="/finance/invoices" replace />} />
               <Route path="/documents" element={<Tasks />} />
               <Route path="/reports" element={<Tasks />} />
               <Route path="/users" element={<Users />} />
