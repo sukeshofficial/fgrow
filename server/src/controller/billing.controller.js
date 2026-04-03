@@ -147,10 +147,12 @@ export const getBillingStatus = async (req, res) => {
         const subscription = await Subscription.findOne({ tenant_id }).populate("plan_id");
         const tenant = await Tenant.findById(tenant_id);
 
+        const isSuperAdmin = req.user.platformRole === "super_admin";
+
         res.status(200).json({
             subscription,
-            trialEndDate: tenant?.trialEndDate,
-            plan: tenant?.plan,
+            trialEndDate: isSuperAdmin ? null : tenant?.trialEndDate,
+            plan: isSuperAdmin ? "pro" : tenant?.plan,
             currentAmount: process.env.SUBSCRIPTION_AMOUNT || "1",
             role: req.user.tenant_role
         });

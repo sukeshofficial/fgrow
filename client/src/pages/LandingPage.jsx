@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { FaShieldAlt, FaCogs, FaChartBar, FaUserCircle } from "react-icons/fa";
 import { useAuth } from "../hooks/useAuth";
 import ScrollingCredits from "../components/dashboard/ScrollingCredits";
+import { Link } from "react-router-dom";
 
 const LandingPage = () => {
     const { user } = useAuth();
@@ -554,8 +555,8 @@ const LandingPage = () => {
                             <a href="#faq">FAQs</a>
                         </div>
                         <div className="nav-actions">
-                            <a href="/login" className="btn-ghost">Login</a>
-                            <a href={user ? "/subscription" : "/register"} className="btn-cta">Book a Demo →</a>
+                            <Link to="/login" className="btn-ghost">Login</Link>
+                            <Link to={user ? "/subscription" : "/register"} className="btn-cta">Book a Demo →</Link>
                         </div>
                     </div>
                 </nav>
@@ -578,8 +579,8 @@ const LandingPage = () => {
                                 Manage clients, services, tasks, billing, approvals, and recurring workflows — all in one secure, role-based CRM built for CA, CS, and compliance teams.
                             </p>
                             <div className="hero-ctas">
-                                <a href={user ? "/subscription" : "/register"} className="btn-cta large">Start 30-Day Trial (₹1) →</a>
-                                <a href="/login" className="btn-outline-cta">Login</a>
+                                <Link to={user ? "/subscription" : "/register"} className="btn-cta large">Start 30-Day Trial (₹1) →</Link>
+                                <Link to="/login" className="btn-outline-cta">Login</Link>
                             </div>
                             <div className="trust-row">
                                 <span className="trust-item"><span className="check">✓</span> Multi-tenant architecture</span>
@@ -719,7 +720,7 @@ const LandingPage = () => {
                                 <p className="sol-p">
                                     With role-based access and multi-tenant isolation, your team sees exactly what they need — nothing more, nothing less.
                                 </p>
-                                <a href={user ? "/subscription" : "/register"} className="sol-link">See how it works →</a>
+                                <Link to={user ? "/subscription" : "/register"} className="sol-link">See how it works →</Link>
                             </div>
                         </div>
                     </div>
@@ -910,7 +911,7 @@ const LandingPage = () => {
                                         <li className="price-feat" key={f}><span className="pf-check">✓</span>{f}</li>
                                     ))}
                                 </ul>
-                                <a href={user ? "/subscription" : "/register"} className="price-btn price-btn-outline">Get Started</a>
+                                <Link to={user ? "/subscription" : "/register"} className="price-btn price-btn-outline">Get Started</Link>
                             </div>
                             <div className="price-card featured reveal reveal-d2">
                                 <div className="popular">Limited Offer</div>
@@ -922,7 +923,7 @@ const LandingPage = () => {
                                         <li className="price-feat" key={f}><span className="pf-check">✓</span>{f}</li>
                                     ))}
                                 </ul>
-                                <a href={user ? "/subscription" : "/register"} className="price-btn price-btn-solid">Start 30-Day Trial</a>
+                                <Link to={user ? "/subscription" : "/register"} className="price-btn price-btn-solid">Start 30-Day Trial</Link>
                             </div>
                             <div className="price-card reveal reveal-d3">
                                 <div className="price-tier">Enterprise</div>
@@ -933,7 +934,7 @@ const LandingPage = () => {
                                         <li className="price-feat" key={f}><span className="pf-check">✓</span>{f}</li>
                                     ))}
                                 </ul>
-                                <a href="/register" className="price-btn price-btn-outline">Contact Sales</a>
+                                <Link to="/register" className="price-btn price-btn-outline">Contact Sales</Link>
                             </div>
                         </div>
                     </div>
@@ -970,8 +971,8 @@ const LandingPage = () => {
                         <h2>Ready to streamline your client operations?</h2>
                         <p>Join hundreds of firms growing smarter with FG GROW.</p>
                         <div className="final-ctas">
-                            <a href={user ? "/subscription" : "/register"} className="btn-white">Start 30-Day Trial (₹1) →</a>
-                            <a href="/login" className="btn-ghost-white">Existing User? Login</a>
+                            <Link to={user ? "/subscription" : "/register"} className="btn-white">Start 30-Day Trial (₹1) →</Link>
+                            <Link to="/login" className="btn-ghost-white">Existing User? Login</Link>
                         </div>
                     </div>
                 </section>

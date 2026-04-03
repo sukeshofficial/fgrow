@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { FiZap, FiWifiOff, FiLock, FiAlertTriangle } from "react-icons/fi";
 
 /**
  * ErrorPage
@@ -7,8 +8,8 @@ import { useNavigate } from "react-router-dom";
  * A premium, user-friendly error page that analyzes the "fault"
  * (Client, Server, or Network) and provides clear action steps.
  */
-const ErrorPage = ({ 
-  type = "default", 
+const ErrorPage = ({
+  type = "default",
   message = "An unexpected error occurred. Our team has been notified.",
   errorId = null,
   onRetry = null
@@ -22,7 +23,7 @@ const ErrorPage = ({
           title: "Server Is Having a Moment",
           subtitle: "It's not you, it's us.",
           description: "Our server encountered an internal problem. We're currently working on a fix.",
-          icon: "⚡",
+          icon: <FiZap size={36} />,
           color: "#EF4444"
         };
       case "network":
@@ -30,7 +31,7 @@ const ErrorPage = ({
           title: "Connection Lost",
           subtitle: "We can't reach the server.",
           description: "Please check your internet connection or firewall settings. The request timed out.",
-          icon: "🌐",
+          icon: <FiWifiOff size={36} />,
           color: "#F59E0B"
         };
       case "auth":
@@ -38,7 +39,7 @@ const ErrorPage = ({
           title: "Session Expired",
           subtitle: "Please log in again.",
           description: "Your security token has expired or is invalid. Redirecting to login...",
-          icon: "🔒",
+          icon: <FiLock size={36} />,
           color: "#3B82F6"
         };
       default:
@@ -46,7 +47,7 @@ const ErrorPage = ({
           title: "Something Went Wrong",
           subtitle: "Unexpected error detected.",
           description: message,
-          icon: "⚠️",
+          icon: <FiAlertTriangle size={36} />,
           color: "#6B7280"
         };
     }
@@ -60,12 +61,12 @@ const ErrorPage = ({
         <div className="error-icon-wrapper" style={{ backgroundColor: `${details.color}20`, color: details.color }}>
           <span className="error-icon">{details.icon}</span>
         </div>
-        
+
         <h1 className="error-title">{details.title}</h1>
         <p className="error-subtitle text-muted">{details.subtitle}</p>
-        
+
         <div className="error-divider"></div>
-        
+
         <p className="error-description">
           {details.description}
         </p>
@@ -86,7 +87,7 @@ const ErrorPage = ({
               Refresh Page
             </button>
           )}
-          
+
           <button className="btn btn-ghost" onClick={() => navigate("/dashboard")}>
             Back to Dashboard
           </button>
