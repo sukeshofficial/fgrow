@@ -1,7 +1,7 @@
 import React from 'react';
 import '../../styles/dashboard.css';
 
-const ScrollingCredits = () => {
+const ScrollingCredits = ({ className }) => {
     const credits = [
         { role: 'DEVELOPER, DESIGNER, TESTER', name: 'SUKESH' },
         { role: 'DESIGNER, TESTER', name: 'PRITHIVIRAAJ J N' },
@@ -9,7 +9,7 @@ const ScrollingCredits = () => {
     ];
 
     return (
-        <div className="scrolling-credits-container">
+        <div className={`scrolling-credits-container ${className || ''}`}>
             <div className="credits-wrapper">
                 {credits.map((item, index) => (
                     <div

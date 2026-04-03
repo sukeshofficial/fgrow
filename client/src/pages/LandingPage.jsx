@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaShieldAlt, FaCogs, FaChartBar, FaUserCircle } from "react-icons/fa";
+import ScrollingCredits from "../components/dashboard/ScrollingCredits";
 
 const LandingPage = () => {
     const [activeFaq, setActiveFaq] = useState(null);
@@ -501,9 +502,40 @@ const LandingPage = () => {
           .steps-track { grid-template-columns: 1fr; }
           .final-cta h2 { font-size: 28px; }
         }
+
+        /* DEV RIBBON */
+        .dev-ribbon {
+          position: fixed;
+          top: 40px;
+          right: -40px;
+          width: 200px;
+          background: linear-gradient(135deg, #f59e0b, #ea580c);
+          color: white;
+          padding: 6px 0;
+          text-align: center;
+          font-size: 10px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          transform: rotate(45deg);
+          z-index: 1000;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          pointer-events: none;
+          box-shadow: 0 0 0 1px rgba(255,255,255,0.1) inset;
+        }
+
+        .scrolling-credits{
+          margin: 0 !important;
+          border-top: none !important;
+          border-bottom: 1px solid var(--border);
+          background: white;
+          height: 40px !important;
+        }
       `}</style>
 
             <div className="lp">
+                <ScrollingCredits className="scrolling-credits" />
+                <div className="dev-ribbon">Under Development</div>
                 {/* NAV */}
                 <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
                     <div className="nav-inner">
@@ -692,7 +724,7 @@ const LandingPage = () => {
                 </section>
 
                 {/* FEATURES */}
-                <section className="features-section" id="features">
+                <section className="features-section" id="features" >
                     <div className="wrap">
                         <div className="reveal">
                             <span className="section-tag">Core Features</span>
@@ -712,7 +744,7 @@ const LandingPage = () => {
                 </section>
 
                 {/* WORKFLOW */}
-                <section className="workflow-section" id="workflow">
+                <section className="workflow-section" id="workflow" >
                     <div className="wrap">
                         <div className="reveal" style={{ textAlign: "center" }}>
                             <span className="section-tag">How It Works</span>
@@ -732,7 +764,7 @@ const LandingPage = () => {
                 </section>
 
                 {/* HIGHLIGHTS */}
-                <section className="highlights">
+                <section className="highlights" >
                     <div className="wrap">
                         <div className="hl-grid">
                             <div className="reveal">
@@ -806,7 +838,7 @@ const LandingPage = () => {
                 </section>
 
                 {/* USE CASES */}
-                <section className="usecase">
+                <section className="usecase" >
                     <div className="wrap" style={{ textAlign: "center" }}>
                         <div className="reveal">
                             <span className="section-tag">Use Cases</span>
@@ -831,7 +863,7 @@ const LandingPage = () => {
                 </section>
 
                 {/* TESTIMONIALS */}
-                <section className="testi">
+                <section className="testi" >
                     <div className="wrap" style={{ textAlign: "center" }}>
                         <div className="reveal">
                             <span className="section-tag">Wall of Love</span>
@@ -859,7 +891,7 @@ const LandingPage = () => {
                 </section>
 
                 {/* PRICING */}
-                <section className="pricing" id="pricing">
+                <section className="pricing" id="pricing" >
                     <div className="wrap" style={{ textAlign: "center" }}>
                         <div className="reveal">
                             <span className="section-tag">Pricing</span>
@@ -906,7 +938,7 @@ const LandingPage = () => {
                 </section>
 
                 {/* FAQ */}
-                <section className="faq" id="faq">
+                <section className="faq" id="faq" >
                     <div className="wrap" style={{ textAlign: "center" }}>
                         <div className="reveal">
                             <span className="section-tag">FAQs</span>
@@ -931,7 +963,7 @@ const LandingPage = () => {
                 </section>
 
                 {/* FINAL CTA */}
-                <section className="final-cta">
+                <section className="final-cta" >
                     <div className="wrap">
                         <h2>Ready to streamline your client operations?</h2>
                         <p>Join hundreds of firms growing smarter with FG GROW.</p>
@@ -943,7 +975,7 @@ const LandingPage = () => {
                 </section>
 
                 {/* FOOTER */}
-                <footer className="footer">
+                < footer className="footer" >
                     <div className="wrap">
                         <div className="footer-grid">
                             <div>
@@ -954,6 +986,9 @@ const LandingPage = () => {
                                     <span className="logo-name" style={{ color: "white" }}>FGROW</span>
                                 </div>
                                 <p className="footer-brand-p">Consolidating consultancy operations into a seamless, secure digital workflow.</p>
+                                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.25)', marginTop: '12px', fontStyle: 'italic' }}>
+                                    Notice: Content on this landing page are placeholders right now.
+                                </p>
                             </div>
                             <div className="footer-col">
                                 <h4>Product</h4>
@@ -978,7 +1013,7 @@ const LandingPage = () => {
                             </div>
                         </div>
                         <div className="footer-bottom">
-                            <span className="footer-copy">© {new Date().getFullYear()} ForgeGrid Technologies. All rights reserved.</span>
+                            <span className="footer-copy">© {new Date().getFullYear()} ForgeGrid. All rights reserved.</span>
                             <div className="footer-social">
                                 <a href="https://www.linkedin.com/in/sukeshd/">LinkedIn</a>
                                 <a href="#">Twitter</a>
@@ -986,7 +1021,7 @@ const LandingPage = () => {
                             </div>
                         </div>
                     </div>
-                </footer>
+                </footer >
             </div>
         </>
     );
