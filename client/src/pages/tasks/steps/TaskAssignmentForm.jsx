@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { listClients, listStaff } from "../../../api/client.api";
 import { listServices } from "../../../api/service.api";
 import SearchableDropdown from "../../../components/ui/SearchableDropdown";
-import { FaLink, FaArrowRight, FaArrowLeft } from "react-icons/fa";
+import { FaLink, FaArrowRight, FaArrowLeft, FaRegFileAlt, FaBriefcase, FaUsers } from "react-icons/fa";
 
 const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
   const [formData, setFormData] = useState({
@@ -91,7 +91,9 @@ const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
 
       <div className="form-grid">
         <div className="form-field">
-          <label className="form-label">Client</label>
+          <label className="form-label">
+            <FaRegFileAlt className="label-icon" /> Client
+          </label>
           <SearchableDropdown
             options={clients}
             value={formData.client}
@@ -102,7 +104,9 @@ const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
         </div>
 
         <div className="form-field">
-          <label className="form-label">Service</label>
+          <label className="form-label">
+            <FaBriefcase className="label-icon" /> Service
+          </label>
           <SearchableDropdown
             options={services}
             value={formData.service}
@@ -114,7 +118,9 @@ const TaskAssignmentForm = ({ data, onNext, onPrev }) => {
       </div>
 
       <div className="form-field">
-        <label className="form-label">Assign Staff</label>
+        <label className="form-label">
+          <FaUsers className="label-icon" /> Assign Staff
+        </label>
         <SearchableDropdown
           options={staff}
           value={formData.users}

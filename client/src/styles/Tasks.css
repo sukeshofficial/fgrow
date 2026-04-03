@@ -10,6 +10,14 @@
   letter-spacing: 0.02em;
 }
 
+.label-icon {
+  color: var(--primary-accent);
+  margin-right: 8px;
+  margin-left: 3px;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
 .priority-high {
   background: #fee2e2;
   color: #991b1b;

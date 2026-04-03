@@ -43,6 +43,7 @@ const ReceiptList = lazy(() => import("./pages/receipts/ReceiptList"));
 const CreateReceiptWizard = lazy(() => import("./pages/receipts/CreateReceiptWizard"));
 const ReceiptDetail = lazy(() => import("./pages/receipts/ReceiptDetail"));
 const EditReceiptWizard = lazy(() => import("./pages/receipts/EditReceiptWizard"));
+const LandingPage = lazy(() => import("./pages/LandingPage"));
 
 import { Spinner } from "./components/ui/Spinner";
 
@@ -84,7 +85,7 @@ const App = () => {
       <Routes>
 
         {/* Default */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<LandingPage />} />
 
         {/* Public */}
         <Route path="/login" element={<Login />} />

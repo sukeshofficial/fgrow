@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaClipboardList, FaArrowRight } from "react-icons/fa";
+import { FaClipboardList, FaArrowRight, FaEdit, FaAlignLeft, FaFlag, FaCalendarAlt } from "react-icons/fa";
 
 const TaskBasicInfoForm = ({ data, onPrev, onNext }) => {
   const [formData, setFormData] = useState({
@@ -44,7 +44,9 @@ const TaskBasicInfoForm = ({ data, onPrev, onNext }) => {
       </h2>
 
       <div className="form-field">
-        <label className="form-label">Task Title <span className="required-star">*</span></label>
+        <label className="form-label">
+          <FaEdit className="label-icon" /> Task Title <span className="required-star">*</span>
+        </label>
         <input
           type="text"
           name="title"
@@ -57,7 +59,9 @@ const TaskBasicInfoForm = ({ data, onPrev, onNext }) => {
       </div>
 
       <div className="form-field">
-        <label className="form-label">Description</label>
+        <label className="form-label">
+          <FaAlignLeft className="label-icon" /> Description
+        </label>
         <textarea
           name="description"
           className="form-input"
@@ -70,7 +74,9 @@ const TaskBasicInfoForm = ({ data, onPrev, onNext }) => {
 
       <div className="form-grid">
         <div className="form-field">
-          <label className="form-label">Priority</label>
+          <label className="form-label">
+            <FaFlag className="label-icon" /> Priority
+          </label>
           <select
             name="priority"
             className="form-input"
@@ -84,7 +90,9 @@ const TaskBasicInfoForm = ({ data, onPrev, onNext }) => {
         </div>
 
         <div className="form-field">
-          <label className="form-label">Due Date</label>
+          <label className="form-label">
+            <FaCalendarAlt className="label-icon" /> Due Date
+          </label>
           <input
             type="date"
             name="due_date"
