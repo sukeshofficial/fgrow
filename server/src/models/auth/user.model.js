@@ -85,8 +85,8 @@ const userSchema = new mongoose.Schema(
 
     tenant_role: {
       type: String,
-      enum: ["owner", "staff", "read_only"],
-      default: "owner",
+      enum: ["owner", "staff", "read_only", "none"],
+      default: "none",
       index: true,
     },
 
@@ -125,6 +125,9 @@ const userSchema = new mongoose.Schema(
     reset_token_expiry: { type: Date, select: false },
 
     // Security metadata
+    otp_code: { type: String, select: false },
+    otp_expiry: { type: Date, select: false },
+
     failed_login_attempts: {
       type: Number,
       default: 0,

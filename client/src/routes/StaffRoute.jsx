@@ -10,10 +10,15 @@ const StaffRoutes = () => {
 
   // tenant_role expected: "staff"
   if (user.tenant_role === "staff") {
-    if (meState === "NO_TENANT") {
+    if (meState === "NO_TENANT" || !user.tenant_id) {
       return <WelcomePage />;
     }
     return <InvitationGate><Outlet /></InvitationGate>;
+  }
+
+  // Handle removed / dissociated members who fall through from TenantRoute
+  if (user.tenant_role === "none" || !user.tenant_id) {
+    return <WelcomePage />;
   }
 
   return <Outlet />;

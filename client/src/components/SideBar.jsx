@@ -367,10 +367,10 @@ export default function Sidebar() {
 
             {/* User Section */}
             <div className="user-area">
-              <div className="user-left">
+              <Link to="/settings" className="user-left" style={{ textDecoration: 'none', color: 'inherit' }}>
                 <img src={avatar} alt="User avatar" className="user-avatar" />
                 <span className="user-name">{user?.name ?? "Guest"}</span>
-              </div>
+              </Link>
             </div>
 
             {user && (

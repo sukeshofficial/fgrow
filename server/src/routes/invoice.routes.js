@@ -2,13 +2,14 @@ import express from "express";
 import * as controller from "../controller/invoice.controller.js";
 import { validate } from "../validators/invoice.validator.js";
 import authMiddleware from "../middleware/auth.middleware.js";
+import billingMiddleware from "../middleware/billing.middleware.js";
 import { requireRole } from "../middleware/tenant_role.middleware.js";
 
 const router = express.Router();
 
 // Middleware groups
-const authStaff = [authMiddleware, requireRole("owner", "staff")];
-const authOwner = [authMiddleware, requireRole("owner")];
+const authStaff = [authMiddleware, billingMiddleware, requireRole("owner", "staff")];
+const authOwner = [authMiddleware, billingMiddleware, requireRole("owner")];
 const authOwnerStaff = authStaff;
 
 // Collection-level

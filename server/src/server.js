@@ -1,11 +1,10 @@
-import http from "http";
 import dotenv from "dotenv";
+dotenv.config();
 
+import http from "http";
 import app from "./app.js";
 import connectDB from "./config/initDb.js";
 import logger from "./utils/logger.js";
-
-dotenv.config();
 
 const start = async () => {
   try {

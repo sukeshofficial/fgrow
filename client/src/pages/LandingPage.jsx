@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaShieldAlt, FaCogs, FaChartBar, FaUserCircle } from "react-icons/fa";
+import { useAuth } from "../hooks/useAuth";
 import ScrollingCredits from "../components/dashboard/ScrollingCredits";
 
 const LandingPage = () => {
+    const { user } = useAuth();
     const [activeFaq, setActiveFaq] = useState(null);
     const [scrolled, setScrolled] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
@@ -553,7 +555,7 @@ const LandingPage = () => {
                         </div>
                         <div className="nav-actions">
                             <a href="/login" className="btn-ghost">Login</a>
-                            <a href="/register" className="btn-cta">Book a Demo →</a>
+                            <a href={user ? "/subscription" : "/register"} className="btn-cta">Book a Demo →</a>
                         </div>
                     </div>
                 </nav>
@@ -576,8 +578,8 @@ const LandingPage = () => {
                                 Manage clients, services, tasks, billing, approvals, and recurring workflows — all in one secure, role-based CRM built for CA, CS, and compliance teams.
                             </p>
                             <div className="hero-ctas">
-                                <a href="/register" className="btn-cta large">Book a Demo →</a>
-                                <a href="/register" className="btn-outline-cta">Start Free Trial</a>
+                                <a href={user ? "/subscription" : "/register"} className="btn-cta large">Start 30-Day Trial (₹1) →</a>
+                                <a href="/login" className="btn-outline-cta">Login</a>
                             </div>
                             <div className="trust-row">
                                 <span className="trust-item"><span className="check">✓</span> Multi-tenant architecture</span>
@@ -717,7 +719,7 @@ const LandingPage = () => {
                                 <p className="sol-p">
                                     With role-based access and multi-tenant isolation, your team sees exactly what they need — nothing more, nothing less.
                                 </p>
-                                <a href="/register" className="sol-link">See how it works →</a>
+                                <a href={user ? "/subscription" : "/register"} className="sol-link">See how it works →</a>
                             </div>
                         </div>
                     </div>
@@ -908,19 +910,19 @@ const LandingPage = () => {
                                         <li className="price-feat" key={f}><span className="pf-check">✓</span>{f}</li>
                                     ))}
                                 </ul>
-                                <a href="/register" className="price-btn price-btn-outline">Get Started</a>
+                                <a href={user ? "/subscription" : "/register"} className="price-btn price-btn-outline">Get Started</a>
                             </div>
                             <div className="price-card featured reveal reveal-d2">
-                                <div className="popular">Most Popular</div>
-                                <div className="price-tier">Pro</div>
-                                <div className="price-amount">₹4,999<span>/mo</span></div>
-                                <p className="price-desc">Best for growing firms</p>
+                                <div className="popular">Limited Offer</div>
+                                <div className="price-tier">Pro Trial</div>
+                                <div className="price-amount">₹1<span>/30 days</span></div>
+                                <p className="price-desc">Experience the full power of FGROW</p>
                                 <ul className="price-features">
                                     {["Unlimited Clients", "Up to 50 Staff Members", "Recurring Task Automation", "Full Invoicing & Billing", "Priority Support"].map(f => (
                                         <li className="price-feat" key={f}><span className="pf-check">✓</span>{f}</li>
                                     ))}
                                 </ul>
-                                <a href="/register" className="price-btn price-btn-solid">Start Free Trial</a>
+                                <a href={user ? "/subscription" : "/register"} className="price-btn price-btn-solid">Start 30-Day Trial</a>
                             </div>
                             <div className="price-card reveal reveal-d3">
                                 <div className="price-tier">Enterprise</div>
@@ -968,8 +970,8 @@ const LandingPage = () => {
                         <h2>Ready to streamline your client operations?</h2>
                         <p>Join hundreds of firms growing smarter with FG GROW.</p>
                         <div className="final-ctas">
-                            <a href="/register" className="btn-white">Book a Demo →</a>
-                            <a href="/register" className="btn-ghost-white">Start Free Trial</a>
+                            <a href={user ? "/subscription" : "/register"} className="btn-white">Start 30-Day Trial (₹1) →</a>
+                            <a href="/login" className="btn-ghost-white">Existing User? Login</a>
                         </div>
                     </div>
                 </section>

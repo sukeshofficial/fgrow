@@ -43,6 +43,8 @@ const ReceiptList = lazy(() => import("./pages/receipts/ReceiptList"));
 const CreateReceiptWizard = lazy(() => import("./pages/receipts/CreateReceiptWizard"));
 const ReceiptDetail = lazy(() => import("./pages/receipts/ReceiptDetail"));
 const EditReceiptWizard = lazy(() => import("./pages/receipts/EditReceiptWizard"));
+const Subscription = lazy(() => import("./pages/Subscription"));
+const Settings = lazy(() => import("./pages/Settings"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 
 import { Spinner } from "./components/ui/Spinner";
@@ -139,7 +141,8 @@ const App = () => {
               <Route path="/reports" element={<Tasks />} />
               <Route path="/users" element={<Users />} />
               <Route path="/notifications" element={<Tasks />} />
-              <Route path="/settings" element={<Tasks />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/subscription" element={<Subscription />} />
 
             </Route>
 

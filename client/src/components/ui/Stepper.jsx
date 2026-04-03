@@ -1,6 +1,6 @@
 import React from "react";
 
-const Stepper = ({ steps, currentStep }) => {
+const Stepper = ({ steps, currentStep, onStepClick }) => {
   return (
     <div className="stepper-container">
       {steps.map((step, index) => {
@@ -10,8 +10,10 @@ const Stepper = ({ steps, currentStep }) => {
         return (
           <div
             key={index}
-            className={`step-item ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""}`}
+            className={`step-item ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""} ${onStepClick ? "clickable" : ""}`}
             aria-current={isActive ? "step" : undefined}
+            onClick={() => onStepClick && onStepClick(index)}
+            style={{ cursor: onStepClick ? 'pointer' : 'default' }}
           >
             <div className="step-circle">
               {isCompleted ? (

@@ -1,5 +1,6 @@
 import express from "express";
 import authMiddleware from "../middleware/auth.middleware.js";
+import billingMiddleware from "../middleware/billing.middleware.js";
 import { requireSuperAdmin } from "../middleware/superAdmin.middleware.js";
 import { requireRole } from "../middleware/tenant_role.middleware.js";
 import {
@@ -13,13 +14,15 @@ import {
   getTenantById,
   getTenantStaffAdmin,
   getTenantClientsAdmin,
+  removeUserFromTenant,
 } from "../controller/tenant.controller.js";
 import { upload } from "../middleware/upload.middleware.js";
 
 const router = express.Router();
 
-const authSuperAdmin = [authMiddleware, requireSuperAdmin];
-const authOwner = [authMiddleware, requireRole("owner")];
+const authSuperAdmin = [authMiddleware, requireSuperAdmin]; // Super admins skip billing check usually, or we can add it if needed. My middleware already skips super_admin.
+const authOwner = [authMiddleware, billingMiddleware, requireRole("owner")];
+const authStandard = [authMiddleware, billingMiddleware];
 
 // Create tenant (public endpoint guarded by auth + upload)
 router.post("/create", authMiddleware, upload.single("companyLogo"), createTenant);
@@ -28,7 +31,7 @@ router.post("/create", authMiddleware, upload.single("companyLogo"), createTenan
 router.get("/all", ...authSuperAdmin, getAllTenants);
 
 // GET single tenant details (authorized users only)
-router.get("/detail/:tenantId", authMiddleware, getTenantById);
+router.get("/detail/:tenantId", ...authStandard, getTenantById);
 
 // GET targeted tenant staff (super-admin only)
 router.get("/detail/:tenantId/staff", ...authSuperAdmin, getTenantStaffAdmin);
@@ -47,6 +50,9 @@ router.patch("/:tenantId/reject", ...authSuperAdmin, rejectTenant);
 router.patch("/re-appeal", ...authOwner, reAppealTenant);
 
 // Get tenant staff (owner and staff)
-router.get("/staff", authMiddleware, requireRole("owner", "staff"), getTenantStaff);
+router.get("/staff", ...authStandard, requireRole("owner", "staff"), getTenantStaff);
+
+// Remove user from tenant (owner only)
+router.patch("/:userId/remove", ...authOwner, removeUserFromTenant);
 
 export default router;

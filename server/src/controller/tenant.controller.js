@@ -337,3 +337,40 @@ export const getTenantClientsAdmin = async (req, res) => {
     });
   }
 };
+
+// --------------------------------------------------
+// 10️ Remove User From Tenant (Owner Only)
+// --------------------------------------------------
+export const removeUserFromTenant = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { id: ownerId, tenant_id: ownerTenantId } = req.user;
+
+    if (!ownerTenantId) {
+      return res.status(403).json({ message: "You are not associated with any organization" });
+    }
+
+    const owner = await User.findById(ownerId);
+    if (!owner || owner.tenant_role !== "owner" || owner.tenant_id?.toString() !== ownerTenantId.toString()) {
+      return res.status(403).json({ message: "Only organization owners can remove members" });
+    }
+
+    const userToRemove = await User.findById(userId);
+    if (!userToRemove || userToRemove.tenant_id?.toString() !== ownerTenantId.toString()) {
+      return res.status(404).json({ message: "User not found in your organization" });
+    }
+
+    if (userToRemove.tenant_role === "owner" || userToRemove._id.toString() === ownerId.toString()) {
+      return res.status(400).json({ message: "Cannot remove the organization owner" });
+    }
+
+    userToRemove.tenant_id = null;
+    userToRemove.tenant_role = "none";
+    await userToRemove.save();
+
+    res.json({ message: "User removed from organization successfully" });
+  } catch (err) {
+    logger.error("Remove User From Tenant Error:", err);
+    res.status(500).json({ message: "Internal server error", error: err.message });
+  }
+};

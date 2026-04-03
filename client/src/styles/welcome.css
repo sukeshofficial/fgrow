@@ -22,6 +22,44 @@
   overflow: hidden;
 }
 
+.welcome-logout-btn {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}
+
+.welcome-logout-btn:hover {
+  background: white;
+  color: #ef4444;
+  border-color: #fee2e2;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.1);
+}
+
+.welcome-logout-btn svg {
+  transition: transform 0.3s;
+}
+
+.welcome-logout-btn:hover svg {
+  transform: translateX(3px);
+}
+
 /* Subtle Background Decoration */
 .welcome-page::before {
   content: "";
