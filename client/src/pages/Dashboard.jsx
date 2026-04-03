@@ -12,6 +12,7 @@ import { Spinner } from "../components/ui/Spinner";
 import DashboardSkeleton from "../components/skeletons/DashboardSkeleton";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
 import ScrollingCredits from "../components/dashboard/ScrollingCredits";
+import { useModal } from "../context/ModalContext";
 import logger from "../utils/logger.js";
 
 /**
@@ -43,6 +44,7 @@ const Dashboard = () => {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const { openReportModal } = useModal();
   const showLoading = useDelayedLoading(loading, 300);
 
   useEffect(() => {
@@ -83,9 +85,11 @@ const Dashboard = () => {
               This is a <strong>test version</strong> of the FGrow application.
               {" "}If you encounter any bugs, please report them to{" "}
               <a
-                href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=sukesh.official.2006@gmail.com"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#report"
+                onClick={(e) => {
+                  e.preventDefault();
+                  openReportModal();
+                }}
                 className="feedback-link"
               >
                 feedback@forgegrid.in

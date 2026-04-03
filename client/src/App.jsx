@@ -66,6 +66,8 @@ import { checkAuth } from "./features/auth/auth.actions";
 import { useError } from "./context/ErrorContext";
 import { setupInterceptors } from "./api/api";
 import GlobalModal from "./components/ui/GlobalModal";
+import ReportIssueModal from "./components/ui/ReportIssueModal";
+import { useModal } from "./context/ModalContext";
 
 const App = () => {
   const { dispatch } = useAuth();
@@ -79,9 +81,12 @@ const App = () => {
     checkAuth(dispatch);
   }, [dispatch, setError]);
 
+  const { isReportModalOpen, closeReportModal } = useModal();
+
   return (
     <Suspense fallback={<PageLoader />}>
       <GlobalModal />
+      <ReportIssueModal isOpen={isReportModalOpen} onClose={closeReportModal} />
       <Routes>
 
         {/* Default */}

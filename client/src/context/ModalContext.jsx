@@ -51,8 +51,22 @@ export const ModalProvider = ({ children }) => {
         setModal(prev => ({ ...prev, isOpen: false }));
     };
 
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
+    const openReportModal = useCallback(() => setIsReportModalOpen(true), []);
+    const closeReportModal = useCallback(() => setIsReportModalOpen(false), []);
+
     return (
-        <ModalContext.Provider value={{ showAlert, showConfirm, modal, handleConfirm, handleCancel }}>
+        <ModalContext.Provider value={{
+            showAlert,
+            showConfirm,
+            modal,
+            handleConfirm,
+            handleCancel,
+            isReportModalOpen,
+            openReportModal,
+            closeReportModal
+        }}>
             {children}
         </ModalContext.Provider>
     );
