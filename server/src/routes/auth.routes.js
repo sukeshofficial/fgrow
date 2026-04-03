@@ -22,7 +22,7 @@ router.post("/login", loginUser);
 router.post("/reset-password", resetPassword);
 
 // Authenticated routes
-router.get("/logout", authMiddleware, logoutUser);
+router.post("/logout", logoutUser);
 router.get("/me", authMiddleware, getMe);
 router.get("/user-preview", userPreview);
 

@@ -46,7 +46,7 @@ export const loginUser = ({ email, password }) => {
  * GET http://localhost:5000/api/v0/auth/logout
  */
 export const logoutUser = () => {
-  return api.get("/auth/logout");
+  return api.post("/auth/logout");
 };
 
 /**

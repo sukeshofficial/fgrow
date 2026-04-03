@@ -581,7 +581,13 @@ export const resetPassword = async (req, res) => {
  */
 export const logoutUser = async (_req, res) => {
   try {
-    res.clearCookie("auth_token", COOKIE_OPTIONS);
+    // Clear cookie with identical metadata but omitting maxAge/expires
+    res.clearCookie("auth_token", {
+      httpOnly: COOKIE_OPTIONS.httpOnly,
+      secure: COOKIE_OPTIONS.secure,
+      sameSite: COOKIE_OPTIONS.sameSite,
+      path: COOKIE_OPTIONS.path,
+    });
     return res.status(200).json({ message: "logged out" });
   } catch (err) {
     logger.error("Logout User error:", err);
