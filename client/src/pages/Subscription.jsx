@@ -144,9 +144,17 @@ const Subscription = () => {
         );
     }
 
-    const isTrialActive = billingStatus?.trialEndDate && new Date(billingStatus.trialEndDate) > new Date();
-    const daysLeft = isTrialActive
-        ? Math.ceil((new Date(billingStatus.trialEndDate) - new Date()) / (1000 * 60 * 60 * 24))
+    const isSuperAdmin = user?.platform_role === "super_admin" || billingStatus?.isSuperAdminTenant;
+    const superAdminEndDate = new Date();
+    superAdminEndDate.setFullYear(superAdminEndDate.getFullYear() + 100);
+
+    const effectiveEndDate = isSuperAdmin
+        ? superAdminEndDate
+        : (billingStatus?.trialEndDate ? new Date(billingStatus.trialEndDate) : null);
+
+    const isTrialActive = isSuperAdmin || (effectiveEndDate && effectiveEndDate > new Date());
+    const daysLeft = isTrialActive && effectiveEndDate
+        ? Math.ceil((effectiveEndDate - new Date()) / (1000 * 60 * 60 * 24))
         : 0;
 
     return (
@@ -502,15 +510,15 @@ const Subscription = () => {
                             {processing ? "Processing..." : "Upgrade Now"}
                         </button>
 
-                        {(billingStatus?.trialEndDate || billingStatus?.plan) && (
+                        {(effectiveEndDate || billingStatus?.plan) && (
                             <div className="status-info">
                                 <div className={`status-badge ${isTrialActive ? 'badge-active' : 'badge-expired'}`}>
                                     {isTrialActive ? 'Active' : 'Expired'}
                                 </div>
                                 {isTrialActive ? (
-                                    <p>Trial ends <strong>{new Date(billingStatus.trialEndDate).toLocaleDateString()}</strong> ({daysLeft} days remaining)</p>
+                                    <p>Trial ends <strong>{effectiveEndDate.toLocaleDateString()}</strong> ({daysLeft} days remaining)</p>
                                 ) : (
-                                    <p>Your trial ended on <strong>{new Date(billingStatus.trialEndDate).toLocaleDateString()}</strong></p>
+                                    <p>Your trial ended on <strong>{effectiveEndDate?.toLocaleDateString()}</strong></p>
                                 )}
                             </div>
                         )}

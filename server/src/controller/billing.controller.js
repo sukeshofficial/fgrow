@@ -145,16 +145,17 @@ export const getBillingStatus = async (req, res) => {
         const { tenant_id } = req.user;
 
         const subscription = await Subscription.findOne({ tenant_id }).populate("plan_id");
-        const tenant = await Tenant.findById(tenant_id);
+        const tenant = await Tenant.findById(tenant_id).populate("ownerUserId");
 
-        const isSuperAdmin = req.user.platformRole === "super_admin";
+        const isSuperAdminTenant = req.user.platformRole === "super_admin" || (tenant?.ownerUserId?.platform_role === "super_admin");
 
         res.status(200).json({
             subscription,
-            trialEndDate: isSuperAdmin ? null : tenant?.trialEndDate,
-            plan: isSuperAdmin ? "pro" : tenant?.plan,
+            trialEndDate: isSuperAdminTenant ? null : tenant?.trialEndDate,
+            plan: isSuperAdminTenant ? "pro" : tenant?.plan,
             currentAmount: process.env.SUBSCRIPTION_AMOUNT || "1",
-            role: req.user.tenant_role
+            role: req.user.tenant_role,
+            isSuperAdminTenant
         });
     } catch (error) {
         logger.error("Error in getBillingStatus controller:", error);

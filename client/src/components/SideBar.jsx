@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FaTachometerAlt,
   FaTasks,
@@ -162,6 +162,7 @@ export default function Sidebar() {
   // tooltip: { label, top } | null
   const [tooltip, setTooltip] = useState(null);
   const { openReportModal } = useModal();
+  const navigate = useNavigate();
 
   /* ----------------------------- Menu Helpers ------------------------------ */
 
@@ -321,7 +322,11 @@ export default function Sidebar() {
       <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
         <div className="sidebar-inner">
           {/* Logo / Brand */}
-          <div className="navbar-logo">
+          <div
+            className="navbar-logo"
+            onClick={() => navigate("/")}
+            style={{ cursor: "pointer" }}
+          >
             <img src={logo} alt="ForgeGrid" className="logo-img" />
             <span className={`logo-text ${collapsed ? "collapsed" : ""} user-info`}>
               <span className="fg">FG</span>row

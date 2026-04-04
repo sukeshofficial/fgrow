@@ -5,7 +5,8 @@ import ScrollingCredits from "../components/dashboard/ScrollingCredits";
 import { Link } from "react-router-dom";
 
 const LandingPage = () => {
-    const { user } = useAuth();
+    const { user, avatar } = useAuth();
+    const isStaff = user?.tenant_role === "staff";
     const [activeFaq, setActiveFaq] = useState(null);
     const [scrolled, setScrolled] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
@@ -188,7 +189,7 @@ const LandingPage = () => {
         .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
         .logo-mark {
           width: 36px; height: 36px; border-radius: 9px;
-          background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+          background: var(--navy);
           display: flex; align-items: center; justify-content: center;
           color: white; font-weight: 800; font-size: 14px; letter-spacing: -0.5px;
           overflow: hidden; padding: 4px;
@@ -555,8 +556,28 @@ const LandingPage = () => {
                             <a href="#faq">FAQs</a>
                         </div>
                         <div className="nav-actions">
-                            <Link to="/login" className="btn-ghost">Login</Link>
-                            <Link to={user ? "/subscription" : "/register"} className="btn-cta">Book a Demo →</Link>
+                            {user ? (
+                                <>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginRight: "12px", color: "var(--text)", fontWeight: 500, fontSize: "14px", padding: "5px 10px 5px 5px", borderRadius: "999px", border: "1px solid var(--border)" }}>
+                                        {avatar ? (
+                                            <img src={avatar} alt="Profile" style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover" }} />
+                                        ) : (
+                                            <FaUserCircle size={24} style={{ color: "var(--muted)" }} />
+                                        )}
+                                        <span>{user.name || "User"}</span>
+                                    </div>
+                                    {isStaff ? (
+                                        <button className="btn-cta" style={{ opacity: 0.5, cursor: "not-allowed" }} disabled>Book a Demo →</button>
+                                    ) : (
+                                        <Link to="/subscription" className="btn-cta">Book a Demo →</Link>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    <Link to="/login" className="btn-ghost">Login</Link>
+                                    <Link to="/subscription" className="btn-cta">Book a Demo →</Link>
+                                </>
+                            )}
                         </div>
                     </div>
                 </nav>
@@ -579,8 +600,16 @@ const LandingPage = () => {
                                 Manage clients, services, tasks, billing, approvals, and recurring workflows — all in one secure, role-based CRM built for CA, CS, and compliance teams.
                             </p>
                             <div className="hero-ctas">
-                                <Link to={user ? "/subscription" : "/register"} className="btn-cta large">Start 30-Day Trial (₹1) →</Link>
-                                <Link to="/login" className="btn-outline-cta">Login</Link>
+                                {isStaff ? (
+                                    <button className="btn-cta large" style={{ opacity: 0.5, cursor: "not-allowed" }} disabled>Start 30-Day Trial (₹1) →</button>
+                                ) : (
+                                    <Link to="/subscription" className="btn-cta large">Start 30-Day Trial (₹1) →</Link>
+                                )}
+                                {user ? (
+                                    <Link to="/dashboard" className="btn-outline-cta">Get Started</Link>
+                                ) : (
+                                    <Link to="/login" className="btn-outline-cta">Login</Link>
+                                )}
                             </div>
                             <div className="trust-row">
                                 <span className="trust-item"><span className="check">✓</span> Multi-tenant architecture</span>
@@ -911,7 +940,11 @@ const LandingPage = () => {
                                         <li className="price-feat" key={f}><span className="pf-check">✓</span>{f}</li>
                                     ))}
                                 </ul>
-                                <Link to={user ? "/subscription" : "/register"} className="price-btn price-btn-outline">Get Started</Link>
+                                {isStaff ? (
+                                    <button className="price-btn price-btn-outline" style={{ opacity: 0.5, cursor: "not-allowed" }} disabled>Get Started</button>
+                                ) : (
+                                    <Link to={user ? "/subscription" : "/register"} className="price-btn price-btn-outline">Get Started</Link>
+                                )}
                             </div>
                             <div className="price-card featured reveal reveal-d2">
                                 <div className="popular">Limited Offer</div>
@@ -923,7 +956,11 @@ const LandingPage = () => {
                                         <li className="price-feat" key={f}><span className="pf-check">✓</span>{f}</li>
                                     ))}
                                 </ul>
-                                <Link to={user ? "/subscription" : "/register"} className="price-btn price-btn-solid">Start 30-Day Trial</Link>
+                                {isStaff ? (
+                                    <button className="price-btn price-btn-solid" style={{ opacity: 0.5, cursor: "not-allowed" }} disabled>Start 30-Day Trial</button>
+                                ) : (
+                                    <Link to={user ? "/subscription" : "/register"} className="price-btn price-btn-solid">Start 30-Day Trial</Link>
+                                )}
                             </div>
                             <div className="price-card reveal reveal-d3">
                                 <div className="price-tier">Enterprise</div>
@@ -934,7 +971,11 @@ const LandingPage = () => {
                                         <li className="price-feat" key={f}><span className="pf-check">✓</span>{f}</li>
                                     ))}
                                 </ul>
-                                <Link to="/register" className="price-btn price-btn-outline">Contact Sales</Link>
+                                {isStaff ? (
+                                    <button className="price-btn price-btn-outline" style={{ opacity: 0.5, cursor: "not-allowed" }} disabled>Contact Sales</button>
+                                ) : (
+                                    <Link to="/register" className="price-btn price-btn-outline">Contact Sales</Link>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -971,8 +1012,16 @@ const LandingPage = () => {
                         <h2>Ready to streamline your client operations?</h2>
                         <p>Join hundreds of firms growing smarter with FG GROW.</p>
                         <div className="final-ctas">
-                            <Link to={user ? "/subscription" : "/register"} className="btn-white">Start 30-Day Trial (₹1) →</Link>
-                            <Link to="/login" className="btn-ghost-white">Existing User? Login</Link>
+                            {isStaff ? (
+                                <button className="btn-white" style={{ opacity: 0.5, cursor: "not-allowed" }} disabled>Start 30-Day Trial (₹1) →</button>
+                            ) : (
+                                <Link to={user ? "/subscription" : "/register"} className="btn-white">Start 30-Day Trial (₹1) →</Link>
+                            )}
+                            {user ? (
+                                <Link to="/dashboard" className="btn-ghost-white">Get Started</Link>
+                            ) : (
+                                <Link to="/login" className="btn-ghost-white">Existing User? Login</Link>
+                            )}
                         </div>
                     </div>
                 </section>
