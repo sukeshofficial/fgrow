@@ -18,15 +18,14 @@ body {
 .tenant-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(18, 23, 30, 0.5);
+  background: rgba(15, 23, 42, 0.55);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   z-index: 10000;
-  overflow-y: auto;
-  padding: 4rem 2rem 2rem 2rem;
+  padding: 1.5rem;
 }
 
 body.modal-open {
@@ -36,12 +35,41 @@ body.modal-open {
 /* ─── Modal ─────────────────────────────────────────────── */
 .tenant-modal {
   width: min(720px, 96%);
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 18px;
-  padding: 1.8rem 2rem 1.6rem;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.12);
+  border-radius: 20px;
+  padding: 2rem 2rem 1.8rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
   position: relative;
+  animation: tenantModalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tenantModalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Thin scrollbar inside modal */
+.tenant-modal::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tenant-modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tenant-modal::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 4px;
 }
 
 .tenant-back-btn {
@@ -69,18 +97,19 @@ body.modal-open {
 
 /* ─── Header ───────────────────────────────────────────── */
 .tenant-modal-title {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 700;
   text-align: center;
-  color: #111827;
-  margin-bottom: 0.15rem;
+  color: #0f172a;
+  margin-bottom: 0.2rem;
+  margin-top: 0.5rem;
 }
 
 .tenant-modal-subtitle {
-  margin: 0 0 1.5rem;
+  margin: 0 0 1.25rem;
   text-align: center;
-  font-size: 0.92rem;
-  color: #6b7280;
+  font-size: 0.875rem;
+  color: #64748b;
 }
 
 /* ─── Error ────────────────────────────────────────────── */
@@ -140,14 +169,14 @@ body.modal-open {
 
 /* ─── Inputs ───────────────────────────────────────────── */
 .tenant-input {
-  padding: 0.6rem 1rem;
-  border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  background: #f3f4f6;
-  font-size: 0.88rem;
-  margin-bottom: 5px;
+  padding: 0.62rem 1rem;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 0.875rem;
+  margin-bottom: 2px;
   width: 100%;
-  color: #111827;
+  color: #0f172a;
   transition: all 0.18s;
 }
 
@@ -176,11 +205,11 @@ body.modal-open {
 
 .tenant-owner-email-value {
   padding: 0.58rem 1rem;
-  border-radius: 999px;
-  background: #f9fafb;
-  border: 1px dashed #e5e7eb;
-  font-size: 0.88rem;
-  color: #4b5563;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: 1.5px dashed #cbd5e1;
+  font-size: 0.875rem;
+  color: #475569;
 }
 
 /* ─── Logo ─────────────────────────────────────────────── */
@@ -279,18 +308,24 @@ body.modal-open {
   cursor: pointer;
 }
 
-.tenant-btn-draft {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-}
-
 .tenant-btn-submit {
-  background: #4f46e5;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
   color: white;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+  border: none;
+  transition: all 0.2s;
 }
 
-.tenant-btn-submit:hover {
-  background: #4338ca;
+.tenant-btn-draft {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.tenant-btn-draft:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
 }
 
 /* ─── Responsive ───────────────────────────────────────── */

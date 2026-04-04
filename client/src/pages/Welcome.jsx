@@ -5,7 +5,6 @@ import { useAuth } from "../hooks/useAuth";
 import { Spinner } from "../components/ui/Spinner";
 
 import WelcomeCard from "../components/tenant/WelcomeCard";
-import WelcomeModal from "../components/tenant/WelcomeModal";
 import CreateTenantModal from "../components/tenant/CreateTenantModal";
 import JoinAsStaff from "../components/staff/JoinAsStaff";
 import Toast from "../components/ui/Toast";
@@ -14,25 +13,12 @@ import logger from "../utils/logger.js";
 
 import "../styles/welcome.css";
 
-const WELCOME_SHOWN_KEY = "fgrow_welcome_shown";
-
 export const WelcomePage = () => {
   const { user, meState, isLoading, invitation, logout } = useAuth();
 
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [activeFlow, setActiveFlow] = useState(null);
   const [toast, setToast] = useState(null);
   const [tenantInfo, setTenantInfo] = useState(null);
-
-  useEffect(() => {
-    if (!isLoading && meState === "NO_TENANT") {
-      const hasSeenWelcome = localStorage.getItem(WELCOME_SHOWN_KEY);
-      if (!hasSeenWelcome) {
-        setShowWelcomeModal(true);
-        localStorage.setItem(WELCOME_SHOWN_KEY, "true");
-      }
-    }
-  }, [isLoading, meState]);
 
   useEffect(() => {
     if (invitation?.token) {
@@ -71,7 +57,6 @@ export const WelcomePage = () => {
     );
   }
 
-  // The main view for NO_TENANT
   const handleCreateTenant = () => {
     if (invitation) {
       setToast({
@@ -80,12 +65,10 @@ export const WelcomePage = () => {
       });
       return;
     }
-    setShowWelcomeModal(false);
     setActiveFlow("create-tenant");
   };
 
   const handleJoinAsStaff = () => {
-    setShowWelcomeModal(false);
     if (invitation) {
       setActiveFlow("join-staff-prefilled");
     } else {
@@ -105,14 +88,6 @@ export const WelcomePage = () => {
       </button>
 
       <WelcomeCard
-        onCreateTenant={handleCreateTenant}
-        onJoinAsStaff={handleJoinAsStaff}
-      />
-
-      {/* Auto-opening modal on first visit */}
-      <WelcomeModal
-        open={showWelcomeModal}
-        onClose={() => setShowWelcomeModal(false)}
         onCreateTenant={handleCreateTenant}
         onJoinAsStaff={handleJoinAsStaff}
       />

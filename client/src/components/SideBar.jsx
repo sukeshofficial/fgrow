@@ -16,6 +16,7 @@ import {
   FaChevronDown,
   FaPlus,
   FaBug,
+  FaCrown,
 } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 
@@ -153,9 +154,19 @@ export default function Sidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const { user, avatar, logout } = useAuth();
+  const { user, avatar, logout, tenant } = useAuth();
 
-  const [collapsed, setCollapsed] = useState(false);
+  // Show upgrade banner if owner and trial is expired or no plan
+  const showUpgradeBanner = user?.tenant_role === "owner" && (
+    !tenant?.plan ||
+    tenant?.plan === "free_trial" ||
+    (tenant?.trialEndDate && new Date(tenant.trialEndDate) < new Date())
+  );
+
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') return window.innerWidth <= 992;
+    return false;
+  });
   const [openMenus, setOpenMenus] = useState({});
   // flyout: { item, top } | null
   const [flyout, setFlyout] = useState(null);
@@ -372,10 +383,35 @@ export default function Sidebar() {
 
             {/* User Section */}
             <div className="user-area">
-              <Link to="/settings" className="user-left" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Link to="/settings" className="user-left" style={{ textDecoration: 'none', color: 'inherit', flex: 1, minWidth: 0 }}>
                 <img src={avatar} alt="User avatar" className="user-avatar" />
-                <span className="user-name">{user?.name ?? "Guest"}</span>
+                {!collapsed && <span className="user-name">{user?.name ?? "Guest"}</span>}
               </Link>
+              {showUpgradeBanner && (
+                <Link
+                  to="/subscription"
+                  onClick={e => e.stopPropagation()}
+                  title="Upgrade to Pro"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    padding: collapsed ? "5px 6px" : "4px 10px",
+                    borderRadius: "999px",
+                    background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+                    color: "white",
+                    textDecoration: "none",
+                    fontSize: "11px",
+                    fontWeight: "700",
+                    flexShrink: 0,
+                    boxShadow: "0 2px 8px rgba(79,70,229,0.4)",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <FaCrown style={{ fontSize: "11px" }} />
+                  {!collapsed && <span>Pro</span>}
+                </Link>
+              )}
             </div>
 
             {user && (

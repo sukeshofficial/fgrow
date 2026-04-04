@@ -418,7 +418,8 @@
 .plan-card {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+    gap: 24px;
     background: #f8fafc;
     padding: 24px;
     border-radius: 12px;
@@ -556,9 +557,7 @@
     transform: none;
 }
 
-/* Security & Cards */
-.security-card,
-.plan-card {
+.security-card {
     background: #f8fafc;
     padding: 32px;
     border-radius: 16px;

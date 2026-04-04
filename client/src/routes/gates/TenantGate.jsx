@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { reAppealTenant, getTenantById } from "../../api/tenant.api";
 import { checkAuth } from "../../features/auth/auth.actions";
@@ -106,29 +107,25 @@ export const TenantGate = ({ children }) => {
     new Date(tenant.trialEndDate) < new Date()
   ) {
     const isOwner = user?.tenant_role === "owner";
+    if (isOwner) {
+      // Hard redirect owners to subscription page — no dashboard access
+      return <Navigate to="/subscription" replace />;
+    }
+    // Staff just see a block screen
     overlay = (
       <div className="tenant-block-wrapper">
         <div className="tenant-block-card expired-gate-card">
           <div className="expired-badge">TRIAL EXPIRED</div>
           <h2>Access Restricted</h2>
           <p className="rejection-general-text">
-            Your 30-day trial period for <strong>{tenant?.name}</strong> has expired.
+            The 30-day trial for <strong>{tenant?.name}</strong> has expired.
           </p>
-
-          <div className="gate-actions" style={{ marginTop: '24px' }}>
-            {isOwner ? (
-              <a href="/subscription" className="btn btn-primary" style={{ textDecoration: 'none', display: 'inline-block', padding: '12px 24px', borderRadius: '8px', fontWeight: '600' }}>
-                Upgrade to Pro
-              </a>
-            ) : (
-              <p className="support-hint">
-                Please contact your organization owner to upgrade the subscription.
-              </p>
-            )}
-            <p className="support-hint" style={{ marginTop: '16px' }}>
-              Need help? Contact <a href="mailto:sukesh.official.2006@gmail.com">support@fgrow.in</a>
-            </p>
-          </div>
+          <p className="support-hint" style={{ marginTop: '16px' }}>
+            Please contact your organization owner to upgrade the subscription.
+          </p>
+          <p className="support-hint" style={{ marginTop: '8px' }}>
+            Need help? Contact <a href="mailto:sukesh.official.2006@gmail.com">support@fgrow.in</a>
+          </p>
         </div>
       </div>
     );

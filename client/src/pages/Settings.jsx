@@ -310,14 +310,14 @@ const Settings = () => {
                                         <div className="plan-info">
                                             <div className="plan-badge-row">
                                                 <span className={`plan-badge ${billingData?.plan === 'pro' ? 'badge-pro' : 'badge-free'}`}>
-                                                    {billingData?.plan?.toUpperCase() || 'FREE TRIAL'}
+                                                    {billingData?.plan === 'pro' ? 'PRO' : 'FREE TRIAL'}
                                                 </span>
                                             </div>
                                             <h4>{billingData?.plan === 'pro' ? 'Pro Plan' : 'Free Trial'}</h4>
                                             <p className="plan-desc">
                                                 {billingData?.plan === 'pro'
                                                     ? (billingData?.subscription?.plan_id?.description || 'Full access to all Pro features.')
-                                                    : 'Basic access to FGrow CRM features. Your trial is currently active.'}
+                                                    : 'Basic access to FGrow CRM features.'}
                                             </p>
 
                                             {billingData?.plan === 'pro' && billingData?.currentAmount ? (
@@ -331,6 +331,33 @@ const Settings = () => {
                                                     <span className="period">/ trial</span>
                                                 </div>
                                             )}
+
+                                            {/* End Date */}
+                                            {billingData?.trialEndDate && (() => {
+                                                const endDate = new Date(billingData.trialEndDate);
+                                                const isExpired = endDate < new Date();
+                                                const isUnlimited = endDate.getFullYear() >= 2100;
+                                                return (
+                                                    <div className="plan-end-date" style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <span style={{ fontSize: '13px', color: 'var(--muted-text, #64748b)' }}>
+                                                            {billingData?.plan === 'pro' ? 'Subscription ends:' : 'Trial ends:'}
+                                                        </span>
+                                                        <span style={{
+                                                            fontSize: '13px',
+                                                            fontWeight: '600',
+                                                            padding: '2px 10px',
+                                                            borderRadius: '999px',
+                                                            background: isUnlimited ? '#e0f2fe' : isExpired ? '#fee2e2' : '#dcfce7',
+                                                            color: isUnlimited ? '#0369a1' : isExpired ? '#b91c1c' : '#15803d',
+                                                        }}>
+                                                            {isUnlimited ? 'Unlimited' : endDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                        </span>
+                                                        {isExpired && !isUnlimited && (
+                                                            <span style={{ fontSize: '12px', color: '#b91c1c', fontWeight: 500 }}>· Expired</span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
 
                                         <div className="plan-actions">
