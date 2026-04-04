@@ -1,0 +1,212 @@
+.c-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: cFadeIn 0.2s ease;
+    padding: 20px;
+}
+
+.c-modal-content {
+    background: white;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 16px;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    animation: cSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: max-width 0.3s ease;
+}
+
+.c-modal-content.success-state {
+    max-width: 580px;
+}
+
+.c-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: 20px;
+    transition: all 0.2s;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.c-modal-close:hover {
+    color: #0f172a;
+    transform: scale(1.1);
+}
+
+.c-modal-body {
+    padding: 36px;
+}
+
+.c-modal-body h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+    font-family: 'Sora', sans-serif;
+}
+
+.c-modal-sub {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 28px;
+    line-height: 1.5;
+}
+
+.c-modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.c-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: left;
+}
+
+.c-form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.c-form-group input {
+    padding: 12px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
+    color: #0f172a;
+}
+
+.c-form-group input::placeholder {
+    color: #94a3b8;
+}
+
+.c-form-group input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.c-input-error {
+    border-color: #ef4444 !important;
+}
+
+.c-error-text {
+    font-size: 12px;
+    color: #ef4444;
+    margin-top: 2px;
+    font-weight: 500;
+}
+
+.c-error-banner {
+    background: rgba(239, 68, 68, 0.1);
+    color: #b91c1c;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    text-align: left;
+}
+
+.c-btn-submit {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.c-btn-submit:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.25);
+}
+
+.c-btn-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.c-spinner {
+    animation: cSpin 1s linear infinite;
+    font-size: 18px;
+}
+
+@keyframes cFadeIn {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+
+    to {
+        opacity: 1;
+        backdrop-filter: blur(4px);
+    }
+}
+
+@keyframes cSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes cSpin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .c-modal-body {
+        padding: 24px;
+    }
+
+    .c-modal-close {
+        top: 16px;
+        right: 16px;
+    }
+
+    .calendly-frame-wrap {
+        height: 500px !important;
+    }
+}

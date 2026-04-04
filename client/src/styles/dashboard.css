@@ -209,8 +209,17 @@
 .credit-name {
   font-size: 13px;
   font-weight: 800;
+  display: flex;
+  text-decoration: none;
   color: var(--primary-accent);
   letter-spacing: 0.02em;
+  gap: 8px;
+}
+
+.linkedin-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 @keyframes spotlight-cycle {

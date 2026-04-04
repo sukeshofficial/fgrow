@@ -116,7 +116,7 @@ const Subscription = () => {
                 modal: {
                     ondismiss: () => {
                         setProcessing(false);
-                        addToast("Payment cancelled. Your trial hasn't started yet.", "error");
+                        addToast("Payment cancelled", "error");
                     },
                     confirm_close: true,
                 },

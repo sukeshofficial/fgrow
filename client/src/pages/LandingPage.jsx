@@ -3,6 +3,10 @@ import { FaShieldAlt, FaCogs, FaChartBar, FaUserCircle, FaInfoCircle } from "rea
 import { useAuth } from "../hooks/useAuth";
 import ScrollingCredits from "../components/dashboard/ScrollingCredits";
 import { Link } from "react-router-dom";
+import ContactSalesModal from "../components/ui/ContactSalesModal";
+import Toast from "../components/ui/Toast";
+import { api } from "../api/api";
+import { checkAuth } from "../features/auth/auth.actions";
 
 const PlaceholderNotice = () => (
     <span className="placeholder-tooltip">
@@ -12,9 +16,120 @@ const PlaceholderNotice = () => (
 );
 
 const LandingPage = () => {
-    const { user, avatar } = useAuth();
+    const { user, avatar, dispatch } = useAuth();
     const isStaff = user?.tenant_role === "staff";
     const [activeFaq, setActiveFaq] = useState(null);
+    const [isSalesModalOpen, setIsSalesModalOpen] = useState(false);
+
+    // Payment Additions
+    const [billingStatus, setBillingStatus] = useState(null);
+    const [processing, setProcessing] = useState(false);
+    const [toasts, setToasts] = useState([]);
+
+    const addToast = (message, type = "success") => {
+        const id = Date.now();
+        setToasts((prev) => [...prev, { id, message, type }]);
+    };
+
+    const removeToast = (id) => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+    };
+
+    useEffect(() => {
+        if (user && !isStaff) {
+            fetchBillingStatus();
+        }
+    }, [user, isStaff]);
+
+    const fetchBillingStatus = async () => {
+        try {
+            const response = await api.get("/billing/status");
+            setBillingStatus(response.data);
+        } catch (err) {
+            console.error("Error fetching billing status:", err);
+        }
+    };
+
+    const loadRazorpayScript = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
+    const handlePayment = async () => {
+        setProcessing(true);
+
+        try {
+            const isLoaded = await loadRazorpayScript();
+            if (!isLoaded) {
+                throw new Error("Razorpay SDK failed to load.");
+            }
+
+            const orderResponse = await api.post("/billing/create-order", {
+                planId: "pro_plan_id",
+            });
+
+            const { order_id, amount, currency, key_id } = orderResponse.data;
+
+            const options = {
+                key: key_id,
+                amount: amount,
+                currency: currency,
+                name: "ForgeGrid",
+                description: "Pro Subscription",
+                image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3wAAAEPSURBVHhe7dAxAQAADMCg+TfdwR+GIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEEIAhCEIAQhCEIAd9f9fAAAABJRU5ErkJggg==",
+                order_id: order_id,
+                handler: async (response) => {
+                    try {
+                        setProcessing(true);
+                        await api.post("/billing/verify-payment", {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                        });
+
+                        await fetchBillingStatus();
+                        await checkAuth(dispatch);
+                        addToast("Payment successful! Your Pro plan is active.", "success");
+                    } catch (err) {
+                        console.error("Verification failed:", err);
+                        addToast("Payment verification failed. Please contact support.", "error");
+                    } finally {
+                        setProcessing(false);
+                    }
+                },
+                prefill: {
+                    name: user?.name,
+                    email: user?.email,
+                    contact: user?.phone,
+                },
+                notes: {
+                    tenant_id: user?.tenant_id,
+                },
+                theme: { color: "#2563eb" },
+                modal: {
+                    ondismiss: () => {
+                        setProcessing(false);
+                        addToast("Payment cancelled", "error");
+                    },
+                    confirm_close: true,
+                },
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.open();
+        } catch (err) {
+            console.error("Payment initiation failed:", err);
+            addToast("Payment initiation failed. Please check your connection.", "error");
+        } finally {
+            setProcessing(false);
+        }
+    };
+
     const [scrolled, setScrolled] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
     const observerRef = useRef(null);
@@ -143,6 +258,11 @@ const LandingPage = () => {
 
     return (
         <>
+            <ContactSalesModal
+                isOpen={isSalesModalOpen}
+                onClose={() => setIsSalesModalOpen(false)}
+                initialData={{ name: user?.name, email: user?.email }}
+            />
             <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -182,14 +302,16 @@ const LandingPage = () => {
 
         /* NAV */
         .nav {
-          position: sticky; top: 0; z-index: 100;
+          position: sticky; top: 0; left: 0; width: 100%; z-index: 999;
           height: 72px; display: flex; align-items: center;
           transition: all 0.3s;
           border-bottom: 1px solid transparent;
-        }
+          }
         .nav.scrolled {
-          background: rgba(255,255,255,0.92);
+          position: fixed; top: 0; left: 0; width: 100%; z-index: 999;
+          background: rgba(255, 255, 255, 0.66);
           backdrop-filter: blur(16px);
+          transition: all 0.3s;
           border-color: var(--border);
         }
         .nav-inner { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 28px; display: flex; justify-content: space-between; align-items: center; }
@@ -580,7 +702,7 @@ const LandingPage = () => {
                                     {isStaff ? (
                                         <button className="btn-cta" style={{ opacity: 0.5, cursor: "not-allowed" }} disabled>Book a Demo →</button>
                                     ) : (
-                                        <Link to="/subscription" className="btn-cta">Book a Demo →</Link>
+                                        <button onClick={() => setIsSalesModalOpen(true)} className="btn-cta">Book a Demo →</button>
                                     )}
                                 </>
                             ) : (
@@ -613,8 +735,15 @@ const LandingPage = () => {
                             <div className="hero-ctas">
                                 {isStaff ? (
                                     <button className="btn-cta large" style={{ opacity: 0.5, cursor: "not-allowed" }} disabled>Start 30-Day Trial (₹1) →</button>
-                                ) : (
+                                ) : !user ? (
                                     <Link to="/subscription" className="btn-cta large">Start 30-Day Trial (₹1) →</Link>
+                                ) : billingStatus?.plan === 'pro' ? (
+                                    // <Link to="/dashboard" className="btn-cta large">Manage App →</Link>
+                                    <button onClick={handlePayment} disabled={processing} className="btn-cta large">{processing ? "Processing..." : "Upgrade to Pro →"}</button>
+                                ) : billingStatus?.trialUsed ? (
+                                    <button onClick={handlePayment} disabled={processing} className="btn-cta large">{processing ? "Processing..." : "Upgrade to Pro →"}</button>
+                                ) : (
+                                    <button onClick={handlePayment} disabled={processing} className="btn-cta large">{processing ? "Processing..." : "Start 30-Day Trial (₹1) →"}</button>
                                 )}
                                 {user ? (
                                     <Link to="/dashboard" className="btn-outline-cta">Get Started</Link>
@@ -959,7 +1088,7 @@ const LandingPage = () => {
                                 {isStaff ? (
                                     <button className="price-btn price-btn-outline" style={{ opacity: 0.5, cursor: "not-allowed" }} disabled>Get Started</button>
                                 ) : (
-                                    <Link to={user ? "/subscription" : "/register"} className="price-btn price-btn-outline">Get Started</Link>
+                                    <Link to={user ? "/dashboard" : "/register"} className="price-btn price-btn-outline">Get Started</Link>
                                 )}
                             </div>
                             <div className="price-card featured reveal reveal-d2">
@@ -990,7 +1119,7 @@ const LandingPage = () => {
                                 {isStaff ? (
                                     <button className="price-btn price-btn-outline" style={{ opacity: 0.5, cursor: "not-allowed" }} disabled>Contact Sales</button>
                                 ) : (
-                                    <Link to="/register" className="price-btn price-btn-outline">Contact Sales</Link>
+                                    <button onClick={() => setIsSalesModalOpen(true)} className="price-btn price-btn-outline">Contact Sales</button>
                                 )}
                             </div>
                         </div>
@@ -1085,11 +1214,16 @@ const LandingPage = () => {
                             <div className="footer-social">
                                 <a href="https://www.linkedin.com/in/sukeshd/">LinkedIn</a>
                                 <a href="#">Twitter</a>
-                                <a href="#">support@fgrow.in</a>
+                                <a href="mailto:sukesh.official.2006@gmail.com">support@fgrow.in</a>
                             </div>
                         </div>
                     </div>
                 </footer >
+            </div>
+            <div className="toast-container" style={{ position: "fixed", bottom: "24px", right: "24px", zIndex: 10000, display: "flex", flexDirection: "column", gap: "10px" }}>
+                {toasts.map((t) => (
+                    <Toast key={t.id} message={t.message} type={t.type} onClose={() => removeToast(t.id)} />
+                ))}
             </div>
         </>
     );
