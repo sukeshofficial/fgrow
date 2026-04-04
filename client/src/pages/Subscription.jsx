@@ -6,6 +6,7 @@ import Toast from "../components/ui/Toast";
 import "../styles/subscription.css";
 import { useNavigate } from "react-router-dom";
 import { Spinner } from "../components/ui/Spinner";
+import { FaShieldAlt } from "react-icons/fa";
 
 const Subscription = () => {
     const { user, dispatch } = useAuth();
@@ -408,8 +409,12 @@ const Subscription = () => {
                 }
 
                 .trust-icon {
-                    color: #10b981;
-                    font-size: 20px;
+                    transform: scale(1.2);
+                    // color: #10b981;
+                    color: var(--blue);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 }
 
                 .rzp-logo-sm {
@@ -539,7 +544,7 @@ const Subscription = () => {
                 </div>
 
                 <div className="trust-badge">
-                    <span className="trust-icon">🛡️</span>
+                    <span className="trust-icon"><FaShieldAlt /></span>
                     <span>Secure payments powered by <strong>Razorpay</strong></span>
                     <img
                         src="https://razorpay.com/favicon.png"

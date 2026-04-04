@@ -1,8 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaShieldAlt, FaCogs, FaChartBar, FaUserCircle } from "react-icons/fa";
+import { FaShieldAlt, FaCogs, FaChartBar, FaUserCircle, FaInfoCircle } from "react-icons/fa";
 import { useAuth } from "../hooks/useAuth";
 import ScrollingCredits from "../components/dashboard/ScrollingCredits";
 import { Link } from "react-router-dom";
+
+const PlaceholderNotice = () => (
+    <span className="placeholder-tooltip">
+        <FaInfoCircle size={14} />
+        <span className="tooltip-text">Notice: Content on this landing page are placeholders right now.</span>
+    </span>
+);
 
 const LandingPage = () => {
     const { user, avatar } = useAuth();
@@ -245,10 +252,7 @@ const LandingPage = () => {
           line-height: 1.08; color: var(--text); margin-bottom: 24px;
         }
         .h1 em { font-style: normal; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .hero-sub {
-          font-size: clamp(17px, 2vw, 20px); color: var(--muted); font-weight: 400;
-          max-width: 620px; margin: 0 auto 44px; line-height: 1.6;
-        }
+        .hero-sub { margin: 0 auto 40px; max-width: 760px; font-size: clamp(15px, 1.5vw, 18px); color: var(--muted); font-weight: 400; line-height: 1.6; }
         .hero-ctas { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-bottom: 52px; }
         .trust-row {
           display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
@@ -450,6 +454,13 @@ const LandingPage = () => {
         .faq-item.open .faq-chevron { transform: rotate(180deg); background: var(--blue-pale); color: var(--blue); }
         .faq-a { padding: 0 24px 18px; font-size: 14px; color: var(--muted); line-height: 1.7; }
 
+        /* TOOLTIP */
+        .placeholder-tooltip { position: relative; display: inline-flex; align-items: center; justify-content: center; cursor: help; color: var(--lighter); transition: color 0.2s; }
+        .placeholder-tooltip:hover { color: var(--blue); }
+        .tooltip-text { visibility: hidden; opacity: 0; width: max-content; max-width: 220px; background: var(--navy); color: white; text-align: center; border-radius: 6px; padding: 6px 10px; position: absolute; z-index: 1000; bottom: 140%; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 500; font-family: var(--font); letter-spacing: normal; text-transform: none; line-height: 1.4; box-shadow: var(--shadow-lg); transition: opacity 0.2s, bottom 0.2s; white-space: normal; }
+        .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: var(--navy) transparent transparent transparent; }
+        .placeholder-tooltip:hover .tooltip-text { visibility: visible; opacity: 1; bottom: 150%; }
+
         /* FINAL CTA */
         .final-cta { background: linear-gradient(135deg, var(--navy) 0%, #1e1b4b 100%); padding: 120px 0; text-align: center; position: relative; overflow: hidden; }
         .final-cta::before { content: ''; position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
@@ -597,7 +608,7 @@ const LandingPage = () => {
                                 in <em>One Unified Platform</em>
                             </h1>
                             <p className="hero-sub">
-                                Manage clients, services, tasks, billing, approvals, and recurring workflows — all in one secure, role-based CRM built for CA, CS, and compliance teams.
+                                Manage clients, services, tasks, billing, approvals, and recurring workflows - all in one secure, role-based CRM built for CA, CS, and compliance teams.
                             </p>
                             <div className="hero-ctas">
                                 {isStaff ? (
@@ -623,7 +634,10 @@ const LandingPage = () => {
                                     <div className="dot-r"></div>
                                     <div className="dot-y"></div>
                                     <div className="dot-g"></div>
-                                    <div className="mock-url">https://fgrow.forgegrid.in/dashboard</div>
+                                    <div className="mock-url" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <span>https://fgrow.forgegrid.in/dashboard</span>
+                                        <PlaceholderNotice />
+                                    </div>
                                 </div>
                                 <div className="mock-body">
                                     <div className="mock-sidebar">
@@ -708,7 +722,9 @@ const LandingPage = () => {
                             </div>
                         </div>
                         <div className="trusted-by">
-                            <p className="trusted-label">Trusted by firms across India</p>
+                            <p className="trusted-label" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                                Trusted by firms across India <PlaceholderNotice />
+                            </p>
                             <div className="logos-row">
                                 {["ComplianceFirst", "AuditHub", "FinServe", "StartOps", "LegalEdge"].map(l => (
                                     <span key={l} className="logo-pill">{l}</span>
@@ -747,7 +763,7 @@ const LandingPage = () => {
                                     FG GROW brings every client, task, service, and invoice into a single source of truth. Automated, secure, and designed to scale with your consultancy.
                                 </p>
                                 <p className="sol-p">
-                                    With role-based access and multi-tenant isolation, your team sees exactly what they need — nothing more, nothing less.
+                                    With role-based access and multi-tenant isolation, your team sees exactly what they need - nothing more, nothing less.
                                 </p>
                                 <Link to={user ? "/subscription" : "/register"} className="sol-link">See how it works →</Link>
                             </div>
@@ -898,7 +914,7 @@ const LandingPage = () => {
                 <section className="testi" >
                     <div className="wrap" style={{ textAlign: "center" }}>
                         <div className="reveal">
-                            <span className="section-tag">Wall of Love</span>
+                            <span className="section-tag" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>Wall of Love <PlaceholderNotice /></span>
                             <h2 className="section-h2">Trusted by India's leading consultants</h2>
                             <p className="section-sub" style={{ margin: "0 auto 64px" }}>Real stories from firms that run their operations on FG GROW.</p>
                         </div>
