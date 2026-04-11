@@ -27,6 +27,10 @@ export const getNextInvoiceNumber = async () => {
   return await api.get(`${BASE_URL}/next-number`);
 };
 
+export const resetInvoiceCounter = async (seq, yearStr) => {
+  return await api.post(`${BASE_URL}/reset-counter`, { seq, yearStr });
+};
+
 // B. Items
 export const addItems = async (id, items) => {
   return await api.post(`${BASE_URL}/${id}/items`, { items });

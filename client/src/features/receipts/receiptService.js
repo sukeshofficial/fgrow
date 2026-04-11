@@ -4,6 +4,19 @@ const BASE_URL = "/receipts";
 
 const receiptService = {
     /**
+     * Get the next auto-generated receipt number
+     */
+    getNextReceiptNumber: async () => {
+        const response = await api.get(`${BASE_URL}/next-number`);
+        return response.data;
+    },
+
+    resetReceiptCounter: async (seq, yearStr) => {
+        const response = await api.post(`${BASE_URL}/reset-counter`, { seq, yearStr });
+        return response.data;
+    },
+
+    /**
      * List all receipts with pagination and filters
      */
     listReceipts: async ({ page = 1, limit = 20, search = "", ...filters } = {}) => {
@@ -83,16 +96,9 @@ const receiptService = {
      * Generate/Download PDF for a receipt
      */
     printReceipt: async (id) => {
-        const response = await api.get(`${BASE_URL}/${id}/print`, {
+        return await api.get(`${BASE_URL}/${id}/print`, {
             responseType: "blob",
         });
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `receipt-${id}.pdf`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
     },
 
     /**

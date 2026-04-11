@@ -22,6 +22,7 @@ const EditReceiptWizard = () => {
     const [submitting, setSubmitting] = useState(false);
 
     const [formData, setFormData] = useState({
+        receipt_no: "",
         client: "",
         billing_entity: "",
         date: new Date().toISOString().slice(0, 10),
@@ -55,11 +56,12 @@ const EditReceiptWizard = () => {
                 }
 
                 setFormData({
+                    receipt_no: r.receipt_no || "",
                     client: r.client?._id || r.client,
                     billing_entity: r.billing_entity?._id || r.billing_entity,
                     date: r.date ? new Date(r.date).toISOString().slice(0, 10) : "",
                     remark: r.remark || "",
-                    payments: r.payments.map(p => ({
+                    payments: (r.payments || []).map(p => ({
                         ...p,
                         date: p.date ? new Date(p.date).toISOString().slice(0, 10) : ""
                     })),
@@ -98,6 +100,7 @@ const EditReceiptWizard = () => {
         try {
             setSubmitting(true);
             const payload = {
+                receipt_no: dataToSave.receipt_no,
                 date: dataToSave.date,
                 remark: dataToSave.remark,
                 payments: dataToSave.payments,

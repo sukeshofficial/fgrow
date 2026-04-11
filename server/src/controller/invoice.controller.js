@@ -22,10 +22,18 @@ export const createInvoice = async (req, res, next) => {
   }
 };
 
-// FIX: Was referenced in routes but never implemented — added here
 export const getNextInvoiceNumber = async (req, res, next) => {
   try {
     const nextNumber = await service.getNextInvoiceNumber(req.user.tenant_id);
+    res.json({ invoice_no: nextNumber });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const resetInvoiceCounter = async (req, res, next) => {
+  try {
+    const nextNumber = await service.resetInvoiceCounterService(req.user.tenant_id, req.body.seq, req.body.yearStr);
     res.json({ invoice_no: nextNumber });
   } catch (err) {
     next(err);

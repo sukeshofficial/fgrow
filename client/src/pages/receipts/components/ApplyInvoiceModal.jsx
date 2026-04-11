@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiX, FiCheck, FiInfo, FiHash } from "react-icons/fi";
+import { FiX, FiCheck, FiInfo, FiHash, FiZap } from "react-icons/fi";
 import receiptService from "../../../features/receipts/receiptService";
 import { Spinner } from "../../../components/ui/Spinner";
 import logger from "../../../utils/logger";
@@ -70,6 +70,20 @@ const ApplyInvoiceModal = ({ isOpen, onClose, clientId, receiptId, availableAmou
         }
     };
 
+    const handleAutoApply = () => {
+        let remaining = availableAmount;
+        const newAllocs = {};
+        for (const inv of invoices) {
+            if (remaining <= 0) break;
+            const toApply = Math.min(remaining, (inv.balance_due || 0));
+            if (toApply > 0) {
+                newAllocs[inv._id] = toApply;
+                remaining -= toApply;
+            }
+        }
+        setAllocations(newAllocs);
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -87,17 +101,59 @@ const ApplyInvoiceModal = ({ isOpen, onClose, clientId, receiptId, availableAmou
                     padding: '24px 32px', borderBottom: '1px solid #f1f5f9',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}>
-                    <div>
-                        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#1e293b' }}>Apply Receipt to Invoices</h3>
-                        <p style={{ margin: '4px 0 0', fontSize: '0.875rem', color: '#64748b' }}>
-                            Available Balance: <strong style={{ color: '#10b981' }}>₹{availableAmount?.toLocaleString('en-IN')}</strong>
-                        </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flex: 1 }}>
+                        <div>
+                            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#1e293b' }}>Apply Receipt to Invoices</h3>
+                            <p style={{ margin: '4px 0 0', fontSize: '0.875rem', color: '#64748b' }}>
+                                Available Balance: <strong style={{ color: '#10b981' }}>₹{availableAmount?.toLocaleString('en-IN')}</strong>
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleAutoApply}
+                            disabled={invoices.length === 0}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '8px 16px',
+                                background: invoices.length === 0 ? '#f1f5f9' : 'linear-gradient(135deg, #7c3aed 0%, #6366f1 100%)',
+                                color: invoices.length === 0 ? '#94a3b8' : 'white',
+                                border: 'none',
+                                borderRadius: '999px',
+                                cursor: invoices.length === 0 ? 'not-allowed' : 'pointer',
+                                fontSize: '12px',
+                                fontWeight: 800,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em',
+                                boxShadow: invoices.length === 0 ? 'none' : '0 4px 12px rgba(124, 58, 237, 0.2)',
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            <FiZap size={13} style={{ fill: invoices.length === 0 ? 'transparent' : 'rgba(255,255,255,0.2)' }} /> Auto Apply
+                        </button>
                     </div>
-                    <button onClick={onClose} style={{
-                        background: '#f1f5f9', border: 'none', borderRadius: '50%',
-                        padding: '8px', cursor: 'pointer', color: '#64748b'
-                    }}>
-                        <FiX size={20} />
+
+                    <button
+                        onClick={onClose}
+                        style={{
+                            background: '#f1f5f9',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '36px',
+                            height: '36px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            color: '#64748b',
+                            transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#e2e8f0'; e.currentTarget.style.color = '#1e293b'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b'; }}
+                    >
+                        <FiX size={18} />
                     </button>
                 </div>
 

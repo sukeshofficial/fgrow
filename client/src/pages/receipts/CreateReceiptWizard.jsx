@@ -20,6 +20,7 @@ const CreateReceiptWizard = () => {
     const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
+        receipt_no: "",
         client: "",
         billing_entity: "",
         date: new Date().toISOString().slice(0, 10),
@@ -53,6 +54,7 @@ const CreateReceiptWizard = () => {
         try {
             setLoading(true);
             const payload = {
+                receipt_no: dataToSave.receipt_no,
                 client: dataToSave.client,
                 billing_entity: dataToSave.billing_entity,
                 date: dataToSave.date,

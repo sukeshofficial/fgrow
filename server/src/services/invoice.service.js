@@ -66,12 +66,12 @@ const syncTaskLinks = async (user, invoiceId, items) => {
 const maybeSyncCounter = async (user, invoiceNo) => {
   if (!invoiceNo) return;
 
-  const parts = invoiceNo.split("-");
-  if (parts.length < 2) return;
+  const parts = invoiceNo.split("/");
+  if (parts.length < 3) return;
 
-  const yearStr = parts[parts.length - 2];
+  const yearStr = parts[1].split("-")[0];
   const seqStr = parts[parts.length - 1];
-  const year = parseInt(yearStr);
+  const year = 2000 + parseInt(yearStr);
   const seq = parseInt(seqStr);
 
   if (isNaN(year) || isNaN(seq)) return;
@@ -193,39 +193,66 @@ export const createInvoice = async (user, payload) => {
 };
 
 export const getNextInvoiceNumber = async (tenantId) => {
-  const year = new Date().getFullYear();
+  const now = new Date();
+  const calendarYear = now.getFullYear();
+  const month = now.getMonth();
+  const year = month >= 3 ? calendarYear : calendarYear - 1;
 
   // 1. Get current counter
   const counter = await InvoiceCounter.findOne({ tenant_id: tenantId, year });
   let nextSeq = counter ? counter.seq + 1 : 1;
 
-  // 2. Double check against actual invoices to prevent desync
-  const latestInvoice = await Invoice.findOne({
-    tenant_id: tenantId,
-    invoice_no: new RegExp(`^INV-${year}-`, 'i'),
-    archived: false
-  }).sort({ invoice_no: -1 }).select('invoice_no').lean();
+  // financial year format
+  const fyStart = year % 100;
+  const fyEnd = (year + 1) % 100;
+  const financialYear = `${fyStart}-${fyEnd}`;
 
-  if (latestInvoice) {
-    const parts = latestInvoice.invoice_no.split("-");
-    const latestSeq = parseInt(parts[parts.length - 1]);
-    if (!isNaN(latestSeq) && latestSeq >= nextSeq) {
-      logger.info(`[NextNumber] Found higher existing sequence in collection: ${latestSeq}. Adjusting suggestion.`);
-      nextSeq = latestSeq + 1;
-    }
+  // 2. Double check against actual invoices to prevent desync
+  const existingInvoices = await Invoice.find({
+    tenant_id: tenantId,
+    invoice_no: new RegExp(`^INV/${financialYear}/`, 'i'),
+    archived: false
+  }).select('invoice_no').lean();
+
+  const existingSeqs = new Set();
+  existingInvoices.forEach(inv => {
+    const parts = inv.invoice_no.split('/');
+    const seq = parseInt(parts[parts.length - 1]);
+    if (!isNaN(seq)) existingSeqs.add(seq);
+  });
+
+  while (existingSeqs.has(nextSeq)) {
+    logger.info(`[NextNumber] Sequence ${nextSeq} already occupied. Checking next available slot.`);
+    nextSeq++;
   }
 
-  const finalNo = `INV-${year}-${String(nextSeq).padStart(4, "0")}`;
+  const finalNo = `INV/${financialYear}/${String(nextSeq).padStart(4, "0")}`;
   logger.info(`[NextNumber] Suggested invoice number for tenant ${tenantId}: ${finalNo}`);
   return finalNo;
 };
 
+export const resetInvoiceCounterService = async (tenantId, newSeq, yearStr) => {
+  const year = 2000 + parseInt(yearStr);
+  if (isNaN(year) || isNaN(newSeq)) throw new Error("Invalid year or sequence");
+
+  const InvoiceCounter = mongoose.model("InvoiceCounter");
+  await InvoiceCounter.findOneAndUpdate(
+    { tenant_id: tenantId, year },
+    { $set: { seq: newSeq - 1 } }, // so getNext returning +1 gets newSeq
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+  return getNextInvoiceNumber(tenantId);
+};
+
 export const findAndIncrementInvoiceNumber = async (tenantId) => {
-  const year = new Date().getFullYear();
+  const now = new Date();
+  const calendarYear = now.getFullYear();
+  const month = now.getMonth();
+  const year = month >= 3 ? calendarYear : calendarYear - 1;
 
   // 1. Get the real next sequence by checking both counter and actual invoices
   const suggested = await getNextInvoiceNumber(tenantId);
-  const nextSeq = parseInt(suggested.split('-').pop());
+  const nextSeq = parseInt(suggested.split('/').pop());
 
   // 2. Update counter to this new sequence
   const counter = await InvoiceCounter.findOneAndUpdate(
@@ -238,7 +265,11 @@ export const findAndIncrementInvoiceNumber = async (tenantId) => {
     },
   );
 
-  return `INV-${year}-${String(counter.seq).padStart(4, "0")}`;
+  const fyStart = year % 100;
+  const fyEnd = (year + 1) % 100;
+  const financialYear = `${fyStart}-${fyEnd}`;
+
+  return `INV/${financialYear}/${String(counter.seq).padStart(4, "0")}`;
 };
 
 export const getInvoiceById = async (user, id) => {
@@ -325,10 +356,15 @@ export const deleteInvoice = async (user, id, force = false) => {
     throw new Error("Invoice already deleted");
   }
 
-  // 1. Identify Year and Seq from invoice number (Format: INV-2026-0002)
-  const parts = invoice.invoice_no.split("-");
-  const year = parseInt(parts[parts.length - 2]);
-  const seq = parseInt(parts[parts.length - 1]);
+  // 1. Identify Year and Seq from invoice number (Format: INV/26-27/0002)
+  const parts = invoice.invoice_no.split("/");
+  let year = new Date().getFullYear();
+  let seq = 0;
+  if (parts.length >= 3) {
+    const yearStr = parts[1].split("-")[0];
+    year = 2000 + parseInt(yearStr);
+    seq = parseInt(parts[parts.length - 1]);
+  }
 
   if (force) {
     await Invoice.deleteOne(filter);

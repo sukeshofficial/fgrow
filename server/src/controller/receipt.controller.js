@@ -12,6 +12,27 @@ import {
 } from "../services/receipt.service.js";
 
 import { generateReceiptPdfBuffer } from "../utils/pdf.helper.js"; // see helper below
+import { getNextReceiptNumber, resetReceiptCounterService } from "../services/receipt.service.js";
+
+export const getNextReceiptNumberController = async (req, res) => {
+    try {
+        const tenant_id = req.user.tenant_id;
+        const number = await getNextReceiptNumber(tenant_id);
+        return res.json({ success: true, data: number });
+    } catch (e) {
+        return res.status(500).json({ success: false, message: e.message });
+    }
+};
+
+export const resetReceiptCounterController = async (req, res) => {
+    try {
+        const tenant_id = req.user.tenant_id;
+        const number = await resetReceiptCounterService(tenant_id, req.body.seq, req.body.yearStr);
+        return res.json({ success: true, data: number });
+    } catch (e) {
+        return res.status(500).json({ success: false, message: e.message });
+    }
+};
 
 export const createReceiptController = async (req, res) => {
     try {

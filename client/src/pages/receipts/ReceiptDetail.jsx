@@ -54,10 +54,34 @@ const ReceiptDetail = () => {
     const handlePrint = async () => {
         try {
             setActionLoading(true);
-            await receiptService.printReceipt(id);
+            const response = await receiptService.printReceipt(id);
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
         } catch (err) {
             logger.error("ReceiptDetail", "Print failed", err);
             showAlert("Print Error", "Failed to generate receipt PDF.", "error");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleDownloadPdf = async () => {
+        try {
+            setActionLoading(true);
+            const response = await receiptService.printReceipt(id);
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Receipt-${receipt?.receipt_no || id}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            logger.error("ReceiptDetail", "Download failed", err);
+            showAlert("Download Error", "Failed to download receipt PDF.", "error");
         } finally {
             setActionLoading(false);
         }
@@ -144,7 +168,9 @@ const ReceiptDetail = () => {
     }
 
     const client = receipt.client || {};
-    const billingEntity = receipt.billing_entity || {};
+    const billingEntity = (receipt.billing_entity && typeof receipt.billing_entity === 'object')
+        ? receipt.billing_entity
+        : { name: 'Your Company' };
 
     // Calculate available balance
     const alreadyApplied = (receipt.applied_invoices || []).reduce((sum, inv) => sum + (inv.amount_applied || 0), 0);
@@ -183,6 +209,9 @@ const ReceiptDetail = () => {
                                 >
                                     <FiShare2 />
                                 </button>
+                                <button className="action-icon-btn" title="Download PDF" onClick={handleDownloadPdf} disabled={actionLoading}>
+                                    <FiFileText />
+                                </button>
                                 <button className="action-icon-btn" title="Print Receipt" onClick={handlePrint} disabled={actionLoading}>
                                     <FiPrinter />
                                 </button>
@@ -219,10 +248,18 @@ const ReceiptDetail = () => {
                                     </div>
                                 )}
                                 <div className="business-name">{billingEntity.name}</div>
-                                <div className="business-address">{billingEntity.officialAddress || formatAddress(billingEntity.companyAddress)}</div>
-                                {billingEntity.companyPhone && <div className="business-address">P: {billingEntity.companyPhone}</div>}
-                                {billingEntity.companyEmail && <div className="business-address">E: {billingEntity.companyEmail}</div>}
-                                {billingEntity.gstNumber && <div className="business-address" style={{ marginTop: '4px', fontWeight: 700 }}>GSTIN: {billingEntity.gstNumber}</div>}
+                                <div className="business-address">
+                                    {billingEntity.officialAddress ||
+                                        billingEntity.address ||
+                                        formatAddress(billingEntity.companyAddress)}
+                                </div>
+                                {(billingEntity.companyPhone) && <div className="business-address">P: {billingEntity.companyPhone}</div>}
+                                {(billingEntity.companyEmail) && <div className="business-address">E: {billingEntity.companyEmail}</div>}
+                                {(billingEntity.gstNumber || billingEntity.gstin) && (
+                                    <div className="business-address" style={{ marginTop: '4px', fontWeight: 700 }}>
+                                        GSTIN: {billingEntity.gstNumber || billingEntity.gstin}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="receipt-meta-header">

@@ -11,6 +11,8 @@ import {
   unpaidInvoicesForClientController,
   printReceiptController,
   sendReceiptController,
+  getNextReceiptNumberController,
+  resetReceiptCounterController,
 } from "../controller/receipt.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
@@ -26,6 +28,8 @@ router.post("/", ...authStaff, createReceiptController);
 router.get("/", ...authStaff, listReceiptsController);
 
 // Utility (must be before /:id to avoid conflicts)
+router.get("/next-number", ...authStaff, getNextReceiptNumberController);
+router.post("/reset-counter", ...authStaff, resetReceiptCounterController);
 router.get("/client/:clientId/unpaid-invoices", ...authStaff, unpaidInvoicesForClientController);
 
 // Print / preview / send

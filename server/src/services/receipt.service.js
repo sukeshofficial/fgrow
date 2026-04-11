@@ -2,6 +2,8 @@
 import mongoose from "mongoose";
 import Receipt from "../models/receipt/receipt.model.js";
 import Invoice from "../models/invoice/invoice.model.js";
+import Tenant from "../models/tenant/tenant.model.js";
+import BillingEntity from "../models/billing/billingEntity.model.js";
 import ReceiptCounter from "../models/receipt/schemas/receiptCounter.model.js";
 import { generateReceiptPdfBuffer } from "../utils/pdf.helper.js";
 import sendEmail from "../utils/sendEmail.js";
@@ -29,26 +31,102 @@ async function serverSupportsTransactions() {
   }
 }
 
-export const generateReceiptNumber = async (tenant_id, prefix = "RCPT") => {
+const maybeSyncCounter = async (tenantId, receiptNo) => {
+  if (!receiptNo) return;
+
+  const parts = receiptNo.split("/");
+  if (parts.length < 3) return;
+
+  const seqStr = parts[parts.length - 1];
+  const seq = parseInt(seqStr);
+
+  if (isNaN(seq)) return;
+
   const now = new Date();
-  const year = now.getFullYear();
+  const calendarYear = now.getFullYear();
+  const month = now.getMonth();
+  const year = month >= 3 ? calendarYear : calendarYear - 1;
 
-  // atomic increment
-  const counter = await ReceiptCounter.findOneAndUpdate(
-    { tenant_id, year },
-    { $inc: { seq: 1 } },
-    { new: true, upsert: true },
-  );
+  try {
+    const updated = await ReceiptCounter.findOneAndUpdate(
+      { tenant_id: tenantId, year },
+      { $max: { seq: seq } },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+    console.log(`[SyncCounter] Receipt counter for tenant ${tenantId} and year ${year} is now at ${updated.seq}`);
+  } catch (e) {
+    console.error(`[SyncCounter] Failed to sync receipt counter for ${receiptNo}:`, e.message);
+  }
+};
 
-  const seq = counter.seq;
+export const getNextReceiptNumber = async (tenant_id, prefix = "RCPT") => {
+  const now = new Date();
+  const calendarYear = now.getFullYear();
+  const month = now.getMonth();
+  const year = month >= 3 ? calendarYear : calendarYear - 1;
 
-  // financial year format (25-26)
+  const counter = await ReceiptCounter.findOne({ tenant_id, year });
+  let nextSeq = counter ? counter.seq + 1 : 1;
+
+  // financial year format
   const fyStart = year % 100;
   const fyEnd = (year + 1) % 100;
-
   const financialYear = `${fyStart}-${fyEnd}`;
 
-  const paddedSeq = String(seq).padStart(4, "0");
+  // Check actual collection to avoid desync
+  const existingReceipts = await Receipt.find({
+    tenant_id,
+    receipt_no: new RegExp(`^${prefix}/${financialYear}/`, 'i'),
+    archived: false
+  }).select('receipt_no').lean();
+
+  const existingSeqs = new Set();
+  existingReceipts.forEach(rect => {
+    const parts = rect.receipt_no.split('/');
+    const seq = parseInt(parts[parts.length - 1]);
+    if (!isNaN(seq)) existingSeqs.add(seq);
+  });
+
+  while (existingSeqs.has(nextSeq)) {
+    nextSeq++;
+  }
+
+  const paddedSeq = String(nextSeq).padStart(4, "0");
+  return `${prefix}/${financialYear}/${paddedSeq}`;
+};
+
+export const resetReceiptCounterService = async (tenantId, newSeq, yearStr) => {
+  const year = 2000 + parseInt(yearStr);
+  if (isNaN(year) || isNaN(newSeq)) throw new Error("Invalid year or sequence");
+
+  const ReceiptCounter = mongoose.model("ReceiptCounter");
+  await ReceiptCounter.findOneAndUpdate(
+    { tenant_id: tenantId, year },
+    { $set: { seq: newSeq - 1 } },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+  return getNextReceiptNumber(tenantId);
+};
+
+export const findAndIncrementReceiptNumber = async (tenant_id, prefix = "RCPT") => {
+  const now = new Date();
+  const calendarYear = now.getFullYear();
+  const month = now.getMonth();
+  const year = month >= 3 ? calendarYear : calendarYear - 1;
+
+  const suggested = await getNextReceiptNumber(tenant_id, prefix);
+  const nextSeq = parseInt(suggested.split('/').pop());
+
+  const counter = await ReceiptCounter.findOneAndUpdate(
+    { tenant_id, year },
+    { $set: { seq: nextSeq } },
+    { new: true, upsert: true, setDefaultsOnInsert: true },
+  );
+
+  const fyStart = year % 100;
+  const fyEnd = (year + 1) % 100;
+  const financialYear = `${fyStart}-${fyEnd}`;
+  const paddedSeq = String(counter.seq).padStart(4, "0");
 
   return `${prefix}/${financialYear}/${paddedSeq}`;
 };
@@ -56,7 +134,8 @@ export const generateReceiptNumber = async (tenant_id, prefix = "RCPT") => {
 export const createReceiptService = async ({ tenant_id, user_id, payload }) => {
   // validations
   if (!payload.client) throw new Error("client is required");
-  if (!payload.billing_entity) throw new Error("billing_entity is required");
+  // Default billing_entity to tenant_id if not provided (parity with Invoices)
+  const billing_entity = payload.billing_entity || tenant_id;
 
   if (!Array.isArray(payload.payments) || payload.payments.length === 0) {
     throw new Error("at least one payment line is required");
@@ -64,7 +143,7 @@ export const createReceiptService = async ({ tenant_id, user_id, payload }) => {
 
   if (!Types.ObjectId.isValid(payload.client))
     throw new Error("Invalid client id");
-  if (!Types.ObjectId.isValid(payload.billing_entity))
+  if (!Types.ObjectId.isValid(billing_entity))
     throw new Error("Invalid billing entity id");
 
   // validate payments
@@ -74,10 +153,12 @@ export const createReceiptService = async ({ tenant_id, user_id, payload }) => {
     }
   }
 
-  const receipt_no = await generateReceiptNumber(
-    tenant_id,
-    payload.prefix || "RCPT",
-  );
+  let receipt_no = payload.receipt_no;
+  if (!receipt_no) {
+    receipt_no = await findAndIncrementReceiptNumber(tenant_id, payload.prefix || "RCPT");
+  } else {
+    await maybeSyncCounter(tenant_id, receipt_no);
+  }
 
   const received_amount = sumPayments(payload.payments);
   const tds_amount = Number(payload.tds_amount || 0);
@@ -90,7 +171,7 @@ export const createReceiptService = async ({ tenant_id, user_id, payload }) => {
   const doc = new Receipt({
     tenant_id,
     receipt_no, // auto generated
-    billing_entity: payload.billing_entity,
+    billing_entity,
     client: payload.client,
     date: payload.date ? new Date(payload.date) : new Date(),
 
@@ -160,21 +241,34 @@ export const listReceiptsService = async ({
 export const getReceiptByIdService = async ({ tenant_id, receipt_id }) => {
   if (!Types.ObjectId.isValid(receipt_id))
     throw new Error("Invalid receipt id");
-  const receipt = await Receipt.findOne({
+
+  let receipt = await Receipt.findOne({
     _id: receipt_id,
     tenant_id,
     archived: false,
   })
-    .populate(
-      "client",
-      "name file_no address primary_contact_mobile primary_contact_email",
-    )
-    .populate(
-      "billing_entity",
-      "name companyAddress companyPhone companyEmail gstNumber registrationNumber logoUrl",
-    )
+    .populate("client billing_entity")
     .lean();
+
   if (!receipt) throw new Error("Receipt not found");
+
+  // If billing_entity failed to populate (e.g. ID mismatch between collections)
+  if (receipt.billing_entity && typeof receipt.billing_entity !== 'object') {
+    const entityId = receipt.billing_entity;
+    // 1. Try Tenant (Main company)
+    let entity = await Tenant.findById(entityId).lean();
+    if (!entity) {
+      // 2. Try BillingEntity (Other entities)
+      entity = await BillingEntity.findById(entityId).lean();
+    }
+    receipt.billing_entity = entity || { _id: entityId, name: "Unknown Entity" };
+  }
+
+  // Fallback: If billing_entity is null/missing, try to use the main tenant doc
+  if (!receipt.billing_entity) {
+    receipt.billing_entity = await Tenant.findById(tenant_id).lean();
+  }
+
   return receipt;
 };
 
@@ -190,6 +284,11 @@ export const updateReceiptService = async ({
   if (!receipt) throw new Error("Receipt not found");
   if (receipt.status === "settled")
     throw new Error("Cannot update a settled receipt");
+
+  if (payload.receipt_no && payload.receipt_no !== receipt.receipt_no) {
+    receipt.receipt_no = payload.receipt_no;
+    await maybeSyncCounter(tenant_id, payload.receipt_no);
+  }
 
   // allow updating payments, remark, date before settlement
   if (payload.payments) {
@@ -229,6 +328,7 @@ export const updateReceiptService = async ({
     receipt.round_off = Number(payload.round_off);
   if (payload.remark !== undefined) receipt.remark = payload.remark;
   if (payload.date) receipt.date = new Date(payload.date);
+  if (payload.billing_entity !== undefined) receipt.billing_entity = payload.billing_entity || tenant_id;
 
   receipt.updated_by = user_id;
   await receipt.save();
@@ -246,6 +346,8 @@ export const deleteReceiptService = async ({
   const receipt = await Receipt.findOne({ _id: receipt_id, tenant_id });
   if (!receipt) throw new Error("Receipt not found");
 
+  const originalReceiptNo = receipt.receipt_no;
+
   if (force) {
     // If applied to invoices, you should reverse application first — protect from accidental hard delete
     if (receipt.applied_invoices && receipt.applied_invoices.length > 0) {
@@ -254,16 +356,40 @@ export const deleteReceiptService = async ({
       );
     }
     await Receipt.deleteOne({ _id: receipt_id });
-    return { hard: true };
   } else {
     if (receipt.status === "settled")
       throw new Error("Cannot archive a settled receipt. Unapply first.");
+
+    // RENAME the receipt number to free it up for reuse, then archive
+    const deletedNo = `${receipt.receipt_no}-DEL-${Date.now()}`;
+    receipt.receipt_no = deletedNo;
     receipt.archived = true;
     receipt.archived_at = new Date();
     receipt.updated_by = user_id;
     await receipt.save();
-    return { hard: false, archived: receipt.toObject() };
   }
+
+  // 3. Decrement counter ONLY if this was the latest receipt issued for this tenant/year
+  const parts = originalReceiptNo.split("/");
+  if (parts.length >= 3) {
+    const seq = parseInt(parts[parts.length - 1]);
+    const now = new Date();
+    const calendarYear = now.getFullYear();
+    const month = now.getMonth();
+    const year = month >= 3 ? calendarYear : calendarYear - 1;
+
+    const ReceiptCounter = mongoose.model("ReceiptCounter");
+    const currentCounter = await ReceiptCounter.findOne({ tenant_id, year });
+
+    if (currentCounter && currentCounter.seq === seq) {
+      await ReceiptCounter.updateOne(
+        { _id: currentCounter._id },
+        { $inc: { seq: -1 } }
+      );
+    }
+  }
+
+  return force ? { hard: true } : { hard: false, archived: receipt.toObject() };
 };
 
 /**
