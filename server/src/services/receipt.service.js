@@ -247,7 +247,7 @@ export const getReceiptByIdService = async ({ tenant_id, receipt_id }) => {
     tenant_id,
     archived: false,
   })
-    .populate("client billing_entity")
+    .populate("client billing_entity tenant_id")
     .lean();
 
   if (!receipt) throw new Error("Receipt not found");

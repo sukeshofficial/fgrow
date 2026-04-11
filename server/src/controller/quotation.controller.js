@@ -7,6 +7,9 @@ import {
   deleteQuotationService,
   changeQuotationStatusService,
   convertQuotationToInvoiceService,
+  sendQuotationService,
+  getNextQuotationNumberService,
+  resetQuotationCounterService,
 } from "../services/quotation.service.js";
 import { generateQuotationPdfBuffer } from "../utils/pdf.helper.js";
 import sendEmail from "../utils/sendEmail.js";
@@ -152,65 +155,12 @@ export const previewQuotationController = async (req, res) => {
 
 export const sendQuotationController = async (req, res) => {
   try {
-    const tenant_id = req.user.tenant_id;
+    const user = req.user;
     const quotationId = req.params.id;
-    // Accept recipients and optional subject/message in body
-    const { to, cc, subject, message } = req.body;
+    const body = req.body;
 
-    if (!to || (Array.isArray(to) && to.length === 0)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Recipient 'to' is required" });
-    }
+    const info = await sendQuotationService(user, quotationId, body);
 
-    // fetch quotation (should populate client/billing_entity etc.)
-    const quotation = await getQuotationByIdService({
-      tenant_id,
-      quotation_id: quotationId,
-    });
-    if (!quotation)
-      return res
-        .status(404)
-        .json({ success: false, message: "Quotation not found" });
-
-    // generate PDF buffer (make sure this function exists / exported in pdf.helper.js).
-    const pdfBuffer = await generateQuotationPdfBuffer(quotation);
-
-    // compose email
-    const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
-    const mail = {
-      from: fromAddress,
-      to, // string or array
-      cc, // optional
-      subject: subject || `Quotation ${quotation.quotation_no || quotationId}`,
-      text:
-        message ||
-        `Please find attached the quotation ${quotation.quotation_no || quotationId}.`,
-      html: `
-        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; padding: 20px;">
-          <!-- Circular Image -->
-          <div style="text-align: center; margin-bottom: 20px;">
-            <img 
-              src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" 
-              alt="Profile"
-              style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #e0e0e0;"
-            />
-          </div>
-          <p>${(message || "Please find attached the quotation details.").replace(/\\n/g, '<br/>')}</p>
-        </div>
-      `,
-      attachments: [
-        {
-          filename: `quotation-${quotation.quotation_no || quotationId}.pdf`,
-          content: pdfBuffer,
-          contentType: "application/pdf",
-        },
-      ],
-    };
-
-    const info = await sendEmail(mail);
-
-    // OPTIONAL: update DB to record that it was sent / who it was sent to (not implemented here)
     return res.json({ success: true, message: "Quotation sent", info });
   } catch (err) {
     logger.error("sendQuotationController error:", err);
@@ -218,5 +168,26 @@ export const sendQuotationController = async (req, res) => {
       success: false,
       message: err.message || "Failed to send quotation",
     });
+  }
+};
+
+export const getNextQuotationNumber = async (req, res) => {
+  try {
+    const tenant_id = req.user.tenant_id;
+    const num = await getNextQuotationNumberService(tenant_id);
+    return res.json({ success: true, quotation_no: num });
+  } catch (e) {
+    return res.status(400).json({ success: false, message: e.message });
+  }
+};
+
+export const resetQuotationCounter = async (req, res) => {
+  try {
+    const tenant_id = req.user.tenant_id;
+    const { seq, yearStr } = req.body;
+    const num = await resetQuotationCounterService(tenant_id, seq, yearStr);
+    return res.json({ success: true, quotation_no: num });
+  } catch (e) {
+    return res.status(400).json({ success: false, message: e.message });
   }
 };

@@ -9,6 +9,8 @@ import {
   convertQuotationToInvoiceController,
   previewQuotationController,
   sendQuotationController,
+  getNextQuotationNumber,
+  resetQuotationCounter,
 } from "../controller/quotation.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
@@ -32,5 +34,9 @@ router.post("/:id/convert-to-invoice", ...authStaff, convertQuotationToInvoiceCo
 // preview/pdf/send
 router.get("/:id/preview", authMiddleware, requireRole("owner", "staff", "user"), previewQuotationController);
 router.post("/:id/send", authMiddleware, requireRole("owner", "staff", "user"), sendQuotationController);
+
+// Counter utility
+router.get("/utility/next-number", ...authStaff, getNextQuotationNumber);
+router.post("/utility/reset-counter", ...authStaff, resetQuotationCounter);
 
 export default router;

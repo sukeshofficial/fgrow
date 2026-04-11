@@ -29,7 +29,7 @@ const quotationSchema = new Schema(
     quotation_no: { type: String, required: true, trim: true, index: true }, // e.g. TVRA 25-26/012
     billing_entity: {
       type: Schema.Types.ObjectId,
-      ref: "BillingEntity",
+      ref: "Tenant",
       required: true,
     },
 

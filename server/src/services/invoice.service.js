@@ -276,7 +276,7 @@ export const getInvoiceById = async (user, id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) return null;
   // FIX: Scoped to tenant
   return Invoice.findOne({ _id: id, ...tenantFilter(user), archived: false })
-    .populate("client billing_entity created_by updated_by")
+    .populate("client billing_entity created_by updated_by tenant_id")
     .lean();
 };
 

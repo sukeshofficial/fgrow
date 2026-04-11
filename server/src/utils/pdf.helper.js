@@ -25,10 +25,29 @@ export const generatePdfBuffer = (invoice) => {
       doc.registerFont("SpaceMono-Bold", BOLD_FONT);
 
 
-      const seller = invoice.billing_entity || {};
-      const sellerAddress = seller.companyAddress || {};
+      const tenant = invoice.tenant_id || {};
+      const billingEntity = invoice.billing_entity || {};
+
+      // Robust fallback logic for seller details
+      const seller = {
+        name: billingEntity.name || tenant.name || "Your Company",
+        gstNumber: billingEntity.gstin || tenant.gstNumber || "",
+        officialAddress: billingEntity.address || tenant.officialAddress || "",
+        companyPhone: tenant.companyPhone || "",
+        companyEmail: tenant.companyEmail || ""
+      };
+
       const client = invoice.client || {};
       const clientAddress = client.address || {};
+
+      const formatAddr = (addr) => {
+        if (!addr) return "";
+        if (typeof addr === 'string') return addr;
+        const parts = [addr.street, addr.city, addr.state, addr.postalCode, addr.country].filter(Boolean);
+        return parts.join(", ");
+      };
+
+      const finalSellerAddress = seller.officialAddress || formatAddr(tenant.companyAddress);
 
       // 1. BRANDING & TITLE
       const logoSize = 30;
@@ -65,14 +84,7 @@ export const generatePdfBuffer = (invoice) => {
       doc.fontSize(9).fillColor("#94a3b8").font("SpaceMono-Bold").text("BILL FROM", leftColX, topOfGrid);
       doc.fontSize(11).fillColor("#1e293b").font("SpaceMono-Bold").text(seller.name || "-", leftColX, topOfGrid + 15);
 
-      const formatAddr = (addr) => {
-        if (!addr) return "";
-        if (typeof addr === 'string') return addr;
-        const parts = [addr.street, addr.city, addr.state, addr.postalCode, addr.country].filter(Boolean);
-        return parts.join(", ");
-      };
-
-      doc.fontSize(10).fillColor("#64748b").font("SpaceMono").text(formatAddr(sellerAddress), leftColX, doc.y + 4, { width: 220, lineGap: 2 });
+      doc.fontSize(10).fillColor("#64748b").font("SpaceMono").text(finalSellerAddress, leftColX, doc.y + 4, { width: 220, lineGap: 2 });
       if (seller.companyPhone) doc.fontSize(9).text(`M: ${seller.companyPhone}`, leftColX, doc.y + 3);
       if (seller.companyEmail) doc.fontSize(9).text(`E: ${seller.companyEmail}`, leftColX, doc.y + 2);
       if (seller.gstNumber) doc.fontSize(9).fillColor("#1e293b").font("SpaceMono-Bold").text(`GSTIN: ${seller.gstNumber}`, leftColX, doc.y + 3);
@@ -226,10 +238,29 @@ export const generateReceiptPdfBuffer = (receipt) => {
       doc.registerFont("SpaceMono-Bold", BOLD_FONT);
 
 
-      const seller = receipt.billing_entity || {};
-      const sellerAddress = seller.companyAddress || {};
+      const tenant = receipt.tenant_id || {};
+      const billingEntity = receipt.billing_entity || {};
+
+      // Robust fallback logic for seller details
+      const seller = {
+        name: billingEntity.name || tenant.name || "Your Company",
+        gstNumber: billingEntity.gstin || tenant.gstNumber || "",
+        officialAddress: billingEntity.address || tenant.officialAddress || "",
+        companyPhone: tenant.companyPhone || "",
+        companyEmail: tenant.companyEmail || ""
+      };
+
       const client = receipt.client || {};
       const clientAddress = client.address || {};
+
+      const formatAddr = (addr) => {
+        if (!addr) return "";
+        if (typeof addr === 'string') return addr;
+        const parts = [addr.street, addr.city, addr.state, addr.postalCode, addr.country].filter(Boolean);
+        return parts.join(", ");
+      };
+
+      const finalSellerAddress = seller.officialAddress || formatAddr(tenant.companyAddress);
 
       // 1. BRANDING & TITLE
       const logoSize = 30;
@@ -266,14 +297,7 @@ export const generateReceiptPdfBuffer = (receipt) => {
       doc.fontSize(9).fillColor("#94a3b8").font("SpaceMono-Bold").text("FROM (BILLING ENTITY)", leftColX, topOfGrid);
       doc.fontSize(11).fillColor("#1e293b").font("SpaceMono-Bold").text(seller.name || "-", leftColX, topOfGrid + 15);
 
-      const formatAddr = (addr) => {
-        if (!addr) return "";
-        if (typeof addr === 'string') return addr;
-        const parts = [addr.street, addr.city, addr.state, addr.postalCode, addr.country].filter(Boolean);
-        return parts.join(", ");
-      };
-
-      doc.fontSize(10).fillColor("#64748b").font("SpaceMono").text(formatAddr(sellerAddress), leftColX, doc.y + 4, { width: 220, lineGap: 2 });
+      doc.fontSize(10).fillColor("#64748b").font("SpaceMono").text(finalSellerAddress, leftColX, doc.y + 4, { width: 220, lineGap: 2 });
       if (seller.companyPhone) doc.fontSize(9).text(`M: ${seller.companyPhone}`, leftColX, doc.y + 3);
       if (seller.companyEmail) doc.fontSize(9).text(`E: ${seller.companyEmail}`, leftColX, doc.y + 2);
       if (seller.gstNumber) doc.fontSize(9).fillColor("#1e293b").font("SpaceMono-Bold").text(`GSTIN: ${seller.gstNumber}`, leftColX, doc.y + 3);
@@ -415,60 +439,173 @@ export const generateReceiptPdfBuffer = (receipt) => {
 export const generateQuotationPdfBuffer = (quotation) => {
   return new Promise((resolve, reject) => {
     try {
-      const doc = new PDFDocument({ margin: 40 });
+      const doc = new PDFDocument({ margin: 50, size: "A4" });
+
       const buffers = [];
-      doc.on("data", buffers.push.bind(buffers));
+      doc.on("data", (data) => buffers.push(data));
       doc.on("end", () => resolve(Buffer.concat(buffers)));
 
       // Register Space Mono Fonts
       doc.registerFont("SpaceMono", REGULAR_FONT);
       doc.registerFont("SpaceMono-Bold", BOLD_FONT);
 
+      const tenant = quotation.tenant_id || {};
+      const billingEntity = quotation.billing_entity || {};
 
-      doc.fontSize(18).font("SpaceMono-Bold").text("QUOTATION", { align: "right" });
-      const seller = quotation.billing_entity || {};
-      const sellerAddr = seller.companyAddress || {};
-      const logoSize = 50;
-      try {
-        doc.save()
-          .circle(40 + logoSize / 2, 40 + logoSize / 2, logoSize / 2)
-          .clip()
-          .image(LOGO_PATH, 40, 40, { width: logoSize, height: logoSize })
-          .restore();
-      } catch (e) { }
-
-      doc.fontSize(11).text(seller.name || "-", 40, doc.y);
-      if (sellerAddr.street) doc.text(sellerAddr.street);
-      if (seller.companyPhone) doc.text(`Phone: ${seller.companyPhone}`);
-      if (seller.companyEmail) doc.text(`Email: ${seller.companyEmail}`);
-      if (seller.gstNumber) doc.text(`GSTIN: ${seller.gstNumber}`);
-      doc.moveDown();
+      // Robust fallback logic for seller details
+      const seller = {
+        name: billingEntity.name || tenant.name || "Your Company",
+        gstNumber: billingEntity.gstin || tenant.gstNumber || "",
+        officialAddress: billingEntity.address || tenant.officialAddress || "",
+        companyPhone: tenant.companyPhone || "",
+        companyEmail: tenant.companyEmail || ""
+      };
 
       const client = quotation.client || {};
-      doc.fontSize(11).text("To:", 40, doc.y);
-      doc.fontSize(12).text(client.name || "-", 40, doc.y);
-      if (client.address?.street) doc.text(client.address.street);
-      if (client.primary_contact_mobile) doc.text(`Mobile: ${client.primary_contact_mobile}`);
-      doc.moveDown();
+      const clientAddress = client.address || {};
 
-      const tableTop = doc.y;
-      doc.fontSize(11).text("Description", 40, tableTop);
-      doc.text("Qty", 330, tableTop);
-      doc.text("Unit", 380, tableTop);
-      doc.text("Amount", 500, tableTop, { width: 80, align: "right" });
+      const formatAddr = (addr) => {
+        if (!addr) return "";
+        if (typeof addr === 'string') return addr;
+        const parts = [addr.street, addr.city, addr.state, addr.postalCode, addr.country].filter(Boolean);
+        return parts.join(", ");
+      };
 
-      let y = tableTop + 22;
-      (quotation.items || []).forEach((it) => {
-        doc.fontSize(10).text(it.description || "-", 40, y, { width: 270 });
-        doc.text(it.quantity || "1", 330, y);
-        doc.text((it.unit_price || 0).toFixed(2), 380, y);
-        doc.text((it.total_amount || 0).toFixed(2), 500, y, { width: 80, align: "right" });
-        y += 18;
+      const finalSellerAddress = seller.officialAddress || formatAddr(tenant.companyAddress);
+
+      // 1. BRANDING & TITLE
+      const logoSize = 30;
+      let textX = 50;
+
+      try {
+        doc.save()
+          .circle(50 + logoSize / 2, 55 + logoSize / 2, logoSize / 2)
+          .clip()
+          .image(LOGO_PATH, 50, 55, { width: logoSize, height: logoSize })
+          .restore();
+        textX = 50 + logoSize + 12;
+      } catch (e) { }
+
+      doc.fontSize(18)
+        .fillColor("#1e293b")
+        .font("SpaceMono-Bold")
+        .text(seller.name || "", textX, 55);
+
+      doc.fillColor("#7c3aed").fontSize(34).font("SpaceMono-Bold").text("QUOTATION", 300, 45, { align: "right" });
+
+      // Divider below header
+      doc.moveTo(50, 110).lineTo(545, 110).strokeColor("#f1f5f9").lineWidth(1).stroke();
+
+      // 2. BILLING GRID
+      const topOfGrid = 135;
+      const leftColX = 50;
+      const rightColX = 300;
+
+      // Bill From
+      doc.fontSize(9).fillColor("#94a3b8").font("SpaceMono-Bold").text("FROM", leftColX, topOfGrid);
+      doc.fontSize(11).fillColor("#1e293b").font("SpaceMono-Bold").text(seller.name || "-", leftColX, topOfGrid + 15);
+
+      doc.fontSize(10).fillColor("#64748b").font("SpaceMono").text(finalSellerAddress, leftColX, doc.y + 4, { width: 220, lineGap: 2 });
+      if (seller.companyPhone) doc.fontSize(9).text(`M: ${seller.companyPhone}`, leftColX, doc.y + 3);
+      if (seller.companyEmail) doc.fontSize(9).text(`E: ${seller.companyEmail}`, leftColX, doc.y + 2);
+      if (seller.gstNumber) doc.fontSize(9).fillColor("#1e293b").font("SpaceMono-Bold").text(`GSTIN: ${seller.gstNumber}`, leftColX, doc.y + 3);
+
+      // Bill To
+      doc.fontSize(9).fillColor("#94a3b8").font("SpaceMono-Bold").text("QUOTATION FOR", rightColX, topOfGrid);
+      doc.fontSize(11).fillColor("#1e293b").font("SpaceMono-Bold").text(client.name || "-", rightColX, topOfGrid + 15);
+      doc.fontSize(10).fillColor("#64748b").font("SpaceMono").text(formatAddr(clientAddress), rightColX, doc.y + 4, { width: 245, lineGap: 2 });
+      if (client.primary_contact_mobile) doc.fontSize(9).text(`M: ${client.primary_contact_mobile}`, rightColX, doc.y + 3);
+      if (client.primary_contact_email) doc.fontSize(9).text(`E: ${client.primary_contact_email}`, rightColX, doc.y + 2);
+      if (client.gstin) doc.fontSize(9).fillColor("#1e293b").font("SpaceMono-Bold").text(`GSTIN: ${client.gstin}`, rightColX, doc.y + 3);
+
+      // 3. QUOTATION META
+      const metaY = topOfGrid + 140;
+      doc.moveTo(50, metaY - 10).lineTo(545, metaY - 10).strokeColor("#f8fafc").stroke();
+
+      doc.fontSize(9).fillColor("#94a3b8").font("SpaceMono-Bold").text("QUOTATION NO", 50, metaY);
+      doc.fontSize(10).fillColor("#1e293b").font("SpaceMono-Bold").text(quotation.quotation_no, 50, metaY + 12);
+
+      doc.fontSize(9).fillColor("#94a3b8").font("SpaceMono-Bold").text("DATE", 180, metaY);
+      doc.fontSize(10).fillColor("#1e293b").font("SpaceMono-Bold").text(new Date(quotation.date).toLocaleDateString('en-IN'), 180, metaY + 12);
+
+      doc.fontSize(9).fillColor("#94a3b8").font("SpaceMono-Bold").text("VALID UNTIL", 310, metaY);
+      doc.fontSize(10).fillColor("#1e293b").font("SpaceMono-Bold").text(quotation.valid_until ? new Date(quotation.valid_until).toLocaleDateString('en-IN') : "-", 310, metaY + 12);
+
+      doc.fontSize(9).fillColor("#94a3b8").font("SpaceMono-Bold").text("TOTAL AMOUNT", 440, metaY, { align: "right", width: 105 });
+      doc.fontSize(11).fillColor("#7c3aed").font("SpaceMono-Bold").text(`₹${(quotation.total_amount || 0).toLocaleString('en-IN')}`, 440, metaY + 12, { align: "right", width: 105 });
+
+      // 4. ITEMS TABLE
+      const tableTop = metaY + 60;
+
+      const drawTableHeader = (y) => {
+        doc.roundedRect(50, y, 495, 28, 6).fill("#f8fafc");
+        doc.fillColor("#475569").fontSize(8).font("SpaceMono-Bold");
+        doc.text("DESCRIPTION", 65, y + 10);
+        doc.text("PRICE", 300, y + 10, { width: 60, align: "right" });
+        doc.text("QTY", 370, y + 10, { width: 30, align: "center" });
+        doc.text("GST %", 410, y + 10, { width: 40, align: "center" });
+        doc.text("AMOUNT", 460, y + 10, { width: 75, align: "right" });
+        return y + 28;
+      };
+
+      let currentY = drawTableHeader(tableTop);
+
+      (quotation.items || []).forEach((item, idx) => {
+        const itemHeight = 35;
+        if (currentY + itemHeight > 740) {
+          doc.addPage();
+          currentY = drawTableHeader(50);
+        }
+
+        const itemY = currentY + 10;
+        doc.fillColor("#1e293b").fontSize(10).font("SpaceMono-Bold").text(item.description || "-", 65, itemY, { width: 230 });
+
+        doc.fillColor("#1e293b").fontSize(10).font("SpaceMono");
+        doc.text(`₹${(item.unit_price || 0).toLocaleString('en-IN')}`, 300, itemY, { width: 60, align: "right" });
+        doc.text((item.quantity || 1).toString(), 370, itemY, { width: 30, align: "center" });
+        doc.text(`${item.gst_rate || 0}%`, 410, itemY, { width: 40, align: "center" });
+        doc.text(`₹${(item.total_amount || 0).toLocaleString('en-IN')}`, 460, itemY, { width: 75, align: "right" });
+
+        currentY = itemY + 25;
+        doc.moveTo(50, currentY).lineTo(545, currentY).strokeColor("#f1f5f9").lineWidth(0.5).stroke();
       });
 
-      y += 20;
-      doc.fontSize(13).text("Total:", 360, y);
-      doc.fontSize(13).text((quotation.total_amount || 0).toFixed(2), 520, y, { width: 80, align: "right" });
+      // 5. SUMMARY
+      const summaryHeight = 90;
+      if (currentY + summaryHeight > 700) {
+        doc.addPage();
+        currentY = 50;
+      }
+      const summaryY = currentY + 30;
+
+      doc.roundedRect(340, summaryY, 205, summaryHeight, 10).fill("#f8fafc");
+
+      if (quotation.terms) {
+        doc.fontSize(9).fillColor("#94a3b8").font("SpaceMono-Bold").text("TERMS & CONDITIONS", 50, summaryY + 10);
+        doc.fontSize(9).fillColor("#64748b").font("SpaceMono").text(quotation.terms, 50, summaryY + 25, { width: 280, lineGap: 2 });
+      }
+
+      const drawRow = (label, value, y, isBold = false, color = "#64748b") => {
+        doc.fontSize(isBold ? 11 : 9).fillColor(color).font(isBold ? "SpaceMono-Bold" : "SpaceMono");
+        doc.text(label, 355, y);
+        doc.text(`₹${(value || 0).toLocaleString('en-IN')}`, 450, y, { width: 85, align: "right" });
+      };
+
+      let finalY = summaryY + 15;
+      drawRow("Subtotal", quotation.subtotal || 0, finalY);
+      finalY += 18;
+      drawRow("Tax Total (GST)", quotation.total_gst || 0, finalY);
+      finalY += 22;
+      doc.moveTo(355, finalY - 8).lineTo(530, finalY - 8).strokeColor("#e2e8f0").lineWidth(1).dash(2, { space: 2 }).stroke().undash();
+
+      doc.fontSize(12).fillColor("#7c3aed").font("SpaceMono-Bold");
+      doc.text("TOTAL", 355, finalY);
+      doc.text(`₹${(quotation.total_amount || 0).toLocaleString('en-IN')}`, 440, finalY, { width: 95, align: "right" });
+
+      // 6. FOOTER
+      const footerY = 780;
+      doc.moveTo(50, footerY - 10).lineTo(545, footerY - 10).strokeColor("#f1f5f9").stroke();
+      doc.fontSize(8).fillColor("#94a3b8").text("This is a computer generated quotation.", 50, footerY, { align: "center", width: 495 });
 
       doc.end();
     } catch (err) { reject(err); }
