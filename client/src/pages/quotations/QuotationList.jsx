@@ -4,7 +4,7 @@ import Sidebar from "../../components/SideBar";
 import quotationService from "../../features/quotations/quotationService";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import logger from "../../utils/logger.js";
-import { Plus, Search, Filter, Eye, MoreHorizontal, Download, Send, FileText, Trash2 } from "lucide-react";
+import { Plus, Search, Filter, Eye, MoreHorizontal, Download, Send, FileText, Trash2, Pencil } from "lucide-react";
 import "./quotations.css";
 
 const QuotationList = () => {
@@ -132,7 +132,15 @@ const QuotationList = () => {
                                 ) : (
                                     quotations.map((q) => (
                                         <tr key={q._id} style={{ borderBottom: '1px solid #f1f5f9' }} className="table-row-hover">
-                                            <td style={{ padding: '16px', fontWeight: '700', color: '#1e293b' }}>{q.quotation_no}</td>
+                                            <td style={{ padding: '16px', fontWeight: '700' }}>
+                                                <span
+                                                    onClick={() => navigate(`/finance/quotations/${q._id}`)}
+                                                    className="clickable-number"
+                                                    style={{ color: '#7c3aed', cursor: 'pointer' }}
+                                                >
+                                                    {q.quotation_no}
+                                                </span>
+                                            </td>
                                             <td style={{ padding: '16px', color: '#475569' }}>{q.client?.name || '-'}</td>
                                             <td style={{ padding: '16px', color: '#64748b', fontSize: '13px' }}>{new Date(q.date).toLocaleDateString()}</td>
                                             <td style={{ padding: '16px', fontWeight: '700', color: '#1e293b' }}>₹{q.total_amount?.toLocaleString()}</td>
@@ -140,13 +148,20 @@ const QuotationList = () => {
                                                 <span className={`status-pill ${q.status || 'pending'}`}>{q.status || 'pending'}</span>
                                             </td>
                                             <td style={{ padding: '16px', textAlign: 'right' }}>
-                                                <button
-                                                    onClick={() => navigate(`/finance/quotations/${q._id}`)}
-                                                    className="action-icon-btn"
-                                                    style={{ display: 'inline-flex' }}
-                                                >
-                                                    <Eye size={16} color="#64748b" />
-                                                </button>
+                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                    <button
+                                                        onClick={() => navigate(`/finance/quotations/${q._id}`)}
+                                                        className="action-icon-btn"
+                                                    >
+                                                        <Eye size={16} color="#64748b" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => navigate(`/finance/quotations/edit/${q._id}`)}
+                                                        className="action-icon-btn edit-btn-list"
+                                                    >
+                                                        <Pencil size={16} color="#7c3aed" />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))

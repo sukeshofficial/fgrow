@@ -59,7 +59,7 @@ const QuotationForm = () => {
                     setFormData({
                         ...q,
                         client: q.client?._id || q.client,
-                        billing_entity: q.billing_entity?._id || q.billing_entity,
+                        billing_entity: q.billing_entity?._id || q.billing_entity || tenant?._id,
                         date: new Date(q.date).toISOString().split('T')[0],
                         valid_until: q.valid_until ? new Date(q.valid_until).toISOString().split('T')[0] : "",
                         items: q.items || []
@@ -149,15 +149,23 @@ const QuotationForm = () => {
         e.preventDefault();
         try {
             setSaving(true);
+
+            // Ensure billing entity is populated. If empty (because it was cleared), gracefully fallback to tenant._id
+            const submitData = { ...formData };
+            if (!submitData.billing_entity && tenant) {
+                submitData.billing_entity = tenant._id;
+            }
+
             if (isEdit) {
-                await quotationService.updateQuotation(id, formData);
+                await quotationService.updateQuotation(id, submitData);
                 showAlert("Updated", "Quotation updated successfully", "success");
             } else {
-                const res = await quotationService.createQuotation(formData);
+                const res = await quotationService.createQuotation(submitData);
                 showAlert("Created", "Quotation created successfully", "success");
                 navigate(`/finance/quotations/${res.data._id}`);
                 return;
             }
+
             navigate(`/finance/quotations/${id}`);
         } catch (err) {
             logger.error("QuotationForm", "Save failed", err);

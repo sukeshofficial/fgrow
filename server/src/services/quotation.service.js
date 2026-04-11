@@ -4,7 +4,10 @@ import Quotation from "../models/quotation/quotation.model.js";
 import Invoice from "../models/invoice/invoice.model.js";
 import QuotationCounter from "../models/quotation/schemas/quotationCounter.model.js";
 import { generateQuotationNumber } from "../utils/generateQuotationNumber.js";
+import { generateQuotationPdfBuffer } from "../utils/pdf.helper.js";
 import { createInvoice } from "./invoice.service.js";
+import sendEmail from "../utils/sendEmail.js";
+import logger from "../utils/logger.js";
 
 const { Types } = mongoose;
 
@@ -173,8 +176,6 @@ export const updateQuotationService = async ({
     throw new Error("Invalid quotation id");
   const q = await Quotation.findOne({ _id: quotation_id, tenant_id });
   if (!q) throw new Error("Quotation not found");
-  if (q.status === "accepted")
-    throw new Error("Cannot edit an accepted quotation (optional rule)");
 
   // allow updating meta fields; items handled by dedicated endpoints or by passing items
   if (payload.items) {
@@ -210,20 +211,31 @@ export const updateQuotationService = async ({
   // fields
   const updatable = [
     "billing_entity",
+    "client",
     "date",
     "valid_until",
     "terms",
     "quotation_no",
+    "status",
   ];
-  updatable.forEach((k) => {
+
+  for (const k of updatable) {
     if (payload[k] !== undefined) {
-      if (k === "billing_entity" && !payload[k]) {
-        q[k] = tenant_id;
+      if (k === "billing_entity" || k === "client") {
+        const val = payload[k] || (k === "billing_entity" ? tenant_id : undefined);
+        if (!val) {
+          if (k === "client") throw new Error("Client is required");
+          continue; // should not happen for billing_entity due to fallback
+        }
+        if (!Types.ObjectId.isValid(val)) {
+          throw new Error(`Invalid ${k} ID`);
+        }
+        q[k] = new Types.ObjectId(val);
       } else {
         q[k] = payload[k];
       }
     }
-  });
+  }
 
   q.updated_by = user_id;
   await q.save();

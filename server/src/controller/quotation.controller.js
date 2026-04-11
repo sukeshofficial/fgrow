@@ -73,6 +73,7 @@ export const updateQuotationController = async (req, res) => {
     });
     return res.json({ success: true, data: updated });
   } catch (e) {
+    console.error("[ERROR][updateQuotationController]", e);
     return res.status(400).json({ success: false, message: e.message });
   }
 };

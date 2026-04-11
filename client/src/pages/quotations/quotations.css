@@ -518,3 +518,19 @@
     color: #7c3aed;
     font-weight: bold;
 }
+
+/* Quotation List UI Enhancements */
+.clickable-number:hover {
+    text-decoration: underline;
+}
+
+.edit-btn-list {
+    background: #f5f3ff !important;
+    color: #7c3aed !important;
+    border: 1px solid #ddd6fe !important;
+}
+
+.edit-btn-list:hover {
+    background: #ede9fe !important;
+    border-color: #c4b5fd !important;
+}
