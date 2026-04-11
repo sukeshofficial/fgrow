@@ -112,6 +112,15 @@
     transform: translateY(-1px);
 }
 
+.action-btn-styled:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    background: #f1f5f9 !important;
+    color: #94a3b8 !important;
+    border-color: #e2e8f0 !important;
+}
+
 .btn-delete {
     background: #fef2f2;
     color: #b91c1c;
@@ -360,6 +369,15 @@
 .btn-unapply:hover {
     background: #fee2e2;
     transform: scale(1.1);
+}
+
+.btn-unapply:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+    color: #94a3b8;
+    transform: none;
 }
 
 .empty-row {

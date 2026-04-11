@@ -82,49 +82,51 @@ export const inviteUserService = async ({
   // 4️⃣ Send email (placeholder - implement actual email sending logic here)
   await sendEmail({
     to: email,
-    subject: "You're invited to join FGrow",
+    subject: `You're invited to join ${tenant.name} on FGrow 🎉`,
     html: `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-      <!-- Circular Image -->
-      <div style="text-align: center; margin-bottom: 20px;">
-        <img 
-          src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" 
-          alt="Profile"
-          style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #e0e0e0;"
-        />
+      <div style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background: #ffffff;">
+        <div style="background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%); padding: 40px 20px; text-align: center;">
+          <img 
+            src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1775310579/tenants/a7tvcuo0moqztzeoevaz.png" 
+            alt="Logo"
+            style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.3); margin-bottom: 20px;"
+          />
+          <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em;">Organization Invitation</h1>
+        </div>
+        
+        <div style="padding: 40px;">
+          <p style="margin-top: 0; font-size: 16px; font-weight: 600; color: #1e293b;">Welcome!</p>
+          <p style="font-size: 16px; color: #475569;">You have been invited to join <strong>${tenant.name}</strong> on FGrow. We're excited to have you on board!</p>
+          
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin: 24px 0; text-align: center;">
+            <p style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">Your Invitation Token</p>
+            <div style="
+              background: #ffffff;
+              border: 2px dashed #7c3aed;
+              border-radius: 12px;
+              padding: 16px;
+              font-family: 'Courier New', Courier, monospace;
+              font-size: 20px;
+              font-weight: 800;
+              color: #7c3aed;
+              letter-spacing: 2px;
+            ">
+              ${inviteToken}
+            </div>
+          </div>
+
+          <p style="font-size: 15px; color: #475569; margin-bottom: 24px;">
+            Please use this token to accept your invitation in the FGrow portal. If you did not expect this invitation, you can safely ignore this email.
+          </p>
+
+          <p style="color: #64748b; font-size: 14px; margin-bottom: 0;">Thanks,<br/><strong>FGrow Team</strong></p>
+        </div>
+
+        <div style="background: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
+          <p style="margin: 0; color: #94a3b8; font-size: 12px; font-weight: 600;">Sent by <strong>${tenant.name}</strong> via FGrow</p>
+        </div>
       </div>
-      <h2 style="color: #2c3e50;">You're invited to join FGrow 🎉</h2>
-      
-      <p>Hello,</p>
-      
-      <p>
-        You have been invited to join <strong>${tenant.name}</strong>.
-      </p>
-      
-      <p>
-        Please use the invite token below to accept your invitation:
-      </p>
-      
-      <div style="
-        margin: 20px 0;
-        padding: 15px;
-        background: #f4f6f8;
-        border: 1px dashed #ccc;
-        text-align: center;
-        font-size: 18px;
-        font-weight: bold;
-        letter-spacing: 1px;
-      ">
-        ${inviteToken}
-      </div>
-      
-      <p>
-        If you did not expect this invitation, you can safely ignore this email.
-      </p>
-      
-      <p>Thanks,<br/>FGrow Team</p>
-    </div>
-  `,
+    `,
   });
 
   return {

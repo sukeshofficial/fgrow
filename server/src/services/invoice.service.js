@@ -604,19 +604,52 @@ export const sendInvoice = async (user, invoiceId, body) => {
   const mailResult = await sendEmail({
     to: body.to,
     cc: body.cc,
-    subject: body.subject || `Invoice ${inv.invoice_no}`,
+    subject: body.subject || `Invoice ${inv.invoice_no} from ${inv.billing_entity?.name || 'FGrow'}`,
     text: body.message || "Please find the attached invoice.",
     html: `
-      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; padding: 20px;">
-        <!-- Circular Image -->
-        <div style="text-align: center; margin-bottom: 20px;">
+      <div style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background: #ffffff;">
+        <div style="background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%); padding: 40px 20px; text-align: center;">
           <img 
-            src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" 
-            alt="Profile"
-            style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #e0e0e0;"
+            src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1775310579/tenants/a7tvcuo0moqztzeoevaz.png" 
+            alt="Logo"
+            style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.3); margin-bottom: 20px;"
           />
+          <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em;">Tax Invoice</h1>
         </div>
-        <p>${(body.message || "Please find the attached invoice.").replace(/\\n/g, '<br/>')}</p>
+        
+        <div style="padding: 40px;">
+          <p style="margin-top: 0; font-size: 16px; font-weight: 600; color: #1e293b;">Hello,</p>
+          <p style="font-size: 16px; color: #475569;">A new invoice has been generated for your recent transaction. Here is a summary of the details:</p>
+          
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin: 24px 0;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding-bottom: 8px; color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Invoice No</td>
+                <td style="padding-bottom: 8px; text-align: right; color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Date</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 700; color: #1e293b; font-size: 16px;">${inv.invoice_no}</td>
+                <td style="text-align: right; font-weight: 700; color: #1e293b; font-size: 16px;">${new Date(inv.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+              </tr>
+              <tr><td colspan="2" style="padding: 12px 0;"><div style="height: 1px; background: #e2e8f0;"></div></td></tr>
+              <tr>
+                <td style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase;">Total Amount</td>
+                <td style="text-align: right; color: #7c3aed; font-size: 20px; font-weight: 800;">₹${(inv.total_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="font-size: 15px; background: #fffbeb; border: 1px solid #fef3c7; color: #92400e; padding: 16px; border-radius: 12px; margin: 24px 0; line-height: 1.5;">
+            <strong style="display: block; margin-bottom: 4px;">Message from ${inv.billing_entity?.name || 'Sender'}:</strong>
+            ${(body.message || "Please find the attached invoice.").replace(/\n/g, '<br/>')}
+          </div>
+
+          <p style="color: #64748b; font-size: 14px; margin-bottom: 0;">If you have any questions, feel free to contact us.</p>
+        </div>
+
+        <div style="background: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
+          <p style="margin: 0; color: #94a3b8; font-size: 12px; font-weight: 600;">Powered by <strong>FGrow</strong></p>
+        </div>
       </div>
     `,
     attachments: [{ filename: `${inv.invoice_no}.pdf`, content: pdfBuffer }],

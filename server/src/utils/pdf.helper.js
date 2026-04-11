@@ -297,7 +297,9 @@ export const generateReceiptPdfBuffer = (receipt) => {
       doc.fontSize(10).fillColor("#1e293b").font("SpaceMono-Bold").text(new Date(receipt.date).toLocaleDateString('en-IN'), 180, metaY + 12);
 
       doc.fontSize(9).fillColor("#94a3b8").font("SpaceMono-Bold").text("METHOD", 310, metaY);
-      doc.fontSize(10).fillColor("#1e293b").font("SpaceMono-Bold").text(receipt.payment_method || "Other", 310, metaY + 12, { textTransform: "capitalize" });
+      const method = receipt.payment_method || "Other";
+      const capitalizedMethod = method.charAt(0).toUpperCase() + method.slice(1);
+      doc.fontSize(10).fillColor("#1e293b").font("SpaceMono-Bold").text(capitalizedMethod, 310, metaY + 12);
 
       doc.fontSize(9).fillColor("#94a3b8").font("SpaceMono-Bold").text("UNAPPLIED BALANCE", 430, metaY, { align: "right", width: 115 });
 

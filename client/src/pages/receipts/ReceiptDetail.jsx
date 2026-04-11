@@ -95,7 +95,8 @@ const ReceiptDetail = () => {
             setIsShareModalOpen(false);
         } catch (err) {
             logger.error("ReceiptDetail", "Email failed", err);
-            showAlert("Error", "Failed to email receipt.", "error");
+            const msg = err.response?.data?.message || "Failed to email receipt.";
+            showAlert("Error", msg, "error");
         } finally {
             setActionLoading(false);
         }
