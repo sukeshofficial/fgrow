@@ -875,7 +875,7 @@ export const sendReceiptService = async (user, receiptId, body) => {
     tenant_id: user.tenant_id,
     archived: false,
   })
-    .populate("client billing_entity")
+    .populate("client billing_entity tenant_id")
     .lean();
 
   if (!receipt) throw new Error("Receipt not found");
@@ -888,50 +888,117 @@ export const sendReceiptService = async (user, receiptId, body) => {
     subject: body.subject || `Receipt ${receipt.receipt_no} from ${receipt.billing_entity?.name || 'FGrow'}`,
     text: body.message || "Please find the attached payment receipt.",
     html: `
-      <div style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background: #ffffff;">
-        <div style="background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%); padding: 40px 20px; text-align: center;">
-          <img 
-            src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1775310579/tenants/a7tvcuo0moqztzeoevaz.png" 
-            alt="Logo"
-            style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.3); margin-bottom: 20px;"
-          />
-          <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em;">Payment Receipt</h1>
-        </div>
-        
-        <div style="padding: 40px;">
-          <p style="margin-top: 0; font-size: 16px; font-weight: 600; color: #1e293b;">Hello,</p>
-          <p style="font-size: 16px; color: #475569;">We have received your payment. Here is a summary of the transaction for your records:</p>
-          
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin: 24px 0;">
-            <table style="width: 100%; border-collapse: collapse;">
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Space Mono', 'Courier New', Courier, monospace;">
+        <div style="padding: 40px 20px;">
+          <div style="max-width: 850px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 60px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);">
+            
+            <!-- Header Table -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
               <tr>
-                <td style="padding-bottom: 8px; color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Receipt No</td>
-                <td style="padding-bottom: 8px; text-align: right; color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Date</td>
-              </tr>
-              <tr>
-                <td style="font-weight: 700; color: #1e293b; font-size: 16px;">${receipt.receipt_no}</td>
-                <td style="text-align: right; font-weight: 700; color: #1e293b; font-size: 16px;">${new Date(receipt.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
-              </tr>
-              <tr><td colspan="2" style="padding: 12px 0;"><div style="height: 1px; background: #e2e8f0;"></div></td></tr>
-              <tr>
-                <td style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase;">Amount Received</td>
-                <td style="text-align: right; color: #7c3aed; font-size: 20px; font-weight: 800;">₹${receipt.received_amount?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                <td style="vertical-align: top; width: 120px;">
+                  <img 
+                    src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1775310579/tenants/a7tvcuo0moqztzeoevaz.png" 
+                    alt="Logo"
+                    style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 1px solid #e2e8f0;"
+                  />
+                </td>
+                <td style="text-align: right; vertical-align: top;">
+                  <h1 style="margin: 0; color: #1e293b; font-size: 32px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; font-family: 'Space Mono', monospace;">PAYMENT RECEIPT</h1>
+                  <div style="margin-top: 12px;">
+                    <span style="background-color: #f0fdf4; color: #166534; padding: 6px 16px; border-radius: 100px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #dcfce7; letter-spacing: 0.05em;">${receipt.status || 'SETTLED'}</span>
+                  </div>
+                </td>
               </tr>
             </table>
+
+            <!-- Business Info -->
+            <div style="margin-bottom: 50px;">
+              <h3 style="margin: 0 0 8px 0; color: #1e293b; font-size: 18px; font-weight: 700;">${(receipt.billing_entity && receipt.billing_entity.name) ? receipt.billing_entity.name : (receipt.tenant_id?.name || 'Your Company')}</h3>
+              <p style="margin: 0; color: #64748b; font-size: 13px; line-height: 1.6;">
+                ${(receipt.billing_entity && receipt.billing_entity.officialAddress) ? receipt.billing_entity.officialAddress : (receipt.tenant_id?.officialAddress || 'Company Address')}
+              </p>
+              ${(receipt.billing_entity?.companyPhone || receipt.tenant_id?.companyPhone) ? `<p style="margin: 4px 0; color: #64748b; font-size: 13px;">P: ${receipt.billing_entity?.companyPhone || receipt.tenant_id?.companyPhone}</p>` : ''}
+              ${(receipt.billing_entity?.companyEmail || receipt.tenant_id?.companyEmail) ? `<p style="margin: 4px 0; color: #64748b; font-size: 13px;">E: ${receipt.billing_entity?.companyEmail || receipt.tenant_id?.companyEmail}</p>` : ''}
+              <p style="margin: 8px 0; color: #1e293b; font-size: 13px; font-weight: 700;">GSTIN: ${receipt.billing_entity?.gstNumber || receipt.tenant_id?.gstNumber || '-'}</p>
+            </div>
+
+            <div style="height: 1px; background-color: #f1f5f9; margin-bottom: 40px;"></div>
+
+            <!-- Details Section -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 50px;">
+              <tr>
+                <td style="width: 50%; vertical-align: top; padding-right: 20px;">
+                  <p style="margin: 0 0 12px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">RECEIVED FROM</p>
+                  <h4 style="margin: 0 0 4px 0; color: #1e293b; font-size: 18px; font-weight: 700;">${receipt.client?.name || 'Client Name'}</h4>
+                  <p style="margin: 2px 0; color: #64748b; font-size: 13px;">${receipt.client?.primary_contact_email || ''}</p>
+                  <p style="margin: 2px 0; color: #64748b; font-size: 13px;">M: ${receipt.client?.primary_contact_mobile || '-'}</p>
+                </td>
+                <td style="width: 50%; vertical-align: top;">
+                  <p style="margin: 0 0 12px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">RECEIPT DETAILS</p>
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                      <td style="color: #64748b; font-size: 13px; padding: 4px 0;">Receipt No:</td>
+                      <td style="text-align: right; color: #1e293b; font-size: 13px; font-weight: 700; padding: 4px 0;">${receipt.receipt_no}</td>
+                    </tr>
+                    <tr>
+                      <td style="color: #64748b; font-size: 13px; padding: 4px 0;">Date:</td>
+                      <td style="text-align: right; color: #1e293b; font-size: 13px; font-weight: 700; padding: 4px 0;">${new Date(receipt.date).toLocaleDateString('en-IN')}</td>
+                    </tr>
+                    <tr>
+                      <td style="color: #64748b; font-size: 13px; padding: 4px 0;">Method:</td>
+                      <td style="text-align: right; color: #1e293b; font-size: 13px; font-weight: 700; padding: 4px 0; text-transform: capitalize;">${receipt.payment_method || 'Other'}</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin: 0 0 12px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">APPLIED INVOICES</p>
+            <div style="height: 1px; background-color: #f1f5f9; margin-bottom: 20px;"></div>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
+              <thead>
+                <tr style="border-bottom: 2px solid #f1f5f9;">
+                  <th style="text-align: left; padding: 12px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase;">Invoice</th>
+                  <th style="text-align: right; padding: 12px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase;">Date</th>
+                  <th style="text-align: right; padding: 12px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase;">Amount Applied</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(receipt.applied_invoices || []).map(app => `
+                  <tr style="border-bottom: 1px solid #f8fafc;">
+                    <td style="padding: 16px 0; color: #1e293b; font-size: 13px; font-weight: 700;">${app.invoice_no || 'Invoice'}</td>
+                    <td style="text-align: right; padding: 16px 0; color: #1e293b; font-size: 13px;">${app.invoice_date ? new Date(app.invoice_date).toLocaleDateString('en-IN') : '-'}</td>
+                    <td style="text-align: right; padding: 16px 0; color: #1e293b; font-size: 13px; font-weight: 700;">₹${(app.amount_applied || 0).toLocaleString('en-IN')}</td>
+                  </tr>
+                `).join('')}
+                ${(receipt.applied_invoices || []).length === 0 ? `
+                  <tr><td colspan="3" style="padding: 20px 0; color: #94a3b8; font-size: 13px; text-align: center;">No invoices applied to this receipt.</td></tr>
+                ` : ''}
+              </tbody>
+            </table>
+            
+            <p style="color: #475569; font-size: 15px; margin-bottom: 30px;">${(body.message || "Please find the attached payment receipt.").replace(/\n/g, "<br/>")}</p>
+
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; margin-top: 40px;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="color: #64748b; font-size: 14px; font-weight: 700; padding: 4px 0; text-transform: uppercase;">Total Received</td>
+                  <td style="text-align: right; color: #7c3aed; font-size: 24px; font-weight: 800; padding: 4px 0;">₹${receipt.received_amount?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                </tr>
+              </table>
+            </div>
+
+            <p style="margin-top: 60px; text-align: center; color: #94a3b8; font-size: 12px;">This is a computer generated receipt and does not require a physical signature.</p>
           </div>
-
-          <div style="font-size: 15px; background: #fffbeb; border: 1px solid #fef3c7; color: #92400e; padding: 16px; border-radius: 12px; margin: 24px 0; line-height: 1.5;">
-            <strong style="display: block; margin-bottom: 4px;">Message from ${receipt.billing_entity?.name || 'Sender'}:</strong>
-            ${(body.message || "Please find the attached payment receipt.").replace(/\n/g, "<br/>")}
-          </div>
-
-          <p style="color: #64748b; font-size: 14px; margin-bottom: 0;">If you have any questions, feel free to contact us.</p>
         </div>
-
-        <div style="background: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
-          <p style="margin: 0; color: #94a3b8; font-size: 12px; font-weight: 600;">Powered by <strong>FGrow</strong></p>
-        </div>
-      </div>
+      </body>
+      </html>
     `,
     attachments: [{ filename: `${receipt.receipt_no}.pdf`, content: pdfBuffer }],
   });

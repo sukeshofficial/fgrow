@@ -595,7 +595,7 @@ export const sendInvoice = async (user, invoiceId, body) => {
 
   // FIX: Scoped to tenant
   const inv = await Invoice.findOne({ _id: invoiceId, ...tenantFilter(user) })
-    .populate("client billing_entity")
+    .populate("client billing_entity tenant_id")
     .lean();
   if (!inv) throw new Error("Invoice not found");
 
@@ -607,50 +607,120 @@ export const sendInvoice = async (user, invoiceId, body) => {
     subject: body.subject || `Invoice ${inv.invoice_no} from ${inv.billing_entity?.name || 'FGrow'}`,
     text: body.message || "Please find the attached invoice.",
     html: `
-      <div style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background: #ffffff;">
-        <div style="background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%); padding: 40px 20px; text-align: center;">
-          <img 
-            src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1775310579/tenants/a7tvcuo0moqztzeoevaz.png" 
-            alt="Logo"
-            style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.3); margin-bottom: 20px;"
-          />
-          <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em;">Tax Invoice</h1>
-        </div>
-        
-        <div style="padding: 40px;">
-          <p style="margin-top: 0; font-size: 16px; font-weight: 600; color: #1e293b;">Hello,</p>
-          <p style="font-size: 16px; color: #475569;">A new invoice has been generated for your recent transaction. Here is a summary of the details:</p>
-          
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin: 24px 0;">
-            <table style="width: 100%; border-collapse: collapse;">
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Space Mono', 'Courier New', Courier, monospace;">
+        <div style="padding: 40px 20px;">
+          <div style="max-width: 850px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 60px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);">
+            
+            <!-- Header Table -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
               <tr>
-                <td style="padding-bottom: 8px; color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Invoice No</td>
-                <td style="padding-bottom: 8px; text-align: right; color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Date</td>
-              </tr>
-              <tr>
-                <td style="font-weight: 700; color: #1e293b; font-size: 16px;">${inv.invoice_no}</td>
-                <td style="text-align: right; font-weight: 700; color: #1e293b; font-size: 16px;">${new Date(inv.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
-              </tr>
-              <tr><td colspan="2" style="padding: 12px 0;"><div style="height: 1px; background: #e2e8f0;"></div></td></tr>
-              <tr>
-                <td style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase;">Total Amount</td>
-                <td style="text-align: right; color: #7c3aed; font-size: 20px; font-weight: 800;">₹${(inv.total_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                <td style="vertical-align: top; width: 120px;">
+                  <img 
+                    src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1775310579/tenants/a7tvcuo0moqztzeoevaz.png" 
+                    alt="Logo"
+                    style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 1px solid #e2e8f0;"
+                  />
+                </td>
+                <td style="text-align: right; vertical-align: top;">
+                  <h1 style="margin: 0; color: #1e293b; font-size: 32px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; font-family: 'Space Mono', monospace;">TAX INVOICE</h1>
+                  <div style="margin-top: 12px;">
+                    <span style="background-color: #f0fdf4; color: #166534; padding: 6px 16px; border-radius: 100px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #dcfce7; letter-spacing: 0.05em;">${inv.status || 'UNPAID'}</span>
+                  </div>
+                </td>
               </tr>
             </table>
+
+            <!-- Billing Info columns -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 50px;">
+              <tr>
+                <td style="width: 50%; vertical-align: top; padding-right: 20px;">
+                  <p style="margin: 0 0 12px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">BILL FROM</p>
+                  <h3 style="margin: 0 0 4px 0; color: #1e293b; font-size: 16px; font-weight: 700;">${(inv.billing_entity && inv.billing_entity.name) ? inv.billing_entity.name : (inv.tenant_id?.name || 'Your Company')}</h3>
+                  <p style="margin: 0; color: #64748b; font-size: 13px; line-height: 1.5;">${(inv.billing_entity && inv.billing_entity.officialAddress) ? inv.billing_entity.officialAddress : (inv.tenant_id?.officialAddress || 'Company Address')}</p>
+                  <p style="margin: 4px 0; color: #1e293b; font-size: 12px; font-weight: 700;">GSTIN: ${inv.billing_entity?.gstNumber || inv.tenant_id?.gstNumber || '-'}</p>
+                </td>
+                <td style="width: 50%; vertical-align: top;">
+                  <p style="margin: 0 0 12px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">BILL TO</p>
+                  <h3 style="margin: 0 0 4px 0; color: #1e293b; font-size: 16px; font-weight: 700;">${inv.client?.name || 'Client Name'}</h3>
+                  <p style="margin: 0; color: #64748b; font-size: 13px; line-height: 1.5;">${inv.client?.address?.street || ''}, ${inv.client?.address?.city || ''}</p>
+                  <p style="margin: 4px 0; color: #1e293b; font-size: 12px; font-weight: 700;">GSTIN: ${inv.client?.gstin || '-'}</p>
+                </td>
+              </tr>
+            </table>
+
+            <div style="height: 1px; background-color: #f1f5f9; margin-bottom: 40px;"></div>
+
+            <!-- Invoice Details Row -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
+              <tr>
+                <td style="width: 33%;">
+                  <p style="margin: 0 0 4px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase;">Invoice No</p>
+                  <p style="margin: 0; color: #1e293b; font-size: 14px; font-weight: 700;">${inv.invoice_no}</p>
+                </td>
+                <td style="width: 33%;">
+                  <p style="margin: 0 0 4px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase;">Date</p>
+                  <p style="margin: 0; color: #1e293b; font-size: 14px; font-weight: 700;">${new Date(inv.date).toLocaleDateString('en-IN')}</p>
+                </td>
+                <td style="width: 33%;">
+                  <p style="margin: 0 0 4px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase;">Due Date</p>
+                  <p style="margin: 0; color: #1e293b; font-size: 14px; font-weight: 700;">${inv.due_date ? new Date(inv.due_date).toLocaleDateString('en-IN') : '-'}</p>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Items Table -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
+              <thead>
+                <tr style="border-bottom: 2px solid #f1f5f9;">
+                  <th style="text-align: left; padding: 12px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase;">Description</th>
+                  <th style="text-align: right; padding: 12px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; width: 80px;">Qty</th>
+                  <th style="text-align: right; padding: 12px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; width: 120px;">Price</th>
+                  <th style="text-align: right; padding: 12px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; width: 120px;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(inv.items || []).map(item => `
+                  <tr style="border-bottom: 1px solid #f8fafc;">
+                    <td style="padding: 16px 0; color: #1e293b; font-size: 13px; font-weight: 700;">${item.description}</td>
+                    <td style="text-align: right; padding: 16px 0; color: #1e293b; font-size: 13px;">${item.quantity || 1}</td>
+                    <td style="text-align: right; padding: 16px 0; color: #1e293b; font-size: 13px;">₹${(item.unit_price || 0).toLocaleString('en-IN')}</td>
+                    <td style="text-align: right; padding: 16px 0; color: #1e293b; font-size: 13px; font-weight: 700;">₹${(item.total_amount || 0).toLocaleString('en-IN')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+
+            <p style="color: #475569; font-size: 15px; margin-bottom: 40px; border-left: 4px solid #7c3aed; padding-left: 16px;">${(body.message || "Please find the attached invoice.").replace(/\n/g, '<br/>')}</p>
+
+            <!-- Totals Card -->
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; margin-left: auto; width: 300px;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="color: #64748b; font-size: 13px; padding-bottom: 12px;">Subtotal</td>
+                  <td style="text-align: right; color: #1e293b; font-size: 13px; font-weight: 700; padding-bottom: 12px;">₹${(inv.subtotal || 0).toLocaleString('en-IN')}</td>
+                </tr>
+                 <tr>
+                  <td style="color: #64748b; font-size: 13px; padding-bottom: 12px;">GST</td>
+                  <td style="text-align: right; color: #1e293b; font-size: 13px; font-weight: 700; padding-bottom: 12px;">₹${(inv.total_gst || 0).toLocaleString('en-IN')}</td>
+                </tr>
+                <tr><td colspan="2" style="padding: 8px 0;"><div style="height: 1px; background-color: #e2e8f0;"></div></td></tr>
+                <tr>
+                  <td style="color: #1e293b; font-size: 14px; font-weight: 700; padding-top: 12px; text-transform: uppercase;">Total</td>
+                  <td style="text-align: right; color: #7c3aed; font-size: 20px; font-weight: 800; padding-top: 12px;">₹${(inv.total_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                </tr>
+              </table>
+            </div>
+
+            <p style="margin-top: 60px; text-align: center; color: #94a3b8; font-size: 11px;">Powered by FGrow - Building together.</p>
           </div>
-
-          <div style="font-size: 15px; background: #fffbeb; border: 1px solid #fef3c7; color: #92400e; padding: 16px; border-radius: 12px; margin: 24px 0; line-height: 1.5;">
-            <strong style="display: block; margin-bottom: 4px;">Message from ${inv.billing_entity?.name || 'Sender'}:</strong>
-            ${(body.message || "Please find the attached invoice.").replace(/\n/g, '<br/>')}
-          </div>
-
-          <p style="color: #64748b; font-size: 14px; margin-bottom: 0;">If you have any questions, feel free to contact us.</p>
         </div>
-
-        <div style="background: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
-          <p style="margin: 0; color: #94a3b8; font-size: 12px; font-weight: 600;">Powered by <strong>FGrow</strong></p>
-        </div>
-      </div>
+      </body>
+      </html>
     `,
     attachments: [{ filename: `${inv.invoice_no}.pdf`, content: pdfBuffer }],
   });
