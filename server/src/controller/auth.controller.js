@@ -574,7 +574,7 @@ export const loginUser = async (req, res) => {
             </div>
 
             <div style="text-align: center; margin: 40px 0;">
-                <a href="${process.env.FRONTEND_URL || "https://fgrow.forgegrid.in"}/dashboard" style="background: linear-gradient(135deg, #2563eb, #7c3aed); color: #ffffff !important; text-decoration: none; padding: 18px 36px; border-radius: 12px; font-weight: 700; font-size: 18px; display: inline-block; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);">
+                <a href="https://fgrow.forgegrid.in/dashboard" style="background: linear-gradient(135deg, #2563eb, #7c3aed); color: #ffffff !important; text-decoration: none; padding: 18px 36px; border-radius: 12px; font-weight: 700; font-size: 18px; display: inline-block; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);">
                     Launch My Dashboard →
                 </a>
             </div>
