@@ -7,17 +7,17 @@ const ScrollingCredits = ({ className }) => {
     const credits = [
         {
             role: 'DEVELOPER, DESIGNER, TESTER',
-            name: 'SUKESH (CEO & CTO)',
+            name: 'SUKESH',
             linkedin: 'https://www.linkedin.com/in/sukeshd'
         },
         {
             role: 'DESIGNER, TESTER',
-            name: 'PRITHIVIRAAJ (CPO)',
+            name: 'PRITHIVIRAAJ',
             linkedin: ''
         },
         {
             role: 'TESTER',
-            name: 'VERAADITHYA (COO)',
+            name: 'VERAADITHYA',
             linkedin: ''
         },
     ];

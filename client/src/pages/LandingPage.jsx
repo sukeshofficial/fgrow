@@ -360,7 +360,7 @@ const LandingPage = () => {
 
         /* HERO */
         .hero {
-          padding: 120px 0 80px;
+          padding: 100px 0 80px;
           background: var(--bg-page);
           position: relative; overflow: hidden;
         }
