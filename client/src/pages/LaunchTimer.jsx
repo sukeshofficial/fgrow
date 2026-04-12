@@ -48,8 +48,10 @@ const LaunchTimer = () => {
         }
         setStatus("loading");
         try {
+            // Trim trailing slash from base URL to prevent double slashes (e.g., //launch)
+            const baseUrl = import.meta.env.VITE_API_URL.replace(/\/$/, "");
             const res = await axios.post(
-                `${import.meta.env.VITE_API_URL}/launch/subscribe`,
+                `${baseUrl}/launch/subscribe`,
                 { email },
                 { withCredentials: true }
             );

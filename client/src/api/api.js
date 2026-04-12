@@ -5,8 +5,14 @@
  */
 import axios from "axios";
 
+// Normalize baseURL to prevent double slashes (e.g., /api/v0//path) 
+// which trigger redirects that fail CORS preflight requests.
+const baseURL = import.meta.env.VITE_API_URL?.endsWith("/")
+  ? import.meta.env.VITE_API_URL.slice(0, -1)
+  : import.meta.env.VITE_API_URL;
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL,
   withCredentials: true,
   timeout: 15000,
   headers: {
@@ -38,7 +44,7 @@ export const setupInterceptors = (setGlobalError) => {
         });
       }
       // 3. Unauthorized (401) - handled by page-specific logic usually, but keep as note
-      
+
       return Promise.reject(error);
     }
   );
