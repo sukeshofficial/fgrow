@@ -6,13 +6,17 @@
  * the application.
  */
 
-import { createContext, useReducer } from "react";
+import { createContext, useReducer, useEffect, useMemo } from "react";
+
+import { useQuery } from "@tanstack/react-query";
+
 
 import {
   authReducer,
   initialAuthState,
 } from "./auth.reducer.js";
-import { logout as logoutAction } from "./auth.actions.js";
+import { logout as logoutAction, checkAuth as fetchUser } from "./auth.actions.js";
+
 import {
   AUTH_START,
   AUTH_SUCCESS,
@@ -50,19 +54,40 @@ export const AuthProvider = ({ children }) => {
   const setAvatar = (avatar) => dispatch({ type: SET_AVATAR, payload: avatar });
 
   /**
+   * TanStack Query for session management
+   */
+  const { data: user, isLoading, isError, refetch } = useQuery({
+    queryKey: ["auth-user"],
+    queryFn: () => fetchUser(dispatch),
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    retry: false, // Don't retry if session is invalid
+  });
+
+  // Sync state with query result
+  useEffect(() => {
+    if (user) {
+      dispatch({ type: AUTH_SUCCESS, payload: user });
+    }
+  }, [user]);
+
+
+  /**
    * Logout handler
    */
   const logout = async () => await logoutAction(dispatch);
 
+  const authContextValue = useMemo(() => ({
+    ...state,
+    isLoading: state.loading || isLoading,
+    dispatch,
+    logout,
+    refetchUser: refetch,
+  }), [state, isLoading, logout, refetch]);
+
   return (
-    <AuthContext.Provider
-      value={{
-        ...state,
-        dispatch,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={authContextValue}>
       {children}
     </AuthContext.Provider>
   );
+
 };

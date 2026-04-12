@@ -17,19 +17,22 @@ import {
 import authMiddleware from "../middleware/auth.middleware.js";
 import billingMiddleware from "../middleware/billing.middleware.js";
 import { requireRole } from "../middleware/tenant_role.middleware.js";
+import { cacheMiddleware, clearCacheMiddleware } from "../middleware/cache.js";
+
 
 const router = express.Router();
 
 const authStaff = [authMiddleware, billingMiddleware, requireRole("owner", "staff")];
 
 // task list & creation
-router.get("/", ...authStaff, listTasksController);
-router.post("/", ...authStaff, createTaskController);
+router.get("/", ...authStaff, cacheMiddleware(300), listTasksController);
+router.post("/", ...authStaff, clearCacheMiddleware("v0/tasks"), createTaskController);
 
 // task details & update
-router.get("/:id", ...authStaff, getTaskController);
-router.put("/:id", ...authStaff, updateTaskController);
-router.delete("/:id", ...authStaff, deleteTaskController);
+router.get("/:id", ...authStaff, cacheMiddleware(300), getTaskController);
+router.put("/:id", ...authStaff, clearCacheMiddleware("v0/tasks"), updateTaskController);
+router.delete("/:id", ...authStaff, clearCacheMiddleware("v0/tasks"), deleteTaskController);
+
 
 // task status
 router.patch("/:id/status", ...authStaff, updateStatusController);

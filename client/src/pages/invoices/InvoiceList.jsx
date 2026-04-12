@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+
 import { useNavigate } from "react-router-dom";
 import FilterBar from "./components/FilterBar";
 import InvoiceTable from "./components/InvoiceTable";
@@ -19,10 +21,8 @@ const debounce = (func, wait) => {
 
 const InvoiceList = () => {
   const navigate = useNavigate();
-  const [invoices, setInvoices] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, total_pages: 0 });
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
   const [filters, setFilters] = useState({
     q: "",
     status: 'all',
@@ -32,58 +32,57 @@ const InvoiceList = () => {
     date_to: ""
   });
 
-  const showLoading = useDelayedLoading(loading, 300);
+  // Debounced search term to avoid excessive API calls while typing
+  const [debouncedQ, setDebouncedQ] = useState(filters.q);
 
-  const fetchInvoices = async (currentFilters, currentPage) => {
-    setLoading(true);
-    try {
-      const activeFilter = currentFilters.status === 'all' ? {} : { status: currentFilters.status };
-      const params = {
-        page: currentPage,
-        per_page: pagination.limit,
-        q: currentFilters.q,
-        client: currentFilters.client,
-        billing_entity: currentFilters.billing_entity,
-        date_from: currentFilters.date_from,
-        date_to: currentFilters.date_to,
-        ...activeFilter,
-      };
-
-      const resp = await getInvoices(params);
-      setInvoices(resp.data.data);
-      const meta = resp.data.meta;
-      setPagination({
-        page: meta.page,
-        limit: meta.per_page,
-        total: meta.total,
-        total_pages: Math.ceil(meta.total / meta.per_page)
-      });
-    } catch (e) {
-      logger.error("InvoiceList", "Failed to fetch invoices", e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const debouncedFetch = useCallback(
-    debounce((f, p) => {
-      fetchInvoices(f, p);
-    }, 500),
+  const handleDebounceSearch = useCallback(
+    debounce((value) => setDebouncedQ(value), 500),
     []
   );
 
-  useEffect(() => {
-    debouncedFetch(filters, pagination.page);
-  }, [filters, pagination.page]);
+  /**
+   * Fetch invoices using TanStack Query
+   */
+  const { data, isLoading } = useQuery({
+    queryKey: ["invoices", { ...filters, q: debouncedQ }, pagination.page],
+    queryFn: async () => {
+      const activeFilter = filters.status === 'all' ? {} : { status: filters.status };
+      const params = {
+        page: pagination.page,
+        per_page: pagination.limit,
+        q: debouncedQ,
+        client: filters.client,
+        billing_entity: filters.billing_entity,
+        date_from: filters.date_from,
+        date_to: filters.date_to,
+        ...activeFilter,
+      };
+      const resp = await getInvoices(params);
+      return resp.data;
+    },
+    placeholderData: (previousData) => previousData,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const invoices = data?.data || [];
+  const meta = data?.meta || {};
+  const total_pages = Math.ceil((meta.total || 0) / (meta.per_page || 10));
+
+  const showLoading = useDelayedLoading(isLoading, 300);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
     setPagination(prev => ({ ...prev, page: 1 }));
+
+    if (key === 'q') {
+      handleDebounceSearch(value);
+    }
   };
 
   const handlePageChange = (newPage) => {
     setPagination(prev => ({ ...prev, page: newPage }));
   };
+
 
   return (
     <>
@@ -134,7 +133,7 @@ const InvoiceList = () => {
                 >
                   &lt;
                 </button>
-                {[...Array(pagination.total_pages || 0)].map((_, i) => (
+                {[...Array(total_pages || 0)].map((_, i) => (
                   <button
                     key={i}
                     className={`page-btn ${pagination.page === i + 1 ? 'active' : ''}`}
@@ -143,13 +142,15 @@ const InvoiceList = () => {
                     {i + 1}
                   </button>
                 ))}
+
                 <button
                   className="page-btn"
-                  disabled={pagination.page === (pagination.total_pages || 1) || pagination.total_pages === 0}
+                  disabled={pagination.page === (total_pages || 1) || total_pages === 0}
                   onClick={() => handlePageChange(pagination.page + 1)}
                 >
                   &gt;
                 </button>
+
               </div>
             </div>
           )}

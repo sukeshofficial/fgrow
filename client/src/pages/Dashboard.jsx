@@ -1,19 +1,22 @@
-import { useState, useEffect } from "react";
+import React, { useState, useMemo, lazy, Suspense } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
 import SideBar from "../components/SideBar";
 import StaffListTable from "../components/tenant/StaffListTable";
-import InviteUserModal from "../components/tenant/InviteUserModal";
 import { Button } from "../components/ui/Button";
 import { FaUserPlus, FaExclamationCircle, FaBuilding } from "react-icons/fa";
 import { useAuth } from "../hooks/useAuth";
 import { getTenantById } from "../api/tenant.api";
 import "../styles/welcome.css";
 import "../styles/tenant-info.css";
-import { Spinner } from "../components/ui/Spinner";
-import DashboardSkeleton from "../components/skeletons/DashboardSkeleton";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
 import ScrollingCredits from "../components/dashboard/ScrollingCredits";
 import { useModal } from "../context/ModalContext";
-import logger from "../utils/logger.js";
+
+// Lazy load heavy components
+const InviteUserModal = lazy(() => import("../components/tenant/InviteUserModal"));
+const DashboardSkeleton = lazy(() => import("../components/skeletons/DashboardSkeleton"));
+
 
 /**
  * Dashboard page
@@ -39,36 +42,32 @@ const getAvatarColorClass = (name) => {
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [tenantDetails, setTenantDetails] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const queryClient = useQueryClient();
+
 
   const { openReportModal } = useModal();
-  const showLoading = useDelayedLoading(loading, 300);
 
-  useEffect(() => {
-    const fetchTenantData = async () => {
-      if (user?.tenant_id) {
-        try {
-          setLoading(true);
-          const response = await getTenantById(user.tenant_id);
-          setTenantDetails(response.data.data);
-        } catch (err) {
-          logger.error("Dashboard", "Failed to fetch tenant details", err);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setLoading(false);
-      }
-    };
-    fetchTenantData();
-  }, [user?.tenant_id]);
+  /**
+   * Fetch tenant details using TanStack Query
+   */
+  const { data: tenantDetails, isLoading: tenantLoading } = useQuery({
+    queryKey: ["tenant-details", user?.tenant_id],
+    queryFn: async () => {
+      const response = await getTenantById(user.tenant_id);
+      return response.data.data;
+    },
+    enabled: !!user?.tenant_id,
+    staleTime: 1000 * 60 * 15, // 15 minutes
+  });
+
+  const showLoading = useDelayedLoading(tenantLoading, 300);
+
 
   const handleInviteSuccess = () => {
-    setRefreshKey((prev) => prev + 1);
+    queryClient.invalidateQueries({ queryKey: ["tenant-staff"] });
   };
+
 
   return (
     <>
@@ -117,7 +116,9 @@ const Dashboard = () => {
 
         {/* Tenant Info Section */}
         {showLoading ? (
-          <DashboardSkeleton />
+          <Suspense fallback={<div className="skeleton-fallback" />}>
+            <DashboardSkeleton />
+          </Suspense>
         ) : tenantDetails && (
           <div className="tenant-info-card">
             {tenantDetails.logoUrl ? (
@@ -125,7 +126,9 @@ const Dashboard = () => {
                 src={tenantDetails.logoUrl}
                 alt="Logo"
                 className="tenant-info-logo"
+                loading="lazy"
               />
+
             ) : (
               <div className="tenant-info-placeholder">
                 <FaBuilding size={32} />
@@ -147,15 +150,19 @@ const Dashboard = () => {
         )}
 
         {user?.tenant_role === "owner" && (
-          <StaffListTable refreshKey={refreshKey} />
+          <StaffListTable />
         )}
 
+
         {isInviteModalOpen && (
-          <InviteUserModal
-            onClose={() => setIsInviteModalOpen(false)}
-            onSuccess={handleInviteSuccess}
-          />
+          <Suspense fallback={null}>
+            <InviteUserModal
+              onClose={() => setIsInviteModalOpen(false)}
+              onSuccess={handleInviteSuccess}
+            />
+          </Suspense>
         )}
+
       </div>
     </>
   );

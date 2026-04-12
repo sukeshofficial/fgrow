@@ -17,6 +17,8 @@ import {
   removeUserFromTenant,
 } from "../controller/tenant.controller.js";
 import { upload } from "../middleware/upload.middleware.js";
+import { cacheMiddleware, clearCacheMiddleware } from "../middleware/cache.js";
+
 
 const router = express.Router();
 
@@ -25,13 +27,16 @@ const authOwner = [authMiddleware, billingMiddleware, requireRole("owner")];
 const authStandard = [authMiddleware, billingMiddleware];
 
 // Create tenant (public endpoint guarded by auth + upload)
-router.post("/create", authMiddleware, upload.single("companyLogo"), createTenant);
+router.post("/create", authMiddleware, clearCacheMiddleware("v0/tenant"), upload.single("companyLogo"), createTenant);
+
 
 // GET ALL tenants (super-admin only)
-router.get("/all", ...authSuperAdmin, getAllTenants);
+router.get("/all", ...authSuperAdmin, cacheMiddleware(600), getAllTenants);
+
 
 // GET single tenant details (authorized users only)
-router.get("/detail/:tenantId", ...authStandard, getTenantById);
+router.get("/detail/:tenantId", ...authStandard, cacheMiddleware(300), getTenantById);
+
 
 // GET targeted tenant staff (super-admin only)
 router.get("/detail/:tenantId/staff", ...authSuperAdmin, getTenantStaffAdmin);
@@ -43,16 +48,18 @@ router.get("/detail/:tenantId/clients", ...authSuperAdmin, getTenantClientsAdmin
 router.get("/pending", ...authSuperAdmin, getPendingTenants);
 
 // Approve / reject tenant (super-admin only)
-router.patch("/:tenantId/approve", ...authSuperAdmin, approveTenant);
-router.patch("/:tenantId/reject", ...authSuperAdmin, rejectTenant);
+router.patch("/:tenantId/approve", ...authSuperAdmin, clearCacheMiddleware("v0/tenant"), approveTenant);
+router.patch("/:tenantId/reject", ...authSuperAdmin, clearCacheMiddleware("v0/tenant"), rejectTenant);
 
 // Re-appeal tenant (owner)
-router.patch("/re-appeal", ...authOwner, reAppealTenant);
+router.patch("/re-appeal", ...authOwner, clearCacheMiddleware("v0/tenant"), reAppealTenant);
+
 
 // Get tenant staff (owner and staff)
-router.get("/staff", ...authStandard, requireRole("owner", "staff"), getTenantStaff);
+router.get("/staff", ...authStandard, requireRole("owner", "staff"), cacheMiddleware(300), getTenantStaff);
 
 // Remove user from tenant (owner only)
-router.patch("/:userId/remove", ...authOwner, removeUserFromTenant);
+router.patch("/:userId/remove", ...authOwner, clearCacheMiddleware("v0/tenant"), removeUserFromTenant);
+
 
 export default router;

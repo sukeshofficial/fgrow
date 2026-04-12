@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/SideBar";
 import quotationService from "../../features/quotations/quotationService";
@@ -7,11 +9,18 @@ import logger from "../../utils/logger.js";
 import { Plus, Search, Filter, Eye, MoreHorizontal, Download, Send, FileText, Trash2, Pencil } from "lucide-react";
 import "./quotations.css";
 
+const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func(...args), wait);
+    };
+};
+
+
 const QuotationList = () => {
     const navigate = useNavigate();
-    const [quotations, setQuotations] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, total_pages: 0 });
+    const [pagination, setPagination] = useState({ page: 1, limit: 10 });
     const [filters, setFilters] = useState({
         search: "",
         status: 'all',
@@ -19,45 +28,56 @@ const QuotationList = () => {
         date_to: ""
     });
 
-    const showLoading = useDelayedLoading(loading, 300);
+    // Debounced search term
+    const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
 
-    const fetchQuotations = async (currentFilters, currentPage) => {
-        setLoading(true);
-        try {
-            const activeFilter = currentFilters.status === 'all' ? {} : { status: currentFilters.status };
+    const handleDebounceSearch = useCallback(
+        debounce((value) => setDebouncedSearch(value), 500),
+        []
+    );
+
+    /**
+     * Fetch quotations using TanStack Query
+     */
+    const { data, isLoading } = useQuery({
+        queryKey: ["quotations", { ...filters, search: debouncedSearch }, pagination.page],
+        queryFn: async () => {
+            const activeFilter = filters.status === 'all' ? {} : { status: filters.status };
             const params = {
-                page: currentPage,
+                page: pagination.page,
                 limit: pagination.limit,
-                search: currentFilters.search,
-                date_from: currentFilters.date_from,
-                date_to: currentFilters.date_to,
+                search: debouncedSearch,
+                date_from: filters.date_from,
+                date_to: filters.date_to,
                 ...activeFilter,
             };
-
             const resp = await quotationService.listQuotations(params);
-            setQuotations(resp.data);
-            const meta = resp.pagination;
-            setPagination({
-                page: meta.page,
-                limit: meta.limit,
-                total: meta.total,
-                total_pages: meta.total_pages
-            });
-        } catch (e) {
-            logger.error("QuotationList", "Failed to fetch quotations", e);
-        } finally {
-            setLoading(false);
-        }
-    };
+            return resp;
+        },
+        placeholderData: (previousData) => previousData,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+
+    const quotations = data?.data || [];
+    const meta = data?.pagination || {};
+    const total_pages = meta.total_pages || 0;
+    const total = meta.total || 0;
+
+    const showLoading = useDelayedLoading(isLoading, 300);
 
     const handleFilterChange = (key, value) => {
         setFilters(prev => ({ ...prev, [key]: value }));
         setPagination(prev => ({ ...prev, page: 1 }));
+
+        if (key === 'search') {
+            handleDebounceSearch(value);
+        }
     };
 
-    useEffect(() => {
-        fetchQuotations(filters, pagination.page);
-    }, [filters, pagination.page]);
+    const handlePageChange = (newPage) => {
+        setPagination(prev => ({ ...prev, page: newPage }));
+    };
+
 
     const getStatusClass = (status) => {
         switch (status) {
@@ -125,11 +145,12 @@ const QuotationList = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {loading ? (
+                                {showLoading ? (
                                     <tr><td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>Loading quotations...</td></tr>
                                 ) : quotations.length === 0 ? (
                                     <tr><td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>No quotations found.</td></tr>
                                 ) : (
+
                                     quotations.map((q) => (
                                         <tr key={q._id} style={{ borderBottom: '1px solid #f1f5f9' }} className="table-row-hover">
                                             <td style={{ padding: '16px', fontWeight: '700' }}>
@@ -170,7 +191,50 @@ const QuotationList = () => {
                         </table>
                     </div>
 
-                    {/* Pagination - Reuse the logic from ReceiptList if needed, or simple version here */}
+                    {/* Pagination */}
+                    {!showLoading && quotations.length > 0 && (
+                        <div className="pagination" style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span className="pagination-info" style={{ fontSize: '14px', color: '#64748b' }}>
+                                Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, total)} of {total} entries
+                            </span>
+                            <div className="pagination-controls" style={{ display: 'flex', gap: '8px' }}>
+                                <button
+                                    className="page-btn"
+                                    style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: pagination.page === 1 ? 'not-allowed' : 'pointer' }}
+                                    disabled={pagination.page === 1}
+                                    onClick={() => handlePageChange(pagination.page - 1)}
+                                >
+                                    &lt;
+                                </button>
+                                {[...Array(total_pages || 0)].map((_, i) => (
+                                    <button
+                                        key={i}
+                                        className={`page-btn ${pagination.page === i + 1 ? 'active' : ''}`}
+                                        style={{
+                                            padding: '8px 12px',
+                                            borderRadius: '8px',
+                                            border: '1px solid #e2e8f0',
+                                            background: pagination.page === i + 1 ? '#7c3aed' : 'white',
+                                            color: pagination.page === i + 1 ? 'white' : '#1e293b',
+                                            cursor: 'pointer'
+                                        }}
+                                        onClick={() => handlePageChange(i + 1)}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                ))}
+                                <button
+                                    className="page-btn"
+                                    style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', cursor: pagination.page === (total_pages || 1) ? 'not-allowed' : 'pointer' }}
+                                    disabled={pagination.page === (total_pages || 1) || total_pages === 0}
+                                    onClick={() => handlePageChange(pagination.page + 1)}
+                                >
+                                    &gt;
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             </div>
         </>

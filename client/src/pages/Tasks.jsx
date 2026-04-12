@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+
 import SideBar from "../components/SideBar";
 import TaskTable from "./tasks/components/TaskTable";
 import TaskFilterBar from "./tasks/components/TaskFilterBar";
-import TaskAdvancedFilterModal from "./tasks/components/TaskAdvancedFilterModal";
-import DeleteModal from "../components/ui/DeleteModal";
 import { listTasks, deleteTask } from "../api/task.api";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
 import { useAuth } from "../hooks/useAuth";
@@ -12,17 +13,22 @@ import logger from "../utils/logger.js";
 import "../styles/ClientList.css";
 import "../styles/Tasks.css";
 
-/**
- * Tasks page
- *
- * Main authenticated landing page for task management.
- */
+// Lazy load modals
+const TaskAdvancedFilterModal = React.lazy(() => import("./tasks/components/TaskAdvancedFilterModal"));
+const DeleteModal = React.lazy(() => import("../components/ui/DeleteModal"));
+
+const debounce = (func, wait) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
+
 const Tasks = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user: currentUser } = useAuth();
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const showLoading = useDelayedLoading(loading, 300);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   // Delete Modal State
@@ -30,7 +36,7 @@ const Tasks = () => {
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
   const [filters, setFilters] = useState({
     search: "",
     status: "all",
@@ -42,60 +48,53 @@ const Tasks = () => {
     dateTo: "",
   });
 
-  // Debounce helper
-  const debounce = (func, wait) => {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), wait);
-    };
-  };
+  // Debounced search term
+  const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
 
-  const fetchTasks = async (currentFilters, currentPage) => {
-    setLoading(true);
-    try {
-      const statusFilter = currentFilters.status === "all" ? {} : { status: currentFilters.status };
-      const params = {
-        page: currentPage,
-        limit: pagination.limit,
-        search: currentFilters.search,
-        priority: currentFilters.priority,
-        service: currentFilters.service,
-        client: currentFilters.client,
-        user: currentFilters.user,
-        dateFrom: currentFilters.dateFrom,
-        dateTo: currentFilters.dateTo,
-        ...statusFilter,
-      };
-
-      const resp = await listTasks(params);
-      if (resp.data.success) {
-        setTasks(resp.data.data.items);
-        setPagination((prev) => ({
-          ...prev,
-          total: resp.data.data.total,
-          total_pages: Math.ceil(resp.data.data.total / prev.limit),
-        }));
-      }
-    } catch (e) {
-      logger.error("TasksPage", "Failed to fetch tasks", e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const debouncedFetch = useCallback(
-    debounce((f, p) => fetchTasks(f, p), 500),
+  const handleDebounceSearch = useCallback(
+    debounce((value) => setDebouncedSearch(value), 500),
     []
   );
 
-  useEffect(() => {
-    debouncedFetch(filters, pagination.page);
-  }, [filters, pagination.page]);
+  /**
+   * Fetch tasks using TanStack Query
+   */
+  const { data, isLoading } = useQuery({
+    queryKey: ["tasks", { ...filters, search: debouncedSearch }, pagination.page],
+    queryFn: async () => {
+      const statusFilter = filters.status === "all" ? {} : { status: filters.status };
+      const params = {
+        page: pagination.page,
+        limit: pagination.limit,
+        search: debouncedSearch,
+        priority: filters.priority,
+        service: filters.service,
+        client: filters.client,
+        user: filters.user,
+        dateFrom: filters.dateFrom,
+        dateTo: filters.dateTo,
+        ...statusFilter,
+      };
+      const resp = await listTasks(params);
+      return resp.data.data;
+    },
+    placeholderData: (previousData) => previousData,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const tasks = data?.items || [];
+  const total = data?.total || 0;
+  const total_pages = Math.ceil(total / pagination.limit);
+
+  const showLoading = useDelayedLoading(isLoading, 300);
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
     setPagination((prev) => ({ ...prev, page: 1 }));
+
+    if (key === 'search') {
+      handleDebounceSearch(value);
+    }
   };
 
   const handlePageChange = (newPage) => {
@@ -121,7 +120,7 @@ const Tasks = () => {
       if (resp.data.success) {
         setIsDeleteModalOpen(false);
         setTaskToDelete(null);
-        fetchTasks(filters, pagination.page);
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
       }
     } catch (e) {
       logger.error("TasksPage", "Failed to delete task", e);
@@ -129,6 +128,7 @@ const Tasks = () => {
       setIsDeleting(false);
     }
   };
+
 
   return (
     <>
@@ -147,27 +147,30 @@ const Tasks = () => {
             currentUser={currentUser}
           />
 
-          <TaskAdvancedFilterModal
-            isOpen={isFilterModalOpen}
-            onClose={() => setIsFilterModalOpen(false)}
-            filters={filters}
-            onApply={(newFilters) => {
-              setFilters(newFilters);
-              setPagination(prev => ({ ...prev, page: 1 }));
-            }}
-            onClear={() =>
-              setFilters({
-                search: "",
-                status: "all",
-                priority: "",
-                service: "",
-                client: "",
-                user: "",
-                dateFrom: "",
-                dateTo: "",
-              })
-            }
-          />
+          <Suspense fallback={null}>
+            <TaskAdvancedFilterModal
+              isOpen={isFilterModalOpen}
+              onClose={() => setIsFilterModalOpen(false)}
+              filters={filters}
+              onApply={(newFilters) => {
+                setFilters(newFilters);
+                setPagination(prev => ({ ...prev, page: 1 }));
+              }}
+              onClear={() =>
+                setFilters({
+                  search: "",
+                  status: "all",
+                  priority: "",
+                  service: "",
+                  client: "",
+                  user: "",
+                  dateFrom: "",
+                  dateTo: "",
+                })
+              }
+            />
+          </Suspense>
+
 
           <TaskTable
             tasks={tasks}
@@ -180,8 +183,9 @@ const Tasks = () => {
             <div className="pagination">
               <span className="pagination-info">
                 Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
-                {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} entries
+                {Math.min(pagination.page * pagination.limit, total)} of {total} entries
               </span>
+
               <div className="pagination-controls">
                 <button
                   className="page-btn"
@@ -190,7 +194,7 @@ const Tasks = () => {
                 >
                   &lt;
                 </button>
-                {[...Array(pagination.total_pages || 0)].map((_, i) => (
+                {[...Array(total_pages || 0)].map((_, i) => (
                   <button
                     key={i}
                     className={`page-btn ${pagination.page === i + 1 ? "active" : ""}`}
@@ -199,13 +203,15 @@ const Tasks = () => {
                     {i + 1}
                   </button>
                 ))}
+
                 <button
                   className="page-btn"
-                  disabled={pagination.page === pagination.total_pages}
+                  disabled={pagination.page === total_pages}
                   onClick={() => handlePageChange(pagination.page + 1)}
                 >
                   &gt;
                 </button>
+
               </div>
             </div>
           )}
@@ -213,17 +219,20 @@ const Tasks = () => {
       </div>
 
       {isDeleteModalOpen && (
-        <DeleteModal
-          title="Delete Task"
-          message={`Are you sure you want to delete "${taskToDelete?.title}"? This action cannot be undone.`}
-          onConfirm={confirmDelete}
-          onCancel={() => {
-            setIsDeleteModalOpen(false);
-            setTaskToDelete(null);
-          }}
-          submitting={isDeleting}
-        />
+        <Suspense fallback={null}>
+          <DeleteModal
+            title="Delete Task"
+            message={`Are you sure you want to delete "${taskToDelete?.title}"? This action cannot be undone.`}
+            onConfirm={confirmDelete}
+            onCancel={() => {
+              setIsDeleteModalOpen(false);
+              setTaskToDelete(null);
+            }}
+            submitting={isDeleting}
+          />
+        </Suspense>
       )}
+
     </>
   );
 };

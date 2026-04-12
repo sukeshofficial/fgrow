@@ -4,6 +4,8 @@ import { validate } from "../validators/invoice.validator.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import billingMiddleware from "../middleware/billing.middleware.js";
 import { requireRole } from "../middleware/tenant_role.middleware.js";
+import { cacheMiddleware, clearCacheMiddleware } from "../middleware/cache.js";
+
 
 const router = express.Router();
 
@@ -13,17 +15,19 @@ const authOwner = [authMiddleware, billingMiddleware, requireRole("owner")];
 const authOwnerStaff = authStaff;
 
 // Collection-level
-router.get("/", ...authStaff, validate("list"), controller.listInvoices);
-router.post("/", ...authStaff, validate("create"), controller.createInvoice);
+router.get("/", ...authStaff, validate("list"), cacheMiddleware(300), controller.listInvoices);
+router.post("/", ...authStaff, validate("create"), clearCacheMiddleware("v0/invoices"), controller.createInvoice);
 router.get("/next-number", ...authStaff, controller.getNextInvoiceNumber);
 router.post("/reset-counter", ...authStaff, controller.resetInvoiceCounter);
 router.get("/export", ...authOwner, validate("export"), controller.exportInvoices);
-router.post("/bulk", ...authOwner, controller.bulkOperations);
+router.post("/bulk", ...authOwner, clearCacheMiddleware("v0/invoices"), controller.bulkOperations);
+
 
 // Single-invoice CRUD
-router.get("/:id", ...authStaff, controller.getInvoiceById);
-router.patch("/:id", ...authStaff, validate("update"), controller.updateInvoice);
-router.delete("/:id", ...authStaff, controller.deleteInvoice);
+router.get("/:id", ...authStaff, cacheMiddleware(300), controller.getInvoiceById);
+router.patch("/:id", ...authStaff, validate("update"), clearCacheMiddleware(["v0/invoices"]), controller.updateInvoice);
+router.delete("/:id", ...authStaff, clearCacheMiddleware(["v0/invoices"]), controller.deleteInvoice);
+
 
 // Items
 router.post("/:id/items", ...authStaff, validate("addItems"), controller.addItems);

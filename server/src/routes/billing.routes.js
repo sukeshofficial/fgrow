@@ -1,6 +1,8 @@
 import express from "express";
 import authMiddleware from "../middleware/auth.middleware.js";
 import * as billingController from "../controller/billing.controller.js";
+import { cacheMiddleware, clearCacheMiddleware } from "../middleware/cache.js";
+
 
 const router = express.Router();
 
@@ -11,10 +13,11 @@ router.post("/webhook", billingController.handleWebhook);
 router.use(authMiddleware);
 
 router.post("/create-order", billingController.createOrder);
-router.post("/verify-payment", billingController.verifyPayment);
-router.get("/status", billingController.getBillingStatus);
-router.get("/history", billingController.getPaymentHistory);
-router.get("/plans", billingController.getPlans);
+router.post("/verify-payment", clearCacheMiddleware("v0/billing"), billingController.verifyPayment);
+router.get("/status", cacheMiddleware(300), billingController.getBillingStatus);
+router.get("/history", cacheMiddleware(300), billingController.getPaymentHistory);
+router.get("/plans", cacheMiddleware(3600), billingController.getPlans);
+
 router.post("/downgrade", billingController.downgradeSubscription);
 
 export default router;

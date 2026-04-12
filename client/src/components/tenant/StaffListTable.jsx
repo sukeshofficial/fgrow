@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+
 import { getTenantStaff } from "../../api/tenant.api";
 import { Card } from "../ui/Card";
 import "../../styles/welcome.css";
@@ -7,27 +9,23 @@ import TableSkeleton from "../skeletons/TableSkeleton";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import { FaUserCircle } from "react-icons/fa";
 
-const StaffListTable = ({ refreshKey }) => {
-  const [staff, setStaff] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+const StaffListTable = () => {
 
-  const showLoading = useDelayedLoading(loading, 300);
 
-  useEffect(() => {
-    const fetchStaff = async () => {
-      try {
-        setLoading(true);
-        const response = await getTenantStaff();
-        setStaff(response.data.data);
-      } catch (err) {
-        setError("Failed to load staff list.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStaff();
-  }, [refreshKey]);
+  /**
+   * Fetch staff list using TanStack Query
+   */
+  const { data: staff = [], isLoading, isError } = useQuery({
+    queryKey: ["tenant-staff"],
+    queryFn: async () => {
+      const response = await getTenantStaff();
+      return response.data.data;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const showLoading = useDelayedLoading(isLoading, 300);
+
   if (showLoading) {
     return (
       <Card className="staff-list-card">
@@ -38,7 +36,8 @@ const StaffListTable = ({ refreshKey }) => {
       </Card>
     );
   }
-  if (error) return <div className="staff-error">{error}</div>;
+  if (isError) return <div className="staff-error">Failed to load staff list.</div>;
+
 
   return (
     <Card className="staff-list-card">
@@ -67,7 +66,7 @@ const StaffListTable = ({ refreshKey }) => {
                       />
                     ) : (
                       <div className="staff-avatar-placeholder">
-                        <FaUserCircle size={32}/>
+                        <FaUserCircle size={32} />
                       </div>
                     )}
                     <div className="staff-info">

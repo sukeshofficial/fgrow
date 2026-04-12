@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaShieldAlt, FaCogs, FaChartBar, FaUserCircle, FaInfoCircle, FaMoon, FaSun } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
+
 import { useAuth } from "../hooks/useAuth";
 import ScrollingCredits from "../components/dashboard/ScrollingCredits";
 import { Link } from "react-router-dom";
@@ -20,6 +22,7 @@ const LandingPage = () => {
     const isStaff = user?.tenant_role === "staff";
     const [activeFaq, setActiveFaq] = useState(null);
     const [isSalesModalOpen, setIsSalesModalOpen] = useState(false);
+
     const [darkMode, setDarkMode] = useState(() => {
         if (typeof window !== "undefined") {
             return localStorage.getItem("fg-dark-mode") === "true" ||
@@ -28,8 +31,6 @@ const LandingPage = () => {
         return false;
     });
 
-    // Payment Additions
-    const [billingStatus, setBillingStatus] = useState(null);
     const [processing, setProcessing] = useState(false);
     const [toasts, setToasts] = useState([]);
 
@@ -42,11 +43,21 @@ const LandingPage = () => {
         setToasts((prev) => prev.filter((t) => t.id !== id));
     };
 
-    useEffect(() => {
-        if (user && !isStaff) {
-            fetchBillingStatus();
-        }
-    }, [user, isStaff]);
+
+
+    /**
+     * Fetch billing status using TanStack Query
+     */
+    const { data: billingStatus } = useQuery({
+        queryKey: ["billing-status", user?._id],
+        queryFn: async () => {
+            const response = await api.get("/billing/status");
+            return response.data;
+        },
+        enabled: !!user && !isStaff,
+        staleTime: 1000 * 60 * 10, // 10 minutes
+    });
+
 
     useEffect(() => {
         localStorage.setItem("fg-dark-mode", darkMode);
@@ -55,14 +66,6 @@ const LandingPage = () => {
 
     const toggleDarkMode = () => setDarkMode((d) => !d);
 
-    const fetchBillingStatus = async () => {
-        try {
-            const response = await api.get("/billing/status");
-            setBillingStatus(response.data);
-        } catch (err) {
-            console.error("Error fetching billing status:", err);
-        }
-    };
 
     const loadRazorpayScript = () => {
         return new Promise((resolve) => {

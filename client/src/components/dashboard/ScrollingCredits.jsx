@@ -49,4 +49,5 @@ const ScrollingCredits = ({ className }) => {
     );
 };
 
-export default ScrollingCredits;
+export default React.memo(ScrollingCredits);
+

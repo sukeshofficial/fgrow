@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/SideBar";
 import ReceiptTable from "./components/ReceiptTable";
@@ -18,10 +20,7 @@ const debounce = (func, wait) => {
 
 const ReceiptList = () => {
     const navigate = useNavigate();
-    const [receipts, setReceipts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, total_pages: 0 });
-    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+    const [pagination, setPagination] = useState({ page: 1, limit: 10 });
     const [filters, setFilters] = useState({
         search: "",
         status: 'all',
@@ -31,58 +30,58 @@ const ReceiptList = () => {
         date_to: ""
     });
 
-    const showLoading = useDelayedLoading(loading, 300);
+    // Debounced search term
+    const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
 
-    const fetchReceipts = async (currentFilters, currentPage) => {
-        setLoading(true);
-        try {
-            const activeFilter = currentFilters.status === 'all' ? {} : { status: currentFilters.status };
-            const params = {
-                page: currentPage,
-                limit: pagination.limit,
-                search: currentFilters.search,
-                client: currentFilters.client,
-                billing_entity: currentFilters.billing_entity,
-                date_from: currentFilters.date_from,
-                date_to: currentFilters.date_to,
-                ...activeFilter,
-            };
-
-            const resp = await receiptService.listReceipts(params);
-            setReceipts(resp.data);
-            const meta = resp.pagination;
-            setPagination({
-                page: meta.page,
-                limit: meta.limit,
-                total: meta.total,
-                total_pages: meta.total_pages
-            });
-        } catch (e) {
-            logger.error("ReceiptList", "Failed to fetch receipts", e);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const debouncedFetch = useCallback(
-        debounce((f, p) => {
-            fetchReceipts(f, p);
-        }, 500),
+    const handleDebounceSearch = useCallback(
+        debounce((value) => setDebouncedSearch(value), 500),
         []
     );
 
-    useEffect(() => {
-        debouncedFetch(filters, pagination.page);
-    }, [filters, pagination.page]);
+    /**
+     * Fetch receipts using TanStack Query
+     */
+    const { data, isLoading } = useQuery({
+        queryKey: ["receipts", { ...filters, search: debouncedSearch }, pagination.page],
+        queryFn: async () => {
+            const activeFilter = filters.status === 'all' ? {} : { status: filters.status };
+            const params = {
+                page: pagination.page,
+                limit: pagination.limit,
+                search: debouncedSearch,
+                client: filters.client,
+                billing_entity: filters.billing_entity,
+                date_from: filters.date_from,
+                date_to: filters.date_to,
+                ...activeFilter,
+            };
+            const resp = await receiptService.listReceipts(params);
+            return resp;
+        },
+        placeholderData: (previousData) => previousData,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+
+    const receipts = data?.data || [];
+    const meta = data?.pagination || {};
+    const total_pages = meta.total_pages || 0;
+    const total = meta.total || 0;
+
+    const showLoading = useDelayedLoading(isLoading, 300);
 
     const handleFilterChange = (key, value) => {
         setFilters(prev => ({ ...prev, [key]: value }));
         setPagination(prev => ({ ...prev, page: 1 }));
+
+        if (key === 'search') {
+            handleDebounceSearch(value);
+        }
     };
 
     const handlePageChange = (newPage) => {
         setPagination(prev => ({ ...prev, page: newPage }));
     };
+
 
     return (
         <>
@@ -104,8 +103,9 @@ const ReceiptList = () => {
                     {!showLoading && receipts.length > 0 && (
                         <div className="pagination">
                             <span className="pagination-info">
-                                Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} entries
+                                Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, total)} of {total} entries
                             </span>
+
                             <div className="pagination-controls">
                                 <button
                                     className="page-btn"
@@ -114,7 +114,7 @@ const ReceiptList = () => {
                                 >
                                     &lt;
                                 </button>
-                                {[...Array(pagination.total_pages || 0)].map((_, i) => (
+                                {[...Array(total_pages || 0)].map((_, i) => (
                                     <button
                                         key={i}
                                         className={`page-btn ${pagination.page === i + 1 ? 'active' : ''}`}
@@ -123,13 +123,15 @@ const ReceiptList = () => {
                                         {i + 1}
                                     </button>
                                 ))}
+
                                 <button
                                     className="page-btn"
-                                    disabled={pagination.page === (pagination.total_pages || 1) || pagination.total_pages === 0}
+                                    disabled={pagination.page === (total_pages || 1) || total_pages === 0}
                                     onClick={() => handlePageChange(pagination.page + 1)}
                                 >
                                     &gt;
                                 </button>
+
                             </div>
                         </div>
                     )}
