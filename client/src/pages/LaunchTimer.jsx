@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
-import { FaLinkedin, FaMusic, FaComments, FaPaperPlane, FaTimes } from "react-icons/fa";
-import { useAuth } from "../hooks/useAuth";
-import { api } from "../api/api";
+import axios from "axios";
+import { FaLinkedin, FaMusic } from "react-icons/fa";
 import "../styles/launch-timer.css";
 
 const LAUNCH_DATE = new Date("2026-04-13T18:00:00+05:30");
@@ -92,55 +90,6 @@ const LaunchTimer = () => {
             audioRef.current.play();
             setIsPlaying(true);
         }, 100);
-    };
-
-    // Chat State
-    const [messages, setMessages] = useState([]);
-    const [chatInput, setChatInput] = useState("");
-    const [isChatOpen, setIsChatOpen] = useState(false);
-    const [isSending, setIsSending] = useState(false);
-    const chatEndRef = useRef(null);
-    const { user } = useAuth();
-
-    const scrollToBottom = () => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    const fetchMessages = async () => {
-        try {
-            const response = await api.get("/launch/chat");
-            setMessages(response.data);
-        } catch (error) {
-            console.error("Failed to fetch chat:", error);
-        }
-    };
-
-    useEffect(() => {
-        if (isChatOpen) {
-            fetchMessages();
-            const interval = setInterval(fetchMessages, 5000);
-            return () => clearInterval(interval);
-        }
-    }, [isChatOpen]);
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
-    const handleSendMessage = async (e) => {
-        e.preventDefault();
-        if (!chatInput.trim() || isSending || !user) return;
-
-        setIsSending(true);
-        try {
-            const response = await api.post("/launch/chat", { message: chatInput });
-            setMessages((prev) => [...prev, response.data]);
-            setChatInput("");
-        } catch (error) {
-            console.error("Send error:", error);
-        } finally {
-            setIsSending(false);
-        }
     };
 
     const handlePillClick = () => {
@@ -356,68 +305,6 @@ const LaunchTimer = () => {
                     onEnded={handleTrackEnd}
                 />
             </div>
-
-            {/* Launch Chat Button */}
-            <button
-                className={`launch-chat-toggle ${isChatOpen ? "active" : ""}`}
-                onClick={() => setIsChatOpen(!isChatOpen)}
-                aria-label="Toggle Public Chat"
-            >
-                {isChatOpen ? <FaTimes /> : <FaComments />}
-                <span className="chat-badge">LIVE</span>
-            </button>
-
-            {/* Launch Chat Window */}
-            {isChatOpen && (
-                <div className="launch-chat-window">
-                    <div className="chat-header">
-                        <div className="chat-header-info">
-                            <h3>Public Chat</h3>
-                            <p>{messages.length} messages • Join the conversation</p>
-                        </div>
-                    </div>
-
-                    <div className="chat-messages">
-                        {messages.length === 0 ? (
-                            <div className="chat-empty">
-                                <p>No messages yet. Be the first to say hi!</p>
-                            </div>
-                        ) : (
-                            messages.map((msg) => (
-                                <div key={msg._id} className={`chat-message ${user?._id === msg.user._id ? "own" : ""}`}>
-                                    <div className="msg-header">
-                                        <span className="msg-user">{msg.user.fullName.split(" ")[0]}</span>
-                                        <span className="msg-time">{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                    </div>
-                                    <div className="msg-content">{msg.message}</div>
-                                </div>
-                            ))
-                        )}
-                        <div ref={chatEndRef} />
-                    </div>
-
-                    <div className="chat-footer">
-                        {user ? (
-                            <form onSubmit={handleSendMessage} className="chat-input-area">
-                                <input
-                                    type="text"
-                                    placeholder="Type a message..."
-                                    value={chatInput}
-                                    onChange={(e) => setChatInput(e.target.value)}
-                                    maxLength={500}
-                                />
-                                <button type="submit" disabled={!chatInput.trim() || isSending}>
-                                    <FaPaperPlane />
-                                </button>
-                            </form>
-                        ) : (
-                            <div className="chat-auth-prompt">
-                                <p>Please <Link to="/login">Login</Link> or <Link to="/register">Sign Up</Link> to chat</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

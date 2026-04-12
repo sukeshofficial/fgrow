@@ -102,10 +102,8 @@ const App = () => {
   }
 
   // 2. Launch Gate
-  const allowedPaths = ["/login", "/register"];
-  const isAuthPage = allowedPaths.includes(window.location.pathname);
-
-  if (!isLaunched && !isSuperAdmin && !isAuthPage) {
+  const isLoginPage = window.location.pathname === "/login";
+  if (!isLaunched && !isSuperAdmin && !isLoginPage) {
     return (
       <Suspense fallback={<PageLoader />}>
         <LaunchTimer />

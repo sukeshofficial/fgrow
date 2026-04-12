@@ -1,5 +1,4 @@
 import { LaunchSubscriber } from "../models/launch/LaunchSubscriber.model.js";
-import { LaunchChatMessage } from "../models/launch/LaunchChatMessage.model.js";
 import * as LaunchService from "../services/launch.service.js";
 
 /**
@@ -34,49 +33,6 @@ export const subscribe = async (req, res) => {
     } catch (error) {
         console.error("Subscription error:", error);
         res.status(500).json({ message: "Something went wrong. Please try again later." });
-    }
-};
-
-/**
- * Get chat messages
- */
-export const getChatMessages = async (req, res) => {
-    try {
-        const messages = await LaunchChatMessage.find()
-            .populate("user", "fullName email avatarUrl")
-            .sort({ createdAt: -1 })
-            .limit(100);
-
-        // Reverse to show chronological order in UI
-        res.json(messages.reverse());
-    } catch (error) {
-        res.status(500).json({ message: "Failed to load messages" });
-    }
-};
-
-/**
- * Send a chat message
- */
-export const sendChatMessage = async (req, res) => {
-    try {
-        const { message } = req.body;
-
-        if (!message || message.trim().length === 0) {
-            return res.status(400).json({ message: "Message cannot be empty" });
-        }
-
-        const chatMessage = new LaunchChatMessage({
-            user: req.user._id,
-            message: message.trim()
-        });
-
-        await chatMessage.save();
-
-        // Populate and return
-        const populated = await LaunchChatMessage.findById(chatMessage._id).populate("user", "fullName email avatarUrl");
-        res.status(201).json(populated);
-    } catch (error) {
-        res.status(500).json({ message: "Failed to send message" });
     }
 };
 
