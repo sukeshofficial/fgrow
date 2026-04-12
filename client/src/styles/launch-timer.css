@@ -102,8 +102,9 @@
         0 0 0 1px rgba(255, 255, 255, 0.04) inset,
         0 32px 64px -16px rgba(0, 0, 0, 0.6),
         0 0 80px rgba(37, 99, 235, 0.12);
-    max-width: 860px;
+    max-width: 760px;
     width: 90%;
+    height: 95%;
     animation: card-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -166,7 +167,7 @@
     border: 1px solid rgba(37, 99, 235, 0.25);
     border-radius: 999px;
     padding: 6px 14px;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .launch-live-dot {
@@ -213,7 +214,7 @@
     font-size: 0.925rem;
     color: #94a3b8;
     line-height: 1.65;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     max-width: 400px;
     margin-left: auto;
     margin-right: auto;
@@ -224,7 +225,7 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .timer-unit {
@@ -297,7 +298,7 @@
     width: 100%;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 14px;
+    border-radius: 999px;
     padding: 7px 7px 7px 14px;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -317,6 +318,7 @@
     height: 18px;
     color: #475569;
     flex-shrink: 0;
+    margin-left: 20px;
 }
 
 .notify-input {
@@ -339,7 +341,7 @@
     background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
     color: #fff;
     border: none;
-    border-radius: 10px;
+    border-radius: 999px;
     padding: 10px 20px;
     font-size: 0.875rem;
     font-weight: 600;
@@ -350,7 +352,6 @@
     align-items: center;
     gap: 6px;
     white-space: nowrap;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
 }
 
 .notify-btn:hover:not(:disabled) {
@@ -424,13 +425,13 @@
 
 /* ── FOOTER ── */
 .launch-footer {
-    margin-top: 24px;
-    padding-top: 24px;
+    margin-top: 10px;
+    padding-top: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 8px;
 }
 
 .launch-footer-main {
@@ -452,18 +453,26 @@
 
 .launch-team-credits {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 16px;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
     width: 100%;
+    margin-top: 10px;
+}
+
+.team-credits-secondary {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 8px;
 }
 
 .team-member {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     background: rgba(255, 255, 255, 0.02);
-    padding: 6px 14px;
+    padding: 4px 12px;
     border-radius: 99px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     transition: all 0.3s ease;
@@ -476,7 +485,7 @@
 }
 
 .team-role {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     color: #475569;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -484,7 +493,7 @@
 }
 
 .team-name {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: #94a3b8;
     display: flex;

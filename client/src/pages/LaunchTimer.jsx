@@ -3,7 +3,7 @@ import axios from "axios";
 import { FaLinkedin, FaMusic } from "react-icons/fa";
 import "../styles/launch-timer.css";
 
-const LAUNCH_DATE = new Date("2026-04-13T18:00:00+05:30");
+const LAUNCH_DATE = new Date("2026-04-20T18:00:00+05:30");
 
 const TRACKS = [
     { title: "Nee Paartha Vizhigal", src: "/music/nee-paartha-vizhigal.mp3" },
@@ -165,7 +165,7 @@ const LaunchTimer = () => {
                     style={{ cursor: "pointer", userSelect: "none" }}
                 >
                     <span className="launch-live-dot"></span>
-                    Launching April 13, 2026
+                    Launching April 20, 2026
                 </div>
 
                 <p className="launch-desc">
@@ -240,25 +240,29 @@ const LaunchTimer = () => {
                         <span className="launch-footer-dot">·</span>
                         <span>No spam, ever.</span>
                     </div>
-
                     <div className="launch-team-credits">
-                        <div className="team-member team-member-special">
-                            <span className="team-role">Designer:</span>
-                            <span className="team-name">
-                                PRITHIVIRAAJ <FaLinkedin className="team-li-icon" size={14} />
-                            </span>
-                        </div>
+                        {/* Lead / Primary Row */}
                         <div className="team-member team-member-special">
                             <span className="team-role">Dev, Design, Test:</span>
                             <a href="https://www.linkedin.com/in/sukeshd" target="_blank" rel="noopener noreferrer" className="team-name">
                                 SUKESH <FaLinkedin className="team-li-icon" size={14} />
                             </a>
                         </div>
-                        <div className="team-member team-member-special">
-                            <span className="team-role">Tester:</span>
-                            <span className="team-name">
-                                VERAADITHYA <FaLinkedin className="team-li-icon" size={14} />
-                            </span>
+
+                        {/* Secondary Row */}
+                        <div className="team-credits-secondary">
+                            <div className="team-member team-member-special">
+                                <span className="team-role">Designer:</span>
+                                <a href="https://www.linkedin.com/in/j-n-prithiviraaj-v3706" target="_blank" rel="noopener noreferrer" className="team-name">
+                                    PRITHIVIRAAJ <FaLinkedin className="team-li-icon" size={14} />
+                                </a>
+                            </div>
+                            <div className="team-member team-member-special">
+                                <span className="team-role">Tester:</span>
+                                <a href="https://www.linkedin.com/in/nveraadithya-2006v" target="_blank" rel="noopener noreferrer" className="team-name">
+                                    VERAADITHYA <FaLinkedin className="team-li-icon" size={14} />
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
