@@ -144,63 +144,56 @@ export const registerUser = async (req, res) => {
     user.reset_token_expiry = Date.now() + 5 * 60 * 1000;
 
     await user.save();
-    // Send verification email
+    // Send Registration Welcome & Verification Email
     await sendEmail({
       to: email,
-      subject: "Your verification code",
-      text: `Your verification code is ${rawOtp}. It expires in 5 minutes.`,
+      subject: "Welcome to FGROW! 🚀 — Verify your account",
+      text: `Hello ${name}, welcome to the family! Your verification code is ${rawOtp}.`,
       html: `
-  <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 20px;">
-    <div style="max-width: 500px; margin: auto; background: #ffffff; padding: 25px; border-radius: 8px; border: 1px solid #e0e0e0;">
-      
-      <!-- Circular Image -->
-      <div style="text-align: center; margin-bottom: 20px;">
-        <img 
-          src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" 
-          alt="Profile"
-          style="
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #e0e0e0;
-          "
-        />
-      </div>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>
+            body { font-family: 'Poppins', sans-serif !important; }
+        </style>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #ffffff; font-family: 'Poppins', sans-serif;">
+        <div style="max-width: 600px; margin: 40px auto; background: #ffffff; color: #1e293b; padding: 48px 40px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+            
+            <div style="text-align: center; margin-bottom: 32px;">
+                <img src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" alt="FGrow" style="width: 80px; height: 80px; border-radius: 16px; margin-bottom: 16px;">
+                <h1 style="color: #2563eb; font-size: 32px; margin: 0; letter-spacing: -0.02em; font-weight: 700;">Welcome! 🥂</h1>
+                <p style="color: #64748b; font-size: 14px; margin-top: 8px;">Hello ${name?.split(" ")[0]}, we're thrilled to have you join FGROW.</p>
+            </div>
 
-      <h2 style="margin-top: 0; color: #2c3e50; text-align: center;">
-        Verify Your Email
-      </h2>
-      
-      <p style="font-size: 14px; color: #555; text-align: center;">
-        Use the verification code below to continue. This code will expire in <strong>5 minutes</strong>.
-      </p>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-bottom: 32px;">
+                <p style="font-size: 14px; line-height: 1.7; color: #334155; margin: 0; text-align: justify;">
+                    We're excited to have you on board. FGrow is your ultimate self-hosted hub for managing clients, tasks, and invoices. 
+                    To get started and secure your account, please use the verification code below to activate your profile.
+                </p>
+            </div>
 
-      <div style="
-        margin: 25px 0;
-        padding: 15px;
-        text-align: center;
-        font-size: 24px;
-        font-weight: bold;
-        letter-spacing: 4px;
-        background-color: #f8f9fa;
-        border: 1px dashed #ccc;
-        border-radius: 6px;
-      ">
-        ${rawOtp}
-      </div>
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 16px; padding: 32px; margin-bottom: 32px; text-align: center;">
+                <p style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; font-weight: 600;">Verification Code</p>
+                <div style="font-size: 36px; font-weight: 800; color: #2563eb; letter-spacing: 12px;">
+                    ${rawOtp}
+                </div>
+                <p style="font-size: 12px; color: #94a3b8; margin-top: 12px;">Expires in <strong>5 minutes</strong></p>
+            </div>
 
-      <p style="font-size: 13px; color: #888; text-align: center;">
-        If you didn’t request this code, you can safely ignore this email.
-      </p>
-
-      <p style="font-size: 13px; color: #888; text-align: center;">
-        — FGrow Team
-      </p>
-
-    </div>
-  </div>
-  `,
+            <div style="text-align: center; margin-top: 48px; border-top: 1px solid #f1f5f9; padding-top: 24px;">
+                <p style="font-size: 13px; color: #94a3b8; margin: 0;">
+                    Thank you for being part of our journey.<br>
+                    <strong>The ForgeGrid Team</strong>
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `,
     });
 
     return res.status(201).json({
@@ -507,11 +500,14 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "invalid credentials" });
     }
 
+    // Capture if this is the first login before updating stats
+    const isFirstLogin = !user.last_login_at;
+
     // Successful login reset
     user.failed_login_attempts = 0;
     user.locked_until = undefined;
     user.lockout_level = 0;
-    user.last_login = new Date();
+    user.last_login_at = new Date();
 
     const superAdminEmails = process.env.SUPER_ADMIN_EMAILS.split(",");
 
@@ -521,6 +517,79 @@ export const loginUser = async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
+    // Send Welcome Email only on 1st login (Asynchronously)
+    if (isFirstLogin) {
+      const loginTime = new Date().toLocaleString("en-US", {
+        timeZone: "Asia/Kolkata",
+        dateStyle: "full",
+        timeStyle: "short",
+      });
+
+      sendEmail({
+        to: user.email,
+        subject: "Welcome back! - FGrow ✨",
+        text: `Hello ${user.name}, welcome to your account! You have successfully logged in on ${loginTime}.`,
+        html: `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>
+            body { font-family: 'Poppins', sans-serif !important; }
+        </style>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #ffffff; font-family: 'Poppins', sans-serif;">
+        <div style="max-width: 600px; margin: 40px auto; background: #ffffff; color: #1e293b; padding: 48px 40px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+            
+            <div style="text-align: center; margin-bottom: 32px;">
+                <img src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1775284858/profile_avatars/ahhwaxgntxhxsu3ifoa9.png" alt="FGrow" style="width: 80px; height: 80px; border-radius: 16px; margin-bottom: 16px;">
+                <h1 style="color: #2563eb; font-size: 32px; margin: 0; letter-spacing: -0.02em; font-weight: 700;">Welcome back! ✨</h1>
+                <p style="color: #64748b; font-size: 14px; margin-top: 8px;">Hello ${user.name?.split(" ")[0]}, your account is now fully active.</p>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-bottom: 32px;">
+                <p style="font-size: 14px; line-height: 1.7; color: #334155; margin: 0; text-align: justify;">
+                    Your account has been successfully verified and accessed. We're excited to see you continue your journey with FGrow. 
+                    Manage your clients, focus on your tasks, and automate your billing all in one place.
+                </p>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-bottom: 32px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 4px 0; font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;">Status</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-bottom: 16px; font-size: 16px; color: #22c55e; font-weight: 700;">Authorized & Verified</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px 0; font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;">Access Time</td>
+                    </tr>
+                    <tr>
+                        <td style="font-size: 16px; color: #1e293b; font-weight: 600;">${loginTime}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="text-align: center; margin: 40px 0;">
+                <a href="${process.env.FRONTEND_URL || "https://fgrow.forgegrid.in"}/dashboard" style="background: linear-gradient(135deg, #2563eb, #7c3aed); color: #ffffff !important; text-decoration: none; padding: 18px 36px; border-radius: 12px; font-weight: 700; font-size: 18px; display: inline-block; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);">
+                    Launch My Dashboard →
+                </a>
+            </div>
+
+            <div style="text-align: center; margin-top: 48px; border-top: 1px solid #f1f5f9; padding-top: 24px;">
+                <p style="font-size: 13px; color: #94a3b8; margin: 0;">
+                    Built by the <strong>ForgeGrid Team</strong>
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `,
+      }).catch(e => logger.error("Failed to send 1st login welcome email", e));
+    }
     return sendAuthSuccess(res, user);
   } catch (err) {
     logger.error("Login User error:", err);
