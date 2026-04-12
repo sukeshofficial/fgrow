@@ -9,6 +9,7 @@ import RejectionModal from "../../components/tenant/RejectionModal";
 import TableSkeleton from "../../components/skeletons/TableSkeleton";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import BugReportsList from "./BugReportsList";
+import LaunchManagement from "./LaunchManagement";
 
 import "../../styles/welcome.css";
 import "../../styles/admin-dashboard.css";
@@ -83,14 +84,14 @@ const AdminDashboard = () => {
         <h1 className="dashboard-title">Super Admin Dashboard</h1>
 
         <div className="filter-tabs" style={{ margin: 0 }}>
-          {['tenants', 'reports'].map(tab => (
+          {['tenants', 'reports', 'launch'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`filter-tabs-btn ${activeTab === tab ? 'active' : ''}`}
               style={{ textTransform: 'capitalize' }}
             >
-              {tab === 'reports' ? 'Bug Reports' : 'Tenants'}
+              {tab === 'reports' ? 'Bug Reports' : tab === 'launch' ? 'Launch' : 'Tenants'}
             </button>
           ))}
         </div>
@@ -154,7 +155,7 @@ const AdminDashboard = () => {
                               {tenant.logoUrl ? (
                                 <img src={tenant.logoUrl} alt="logo" className="tenant-logo-super-admin" />
                               ) : (
-                                <FaUserCircle size={32}/>
+                                <FaUserCircle size={32} />
                               )}
                             </div>
                             <div className="staff-info">
@@ -241,8 +242,10 @@ const AdminDashboard = () => {
             />
           )}
         </>
-      ) : (
+      ) : activeTab === 'reports' ? (
         <BugReportsList />
+      ) : (
+        <LaunchManagement />
       )}
     </div>
   );

@@ -3,11 +3,14 @@ import { User } from "../models/auth/user.model.js";
 import Task from "../models/task/task.model.js";
 import Todo from "../models/todo/todo.model.js";
 import Notification from "../models/notification/notification.model.js";
+import { LaunchSubscriber } from "../models/launch/LaunchSubscriber.model.js";
+import * as LaunchService from "./launch.service.js";
 import logger from "../utils/logger.js";
 import sendEmail from "../utils/sendEmail.js";
 
 /**
  * 6:00 PM Daily Summary
+
  * Aggregates work done today and sends a notification to each user.
  */
 const dailyWorkSummary = async () => {
@@ -171,6 +174,19 @@ const taskReminders = async () => {
     }
 };
 
+/**
+ * Launch Day Announcement
+ * Fires at 18:00 IST on April 13.
+ */
+const launchAnnouncement = async () => {
+    try {
+        await LaunchService.runLaunchAnnouncement();
+    } catch (err) {
+        logger.error("Error in launchAnnouncement cron:", err);
+    }
+};
+
+
 export const initCron = () => {
     // Daily Summary at 6:00 PM (18:00)
     cron.schedule("0 18 * * *", dailyWorkSummary);
@@ -178,5 +194,13 @@ export const initCron = () => {
     // Task Reminders every hour
     cron.schedule("0 * * * *", taskReminders);
 
+    // Launch Announcement: April 13 at 18:00 IST
+    // (IST is UTC+5:30. 18:00 IST = 12:30 UTC)
+    // Format: 'minute hour day month dayOfWeek'
+    cron.schedule("00 18 13 4 *", launchAnnouncement, {
+        timezone: "Asia/Kolkata"
+    });
+
     logger.info("Cron services initialized.");
 };
+

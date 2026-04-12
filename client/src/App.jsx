@@ -50,6 +50,8 @@ const Subscription = lazy(() => import("./pages/Subscription"));
 const Settings = lazy(() => import("./pages/Settings"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const NotificationPage = lazy(() => import("./pages/Notifications/NotificationPage"));
+const LaunchTimer = lazy(() => import("./pages/LaunchTimer"));
+
 
 
 import { Spinner } from "./components/ui/Spinner";
@@ -77,8 +79,12 @@ import ReportIssueModal from "./components/ui/ReportIssueModal";
 import { useModal } from "./context/ModalContext";
 
 const App = () => {
-  const { dispatch } = useAuth();
+  const { user, dispatch, isLoading } = useAuth();
   const { setError } = useError();
+
+  const launchDate = new Date("2026-04-13T18:00:00+05:30");
+  const isLaunched = new Date() >= launchDate;
+  const isSuperAdmin = user?.platform_role === "super_admin" || user?.role === "superadmin";
 
   useEffect(() => {
     // 1. Setup global axios error handling
@@ -90,6 +96,21 @@ const App = () => {
 
   const { isReportModalOpen, closeReportModal } = useModal();
 
+  // 1. Show loader while checking auth
+  if (isLoading) {
+    return <PageLoader />;
+  }
+
+  // 2. Launch Gate
+  const isLoginPage = window.location.pathname === "/login";
+  if (!isLaunched && !isSuperAdmin && !isLoginPage) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <LaunchTimer />
+      </Suspense>
+    );
+  }
+
   return (
     <Suspense fallback={<PageLoader />}>
       <GlobalModal />
@@ -98,6 +119,7 @@ const App = () => {
 
         {/* Default */}
         <Route path="/" element={<LandingPage />} />
+
 
         {/* Public */}
         <Route path="/login" element={<Login />} />
