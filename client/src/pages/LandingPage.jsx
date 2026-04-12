@@ -706,6 +706,19 @@ const LandingPage = () => {
                                 <span className="trust-item"><span className="check">✓</span> Approval-based onboarding</span>
                             </div>
 
+                            <div style={{ marginBottom: "52px", display: "flex", justifyContent: "center" }}>
+                                <a href="https://www.producthunt.com/products/fgrow?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-fgrow" target="_blank" rel="noopener noreferrer">
+                                    <img
+                                        alt="FGrow - One secure hub for clients, tasks, and invoices. | Product Hunt"
+                                        width="250"
+                                        height="54"
+                                        src={`https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1121746&theme=${darkMode ? 'dark' : 'light'}&t=1775985927839`}
+                                    />
+                                </a>
+                            </div>
+
+
+
                             {/* Dashboard Mockup */}
                             <div className="mockup-wrap">
                                 <div className="mock-bar">
