@@ -1,8 +1,17 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import { FaLinkedin, FaMusic, FaComments, FaPaperPlane, FaTimes } from "react-icons/fa";
+import { useAuth } from "../hooks/useAuth";
+import { api } from "../api/api";
 import "../styles/launch-timer.css";
 
 const LAUNCH_DATE = new Date("2026-04-13T18:00:00+05:30");
+
+const TRACKS = [
+    { title: "Nee Paartha Vizhigal", src: "/music/nee-paartha-vizhigal.mp3" },
+    { title: "Kanave Kanave", src: "/music/kanave-kanave.mp3" },
+    { title: "Kanave Nee Nan", src: "/music/kanave-nee-naan.mp3" },
+];
 
 function calculateTimeLeft() {
     const difference = +LAUNCH_DATE - +new Date();
@@ -23,6 +32,116 @@ const LaunchTimer = () => {
     const [status, setStatus] = useState("idle");
     const [message, setMessage] = useState("");
     const [clickCount, setClickCount] = useState(0);
+
+    // Music Player State
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentTrack, setCurrentTrack] = useState(0);
+    const [showMusicTooltip, setShowMusicTooltip] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const audioRef = useRef(null);
+
+    // Initial interaction for autoplay
+    useEffect(() => {
+        const handleFirstInteraction = () => {
+            if (audioRef.current && !isPlaying) {
+                audioRef.current.play().then(() => setIsPlaying(true)).catch(() => { });
+            }
+            window.removeEventListener("click", handleFirstInteraction);
+            window.removeEventListener("keydown", handleFirstInteraction);
+        };
+        window.addEventListener("click", handleFirstInteraction);
+        window.addEventListener("keydown", handleFirstInteraction);
+        return () => {
+            window.removeEventListener("click", handleFirstInteraction);
+            window.removeEventListener("keydown", handleFirstInteraction);
+        };
+    }, [isPlaying]);
+
+    const togglePlay = (e) => {
+        if (e) e.stopPropagation();
+        if (isPlaying) {
+            audioRef.current.pause();
+        } else {
+            audioRef.current.play();
+        }
+        setIsPlaying(!isPlaying);
+    };
+
+    const handleTimeUpdate = () => {
+        if (audioRef.current) {
+            const val = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+            setProgress(val || 0);
+        }
+    };
+
+    const handleSeek = (e) => {
+        e.stopPropagation();
+        if (audioRef.current) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const percentage = x / rect.width;
+            audioRef.current.currentTime = percentage * audioRef.current.duration;
+        }
+    };
+
+    const handleTrackEnd = () => {
+        const next = (currentTrack + 1) % TRACKS.length;
+        setCurrentTrack(next);
+        // Using timeout to ensure source is updated
+        setTimeout(() => {
+            audioRef.current.play();
+            setIsPlaying(true);
+        }, 100);
+    };
+
+    // Chat State
+    const [messages, setMessages] = useState([]);
+    const [chatInput, setChatInput] = useState("");
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+    const chatEndRef = useRef(null);
+    const { user } = useAuth();
+
+    const scrollToBottom = () => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    const fetchMessages = async () => {
+        try {
+            const response = await api.get("/launch/chat");
+            setMessages(response.data);
+        } catch (error) {
+            console.error("Failed to fetch chat:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (isChatOpen) {
+            fetchMessages();
+            const interval = setInterval(fetchMessages, 5000);
+            return () => clearInterval(interval);
+        }
+    }, [isChatOpen]);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!chatInput.trim() || isSending || !user) return;
+
+        setIsSending(true);
+        try {
+            const response = await api.post("/launch/chat", { message: chatInput });
+            setMessages((prev) => [...prev, response.data]);
+            setChatInput("");
+        } catch (error) {
+            console.error("Send error:", error);
+        } finally {
+            setIsSending(false);
+        }
+    };
 
     const handlePillClick = () => {
         const newCount = clickCount + 1;
@@ -101,8 +220,7 @@ const LaunchTimer = () => {
                 </div>
 
                 <p className="launch-desc">
-                    A powerful self-hosted CRM built for CA, CS & compliance teams.
-                    Be the first to get access when we go live at&nbsp;
+                    A powerful self-hosted CRM built for CA, CS & compliance teams. Be the first to get access when we go live at&nbsp;
                     <strong>6:00 PM IST.</strong>
                 </p>
 
@@ -167,12 +285,139 @@ const LaunchTimer = () => {
 
                 {/* Footer */}
                 <div className="launch-footer">
-                    <span>Powered by</span>
-                    <span className="launch-footer-brand">ForgeGrid</span>
-                    <span className="launch-footer-dot">·</span>
-                    <span>No spam, ever.</span>
+                    <div className="launch-footer-main">
+                        <span>Powered by</span>
+                        <span className="launch-footer-brand">ForgeGrid</span>
+                        <span className="launch-footer-dot">·</span>
+                        <span>No spam, ever.</span>
+                    </div>
+
+                    <div className="launch-team-credits">
+                        <div className="team-member team-member-special">
+                            <span className="team-role">Designer:</span>
+                            <span className="team-name">
+                                PRITHIVIRAAJ <FaLinkedin className="team-li-icon" size={14} />
+                            </span>
+                        </div>
+                        <div className="team-member team-member-special">
+                            <span className="team-role">Dev, Design, Test:</span>
+                            <a href="https://www.linkedin.com/in/sukeshd" target="_blank" rel="noopener noreferrer" className="team-name">
+                                SUKESH <FaLinkedin className="team-li-icon" size={14} />
+                            </a>
+                        </div>
+                        <div className="team-member team-member-special">
+                            <span className="team-role">Tester:</span>
+                            <span className="team-name">
+                                VERAADITHYA <FaLinkedin className="team-li-icon" size={14} />
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {/* Floating Music Player */}
+            <div
+                className={`launch-music-player ${isPlaying ? "is-playing" : ""}`}
+                onClick={togglePlay}
+                onDoubleClick={(e) => {
+                    e.stopPropagation();
+                    handleTrackEnd();
+                }}
+                aria-label={isPlaying ? "Pause music" : "Play music"}
+                role="button"
+                tabIndex="0"
+                onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        togglePlay();
+                    }
+                }}
+            >
+                <div className="vinyl-disk-wrapper">
+                    <img src="/vinyl.png" alt="Vinyl record" className="vinyl-disk" />
+                    {/* <div className="vinyl-center">
+                        <FaMusic className="vinyl-music-icon" />
+                    </div> */}
+                </div>
+                <div className="music-tooltip">
+                    <span className="tooltip-title">Now Playing:</span>
+                    <span className="tooltip-track">{TRACKS[currentTrack].title}</span>
+                    <div className="music-progress-container" onClick={handleSeek}>
+                        <div
+                            className="music-progress-bar"
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
+                </div>
+                <audio
+                    ref={audioRef}
+                    src={TRACKS[currentTrack].src}
+                    onTimeUpdate={handleTimeUpdate}
+                    onEnded={handleTrackEnd}
+                />
+            </div>
+
+            {/* Launch Chat Button */}
+            <button
+                className={`launch-chat-toggle ${isChatOpen ? "active" : ""}`}
+                onClick={() => setIsChatOpen(!isChatOpen)}
+                aria-label="Toggle Public Chat"
+            >
+                {isChatOpen ? <FaTimes /> : <FaComments />}
+                <span className="chat-badge">LIVE</span>
+            </button>
+
+            {/* Launch Chat Window */}
+            {isChatOpen && (
+                <div className="launch-chat-window">
+                    <div className="chat-header">
+                        <div className="chat-header-info">
+                            <h3>Public Chat</h3>
+                            <p>{messages.length} messages • Join the conversation</p>
+                        </div>
+                    </div>
+
+                    <div className="chat-messages">
+                        {messages.length === 0 ? (
+                            <div className="chat-empty">
+                                <p>No messages yet. Be the first to say hi!</p>
+                            </div>
+                        ) : (
+                            messages.map((msg) => (
+                                <div key={msg._id} className={`chat-message ${user?._id === msg.user._id ? "own" : ""}`}>
+                                    <div className="msg-header">
+                                        <span className="msg-user">{msg.user.fullName.split(" ")[0]}</span>
+                                        <span className="msg-time">{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                    </div>
+                                    <div className="msg-content">{msg.message}</div>
+                                </div>
+                            ))
+                        )}
+                        <div ref={chatEndRef} />
+                    </div>
+
+                    <div className="chat-footer">
+                        {user ? (
+                            <form onSubmit={handleSendMessage} className="chat-input-area">
+                                <input
+                                    type="text"
+                                    placeholder="Type a message..."
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    maxLength={500}
+                                />
+                                <button type="submit" disabled={!chatInput.trim() || isSending}>
+                                    <FaPaperPlane />
+                                </button>
+                            </form>
+                        ) : (
+                            <div className="chat-auth-prompt">
+                                <p>Please <Link to="/login">Login</Link> or <Link to="/register">Sign Up</Link> to chat</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

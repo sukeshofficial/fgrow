@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
 .launch-gate {
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -92,7 +92,7 @@
     position: relative;
     z-index: 10;
     text-align: center;
-    padding: 52px 48px 40px;
+    padding: 32px 48px;
     background: rgba(255, 255, 255, 0.035);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
@@ -102,7 +102,7 @@
         0 0 0 1px rgba(255, 255, 255, 0.04) inset,
         0 32px 64px -16px rgba(0, 0, 0, 0.6),
         0 0 80px rgba(37, 99, 235, 0.12);
-    max-width: 560px;
+    max-width: 860px;
     width: 90%;
     animation: card-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -199,7 +199,7 @@
     line-height: 1.25;
     letter-spacing: -0.02em;
     color: #f1f5f9;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
 }
 
 .launch-headline-accent {
@@ -213,7 +213,7 @@
     font-size: 0.925rem;
     color: #94a3b8;
     line-height: 1.65;
-    margin-bottom: 36px;
+    margin-bottom: 24px;
     max-width: 400px;
     margin-left: auto;
     margin-right: auto;
@@ -224,14 +224,14 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
 }
 
 .timer-unit {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 16px;
-    padding: 18px 8px 14px;
+    padding: 14px 8px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -424,22 +424,116 @@
 
 /* ── FOOTER ── */
 .launch-footer {
-    margin-top: 28px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.launch-footer-main {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
     font-size: 0.75rem;
-    color: #334155;
+    color: #475569;
 }
 
 .launch-footer-brand {
-    color: #475569;
+    color: #64748b;
     font-weight: 600;
 }
 
 .launch-footer-dot {
     color: #1e293b;
+}
+
+.launch-team-credits {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+}
+
+.team-member {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 6px 14px;
+    border-radius: 99px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.team-member:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.team-role {
+    font-size: 0.7rem;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+}
+
+.team-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.team-member-special {
+    position: relative;
+    border-color: rgba(59, 130, 246, 0.15);
+}
+
+.team-member-special:hover {
+    background: rgba(37, 99, 235, 0.08);
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow:
+        0 0 20px rgba(37, 99, 235, 0.2),
+        0 0 40px rgba(124, 58, 237, 0.1);
+    transform: translateY(-2px) scale(1.02);
+}
+
+.team-member-special .team-name {
+    background: linear-gradient(135deg, #94a3b8 0%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    transition: all 0.3s;
+}
+
+.team-member-special:hover .team-name {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.team-member-special:hover .team-li-icon {
+    transform: rotate(360deg) scale(1.3);
+    color: #60a5fa;
+}
+
+@media (max-width: 640px) {
+    .launch-team-credits {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
 }
 
 /* ── RESPONSIVE ── */
@@ -482,12 +576,418 @@
     }
 }
 
+/* ── MUSIC PLAYER ── */
+.launch-music-player {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 1000;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
+.launch-music-player:hover {
+    transform: scale(1.05);
+}
 
-.launch-bypass-btn:hover {
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.1);
-    color: #94a3b8;
+.vinyl-disk-wrapper {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s;
+}
+
+.launch-music-player:hover .vinyl-disk-wrapper {
+    box-shadow:
+        0 0 30px rgba(37, 99, 235, 0.3),
+        0 0 60px rgba(124, 58, 237, 0.2);
     border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-1px);
+}
+
+.vinyl-disk {
+    width: 100%;
+    height: 100%;
+    display: block;
+    animation: rotate-vinyl 6s linear infinite;
+    animation-play-state: paused;
+}
+
+.is-playing .vinyl-disk {
+    animation-play-state: running;
+}
+
+@keyframes rotate-vinyl {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.vinyl-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    background: #111;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #222;
+    z-index: 2;
+}
+
+.vinyl-music-icon {
+    font-size: 10px;
+    color: #475569;
+}
+
+.is-playing .vinyl-music-icon {
+    color: #60a5fa;
+    animation: bounce 1s ease-in-out infinite alternate;
+}
+
+@keyframes bounce {
+    from {
+        transform: scale(0.85);
+        opacity: 0.6;
+    }
+
+    to {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+}
+
+.music-tooltip {
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 8px 16px;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    min-width: 140px;
+    transition: all 0.3s ease;
+}
+
+@keyframes tooltip-fade {
+    from {
+        opacity: 0;
+        transform: translateX(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.tooltip-title {
+    font-size: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #475569;
+    font-weight: 600;
+}
+
+.tooltip-track {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #cbd5e1;
+    white-space: nowrap;
+}
+
+.music-progress-container {
+    width: 100%;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin-top: 0;
+    opacity: 0;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.launch-music-player:hover .music-progress-container {
+    height: 4px;
+    margin-top: 6px;
+    opacity: 1;
+}
+
+.music-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #60a5fa, #a78bfa);
+    border-radius: 2px;
+    width: 0;
+    transition: width 0.1s linear;
+}
+
+/* Launch Chat Toggle */
+.launch-chat-toggle {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1000;
+}
+
+.launch-chat-toggle:hover {
+    transform: scale(1.1);
+    background: rgba(30, 41, 59, 0.9);
+    box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.3);
+}
+
+.launch-chat-toggle.active {
+    background: #2563eb;
+    border-color: #3b82f6;
+    transform: rotate(90deg);
+}
+
+.chat-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    font-size: 8px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 999px;
+    letter-spacing: 0.05em;
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+/* Chat Window */
+.launch-chat-window {
+    position: fixed;
+    bottom: 100px;
+    left: 30px;
+    width: 360px;
+    height: 500px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: chat-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+@keyframes chat-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.chat-header {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chat-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    color: #f8fafc;
+}
+
+.chat-header p {
+    font-size: 12px;
+    color: #94a3b8;
+    margin: 4px 0 0;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.chat-message {
+    max-width: 85%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.chat-message.own {
+    align-self: flex-end;
+}
+
+.msg-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 11px;
+}
+
+.msg-user {
+    color: #3b82f6;
+    font-weight: 700;
+}
+
+.chat-message.own .msg-user {
+    color: #a78bfa;
+}
+
+.msg-time {
+    color: #64748b;
+}
+
+.msg-content {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 14px;
+    border-radius: 0 14px 14px 14px;
+    font-size: 14px;
+    color: #e2e8f0;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.chat-message.own .msg-content {
+    background: rgba(37, 99, 235, 0.2);
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    border-radius: 14px 14px 0 14px;
+}
+
+.chat-footer {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chat-input-area {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input-area input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 10px 16px;
+    color: #f8fafc;
+    font-size: 14px;
+}
+
+.chat-input-area button {
+    width: 42px;
+    height: 42px;
+    background: #2563eb;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.chat-auth-prompt {
+    text-align: center;
+    padding: 10px;
+}
+
+.chat-auth-prompt p {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.chat-auth-prompt a {
+    color: #3b82f6;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+@media (max-width: 640px) {
+    .launch-music-player {
+        top: auto;
+        bottom: 24px;
+        right: 24px;
+    }
+
+    .music-tooltip {
+        position: absolute;
+        bottom: 80px;
+        right: 0;
+    }
+
+    .launch-chat-window {
+        width: calc(100% - 40px);
+        left: 20px;
+        bottom: 90px;
+        height: 60vh;
+    }
+
+    .launch-chat-toggle {
+        bottom: 20px;
+        left: 20px;
+        width: 50px;
+        height: 50px;
+    }
 }
