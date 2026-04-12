@@ -1,6 +1,9 @@
 import Task from "../models/task/task.model.js";
 import TaskActivity from "../models/task/taskActivity.model.js";
+import { User } from "../models/auth/user.model.js";
 import mongoose from "mongoose";
+import { notify } from "../utils/notificationHelper.js";
+
 
 const DEFAULT_LIMIT = 20;
 
@@ -119,6 +122,26 @@ export const createTask = async (payload, user) => {
     detail: "New Task Created",
   });
 
+  // Notify assigned users
+  if (createdTask.users && createdTask.users.length > 0) {
+    const assignedUsers = await User.find({ _id: { $in: createdTask.users } });
+    for (const au of assignedUsers) {
+      if (au._id.toString() !== user.id.toString()) {
+        await notify({
+          tenant_id: createdTask.tenant_id,
+          recipientId: au._id,
+          recipientEmail: au.email,
+          senderId: user.id,
+          type: "task_assigned",
+          title: "New Task Assigned",
+          message: `${user.data?.name || 'A team member'} assigned a new task: "${createdTask.title}"`,
+          link: `/tasks/${createdTask._id}`
+        });
+      }
+    }
+  }
+
+
   return createdTask.toObject();
 };
 
@@ -163,6 +186,35 @@ export const updateTask = async (taskId, patch, user = {}) => {
     detail: "Task updated",
     meta: { patch },
   });
+
+  // Notify newly assigned users
+  if (patch.users && Array.isArray(patch.users)) {
+    // Note: updatedTask is .lean(), so users might be IDs or populated
+    const oldTask = await Task.findById(taskId).select('users');
+    const oldUserIds = oldTask.users.map(u => u.toString());
+    const newUserIds = patch.users.map(u => (typeof u === 'object' ? u.user : u).toString());
+
+    const newlyAddedIds = newUserIds.filter(id => !oldUserIds.includes(id));
+
+    if (newlyAddedIds.length > 0) {
+      const newlyAddedUsers = await User.find({ _id: { $in: newlyAddedIds } });
+      for (const au of newlyAddedUsers) {
+        if (au._id.toString() !== user.id.toString()) {
+          await notify({
+            tenant_id: updatedTask.tenant_id,
+            recipientId: au._id,
+            recipientEmail: au.email,
+            senderId: user.id,
+            type: "task_assigned",
+            title: "Task Assigned",
+            message: `${user.data?.name || 'A team member'} assigned you to a task: "${updatedTask.title}"`,
+            link: `/tasks/${updatedTask._id}`
+          });
+        }
+      }
+    }
+  }
+
 
   return updatedTask;
 };

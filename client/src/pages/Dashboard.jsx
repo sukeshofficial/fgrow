@@ -3,7 +3,7 @@ import SideBar from "../components/SideBar";
 import StaffListTable from "../components/tenant/StaffListTable";
 import InviteUserModal from "../components/tenant/InviteUserModal";
 import { Button } from "../components/ui/Button";
-import { FaUserPlus, FaExclamationCircle } from "react-icons/fa";
+import { FaUserPlus, FaExclamationCircle, FaBuilding } from "react-icons/fa";
 import { useAuth } from "../hooks/useAuth";
 import { getTenantById } from "../api/tenant.api";
 import "../styles/welcome.css";
@@ -127,10 +127,11 @@ const Dashboard = () => {
                 className="tenant-info-logo"
               />
             ) : (
-              <div className={`tenant-info-placeholder ${getAvatarColorClass(tenantDetails.name)}`}>
-                {tenantDetails.name?.[0]}
+              <div className="tenant-info-placeholder">
+                <FaBuilding size={32} />
               </div>
             )}
+
             <div className="tenant-info-content">
               <h2 className="tenant-info-name">{tenantDetails.name}</h2>
               <p className="tenant-info-details">

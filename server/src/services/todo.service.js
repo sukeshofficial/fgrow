@@ -1,6 +1,9 @@
 // services/todo.service.js
 import mongoose from "mongoose";
-import Todo from "../models/todo/todo.model.js"; // model file. :contentReference[oaicite:4]{index=4}
+import Todo from "../models/todo/todo.model.js";
+import { User } from "../models/auth/user.model.js";
+import { notify } from "../utils/notificationHelper.js";
+
 
 /**
  * computeNextDueDate
@@ -69,13 +72,31 @@ export async function createTodo(payload) {
     .sort({ position: -1 })
     .select("position")
     .lean();
-  
+
   const nextPosition = lastTodo ? (lastTodo.position + 1) : 0;
-  
+
   const todo = new Todo({ ...payload, position: nextPosition });
   await todo.save();
 
+  // Notify assigned user
+  if (todo.user) {
+    const assignedUser = await User.findById(todo.user);
+    if (assignedUser && assignedUser._id.toString() !== todo.created_by.toString()) {
+      await notify({
+        tenant_id: todo.tenant_id,
+        recipientId: assignedUser._id,
+        recipientEmail: assignedUser.email,
+        senderId: todo.created_by,
+        type: "todo_created",
+        title: "New Todo Assigned",
+        message: `You were assigned a new todo: "${todo.title}"`,
+        link: "/todos"
+      });
+    }
+  }
+
   return todo;
+
 }
 
 /**
@@ -203,13 +224,36 @@ export async function updateTodo(tenant_id, id, updates = {}, actor = null) {
     "position"
   ];
 
+  const oldUserId = todo.user?.toString();
+
   Object.keys(updates).forEach((k) => {
     if (allowed.includes(k)) todo[k] = updates[k];
   });
 
   if (actor && actor.id) todo.updated_by = actor.id;
   await todo.save();
+
+  // Notify if user changed
+  const newUserId = todo.user?.toString();
+  if (newUserId && newUserId !== oldUserId) {
+    const assignedUser = await User.findById(newUserId);
+    const actorId = actor?.id || actor?._id;
+    if (assignedUser && assignedUser._id.toString() !== actorId?.toString()) {
+      await notify({
+        tenant_id: todo.tenant_id,
+        recipientId: assignedUser._id,
+        recipientEmail: assignedUser.email,
+        senderId: actorId,
+        type: "todo_created",
+        title: "Todo Assigned",
+        message: `${actor?.data?.name || 'A team member'} assigned you a todo: "${todo.title}"`,
+        link: "/todos"
+      });
+    }
+  }
+
   return todo;
+
 }
 
 /**
@@ -248,7 +292,7 @@ export async function updateTodoPosition(tenant_id, id, newStatus, newPosition, 
 
   todo.position = newPosition;
   if (actor && actor.id) todo.updated_by = actor.id;
-  
+
   await todo.save();
   return todo;
 }
@@ -296,7 +340,7 @@ export async function markComplete(tenant_id, id, actor = null) {
     .select("position")
     .lean();
   todo.position = lastComp ? (lastComp.position + 1) : 0;
-  
+
   if (actor && actor._id) todo.updated_by = actor._id;
   await todo.save();
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getAllTenants, approveTenant, rejectTenant } from "../../api/tenant.api";
 import { Button } from "../../components/ui/Button";
-import { FaSearch, FaCheck, FaTimes, FaEye } from "react-icons/fa";
+import { FaSearch, FaCheck, FaTimes, FaEye, FaUserCircle } from "react-icons/fa";
 import Sidebar from "../../components/SideBar";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import RejectionModal from "../../components/tenant/RejectionModal";
@@ -151,7 +151,11 @@ const AdminDashboard = () => {
                         <td>
                           <div className="staff-member-cell">
                             <div className="staff-avatar-placeholder avatar-bg">
-                              <img src={tenant.logoUrl} alt="logo" className="tenant-logo-super-admin" />
+                              {tenant.logoUrl ? (
+                                <img src={tenant.logoUrl} alt="logo" className="tenant-logo-super-admin" />
+                              ) : (
+                                <FaUserCircle size={32}/>
+                              )}
                             </div>
                             <div className="staff-info">
                               <span className="staff-name">{tenant.name}</span>

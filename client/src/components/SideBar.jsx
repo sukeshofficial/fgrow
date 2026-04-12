@@ -17,6 +17,7 @@ import {
   FaPlus,
   FaBug,
   FaCrown,
+  FaUserCircle
 } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 
@@ -384,7 +385,12 @@ export default function Sidebar() {
             {/* User Section */}
             <div className="user-area">
               <Link to="/settings" className="user-left" style={{ textDecoration: 'none', color: 'inherit', flex: 1, minWidth: 0 }}>
-                <img src={avatar} alt="User avatar" className="user-avatar" />
+                {avatar ?
+                  (
+                    <img src={avatar} alt="User avatar" className="user-avatar" />
+                  ) : (
+                    <FaUserCircle size={30} style={{ color: "var(--text-muted)" }} />
+                  )}
                 {!collapsed && <span className="user-name">{user?.name ?? "Guest"}</span>}
               </Link>
               {showUpgradeBanner && (

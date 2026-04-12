@@ -1,6 +1,8 @@
 // src/components/auth/LoginForm.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { FaUserCircle } from "react-icons/fa";
+
 
 import { useAuth } from "../../hooks/useAuth.js";
 import { verifyOtp, login } from "../../features/auth/auth.actions.js";
@@ -115,15 +117,18 @@ const LoginForm = ({ onSuccess }) => {
       <h2 className="auth-title">Login</h2>
 
       {/* Avatar Preview */}
-      {avatar && (
-        <div className="login-avatar-wrapper">
+      <div className="login-avatar-wrapper">
+        {avatar ? (
           <img
             src={avatar}
             alt="User avatar"
             className="email-avatar"
           />
-        </div>
-      )}
+        ) : form.email.includes("@") && (
+          <FaUserCircle size={48} className="email-avatar-icon" style={{ color: "var(--text-muted)" }} />
+        )}
+      </div>
+
 
       {/* Error */}
       {error && <p className="form-error">{error}</p>}

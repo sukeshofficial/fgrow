@@ -5,6 +5,7 @@ import "../../styles/welcome.css";
 import { Spinner } from "../ui/Spinner";
 import TableSkeleton from "../skeletons/TableSkeleton";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
+import { FaUserCircle } from "react-icons/fa";
 
 const StaffListTable = ({ refreshKey }) => {
   const [staff, setStaff] = useState([]);
@@ -66,7 +67,7 @@ const StaffListTable = ({ refreshKey }) => {
                       />
                     ) : (
                       <div className="staff-avatar-placeholder">
-                        {(member.name || member.username || "?")[0].toUpperCase()}
+                        <FaUserCircle size={32}/>
                       </div>
                     )}
                     <div className="staff-info">

@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getTenantById, getTenantStaffAdmin, getTenantClientsAdmin, approveTenant, rejectTenant } from "../../api/tenant.api";
 import { Button } from "../../components/ui/Button";
-import { 
-  FaArrowLeft, FaCheck, FaTimes, FaUsers, FaUserTie, FaBuilding, 
+import {
+  FaArrowLeft, FaCheck, FaTimes, FaUsers, FaUserTie, FaBuilding,
   FaEnvelope, FaPhone, FaGlobe, FaFileInvoice, FaMapMarkerAlt,
-  FaClock, FaCoins, FaCalendarAlt, FaRedoAlt, FaInfoCircle, FaShieldAlt
+  FaClock, FaCoins, FaCalendarAlt, FaRedoAlt, FaInfoCircle, FaShieldAlt,
+  FaUserCircle
 } from "react-icons/fa";
 import Sidebar from "../../components/SideBar";
 import Toast from "../../components/ui/Toast";
@@ -42,7 +43,7 @@ const TenantDetailView = () => {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  
+
   // UI States
   const [toasts, setToasts] = useState([]);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -134,17 +135,17 @@ const TenantDetailView = () => {
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           {tenant.verificationStatus === 'pending' && (
             <>
-              <Button 
-                variant="primary" 
-                onClick={handleApprove} 
+              <Button
+                variant="primary"
+                onClick={handleApprove}
                 style={{ backgroundColor: '#22c55e' }}
                 disabled={actionLoading}
               >
                 <FaCheck style={{ marginRight: '8px' }} /> Approve
               </Button>
-              <Button 
-                variant="secondary" 
-                onClick={() => setShowRejectModal(true)} 
+              <Button
+                variant="secondary"
+                onClick={() => setShowRejectModal(true)}
                 style={{ color: '#ef4444' }}
                 disabled={actionLoading}
               >
@@ -165,14 +166,13 @@ const TenantDetailView = () => {
               <img src={tenant.logoUrl} alt="logo" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 0.75rem', display: 'block' }} />
             ) : (
               <div className="staff-avatar-placeholder" style={{ width: 72, height: 72, fontSize: '2rem', margin: '0 auto 0.75rem' }}>
-                {tenant.name[0].toUpperCase()}
+                <FaBuilding size={40}/>
               </div>
             )}
             <h3 style={{ margin: '0 0 0.5rem' }}>{tenant.name}</h3>
-            <span className={`staff-role-badge ${
-              tenant.verificationStatus === 'verified' ? 'role-staff' :
-              tenant.verificationStatus === 'rejected' ? '' : 'role-owner'
-            }`} style={tenant.verificationStatus === 'rejected' ? { background: '#fee2e2', color: '#ef4444' } : {}}>
+            <span className={`staff-role-badge ${tenant.verificationStatus === 'verified' ? 'role-staff' :
+                nant.verificationStatus === 'rejected' ? '' : 'role-owner'
+              }`} style={tenant.verificationStatus === 'rejected' ? { background: '#fee2e2', color: '#ef4444' } : {}}>
               {tenant.verificationStatus}
             </span>
           </div>
@@ -256,59 +256,59 @@ const TenantDetailView = () => {
 
         {/* Staff & Clients Split View */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-           {/* Staff Section */}
-           <div className="staff-list-card" style={{ margin: 0 }}>
-              <h3 className="staff-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FaUsers /> Tenant's Staffs ({staff.length})
-              </h3>
-              <div className="staff-table-container">
-                <table className="staff-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Role</th>
-                      <th>Status</th>
+          {/* Staff Section */}
+          <div className="staff-list-card" style={{ margin: 0 }}>
+            <h3 className="staff-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FaUsers /> Tenant's Staffs ({staff.length})
+            </h3>
+            <div className="staff-table-container">
+              <table className="staff-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {staff.map(s => (
+                    <tr key={s._id}>
+                      <td>{s.name} <br /><small style={{ color: '#94a3b8' }}>{s.email}</small></td>
+                      <td><span className={`staff-role-badge role-${s.tenant_role}`}>{s.tenant_role}</span></td>
+                      <td>{s.status}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {staff.map(s => (
-                      <tr key={s._id}>
-                        <td>{s.name} <br/><small style={{color: '#94a3b8'}}>{s.email}</small></td>
-                        <td><span className={`staff-role-badge role-${s.tenant_role}`}>{s.tenant_role}</span></td>
-                        <td>{s.status}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-           </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-           {/* Clients Section */}
-           <div className="staff-list-card" style={{ margin: 0 }}>
-              <h3 className="staff-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FaUserTie /> Tenant's Clients ({clients.length})
-              </h3>
-              <div className="staff-table-container">
-                <table className="staff-table">
-                  <thead>
-                    <tr>
-                      <th>Client Name</th>
-                      <th>Email</th>
-                      <th>Mobile</th>
+          {/* Clients Section */}
+          <div className="staff-list-card" style={{ margin: 0 }}>
+            <h3 className="staff-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FaUserTie /> Tenant's Clients ({clients.length})
+            </h3>
+            <div className="staff-table-container">
+              <table className="staff-table">
+                <thead>
+                  <tr>
+                    <th>Client Name</th>
+                    <th>Email</th>
+                    <th>Mobile</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {clients.map(c => (
+                    <tr key={c._id}>
+                      <td>{c.name}</td>
+                      <td>{c.primary_contact_email || 'N/A'}</td>
+                      <td>{c.primary_contact_mobile || 'N/A'}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {clients.map(c => (
-                      <tr key={c._id}>
-                        <td>{c.name}</td>
-                        <td>{c.primary_contact_email || 'N/A'}</td>
-                        <td>{c.primary_contact_mobile || 'N/A'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-           </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 

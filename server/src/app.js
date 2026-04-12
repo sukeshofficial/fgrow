@@ -25,6 +25,8 @@ import reportRoutes from "./routes/report.routes.js";
 import billingRoutes from "./routes/billing.routes.js";
 import profileRoutes from "./routes/profile.routes.js";
 import leadRoutes from "./routes/lead.routes.js";
+import notificationRoutes from "./routes/notification.routes.js";
+
 
 import { errorMiddleware } from "./middleware/error.middleware.js";
 
@@ -99,6 +101,8 @@ app.use("/api/v0/reports", reportRoutes);
 app.use("/api/v0/billing", billingRoutes);
 app.use("/api/v0/profile", profileRoutes);
 app.use("/api/v0/leads", leadRoutes);
+app.use("/api/v0/notifications", notificationRoutes);
+
 
 app.get("/api/v0/health", (req, res) => {
   res.json({ status: "OK" });

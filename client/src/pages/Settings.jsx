@@ -8,7 +8,7 @@ import { Spinner } from "../components/ui/Spinner";
 import { checkAuth } from "../features/auth/auth.actions";
 import Sidebar from "../components/SideBar";
 import Stepper from "../components/ui/Stepper";
-import { FaUser, FaLock, FaCreditCard, FaUsers } from "react-icons/fa";
+import { FaUser, FaLock, FaCreditCard, FaUsers, FaUserCircle } from "react-icons/fa";
 import "../styles/settings.css";
 
 const Settings = () => {
@@ -229,7 +229,7 @@ const Settings = () => {
                                     <img src={user.profile_avatar.secure_url} alt="Profile" className="avatar-preview" />
                                 ) : (
                                     <div className="avatar-initials">
-                                        {user?.name ? user.name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()}
+                                        <FaUserCircle size={40}/>
                                     </div>
                                 )}
                                 <label className="avatar-edit-overlay">

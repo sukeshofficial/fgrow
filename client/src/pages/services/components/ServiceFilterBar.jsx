@@ -49,7 +49,7 @@ const ServiceFilterBar = ({
           alignItems: 'center',
           gap: '8px',
           padding: '8px 16px',
-          borderRadius: '10px',
+          borderRadius: '999px',
           border: '1px solid var(--border-color)',
           background: 'white',
           color: 'var(--text-main)',

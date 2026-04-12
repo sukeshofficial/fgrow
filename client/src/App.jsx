@@ -49,6 +49,8 @@ const QuotationForm = lazy(() => import("./pages/quotations/QuotationForm"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Settings = lazy(() => import("./pages/Settings"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
+const NotificationPage = lazy(() => import("./pages/Notifications/NotificationPage"));
+
 
 import { Spinner } from "./components/ui/Spinner";
 
@@ -143,7 +145,7 @@ const App = () => {
               <Route path="/documents" element={<Tasks />} />
               <Route path="/reports" element={<Tasks />} />
               <Route path="/users" element={<Users />} />
-              <Route path="/notifications" element={<Tasks />} />
+              <Route path="/notifications" element={<NotificationPage />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/finance/quotations" element={<QuotationList />} />

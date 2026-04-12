@@ -135,9 +135,6 @@ const TodoCard = ({ todo, index, onEdit, onDelete, clients, services, staff, onS
               <button className="icon-btn danger" onClick={(e) => { e.stopPropagation(); onDelete(todo._id); }}>
                 <FiTrash2 />
               </button>
-              <button className="icon-btn secondary" onClick={(e) => { e.stopPropagation(); onEdit(todo); }} title="Full Edit">
-                <FiMoreHorizontal />
-              </button>
             </div>
           </div>
         </div>

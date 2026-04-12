@@ -227,7 +227,7 @@ const TaskDetails = () => {
               <div className="task-title-area">
                 <div className="td-title-row">
                   <h1>{task.title}</h1>
-                  
+
                 </div>
                 {task.status === "completed" && task.completed_at && (
                   <div className="task-completion-badge">
