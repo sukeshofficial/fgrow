@@ -103,7 +103,9 @@ const App = () => {
 
   // 2. Launch Gate
   const isLoginPage = window.location.pathname === "/login";
-  if (!isLaunched && !isSuperAdmin && !isLoginPage) {
+  const hasBypass = localStorage.getItem("launchBypass") === "true";
+
+  if (!isLaunched && !isSuperAdmin && !isLoginPage && !hasBypass) {
     return (
       <Suspense fallback={<PageLoader />}>
         <LaunchTimer />

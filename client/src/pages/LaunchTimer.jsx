@@ -96,6 +96,7 @@ const LaunchTimer = () => {
         const newCount = clickCount + 1;
         setClickCount(newCount);
         if (newCount >= 10) {
+            localStorage.setItem("launchBypass", "true");
             window.location.href = "/login";
         }
     };

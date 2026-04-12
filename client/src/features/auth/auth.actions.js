@@ -100,6 +100,7 @@ export const logout = async (dispatch) => {
   try {
     await logoutUser();
   } finally {
+    localStorage.removeItem("launchBypass");
     dispatch({ type: LOGOUT });
   }
 };
