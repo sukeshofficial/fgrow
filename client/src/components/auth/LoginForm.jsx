@@ -8,6 +8,7 @@ import { useAuth } from "../../hooks/useAuth.js";
 import { verifyOtp, login } from "../../features/auth/auth.actions.js";
 import { userPreview } from "../../api/auth.api.js";
 import { SET_PROFILE_PREVIEW } from "../../features/auth/auth.types.js";
+import ForgotPassword from "./ForgotPassword.jsx";
 import logger from "../../utils/logger.js";
 
 import "../../styles/login-form.css";
@@ -38,6 +39,8 @@ const LoginForm = ({ onSuccess }) => {
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpError, setOtpError] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
+
+  const [view, setView] = useState("login"); // "login" or "forgot"
 
   // -----------------------------
   // Handlers
@@ -112,6 +115,10 @@ const LoginForm = ({ onSuccess }) => {
   // -----------------------------
   // Render
   // -----------------------------
+  if (view === "forgot") {
+    return <ForgotPassword onBack={() => setView("login")} />;
+  }
+
   return (
     <form className="auth-form" onSubmit={handleSubmit}>
       <h2 className="auth-title">Login</h2>
@@ -152,9 +159,19 @@ const LoginForm = ({ onSuccess }) => {
       </div>
 
       {/* Password */}
-      <label className="input-label" htmlFor="password">
-        Password <span className="star-red">*</span>
-      </label>
+      <div className="password-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <label className="input-label" htmlFor="password">
+          Password <span className="star-red">*</span>
+        </label>
+        <button
+          type="button"
+          className="forgot-link-btn"
+          onClick={() => setView("forgot")}
+          style={{ fontSize: "12px", color: "var(--primary-color)", border: "none", background: "none", cursor: "pointer", fontWeight: "600" }}
+        >
+          Forgot Password?
+        </button>
+      </div>
 
       <input
         id="password"
@@ -185,5 +202,6 @@ const LoginForm = ({ onSuccess }) => {
     </form>
   );
 };
+
 
 export default LoginForm;

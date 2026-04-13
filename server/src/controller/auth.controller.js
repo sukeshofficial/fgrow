@@ -164,7 +164,7 @@ export const registerUser = async (req, res) => {
         <div style="max-width: 600px; margin: 40px auto; background: #ffffff; color: #1e293b; padding: 48px 40px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
             
             <div style="text-align: center; margin-bottom: 32px;">
-                <img src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" alt="FGrow" style="width: 80px; height: 80px; border-radius: 16px; margin-bottom: 16px;">
+                <img src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1775310579/tenants/a7tvcuo0moqztzeoevaz.png" alt="FGrow" style="width: 80px; height: 80px; border-radius: 16px; margin-bottom: 16px;">
                 <h1 style="color: #2563eb; font-size: 32px; margin: 0; letter-spacing: -0.02em; font-weight: 700;">Welcome! 🥂</h1>
                 <p style="color: #64748b; font-size: 14px; margin-top: 8px;">Hello ${name?.split(" ")[0]}, we're thrilled to have you join FGROW.</p>
             </div>
@@ -299,7 +299,7 @@ export const resendSignupOtp = async (req, res) => {
       <!-- Circular Image -->
       <div style="text-align: center; margin-bottom: 20px;">
         <img 
-          src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" 
+          src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1775310579/tenants/a7tvcuo0moqztzeoevaz.png" 
           alt="Profile"
           style="
             width: 80px;
@@ -358,6 +358,113 @@ export const resendSignupOtp = async (req, res) => {
     });
   }
 };
+
+/**
+ * forgotPasswordRequest
+ * - Generate and send OTP for password reset
+ */
+export const forgotPasswordRequest = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || !validator.isEmail(email)) {
+      return res.status(400).json({ message: "valid email required" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      // For security, don't reveal if account exists or not
+      return res.status(200).json({ message: "If an account exists, an OTP has been sent" });
+    }
+
+    const otp = createNumericOtp();
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+    user.reset_token = hashedOtp;
+    user.reset_token_expiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    await user.save({ validateBeforeSave: false });
+
+    await sendEmail({
+      to: email,
+      subject: "Password Reset OTP - FGrow 🛡️",
+      text: `Your password reset OTP is ${otp}. It expires in 10 minutes.`,
+      html: `
+    <div style="font-family: 'Poppins', sans-serif; background-color: #f8fafc; padding: 40px 20px;">
+      <div style="max-width: 500px; margin: auto; background: #ffffff; padding: 40px; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+        
+        <div style="text-align: center; margin-bottom: 32px;">
+          <img 
+            src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1775310579/tenants/a7tvcuo0moqztzeoevaz.png" 
+            alt="FGrow"
+            style="width: 70px; height: 70px; border-radius: 18px; margin-bottom: 20px;"
+          />
+          <h2 style="margin: 0; color: #1e293b; font-size: 24px; font-weight: 700;">Reset Your Password</h2>
+          <p style="color: #64748b; font-size: 14px; margin-top: 8px;">Use the code below to complete your reset request.</p>
+        </div>
+
+        <div style="background: #f1f5f9; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 24px; margin-bottom: 24px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 800; color: #2563eb; letter-spacing: 10px;">
+            ${otp}
+          </div>
+          <p style="font-size: 12px; color: #94a3b8; margin-top: 12px; text-transform: uppercase; font-weight: 600;">Valid for 10 minutes</p>
+        </div>
+
+        <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: center; margin-bottom: 32px;">
+          If you didn't request this, you can safely ignore this email. Your password will remain unchanged.
+        </p>
+
+        <div style="text-align: center; border-top: 1px solid #f1f5f9; padding-top: 24px;">
+          <p style="font-size: 13px; color: #94a3b8; margin: 0;">
+            Securing your growth,<br>
+            <strong>The FGrow Security Team</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+      `,
+    });
+
+    return res.status(200).json({ message: "If an account exists, an OTP has been sent" });
+  } catch (err) {
+    logger.error("Forgot Password Request error:", err);
+    return res.status(500).json({ message: "internal server error" });
+  }
+};
+
+/**
+ * verifyResetOtp
+ * - Verify the OTP before allowing password reset
+ */
+export const verifyResetOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ message: "email and otp required" });
+    }
+
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+    const user = await User.findOne({
+      email,
+      reset_token: hashedOtp,
+      reset_token_expiry: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "invalid or expired otp" });
+    }
+
+    return res.status(200).json({ message: "OTP verified. Proceed to reset password." });
+  } catch (err) {
+    logger.error("Verify Reset OTP error:", err);
+    return res.status(500).json({ message: "internal server error" });
+  }
+};
+
+
 
 /**
  * loginUser
@@ -434,7 +541,7 @@ export const loginUser = async (req, res) => {
         <!-- Circular Image -->
         <div style="text-align: center; margin-bottom: 20px;">
           <img 
-            src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1774225986/users/tqg7thoai2g8yqhsvpr6.png" 
+            src="https://res.cloudinary.com/dbaeuihz7/image/upload/v1775310579/tenants/a7tvcuo0moqztzeoevaz.png" 
             alt="Profile"
             style="
               width: 80px;
@@ -604,24 +711,25 @@ export const loginUser = async (req, res) => {
  */
 export const resetPassword = async (req, res) => {
   try {
-    const { email, token, newPassword } = req.body;
+    const { email, token, otp, newPassword } = req.body;
 
-    if (!email || !token || !newPassword) {
+    if (!email || (!token && !otp) || !newPassword) {
       return res.status(400).json({
-        message: "email, token and new password required",
+        message: "email, (token or otp) and new password required",
       });
     }
 
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const resetValue = token || otp;
+    const hashedValue = crypto.createHash("sha256").update(resetValue).digest("hex");
 
     const user = await User.findOne({
       email,
-      reset_token: hashedToken,
+      reset_token: hashedValue,
       reset_token_expiry: { $gt: Date.now() },
     }).select("+password_hash +locked_until +lockout_level");
 
     if (!user) {
-      return res.status(400).json({ message: "invalid or expired token" });
+      return res.status(400).json({ message: "invalid or expired token/otp" });
     }
 
     user.password = newPassword;
@@ -630,7 +738,7 @@ export const resetPassword = async (req, res) => {
     user.locked_until = undefined;
     user.failed_login_attempts = 0;
     user.lockout_level = 0;
-    user.last_login = new Date();
+    user.last_login_at = new Date();
 
     await user.save();
 
@@ -644,6 +752,7 @@ export const resetPassword = async (req, res) => {
     });
   }
 };
+
 
 /**
  * logoutUser

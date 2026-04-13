@@ -7,6 +7,8 @@ import {
   verifyOtp,
   resendSignupOtp,
   resetPassword,
+  forgotPasswordRequest,
+  verifyResetOtp,
   logoutUser,
   getMe,
   userPreview,
@@ -19,6 +21,8 @@ router.post("/register", upload.single("profile-avatar"), registerUser);
 router.post("/verify-signup-otp", verifyOtp);
 router.post("/resend-verify-otp", resendSignupOtp);
 router.post("/login", loginUser);
+router.post("/forgot-password", forgotPasswordRequest);
+router.post("/verify-reset-otp", verifyResetOtp);
 router.post("/reset-password", resetPassword);
 
 // Authenticated routes

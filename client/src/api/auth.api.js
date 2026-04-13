@@ -66,3 +66,29 @@ export const userPreview = (email) => {
 export const getMe = () => {
   return api.get("/auth/me");
 };
+
+/**
+ * Forgot Password Request
+ * POST /auth/forgot-password
+ */
+export const forgotPasswordRequest = (email) => {
+  return api.post("/auth/forgot-password", { email });
+};
+
+/**
+ * Reset Password
+ * POST /auth/reset-password
+ */
+export const resetPassword = (data) => {
+  return api.post("/auth/reset-password", data);
+};
+
+/**
+ * Verify Reset OTP
+ * POST /auth/verify-reset-otp
+ */
+export const verifyResetOtp = (data) => {
+  return api.post("/auth/verify-reset-otp", data);
+};
+
+

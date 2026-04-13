@@ -5,6 +5,9 @@ import {
   loginUser,
   logoutUser,
   getMe,
+  forgotPasswordRequest,
+  resetPassword,
+  verifyResetOtp,
 } from "../../api/auth.api.js";
 
 import { AUTH_START, AUTH_SUCCESS, AUTH_FAIL, LOGOUT } from "./auth.types.js";
@@ -129,3 +132,41 @@ export const checkAuth = async (dispatch) => {
     return null;
   }
 };
+
+/**
+ * Request Password Reset OTP
+ */
+export const forgotPassword = async (email) => {
+  try {
+    const res = await forgotPasswordRequest(email);
+    return res.data;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Reset Password with OTP
+ */
+export const resetUserPassword = async (data) => {
+  try {
+    const res = await resetPassword(data);
+    return res.data;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Verify OTP for password reset
+ */
+export const verifyOtpReset = async (data) => {
+  try {
+    const res = await verifyResetOtp(data);
+    return res.data;
+  } catch (err) {
+    throw err;
+  }
+};
+
+
