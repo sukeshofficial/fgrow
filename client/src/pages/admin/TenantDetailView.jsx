@@ -171,7 +171,7 @@ const TenantDetailView = () => {
             )}
             <h3 style={{ margin: '0 0 0.5rem' }}>{tenant.name}</h3>
             <span className={`staff-role-badge ${tenant.verificationStatus === 'verified' ? 'role-staff' :
-                nant.verificationStatus === 'rejected' ? '' : 'role-owner'
+                tenant.verificationStatus === 'rejected' ? '' : 'role-owner'
               }`} style={tenant.verificationStatus === 'rejected' ? { background: '#fee2e2', color: '#ef4444' } : {}}>
               {tenant.verificationStatus}
             </span>
