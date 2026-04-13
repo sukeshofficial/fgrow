@@ -145,6 +145,7 @@ export const registerUser = async (req, res) => {
 
     await user.save();
     // Send Registration Welcome & Verification Email
+    logger.info(`Registration: Sending OTP to ${email}`);
     await sendEmail({
       to: email,
       subject: "Welcome to FGROW! 🚀 — Verify your account",
@@ -386,6 +387,7 @@ export const forgotPasswordRequest = async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
+    logger.info(`ForgotPassword: Sending OTP to ${email}`);
     await sendEmail({
       to: email,
       subject: "Password Reset OTP - FGrow 🛡️",
@@ -632,7 +634,8 @@ export const loginUser = async (req, res) => {
         timeStyle: "short",
       });
 
-      sendEmail({
+      logger.info(`Login: Sending 1st login welcome email to ${user.email}`);
+      await sendEmail({
         to: user.email,
         subject: "Welcome back! - FGrow ✨",
         text: `Hello ${user.name}, welcome to your account! You have successfully logged in on ${loginTime}.`,

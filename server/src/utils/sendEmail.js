@@ -9,9 +9,17 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  connectionTimeout: 5000, // 5 seconds
-  greetingTimeout: 5000, // 5 seconds
+  connectionTimeout: 5000,
+  greetingTimeout: 5000,
 });
+
+// Debug log for production initialization
+if (process.env.NODE_ENV === "production") {
+  const maskedUser = process.env.EMAIL_USER ? `${process.env.EMAIL_USER.slice(0, 3)}***${process.env.EMAIL_USER.slice(-3)}` : "MISSING";
+  const passStatus = process.env.EMAIL_PASS ? "PRESENT" : "MISSING";
+  logger.info(`📧 Email initialization: User: ${maskedUser}, Password: ${passStatus}`);
+}
+
 
 export default async function sendEmail(mail) {
   try {
