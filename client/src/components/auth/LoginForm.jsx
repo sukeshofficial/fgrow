@@ -76,15 +76,19 @@ const LoginForm = ({ onSuccess }) => {
       try {
         const res = await userPreview(form.email);
 
-        dispatch({
-          type: SET_PROFILE_PREVIEW,
-          payload: {
-            avatar: res.data.preview.avatar,
-            username: res.data.preview.username,
-          },
-        });
+        if (res.data.found) {
+          dispatch({
+            type: SET_PROFILE_PREVIEW,
+            payload: {
+              avatar: res.data.preview.avatar,
+              username: res.data.preview.username,
+            },
+          });
 
-        setAvatar(res.data.preview.avatar);
+          setAvatar(res.data.preview.avatar);
+        } else {
+          setAvatar(null);
+        }
       } catch (err) {
         logger.error("LoginForm", "Preview failed", err);
         setAvatar(null);

@@ -928,16 +928,21 @@ export const userPreview = async (req, res) => {
     );
 
     if (!user) {
-      return res.status(404).json({ message: "user not found" });
+      return res.status(200).json({
+        message: "user not found",
+        found: false
+      });
     }
 
     return res.status(200).json({
       message: "profile preview fetched",
+      found: true,
       preview: {
         username: user.name || user.username,
-        avatar: user.profile_avatar.secure_url,
+        avatar: user.profile_avatar?.secure_url || "",
       },
     });
+
   } catch (err) {
     logger.error("User Preview error:", err);
     return res.status(500).json({
