@@ -82,7 +82,7 @@ const App = () => {
   const { user, dispatch, isLoading } = useAuth();
   const { setError } = useError();
 
-  const launchDate = new Date("2026-04-13T18:00:00+05:30");
+  const launchDate = new Date("2026-04-20T18:00:00+05:30");
   const isLaunched = new Date() >= launchDate;
   const isSuperAdmin = user?.platform_role === "super_admin" || user?.role === "superadmin";
 

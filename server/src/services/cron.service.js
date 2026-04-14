@@ -176,7 +176,7 @@ const taskReminders = async () => {
 
 /**
  * Launch Day Announcement
- * Fires at 18:00 IST on April 13.
+ * Fires at 18:00 IST on April 20.
  */
 const launchAnnouncement = async () => {
     try {
@@ -194,10 +194,10 @@ export const initCron = () => {
     // Task Reminders every hour
     cron.schedule("0 * * * *", taskReminders);
 
-    // Launch Announcement: April 13 at 18:00 IST
+    // Launch Announcement: April 20 at 18:00 IST
     // (IST is UTC+5:30. 18:00 IST = 12:30 UTC)
     // Format: 'minute hour day month dayOfWeek'
-    cron.schedule("00 18 13 4 *", launchAnnouncement, {
+    cron.schedule("00 18 20 4 *", launchAnnouncement, {
         timezone: "Asia/Kolkata"
     });
 
