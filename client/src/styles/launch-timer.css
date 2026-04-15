@@ -668,6 +668,7 @@
     animation: bounce 1s ease-in-out infinite alternate;
 }
 
+
 @keyframes bounce {
     from {
         transform: scale(0.85);
@@ -691,8 +692,13 @@
     flex-direction: column;
     gap: 2px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    min-width: 140px;
-    transition: all 0.3s ease;
+    width: 140px;
+    overflow: hidden;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.launch-music-player:hover .music-tooltip {
+    width: 280px;
 }
 
 @keyframes tooltip-fade {
@@ -720,6 +726,18 @@
     font-weight: 700;
     color: #cbd5e1;
     white-space: nowrap;
+}
+
+/* Truncated at rest, full title visible on hover */
+.tooltip-track-truncated {
+    max-width: 108px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.launch-music-player:hover .tooltip-track-truncated {
+    max-width: 248px;
 }
 
 .music-progress-container {
@@ -750,15 +768,35 @@
 }
 
 @media (max-width: 640px) {
-    .launch-music-player {
-        top: auto;
-        bottom: 24px;
-        right: 24px;
-    }
-
     .music-tooltip {
         position: absolute;
-        bottom: 80px;
+        top: 76px;
         right: 0;
+        /* Hidden by default on mobile */
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-6px);
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    /* Shown when toggled by JS */
+    .music-tooltip.tooltip-mobile-visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+
+    /* Disable CSS hover expansion on mobile — JS controls visibility instead */
+    .launch-music-player:hover .music-tooltip {
+        width: 140px;
+    }
+    .launch-music-player:hover .tooltip-track-truncated {
+        max-width: 108px;
+    }
+    .music-tooltip.tooltip-mobile-visible .tooltip-track-truncated {
+        max-width: 248px;
+    }
+    .music-tooltip.tooltip-mobile-visible {
+        width: 280px;
     }
 }

@@ -6,9 +6,12 @@ import "../styles/launch-timer.css";
 const LAUNCH_DATE = new Date("2026-04-20T18:00:00+05:30");
 
 const TRACKS = [
-    { title: "Nee Paartha Vizhigal", src: "/music/nee-paartha-vizhigal.mp3" },
-    { title: "Kanave Kanave", src: "/music/kanave-kanave.mp3" },
-    { title: "Kanave Nee Nan", src: "/music/kanave-nee-naan.mp3" },
+    { title: "Nee Paartha Vizhigal - 3", src: "/music/nee-paartha-vizhigal.mp3" },
+    { title: "Kanave Kanave - David", src: "/music/kanave-kanave.mp3" },
+    { title: "Kanave Nee Nan - Kannum Kannum Kollaiyadithaal", src: "/music/kanave-nee-naan.mp3" },
+    { title: "No Time for Caution - Interstellar", src: "/music/interstellar.mp3" },
+    { title: "Shape of You", src: "/music/shape-of-you.mp3" },
+    { title: "Avengers Theme", src: "/music/avengers.mp3" }
 ];
 
 function calculateTimeLeft() {
@@ -35,8 +38,10 @@ const LaunchTimer = () => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTrack, setCurrentTrack] = useState(0);
     const [showMusicTooltip, setShowMusicTooltip] = useState(false);
+    const [showTooltip, setShowTooltip] = useState(false);
     const [progress, setProgress] = useState(0);
     const audioRef = useRef(null);
+    const playerRef = useRef(null);
 
     // Initial interaction for autoplay
     useEffect(() => {
@@ -54,6 +59,18 @@ const LaunchTimer = () => {
             window.removeEventListener("keydown", handleFirstInteraction);
         };
     }, [isPlaying]);
+
+    // Close tooltip on outside click (mobile)
+    useEffect(() => {
+        if (!showTooltip) return;
+        const handleOutside = (e) => {
+            if (playerRef.current && !playerRef.current.contains(e.target)) {
+                setShowTooltip(false);
+            }
+        };
+        document.addEventListener("click", handleOutside);
+        return () => document.removeEventListener("click", handleOutside);
+    }, [showTooltip]);
 
     const togglePlay = (e) => {
         if (e) e.stopPropagation();
@@ -271,8 +288,17 @@ const LaunchTimer = () => {
 
             {/* Floating Music Player */}
             <div
+                ref={playerRef}
                 className={`launch-music-player ${isPlaying ? "is-playing" : ""}`}
-                onClick={togglePlay}
+                onClick={(e) => {
+                    // toggle play/pause
+                    togglePlay(e);
+                    // on mobile, also toggle tooltip
+                    if (window.innerWidth <= 640) {
+                        e.stopPropagation();
+                        setShowTooltip(prev => !prev);
+                    }
+                }}
                 onDoubleClick={(e) => {
                     e.stopPropagation();
                     handleTrackEnd();
@@ -289,13 +315,10 @@ const LaunchTimer = () => {
             >
                 <div className="vinyl-disk-wrapper">
                     <img src="/vinyl.png" alt="Vinyl record" className="vinyl-disk" />
-                    {/* <div className="vinyl-center">
-                        <FaMusic className="vinyl-music-icon" />
-                    </div> */}
                 </div>
-                <div className="music-tooltip">
+                <div className={`music-tooltip${showTooltip ? " tooltip-mobile-visible" : ""}`}>
                     <span className="tooltip-title">Now Playing:</span>
-                    <span className="tooltip-track">{TRACKS[currentTrack].title}</span>
+                    <span className="tooltip-track tooltip-track-truncated">{TRACKS[currentTrack].title}</span>
                     <div className="music-progress-container" onClick={handleSeek}>
                         <div
                             className="music-progress-bar"
