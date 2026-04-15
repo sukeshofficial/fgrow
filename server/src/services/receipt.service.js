@@ -208,10 +208,16 @@ export const listReceiptsService = async ({
 
   if (filters.client && Types.ObjectId.isValid(filters.client))
     query.client = new Types.ObjectId(filters.client);
+  if (filters.billing_entity && Types.ObjectId.isValid(filters.billing_entity))
+    query.billing_entity = new Types.ObjectId(filters.billing_entity);
   if (filters.date_from || filters.date_to) {
     query.date = {};
     if (filters.date_from) query.date.$gte = new Date(filters.date_from);
-    if (filters.date_to) query.date.$lte = new Date(filters.date_to);
+    if (filters.date_to) {
+      const to = new Date(filters.date_to);
+      to.setHours(23, 59, 59, 999);
+      query.date.$lte = to;
+    }
   }
   if (filters.status) query.status = filters.status;
 

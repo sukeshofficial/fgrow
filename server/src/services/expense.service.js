@@ -4,9 +4,10 @@ import Invoice from "../models/invoice/invoice.model.js";
 import cloudinary from "../utils/cloudinary.js";
 import ExpenseCategory from "../models/expense/schemas/expenseCategory.model.js";
 import PaymentMode from "../models/expense/schemas/paymentMode.model.js";
+import ExpenseCounter from "../models/expense/schemas/expenseCounter.model.js";
 
 import { generateExpenseNumber } from "../utils/generateExpenseNumber.js";
-import { uploadFileToCloud } from "../utils/cloudinary.js";
+import { uploadExpenseAttachment } from "../utils/cloudinary.js";
 
 import fs from "fs";
 
@@ -204,9 +205,9 @@ export const updateExpenseService = async ({
   // payments replace or append depending on your UI; here we replace if provided
   if (payload.payments) e.payments = payload.payments;
 
-  // files replace or append - here append if provided
-  if (Array.isArray(payload.files) && payload.files.length > 0) {
-    e.files = e.files.concat(payload.files);
+  // files replace
+  if (Array.isArray(payload.files)) {
+    e.files = payload.files;
   }
 
   // recalc totals
@@ -323,30 +324,39 @@ export const uploadFilesToExpenseService = async ({
 
   if (!expense) throw new Error("Expense not found");
 
+  // Enforce max 10 files limit
+  const currentFilesCount = expense.files?.length || 0;
+  if (currentFilesCount + files.length > 10) {
+    throw new Error(`Maximum 10 attachments allowed per expense. You currently have ${currentFilesCount}.`);
+  }
+
   const uploadedFiles = [];
 
   for (const file of files) {
-
     let upload;
-
     try {
-      upload = await uploadFileToCloud(file.path, `expenses/${tenant_id}`);
+      upload = await uploadExpenseAttachment({
+        path: file.path,
+        buffer: file.buffer,
+        originalname: file.originalname,
+        tenant_id
+      });
     } finally {
-      if (fs.existsSync(file.path)) {
+      if (file.path && fs.existsSync(file.path)) {
         fs.unlinkSync(file.path);
       }
     }
 
     if (!upload.success) {
-      throw new Error(upload.error);
+      throw new Error(upload.error || "File upload failed");
     }
 
     uploadedFiles.push({
       key: upload.public_id,
       url: upload.url,
-      name: upload.name,
-      size: upload.size,
-      mime: upload.mime,
+      name: file.originalname || upload.name,
+      size: file.size || upload.size,
+      mime: file.mimetype || upload.mime,
       uploaded_at: new Date(),
       uploaded_by: user_id,
     });
@@ -356,7 +366,6 @@ export const uploadFilesToExpenseService = async ({
   expense.files.push(...uploadedFiles);
 
   expense.updated_by = user_id;
-
   await expense.save();
 
   return expense.toObject();
@@ -549,4 +558,38 @@ export const deletePaymentModeService = async ({ tenant_id, mode_id }) => {
   await mode.save();
 
   return true;
+};
+
+export const resetExpenseCounterService = async ({ tenant_id, nextSeq, fy }) => {
+  const yearNum = parseInt(fy, 10);
+  if (isNaN(yearNum)) throw new Error("Invalid financial year");
+
+  const counter = await ExpenseCounter.findOneAndUpdate(
+    { tenant_id, year: yearNum },
+    { seq: nextSeq - 1 },
+    { upsert: true, new: true },
+  );
+
+  const paddedSeq = String(nextSeq).padStart(3, "0");
+  return {
+    success: true,
+    expense_no: `EXP/${yearNum}-${yearNum + 1}/${paddedSeq}`,
+    seq: nextSeq,
+  };
+};
+
+export const getNextExpenseNumberService = async ({ tenant_id, date }) => {
+  const d = date ? new Date(date) : new Date();
+  const year = d.getMonth() >= 3 ? d.getFullYear() % 100 : (d.getFullYear() - 1) % 100;
+
+  // We don't increment here, just check current counter and return EXPECTED next
+  const counter = await ExpenseCounter.findOne({ tenant_id, year });
+  const nextSeq = (counter?.seq || 0) + 1;
+
+  const paddedSeq = String(nextSeq).padStart(3, "0");
+  return {
+    success: true,
+    expense_no: `EXP/${year}-${year + 1}/${paddedSeq}`,
+    seq: nextSeq,
+  };
 };

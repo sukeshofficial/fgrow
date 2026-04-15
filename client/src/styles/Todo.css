@@ -139,7 +139,7 @@
   flex-wrap: wrap;
 }
 
-.chevron {
+.sd-chevron {
   transition: transform 0.2s;
   color: var(--text-muted);
   flex-shrink: 0;
@@ -147,7 +147,7 @@
   font-size: 16px;
 }
 
-.chevron.up {
+.sd-chevron.up {
   transform: rotate(180deg);
 }
 

@@ -5,63 +5,101 @@ import { api } from "./api";
  * POST /expense
  */
 export const createExpense = (payload) => {
-  return api.post("/expense", payload);
+  return api.post("/expenses", payload);
 };
 
 /**
  * List expenses with filters
- * GET /expense
+ * GET /expenses
  */
 export const listExpenses = (params) => {
-  return api.get("/expense", { params });
+  return api.get("/expenses", { params });
 };
 
 /**
  * Get expense details
- * GET /expense/:id
+ * GET /expenses/:id
  */
 export const getExpense = (id) => {
-  return api.get(`/expense/${id}`);
+  return api.get(`/expenses/${id}`);
 };
 
 /**
  * Update expense
- * PATCH /expense/:id
+ * PATCH /expenses/:id
  */
 export const updateExpense = (id, payload) => {
-  return api.patch(`/expense/${id}`, payload);
+  return api.patch(`/expenses/${id}`, payload);
 };
 
 /**
  * Delete expense
- * DELETE /expense/:id
+ * DELETE /expenses/:id
  */
 export const deleteExpense = (id) => {
-  return api.delete(`/expense/${id}`);
+  return api.delete(`/expenses/${id}`);
 };
 
 /**
  * List expense categories
- * GET /expense/categories
+ * GET /expenses/categories
  */
 export const listExpenseCategories = () => {
-  return api.get("/expense/categories");
+  return api.get("/expenses/categories");
 };
 
 /**
  * List payment modes
- * GET /expense/payment-modes
+ * GET /expenses/payment-modes
  */
 export const listPaymentModes = () => {
-  return api.get("/expense/payment-modes");
+  return api.get("/expenses/payment-modes");
+};
+
+/**
+ * Create expense category
+ * POST /expenses/categories
+ */
+export const createExpenseCategory = (payload) => {
+  return api.post("/expenses/categories", payload);
+};
+
+/**
+ * Create payment mode
+ * POST /expenses/payment-modes
+ */
+export const createPaymentMode = (payload) => {
+  return api.post("/expenses/payment-modes", payload);
+};
+
+/**
+ * Get next expense number
+ */
+export const getNextNumber = (date) => {
+  return api.get("/expenses/next-number", { params: { date } });
+};
+
+/**
+ * Reset expense counter
+ */
+export const resetCounter = (nextSeq, fy) => {
+  return api.post("/expenses/reset-counter", { nextSeq, fy });
 };
 
 /**
  * Upload expense files
- * POST /expense/:id/files
+ * POST /expenses/:id/files
  */
 export const uploadExpenseFiles = (id, formData) => {
-  return api.post(`/expense/${id}/files`, formData, {
+  return api.post(`/expenses/${id}/files`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+};
+
+/**
+ * Delete expense file
+ * DELETE /expenses/:id/files/:fileId
+ */
+export const deleteExpenseFile = (id, fileId) => {
+  return api.delete(`/expenses/${id}/files`, { params: { fileId } });
 };

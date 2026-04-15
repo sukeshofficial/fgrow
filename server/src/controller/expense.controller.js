@@ -16,6 +16,8 @@ import {
   listPaymentModesService,
   updatePaymentModeService,
   deletePaymentModeService,
+  resetExpenseCounterService,
+  getNextExpenseNumberService,
 } from "../services/expense.service.js";
 
 export const createExpenseController = async (req, res) => {
@@ -151,7 +153,11 @@ export const deleteExpenseFileController = async (req, res) => {
     const user_id = req.user._id;
 
     const expense_id = req.params.id;
-    const file_id = decodeURIComponent(req.params.fileId);
+    const file_id = req.query.fileId;
+
+    if (!file_id) {
+      throw new Error("File ID is required");
+    }
 
     const result = await deleteExpenseFileService({
       tenant_id,
@@ -169,6 +175,8 @@ export const deleteExpenseFileController = async (req, res) => {
     return res.status(400).json({
       success: false,
       message: error.message,
+      stack: error.stack,
+      debug_params: req.params
     });
   }
 };
@@ -310,5 +318,31 @@ export const deletePaymentModeController = async (req, res) => {
     res.json({ success: true, message: "Payment mode deleted" });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
+  }
+};
+export const getNextExpenseNumberController = async (req, res) => {
+  try {
+    const { date } = req.query;
+    const result = await getNextExpenseNumberService({
+      tenant_id: req.tenant._id,
+      date,
+    });
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const resetExpenseCounterController = async (req, res) => {
+  try {
+    const { nextSeq, fy } = req.body;
+    const result = await resetExpenseCounterService({
+      tenant_id: req.tenant._id,
+      nextSeq,
+      fy,
+    });
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };

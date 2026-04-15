@@ -107,7 +107,7 @@ export const uploadFileToCloud = async (file_path, folder = "expenses") => {
   try {
     const result = await cloudinary.uploader.upload(file_path, {
       folder,
-      resource_type: "raw",
+      resource_type: "auto", // Changed to auto to support images and documents better
       type: "upload",
       access_mode: "public",
       use_filename: true,
@@ -128,6 +128,20 @@ export const uploadFileToCloud = async (file_path, folder = "expenses") => {
       error: error.message,
     };
   }
+};
+
+/**
+ * Specifically for expense attachments, using 'auto' to handle images and docs.
+ * Supports both file paths and buffers.
+ */
+export const uploadExpenseAttachment = async ({ path: filePath, buffer, originalname, tenant_id }) => {
+  const folder = `expenses/${tenant_id}`;
+
+  if (buffer) {
+    return uploadFileBufferToCloud(buffer, folder, originalname);
+  }
+
+  return uploadFileToCloud(filePath, folder);
 };
 
 /**

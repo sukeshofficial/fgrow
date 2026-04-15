@@ -269,12 +269,12 @@
   background: white;
 }
 
-.chevron {
+.sd-chevron {
   transition: transform 0.2s;
   color: var(--text-muted);
 }
 
-.chevron.up {
+.sd-chevron.up {
   transform: rotate(180deg);
 }
 
@@ -459,7 +459,7 @@
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-.dropdown-toggle .chevron {
+.dropdown-toggle .sd-chevron {
   flex-shrink: 0;
   margin-left: auto;
   font-size: 16px;

@@ -181,7 +181,7 @@ const QuotationForm = () => {
         <>
             <Sidebar />
             <div className="clients">
-                <div style={{ padding: '30px', maxWidth: '1200px', margin: '0 auto' }}>
+                <div style={{ padding: '30px', maxWidth: '1200px', margin: '0 auto', marginTop: '60px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                         <div>
                             <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#1e293b' }}>{isEdit ? 'Edit Quotation' : 'Create New Quotation'}</h1>

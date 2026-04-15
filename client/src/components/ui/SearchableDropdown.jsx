@@ -49,7 +49,7 @@ const SearchableDropdown = ({
 
   const handleAddClick = () => {
     if (onAddNew) {
-      onAddNew();
+      onAddNew(search);
       setIsOpen(false);
     }
   };
@@ -57,7 +57,7 @@ const SearchableDropdown = ({
   return (
     <div className={`custom-dropdown ${isOpen ? "open" : ""}`} ref={dropdownRef}>
       <div
-        className={`dropdown-toggle form-input ${isOpen ? "open" : ""} ${error ? "has-error" : ""}`}
+        className={`dropdown-toggle ${isOpen ? "open" : ""} ${error ? "has-error" : ""}`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="chip-container">
@@ -111,7 +111,7 @@ const SearchableDropdown = ({
             </div>
           )}
         </div>
-        <FiChevronDown className={`chevron ${isOpen ? "up" : ""}`} />
+        <FiChevronDown className={`sd-chevron ${isOpen ? "up" : ""}`} />
       </div>
 
       {isOpen && (
@@ -136,8 +136,8 @@ const SearchableDropdown = ({
                 <div
                   key={option._id}
                   className={`dropdown-item ${isMulti
-                      ? (Array.isArray(value) && value.includes(option._id) ? "selected" : "")
-                      : (value === option._id ? "selected" : "")
+                    ? (Array.isArray(value) && value.includes(option._id) ? "selected" : "")
+                    : (value === option._id ? "selected" : "")
                     }`}
                   onClick={() => handleSelect(option._id)}
                 >
@@ -161,8 +161,8 @@ const SearchableDropdown = ({
             )}
           </div>
           {onAddNew && (
-            <div className="add-new-btn" onClick={handleAddClick}>
-              <span className="plus-icon">+</span> {addNewLabel}
+            <div className="sd-add-new-option" onClick={handleAddClick}>
+              <span className="plus-icon">+</span> {addNewLabel} {search ? `"${search}"` : ""}
             </div>
           )}
         </div>

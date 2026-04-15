@@ -123,7 +123,11 @@ export const listQuotationsService = async ({
   if (filters.date_from || filters.date_to) {
     query.date = {};
     if (filters.date_from) query.date.$gte = new Date(filters.date_from);
-    if (filters.date_to) query.date.$lte = new Date(filters.date_to);
+    if (filters.date_to) {
+      const to = new Date(filters.date_to);
+      to.setHours(23, 59, 59, 999);
+      query.date.$lte = to;
+    }
   }
   if (search)
     query.$or = [

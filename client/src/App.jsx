@@ -46,6 +46,9 @@ const EditReceiptWizard = lazy(() => import("./pages/receipts/EditReceiptWizard"
 const QuotationList = lazy(() => import("./pages/quotations/QuotationList"));
 const QuotationDetail = lazy(() => import("./pages/quotations/QuotationDetail"));
 const QuotationForm = lazy(() => import("./pages/quotations/QuotationForm"));
+const ExpenseList = lazy(() => import("./pages/expenses/ExpenseList"));
+const ExpenseForm = lazy(() => import("./pages/expenses/ExpenseForm"));
+const ExpenseDetail = lazy(() => import("./pages/expenses/ExpenseDetail"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Settings = lazy(() => import("./pages/Settings"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -176,6 +179,11 @@ const App = () => {
               <Route path="/finance/quotations/create" element={<QuotationForm />} />
               <Route path="/finance/quotations/edit/:id" element={<QuotationForm />} />
               <Route path="/finance/quotations/:id" element={<QuotationDetail />} />
+
+              <Route path="/finance/expenses" element={<ExpenseList />} />
+              <Route path="/finance/expenses/create" element={<ExpenseForm />} />
+              <Route path="/finance/expenses/edit/:id" element={<ExpenseForm />} />
+              <Route path="/finance/expenses/:id" element={<ExpenseDetail />} />
 
             </Route>
 

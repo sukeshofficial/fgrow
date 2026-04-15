@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { FiEye, FiEdit3, FiCalendar, FiUser } from "react-icons/fi";
+import { Eye, Pencil, Calendar, User } from "lucide-react";
 import TableSkeleton from "../../../components/skeletons/TableSkeleton";
 
 const ReceiptTable = ({ receipts, loading }) => {
@@ -79,7 +79,7 @@ const ReceiptTable = ({ receipts, loading }) => {
                                 </td>
                                 <td>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '13px' }}>
-                                        <FiCalendar size={13} />
+                                        <Calendar size={13} />
                                         {formatDate(receipt.date)}
                                     </div>
                                 </td>
@@ -100,7 +100,7 @@ const ReceiptTable = ({ receipts, loading }) => {
                                             title="View Details"
                                             onClick={() => navigate(`/finance/receipts/${receipt._id}`)}
                                         >
-                                            <FiEye size={14} />
+                                            <Eye size={14} />
                                         </button>
                                         <button
                                             className="action-btn"
@@ -109,7 +109,7 @@ const ReceiptTable = ({ receipts, loading }) => {
                                             onClick={() => navigate(`/finance/receipts/edit/${receipt._id}`)}
                                             disabled={receipt.status === 'settled'}
                                         >
-                                            <FiEdit3 size={14} />
+                                            <Pencil size={14} />
                                         </button>
                                     </div>
                                 </td>

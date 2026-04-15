@@ -384,14 +384,14 @@
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
-.dropdown-toggle .chevron {
+.dropdown-toggle .sd-chevron {
     transition: transform 0.2s ease;
     color: #94a3b8;
     margin-left: 8px;
     font-size: 16px;
 }
 
-.dropdown-toggle .chevron.up {
+.dropdown-toggle .sd-chevron.up {
     transform: rotate(180deg);
 }
 
@@ -519,7 +519,72 @@
     font-weight: bold;
 }
 
-/* Quotation List UI Enhancements */
+/* Quotation List Layout */
+.quotation-list-container {
+    padding: 32px;
+    background-color: var(--bg-light);
+    min-height: 100vh;
+}
+
+.quotation-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.quotation-list-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.quotation-list-subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+/* Table Styles */
+.table-container {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow-x: auto;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.modern-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.modern-table th {
+    background: #f8fafc;
+    padding: 14px 20px;
+    text-align: left;
+    font-weight: 600;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+}
+
+.modern-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    vertical-align: middle;
+}
+
+.modern-table tr:hover {
+    background-color: #f8fafc;
+}
+
 .clickable-number:hover {
     text-decoration: underline;
 }
@@ -533,4 +598,175 @@
 .edit-btn-list:hover {
     background: #ede9fe !important;
     border-color: #c4b5fd !important;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 24px;
+}
+
+.pagination-info {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.page-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: white;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.page-btn.active {
+    background: #7c3aed;
+    color: rgb(255, 255, 255);
+    border-color: #7c3aed;
+}
+
+/* Filter Bar for Quotations */
+.filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 16px 24px;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 32px;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 16px;
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+.table-search-input {
+    width: 100%;
+    padding: 14px 20px 14px 48px;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+.table-search-input:focus {
+    background: white;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+    transform: translateY(-1px);
+}
+
+.quick-filters {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.status-toggle {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 999px;
+    gap: 4px;
+}
+
+.toggle-btn {
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toggle-btn.active {
+    background: white;
+    color: #0f172a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: scale(1.02);
+}
+
+.advanced-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    color: #64748b;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1.5px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.advanced-filter-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #1e293b;
+}
+
+.create-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #7c3aed;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+}
+
+.create-btn:hover {
+    background: #6d28d9;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(124, 58, 237, 0.3);
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

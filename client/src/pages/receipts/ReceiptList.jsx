@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/SideBar";
 import ReceiptTable from "./components/ReceiptTable";
 import ReceiptFilterBar from "./components/ReceiptFilterBar";
+import ReceiptAdvancedFilterModal from "./components/ReceiptAdvancedFilterModal";
 import receiptService from "../../features/receipts/receiptService";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import logger from "../../utils/logger.js";
@@ -20,6 +21,7 @@ const debounce = (func, wait) => {
 
 const ReceiptList = () => {
     const navigate = useNavigate();
+    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
     const [pagination, setPagination] = useState({ page: 1, limit: 10 });
     const [filters, setFilters] = useState({
         search: "",
@@ -44,17 +46,19 @@ const ReceiptList = () => {
     const { data, isLoading } = useQuery({
         queryKey: ["receipts", { ...filters, search: debouncedSearch }, pagination.page],
         queryFn: async () => {
-            const activeFilter = filters.status === 'all' ? {} : { status: filters.status };
+            const { search, status, client, billing_entity, date_from, date_to } = filters;
             const params = {
                 page: pagination.page,
                 limit: pagination.limit,
-                search: debouncedSearch,
-                client: filters.client,
-                billing_entity: filters.billing_entity,
-                date_from: filters.date_from,
-                date_to: filters.date_to,
-                ...activeFilter,
+                search: debouncedSearch || undefined,
+                client: client || undefined,
+                billing_entity: billing_entity || undefined,
+                date_from: date_from || undefined,
+                date_to: date_to || undefined,
             };
+            if (status && status !== 'all') {
+                params.status = status;
+            }
             const resp = await receiptService.listReceipts(params);
             return resp;
         },
@@ -96,6 +100,28 @@ const ReceiptList = () => {
                         filters={filters}
                         onFilterChange={handleFilterChange}
                         onCreateNew={() => navigate("/finance/receipts/create")}
+                        onOpenFilters={() => setIsFilterModalOpen(true)}
+                    />
+
+                    <ReceiptAdvancedFilterModal
+                        isOpen={isFilterModalOpen}
+                        onClose={() => setIsFilterModalOpen(false)}
+                        filters={filters}
+                        onApply={(newFilters) => {
+                            setFilters(newFilters);
+                            setPagination(prev => ({ ...prev, page: 1 }));
+                        }}
+                        onClear={() => {
+                            setFilters({
+                                search: "",
+                                status: 'all',
+                                client: "",
+                                billing_entity: "",
+                                date_from: "",
+                                date_to: ""
+                            });
+                            setPagination(prev => ({ ...prev, page: 1 }));
+                        }}
                     />
 
                     <ReceiptTable receipts={receipts} loading={showLoading} />
