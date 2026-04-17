@@ -55,7 +55,9 @@ const LandingPage = lazy(() => import("./pages/LandingPage"));
 const NotificationPage = lazy(() => import("./pages/Notifications/NotificationPage"));
 const LaunchTimer = lazy(() => import("./pages/LaunchTimer"));
 
-
+const DocumentInOut = lazy(() => import("./pages/documents/DocumentInOut"));
+const DscManagement = lazy(() => import("./pages/documents/DscManagement"));
+const DocumentCollection = lazy(() => import("./pages/documents/DocumentCollection"));
 
 import { Spinner } from "./components/ui/Spinner";
 
@@ -169,7 +171,12 @@ const App = () => {
               <Route path="/finance/receipts/edit/:id" element={<EditReceiptWizard />} />
               <Route path="/finance/receipts/:id" element={<ReceiptDetail />} />
               <Route path="/finance" element={<Navigate to="/finance/invoices" replace />} />
-              <Route path="/documents" element={<Tasks />} />
+              
+              <Route path="/documents/in-out" element={<DocumentInOut />} />
+              <Route path="/documents/dsc" element={<DscManagement />} />
+              <Route path="/documents/collection" element={<DocumentCollection />} />
+              <Route path="/documents" element={<Navigate to="/documents/in-out" replace />} />
+              
               <Route path="/reports" element={<Tasks />} />
               <Route path="/users" element={<Users />} />
               <Route path="/notifications" element={<NotificationPage />} />

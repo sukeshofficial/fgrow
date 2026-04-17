@@ -31,6 +31,7 @@ export const createCollectionRequestService = async ({
     client: payload.client,
     task: payload.task,
     message: payload.message,
+    documents_count: payload.documents_count || 0,
     created_by: user_id,
     updated_by: user_id,
   });
@@ -132,8 +133,7 @@ export const updateCollectionRequestService = async ({
   const r = await CollectionRequest.findOne({ _id: request_id, tenant_id });
   if (!r) throw new Error("Collection request not found");
 
-  // basic updatable fields
-  const updatable = ["status", "task", "message", "due_date", "assigned_to"];
+  const updatable = ["status", "task", "message", "due_date", "assigned_to", "documents_count"];
   updatable.forEach((k) => {
     if (payload[k] !== undefined) {
       if (
@@ -248,7 +248,6 @@ export const attachDocumentsToRequestService = async ({
   r.documents = r.documents || [];
   r.documents.push(...uploadedDocs);
 
-  r.documents_count = r.documents.length;
   r.updated_by = user_id;
 
   await r.save();
@@ -296,7 +295,6 @@ export const removeDocumentFromRequestService = async ({
   // remove from array
   r.documents = r.documents.filter((d) => String(d._id) !== String(doc._id));
 
-  r.documents_count = r.documents.length;
   r.updated_by = user_id;
 
   await r.save();

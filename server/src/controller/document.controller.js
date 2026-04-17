@@ -123,7 +123,7 @@ export const returnDocumentController = async (req, res) => {
     const result = await returnDocumentService({
       tenant_id,
       document_id: req.params.id,
-      returned_on: req.body.returned_on,
+      returned_on: req.body?.returned_on || new Date(),
     });
 
     res.json({

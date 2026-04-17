@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FiChevronDown } from "react-icons/fi";
+import { FiChevronDown, FiTrash2 } from "react-icons/fi";
+import "../../styles/SearchableDropdown.css";
 
 const SearchableDropdown = ({
   options = [],
@@ -10,7 +11,8 @@ const SearchableDropdown = ({
   addNewLabel = "Add New",
   isMulti = false,
   loading = false,
-  error = false
+  error = false,
+  onDeleteOption
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -151,9 +153,21 @@ const SearchableDropdown = ({
                     )}
                     {option.name}
                   </div>
-                  {(isMulti ? (Array.isArray(value) && value.includes(option._id)) : (value === option._id)) && (
-                    <span className="check-icon">✓</span>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {(isMulti ? (Array.isArray(value) && value.includes(option._id)) : (value === option._id)) && (
+                      <span className="check-icon">✓</span>
+                    )}
+                    {onDeleteOption && (
+                      <span 
+                        className="sd-delete-icon" 
+                        title="Delete"
+                        onClick={(e) => { e.stopPropagation(); onDeleteOption(option._id); }}
+                        style={{ color: '#ef4444', display: 'flex', alignItems: 'center', cursor: 'pointer', padding: '4px', borderRadius: '4px' }}
+                      >
+                         <FiTrash2 />
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))
             ) : (

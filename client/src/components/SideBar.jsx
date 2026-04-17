@@ -73,14 +73,19 @@ const MENU = [
     path: "/documents",
     icon: <FaFileAlt />,
     right: <FaChevronRight />,
+    subItems: [
+      { label: "Document In-Out", path: "/documents/in-out" },
+      { label: "DSC Management", path: "/documents/dsc" },
+      { label: "Doc. Collection", path: "/documents/collection" }
+    ]
   },
 
-  {
-    label: "Reports",
-    path: "/reports",
-    icon: <FaChartBar />,
-    right: <FaChevronRight />,
-  },
+  // {
+  //   label: "Reports",
+  //   path: "/reports",
+  //   icon: <FaChartBar />,
+  //   right: <FaChevronRight />,
+  // },
 
   { label: "Users", path: "/users", icon: <FaUsers /> },
 

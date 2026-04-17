@@ -1,0 +1,478 @@
+/* Documents.css */
+
+/* Custom Toggle Switch for Document Form */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  margin-right: 10px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider {
+  background-color: var(--primary-accent, #3b82f6);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px var(--primary-accent, #3b82f6);
+}
+
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+.slider.round {
+  border-radius: 20px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.required-asterisk {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.document-toggle-container {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-main);
+  margin-bottom: 20px;
+}
+
+/* Page structural styles */
+.documents-page {
+  margin-top: 0;
+  margin-left: var(--sidebar-w, 260px);
+  transition: margin-left 0.3s ease;
+}
+
+.documents-container {
+  padding: 32px;
+  padding-top: 80px;
+  background-color: var(--bg-light);
+  min-height: 100vh;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+.documents-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  margin-top: 20px;
+}
+
+.documents-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+/* Table container styling */
+.doc-table-container {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow-x: auto;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.doc-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.doc-table th {
+  background: #f8fafc;
+  padding: 14px 20px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+.doc-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.doc-table tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Buttons */
+.doc-create-btn {
+  background: var(--primary-accent);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(99, 102, 241, 0.1);
+}
+
+.doc-create-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.doc-cancel-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: white;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.doc-cancel-btn:hover {
+  background: #f8fafc;
+}
+
+.doc-submit-btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  background: var(--primary-accent);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.doc-submit-btn:hover {
+  background: var(--primary-hover);
+}
+
+.doc-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Action Items */
+.doc-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.doc-action-btn {
+  width: 52px;
+  height: 32px;
+  border-radius: 999px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 13px;
+}
+
+.doc-action-btn:hover {
+  background: white;
+  color: var(--primary-accent);
+  border-color: var(--primary-accent);
+}
+
+.doc-action-btn.delete:hover {
+  color: var(--error-red) !important;
+  border-color: var(--error-red) !important;
+}
+
+/* Modals */
+.doc-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.doc-modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.doc-modal-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.doc-modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.doc-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.doc-modal-body {
+  padding: 24px;
+}
+
+.doc-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.doc-form-group {
+  margin-bottom: 20px;
+}
+
+.doc-form-group.full-width {
+  grid-column: span 2;
+}
+
+.doc-form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.doc-form-input {
+  max-height: 50px;
+}
+
+textarea.doc-form-input {
+  max-height: none;
+  min-height: 80px;
+}
+
+.doc-form-input,
+.doc-form-group input,
+.doc-form-group select,
+.doc-form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fdfdfd;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.doc-form-input:focus,
+.doc-form-group input:focus,
+.doc-form-group select:focus,
+.doc-form-group textarea:focus {
+  border-color: var(--primary-accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.doc-view-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+.doc-view-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.doc-view-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.doc-view-item.no-border {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.doc-view-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #64748b);
+  font-weight: 600;
+}
+
+.doc-view-value {
+  font-size: 15px;
+  color: var(--text-main, #0f172a);
+  font-weight: 500;
+  line-height: 1.5;
+  word-break: break-word;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.doc-view-icon {
+  color: #94a3b8;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.doc-view-value.notes-box {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-accent, #3b82f6);
+  font-size: 14px;
+  color: #334155;
+  margin-top: 8px;
+}
+
+.doc-modal-footer {
+  padding: 24px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Badges */
+.doc-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.doc-status-badge.open {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.doc-status-badge.in_progress {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.doc-status-badge.closed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.doc-status-badge.cancelled {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.doc-status-badge.given {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.doc-status-badge.received {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+/* Responsive Overrides */
+@media (max-width: 992px) {
+  .documents-page {
+    margin-left: 72px;
+  }
+  .documents-container {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .documents-container {
+    padding: 15px;
+  }
+  .doc-modal-content {
+    width: 92%;
+    max-width: 92%;
+    margin: 10px auto;
+    padding: 15px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .doc-modal-body > div {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .doc-form-group.full-width {
+    grid-column: span 1;
+  }
+  .doc-table th,
+  .doc-table td {
+    padding: 12px 15px;
+    white-space: nowrap;
+  }
+}
