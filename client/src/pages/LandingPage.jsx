@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
 import ScrollingCredits from "../components/dashboard/ScrollingCredits";
 import { Link } from "react-router-dom";
-import ContactSalesModal from "../components/ui/ContactSalesModal";
+import { PopupModal } from "react-calendly";
 import Toast from "../components/ui/Toast";
 import { api } from "../api/api";
 import { checkAuth } from "../features/auth/auth.actions";
@@ -21,7 +21,7 @@ const LandingPage = () => {
     const { user, avatar, dispatch } = useAuth();
     const isStaff = user?.tenant_role === "staff";
     const [activeFaq, setActiveFaq] = useState(null);
-    const [isSalesModalOpen, setIsSalesModalOpen] = useState(false);
+    const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
 
     const [darkMode, setDarkMode] = useState(() => {
         if (typeof window !== "undefined") {
@@ -193,7 +193,12 @@ const LandingPage = () => {
 
     return (
         <>
-            <ContactSalesModal isOpen={isSalesModalOpen} onClose={() => setIsSalesModalOpen(false)} initialData={{ name: user?.name, email: user?.email }} />
+            <PopupModal
+                url="https://calendly.com/sukesh-official-2006"
+                onModalClose={() => setIsCalendlyOpen(false)}
+                open={isCalendlyOpen}
+                rootElement={document.getElementById("root")}
+            />
             <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -652,13 +657,13 @@ const LandingPage = () => {
                                     {isStaff ? (
                                         <button className="btn-cta" style={{ opacity: 0.5, cursor: "not-allowed" }} disabled>Book a Demo →</button>
                                     ) : (
-                                        <button onClick={() => setIsSalesModalOpen(true)} className="btn-cta">Book a Demo →</button>
+                                        <button onClick={() => setIsCalendlyOpen(true)} className="btn-cta">Book a Demo →</button>
                                     )}
                                 </>
                             ) : (
                                 <>
                                     <Link to="/login" className="btn-ghost">Login</Link>
-                                    <Link to="/subscription" className="btn-cta">Book a Demo →</Link>
+                                    <button onClick={() => setIsCalendlyOpen(true)} className="btn-cta">Book a Demo →</button>
                                 </>
                             )}
                         </div>
@@ -1080,7 +1085,7 @@ const LandingPage = () => {
                                 {isStaff ? (
                                     <button className="price-btn price-btn-outline" style={{ opacity: 0.5, cursor: "not-allowed" }} disabled>Contact Sales</button>
                                 ) : (
-                                    <button onClick={() => setIsSalesModalOpen(true)} className="price-btn price-btn-outline">Contact Sales</button>
+                                    <button onClick={() => setIsCalendlyOpen(true)} className="price-btn price-btn-outline">Contact Sales</button>
                                 )}
                             </div>
                         </div>

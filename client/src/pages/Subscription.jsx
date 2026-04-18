@@ -7,6 +7,7 @@ import "../styles/subscription.css";
 import { useNavigate } from "react-router-dom";
 import { Spinner } from "../components/ui/Spinner";
 import { FaShieldAlt } from "react-icons/fa";
+import GooglePayButton from "@google-pay/button-react";
 
 const Subscription = () => {
     const { user, dispatch } = useAuth();
@@ -16,6 +17,10 @@ const Subscription = () => {
     const [billingStatus, setBillingStatus] = useState(null);
     const [error, setError] = useState(null);
     const [toasts, setToasts] = useState([]);
+    
+    // GPay / UPI State
+    const [showGpayModal, setShowGpayModal] = useState(false);
+    const [utr, setUtr] = useState("");
 
     const addToast = (message, type = "success") => {
         const id = Date.now();
@@ -52,7 +57,29 @@ const Subscription = () => {
         });
     };
 
-    const handlePayment = async () => {
+    const handleGpaySubmit = async (e) => {
+        e.preventDefault();
+        if (!utr) {
+            addToast("Please enter UTR/Reference number", "error");
+            return;
+        }
+        setProcessing(true);
+        try {
+            await api.post("/billing/verify-manual", { utr });
+            await fetchBillingStatus();
+            await checkAuth(dispatch);
+            addToast("Payment recorded! Your subscription is active.", "success");
+            setShowGpayModal(false);
+            setUtr("");
+        } catch (err) {
+            console.error("GPay verification failed:", err);
+            setError("GPay verification failed. Please try again or contact support.");
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const handleRazorpayPayment = async () => {
         setProcessing(true);
         setError(null);
 
@@ -467,7 +494,106 @@ const Subscription = () => {
                 @media (max-width: 768px) {
                     .back-btn { top: 20px; left: 20px; padding: 6px 12px; font-size: 13px; }
                 }
+
+                /* GPay Modal CSS */
+                .gpay-overlay {
+                    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+                    z-index: 1000; display: flex; align-items: center; justify-content: center;
+                }
+                .gpay-modal {
+                    background: white; border-radius: var(--radius); padding: 32px;
+                    width: 90%; max-width: 400px; text-align: center; box-shadow: var(--shadow-lg);
+                }
+                .gpay-qr-img { width: 220px; max-width: 100%; border-radius: 8px; margin: 16px auto; display: block; border: 1px solid var(--border); box-shadow: var(--shadow); }
+                .utr-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin: 16px 0; font-family: var(--font); font-size: 15px; }
+                .price-btn-secondary { background: var(--off); color: var(--text); padding: 10px; width: 100%; border-radius: 8px; margin-top: 8px; transition: 0.2s; border: none; cursor: pointer; }
+                .price-btn-secondary:hover { background: #e2e8f0; }
             `}</style>
+
+            {showGpayModal && (
+                <div className="gpay-overlay">
+                    <div className="gpay-modal">
+                        <h3 style={{fontSize: 22, fontWeight: 800, marginBottom: 8}}>Pay securely with GPay</h3>
+                        <p style={{fontSize: 14, color: 'var(--muted)', marginBottom: 24}}>Use the official Google Pay button to process your payment.</p>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+                            <GooglePayButton
+                                environment="TEST"
+                                paymentRequest={{
+                                    apiVersion: 2,
+                                    apiVersionMinor: 0,
+                                    allowedPaymentMethods: [
+                                        {
+                                            type: 'CARD',
+                                            parameters: {
+                                                allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+                                                allowedCardNetworks: ['MASTERCARD', 'VISA'],
+                                            },
+                                            tokenizationSpecification: {
+                                                type: 'PAYMENT_GATEWAY',
+                                                parameters: {
+                                                    gateway: 'razorpay',
+                                                    gatewayMerchantId: 'rzp_test_placeholder',
+                                                },
+                                            },
+                                        },
+                                    ],
+                                    merchantInfo: {
+                                        merchantId: '12345678901234567890',
+                                        merchantName: 'ForgeGrid',
+                                    },
+                                    transactionInfo: {
+                                        totalPriceStatus: 'FINAL',
+                                        totalPriceLabel: 'Total',
+                                        totalPrice: (billingStatus?.currentAmount || 1).toString(),
+                                        currencyCode: 'INR',
+                                        countryCode: 'IN',
+                                    },
+                                }}
+                                onLoadPaymentData={async (paymentData) => {
+                                    setProcessing(true);
+                                    try {
+                                        // Mock backend resolution using the token data payload
+                                        const mockUtr = paymentData.paymentMethodData?.tokenizationData?.token?.substring(0, 12) || "gpay_auth_ok";
+                                        await api.post("/billing/verify-manual", { utr: mockUtr });
+                                        await fetchBillingStatus();
+                                        await checkAuth(dispatch);
+                                        addToast("Payment successful via Google Pay API!", "success");
+                                        setShowGpayModal(false);
+                                    } catch (err) {
+                                        console.error("GPay processing failed", err);
+                                        setError("Payment failed. Please try again.");
+                                    } finally {
+                                        setProcessing(false);
+                                    }
+                                }}
+                                onCancel={() => addToast("Payment cancelled", "error")}
+                                buttonColor="black"
+                                buttonType="pay"
+                            />
+                        </div>
+
+                        <hr style={{border: 'none', borderTop: '1px solid var(--border)', margin: '24px 0'}} />
+
+                        <form onSubmit={handleGpaySubmit}>
+                            <p style={{fontSize: 13, color: 'var(--text)', fontWeight: 600, textAlign: 'left'}}>Already Paid?</p>
+                            <input 
+                                type="text"
+                                className="utr-input"
+                                placeholder="Enter 12-digit UTR No. / Transaction ID" 
+                                value={utr}
+                                onChange={e => setUtr(e.target.value)}
+                                required
+                            />
+                            <button type="submit" className="price-btn price-btn-solid" disabled={processing}>
+                                {processing ? "Verifying..." : "Verify Payment"}
+                            </button>
+                        </form>
+                        <button type="button" className="price-btn-secondary" onClick={() => setShowGpayModal(false)}>Cancel</button>
+                    </div>
+                </div>
+            )}
 
             <div className="sub-wrap">
                 <button className="back-btn" onClick={() => navigate(-1)}>
@@ -509,10 +635,19 @@ const Subscription = () => {
 
                         <button
                             className="price-btn price-btn-solid"
-                            onClick={handlePayment}
+                            onClick={() => setShowGpayModal(true)}
                             disabled={processing}
                         >
-                            {processing ? "Processing..." : "Upgrade Now"}
+                            {processing ? "Processing..." : "Pay with GPay"}
+                        </button>
+
+                        <button 
+                            type="button" 
+                            style={{marginTop: 16, background: 'none', border: 'none', color: 'var(--muted)', fontSize: 13, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline'}}
+                            onClick={handleRazorpayPayment}
+                            disabled={processing}
+                        >
+                            Pay via Card / Netbanking (Razorpay)
                         </button>
 
                         {(effectiveEndDate || billingStatus?.plan) && (

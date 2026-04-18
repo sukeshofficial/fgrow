@@ -14,12 +14,14 @@
     "cy:open": "cypress open"
   },
   "dependencies": {
+    "@google-pay/button-react": "^3.2.1",
     "@hello-pangea/dnd": "^18.0.1",
     "@tanstack/react-query": "^5.99.0",
     "axios": "^1.13.5",
     "axios-retry": "^4.5.0",
     "lucide-react": "^1.8.0",
     "react": "^19.2.0",
+    "react-calendly": "^4.4.0",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.13.0",

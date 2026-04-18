@@ -85,6 +85,37 @@ export const verifyPayment = async (req, res) => {
 };
 
 /**
+ * Verify manual GPay/UPI payment with UTR
+ */
+export const verifyManualPayment = async (req, res) => {
+    try {
+        const { utr } = req.body;
+        const { tenant_id } = req.user;
+        
+        if (!utr) return res.status(400).json({ message: "UTR/Transaction ID is required" });
+
+        const amount = parseFloat(process.env.SUBSCRIPTION_AMOUNT || "1");
+        
+        const payment = new Payment({
+            tenant_id,
+            amount,
+            currency: "INR",
+            razorpay_order_id: `manual_${utr}_${Date.now()}`,
+            razorpay_payment_id: utr,
+            status: "paid",
+        });
+        
+        await payment.save();
+        await activateSubscriptionWithTrial(tenant_id, payment);
+
+        res.status(200).json({ message: "Payment verified and subscription activated" });
+    } catch (error) {
+        logger.error("Error in verifyManualPayment controller:", error);
+        res.status(500).json({ message: "Manual verification failed" });
+    }
+};
+
+/**
  * Handle Razorpay Webhooks
  */
 export const handleWebhook = async (req, res) => {

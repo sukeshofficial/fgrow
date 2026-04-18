@@ -14,6 +14,7 @@ router.use(authMiddleware);
 
 router.post("/create-order", billingController.createOrder);
 router.post("/verify-payment", clearCacheMiddleware("v0/billing"), billingController.verifyPayment);
+router.post("/verify-manual", clearCacheMiddleware("v0/billing"), billingController.verifyManualPayment);
 router.get("/status", cacheMiddleware(300), billingController.getBillingStatus);
 router.get("/history", cacheMiddleware(300), billingController.getPaymentHistory);
 router.get("/plans", cacheMiddleware(3600), billingController.getPlans);

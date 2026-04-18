@@ -5,10 +5,11 @@ import { FaUserCircle } from "react-icons/fa";
 
 
 import { useAuth } from "../../hooks/useAuth.js";
-import { verifyOtp, login } from "../../features/auth/auth.actions.js";
+import { verifyOtp, login, resendOtp } from "../../features/auth/auth.actions.js";
 import { userPreview } from "../../api/auth.api.js";
 import { SET_PROFILE_PREVIEW } from "../../features/auth/auth.types.js";
 import ForgotPassword from "./ForgotPassword.jsx";
+import OtpModal from "./OtpModal.jsx";
 import logger from "../../utils/logger.js";
 
 import "../../styles/login-form.css";
@@ -116,6 +117,42 @@ const LoginForm = ({ onSuccess }) => {
     }
   };
 
+  const handleOpenOtp = async () => {
+    try {
+      setOtpLoading(true);
+      await resendOtp(dispatch, form.email);
+      setShowOtpModal(true);
+      setError(null);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (code) => {
+    try {
+      setOtpLoading(true);
+      setOtpError("");
+      await verifyOtp(dispatch, { email: form.email, otp: code });
+      setShowOtpModal(false);
+      onSuccess();
+    } catch (err) {
+      setOtpError(err.response?.data?.message || "Invalid code");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      setOtpError("");
+      await resendOtp(dispatch, form.email);
+    } catch (err) {
+      setOtpError(err.response?.data?.message || "Failed to resend code");
+    }
+  };
+
   // -----------------------------
   // Render
   // -----------------------------
@@ -124,6 +161,7 @@ const LoginForm = ({ onSuccess }) => {
   }
 
   return (
+    <>
     <form className="auth-form" onSubmit={handleSubmit}>
       <h2 className="auth-title">Login</h2>
 
@@ -188,13 +226,24 @@ const LoginForm = ({ onSuccess }) => {
       />
 
       {/* Submit */}
-      <button
-        type="submit"
-        className="btn primary"
-        disabled={isLoading}
-      >
-        {isLoading ? "Logging in..." : "Login"}
-      </button>
+      {error && error.toLowerCase().includes("verify") ? (
+        <button
+          type="button"
+          className="btn primary"
+          onClick={handleOpenOtp}
+          disabled={otpLoading}
+        >
+          {otpLoading ? "Sending OTP..." : "Verify OTP"}
+        </button>
+      ) : (
+        <button
+          type="submit"
+          className="btn primary"
+          disabled={isLoading}
+        >
+          {isLoading ? "Logging in..." : "Login"}
+        </button>
+      )}
 
       {/* Switch */}
       <p className="auth-switch">
@@ -204,6 +253,17 @@ const LoginForm = ({ onSuccess }) => {
         </Link>
       </p>
     </form>
+    
+    <OtpModal
+      open={showOtpModal}
+      onClose={() => setShowOtpModal(false)}
+      onVerify={handleVerifyOtp}
+      onResend={handleResendOtp}
+      email={form.email}
+      isLoading={otpLoading}
+      error={otpError}
+    />
+    </>
   );
 };
 
