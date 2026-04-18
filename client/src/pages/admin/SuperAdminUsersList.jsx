@@ -141,13 +141,14 @@ const SuperAdminUsersList = () => {
                           {user.platform_role === "none" ? "Standard User" : user.platform_role.replace("_", " ")}
                         </span>
                         <div style={{ marginTop: "4px" }}>
-                          <span className={`staff-role-badge ${user.status === "active" ? "verified" : user.status === "suspended" ? "rejected" : "pending"}`} style={{ 
+                          <span className={`staff-role-badge ${user.status === "active" ? "verified" : user.status === "inactive" ? "pending" : "rejected"}`} style={{ 
                             fontSize: "10px", 
                             padding: "2px 8px",
                             borderRadius: "12px",
                             display: "inline-flex",
                             alignItems: "center",
-                            height: "20px"
+                            height: "20px",
+                            textTransform: "capitalize"
                           }}>
                             {user.status || "Unknown"}
                           </span>

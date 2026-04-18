@@ -93,7 +93,7 @@ const userSchema = new mongoose.Schema(
     // Account Status
     status: {
       type: String,
-      enum: ["invited", "active", "suspended"],
+      enum: ["invited", "active", "suspended", "inactive"],
       default: "active",
       index: true,
     },

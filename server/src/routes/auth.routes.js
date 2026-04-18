@@ -26,7 +26,7 @@ router.post("/verify-reset-otp", verifyResetOtp);
 router.post("/reset-password", resetPassword);
 
 // Authenticated routes
-router.post("/logout", logoutUser);
+router.post("/logout", authMiddleware, logoutUser);
 router.get("/me", authMiddleware, getMe);
 router.get("/user-preview", userPreview);
 

@@ -654,6 +654,7 @@ export const loginUser = async (req, res) => {
     user.locked_until = undefined;
     user.lockout_level = 0;
     user.last_login_at = new Date();
+    user.status = "active";
 
     const superAdminEmails = process.env.SUPER_ADMIN_EMAILS.split(",");
 
@@ -801,7 +802,7 @@ export const resetPassword = async (req, res) => {
 /**
  * logoutUser
  */
-export const logoutUser = async (_req, res) => {
+export const logoutUser = async (req, res) => {
   try {
     // Clear cookie with identical metadata but omitting maxAge/expires
     res.clearCookie("auth_token", {
@@ -810,6 +811,11 @@ export const logoutUser = async (_req, res) => {
       sameSite: COOKIE_OPTIONS.sameSite,
       path: COOKIE_OPTIONS.path,
     });
+
+    if (req.user?.id) {
+      await User.findByIdAndUpdate(req.user.id, { status: "inactive" });
+    }
+
     return res.status(200).json({ message: "logged out" });
   } catch (err) {
     logger.error("Logout User error:", err);

@@ -81,6 +81,7 @@ export const forceLogoutUserAdmin = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     user.token_version = (user.token_version || 0) + 1;
+    user.status = "inactive";
     await user.save({ validateBeforeSave: false });
 
     res.status(200).json({ success: true, message: "User force logged out successfully" });
