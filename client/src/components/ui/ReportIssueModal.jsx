@@ -130,7 +130,7 @@ const ReportIssueModal = ({ isOpen, onClose }) => {
                                 <label className="filter-label">Title <span style={{ color: '#ef4444' }}>*</span></label>
                                 <input
                                     type="text"
-                                    className="filter-input-styled"
+                                    className="report-input-styled"
                                     placeholder="E.g., Cannot upload logo in Settings"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
@@ -141,7 +141,7 @@ const ReportIssueModal = ({ isOpen, onClose }) => {
                             <div className="filter-form-group">
                                 <label className="filter-label">Description <span style={{ color: '#ef4444' }}>*</span></label>
                                 <textarea
-                                    className="filter-input-styled"
+                                    className="report-input-styled"
                                     style={{ minHeight: '120px', resize: 'vertical' }}
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
