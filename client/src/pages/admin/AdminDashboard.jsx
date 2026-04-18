@@ -10,6 +10,7 @@ import TableSkeleton from "../../components/skeletons/TableSkeleton";
 import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import BugReportsList from "./BugReportsList";
 import LaunchManagement from "./LaunchManagement";
+import SuperAdminUsersList from "./SuperAdminUsersList";
 
 import "../../styles/welcome.css";
 import "../../styles/admin-dashboard.css";
@@ -84,14 +85,14 @@ const AdminDashboard = () => {
         <h1 className="dashboard-title">Super Admin Dashboard</h1>
 
         <div className="filter-tabs" style={{ margin: 0 }}>
-          {['tenants', 'reports', 'launch'].map(tab => (
+          {['tenants', 'reports', 'launch', 'users'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`filter-tabs-btn ${activeTab === tab ? 'active' : ''}`}
               style={{ textTransform: 'capitalize' }}
             >
-              {tab === 'reports' ? 'Bug Reports' : tab === 'launch' ? 'Launch' : 'Tenants'}
+              {tab === 'reports' ? 'Bug Reports' : tab === 'launch' ? 'Launch' : tab === 'users' ? 'Users' : 'Tenants'}
             </button>
           ))}
         </div>
@@ -244,8 +245,10 @@ const AdminDashboard = () => {
         </>
       ) : activeTab === 'reports' ? (
         <BugReportsList />
-      ) : (
+      ) : activeTab === 'launch' ? (
         <LaunchManagement />
+      ) : (
+        <SuperAdminUsersList />
       )}
     </div>
   );

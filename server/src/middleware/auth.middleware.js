@@ -53,11 +53,16 @@ export default async function authMiddleware(req, res, next) {
 
     // Load fresh user and validate account state
     const user = await User.findById(userId).select(
-      "name email tenant_id platform_role tenant_role status profile_avatar",
+      "name email tenant_id platform_role tenant_role status profile_avatar token_version",
     );
 
     if (!user) {
       return res.status(401).json({ message: "unauthorized: user not found" });
+    }
+
+    // Check for remote logout
+    if ((decoded.token_version ?? 0) !== (user.token_version ?? 0)) {
+      return res.status(401).json({ message: "unauthorized: session expired remotely" });
     }
 
     // Block access if account is locked

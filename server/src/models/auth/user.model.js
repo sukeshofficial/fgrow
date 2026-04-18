@@ -139,6 +139,12 @@ const userSchema = new mongoose.Schema(
       default: 0,
       select: false,
     },
+    
+    // Remote logout tracking
+    token_version: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

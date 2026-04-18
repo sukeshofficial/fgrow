@@ -43,7 +43,10 @@ const COOKIE_OPTIONS = {
  * Helper: issue JWT cookie and return safe user payload
  */
 const sendAuthSuccess = (res, user, payload = {}) => {
-  const token = generateToken({ userId: user._id });
+  const token = generateToken({ 
+    userId: user._id, 
+    token_version: user.token_version ?? 0 
+  });
 
   res.cookie("auth_token", token, COOKIE_OPTIONS);
 
@@ -106,21 +109,46 @@ export const registerUser = async (req, res) => {
       };
     }
 
-    const invitation = await UserInvitation.findOne({
+    let invitation = await UserInvitation.findOne({
       email,
       accepted_at: null,
     });
 
     let invitedBy;
+    let tenant_id = null;
+    let tenant_role = "none";
+
+    // Reconnection logic: if no active invitation, check for past associations
+    if (!invitation) {
+      // 1. Check for previously accepted invitations (staff)
+      invitation = await UserInvitation.findOne({ email }).sort({ createdAt: -1 });
+      
+      if (!invitation) {
+        // 2. Check if this user owns a tenant (owner)
+        const ownedTenant = await Tenant.findOne({ companyEmail: email });
+        if (ownedTenant) {
+          tenant_id = ownedTenant._id;
+          tenant_role = "owner";
+        }
+      }
+    }
 
     if (invitation) {
-      if (invitation.expires_at < Date.now()) {
+      // Check expiry only for active (unaccepted) invitations
+      if (!invitation.accepted_at && invitation.expires_at < Date.now()) {
         return res.status(400).json({
           message: "Invitation expired",
         });
       }
 
       invitedBy = invitation.invited_by;
+      tenant_id = invitation.tenant_id;
+      tenant_role = invitation.tenant_role;
+
+      if (!invitation.accepted_at) {
+        invitation.accepted_at = new Date();
+        await invitation.save();
+      }
     }
 
     // Create user
@@ -129,6 +157,8 @@ export const registerUser = async (req, res) => {
       username,
       email,
       invited_by: invitedBy,
+      tenant_id: tenant_id,
+      tenant_role: tenant_role,
       profile_avatar: avatarData,
       status: "active",
       joined_at: new Date(),
@@ -246,6 +276,13 @@ export const verifyOtp = async (req, res) => {
     user.reset_token_expiry = undefined;
 
     await user.save({ validateBeforeSave: false });
+
+    // Reconnection: If reregistering owner, link the tenant back to this new user ID
+    if (user.tenant_role === "owner" && user.tenant_id) {
+      await Tenant.findByIdAndUpdate(user.tenant_id, {
+        ownerUserId: user._id,
+      });
+    }
 
     return sendAuthSuccess(res, user, {
       message: "Email verified and authenticated successfully",
@@ -622,6 +659,10 @@ export const loginUser = async (req, res) => {
 
     if (superAdminEmails.includes(user.email)) {
       user.platform_role = "super_admin";
+    }
+
+    if (user.tenant_id && user.tenant_role === "none") {
+      user.tenant_role = "staff";
     }
 
     await user.save({ validateBeforeSave: false });

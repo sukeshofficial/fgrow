@@ -27,6 +27,7 @@ import profileRoutes from "./routes/profile.routes.js";
 import leadRoutes from "./routes/lead.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import launchRoutes from "./routes/launch.routes.js";
+import superAdminRoutes from "./routes/superadmin.routes.js";
 
 import { errorMiddleware } from "./middleware/error.middleware.js";
 
@@ -103,6 +104,7 @@ app.use("/api/v0/profile", profileRoutes);
 app.use("/api/v0/leads", leadRoutes);
 app.use("/api/v0/notifications", notificationRoutes);
 app.use("/api/v0/launch", launchRoutes);
+app.use("/api/v0/superadmin", superAdminRoutes);
 
 
 
