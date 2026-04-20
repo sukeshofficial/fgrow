@@ -11,6 +11,9 @@ const BugReportsList = () => {
     const [updatingId, setUpdatingId] = useState(null);
     const [selectedImages, setSelectedImages] = useState(null); // For Lightbox
     const [currentImgIndex, setCurrentImgIndex] = useState(0);
+    const [resolutionModal, setResolutionModal] = useState({ open: false, reportId: null });
+    const [resolutionForm, setResolutionForm] = useState({ title: "", description: "", screenshots: [] });
+    const [resolutionPreviews, setResolutionPreviews] = useState([]);
 
     const getStatusStyle = (status) => {
         switch (status) {
@@ -51,6 +54,13 @@ const BugReportsList = () => {
     };
 
     const handleUpdateStatus = async (id, newStatus) => {
+        if (newStatus === "resolved") {
+            setResolutionModal({ open: true, reportId: id });
+            setResolutionForm({ title: "", description: "", screenshots: [] });
+            setResolutionPreviews([]);
+            return;
+        }
+
         try {
             setUpdatingId(id);
             await api.put(`/reports/${id}/status`, { status: newStatus });
@@ -60,6 +70,40 @@ const BugReportsList = () => {
         } finally {
             setUpdatingId(null);
         }
+    };
+
+    const handleResolveSubmit = async (e) => {
+        e.preventDefault();
+        const { reportId } = resolutionModal;
+
+        try {
+            setUpdatingId(reportId);
+            const formData = new FormData();
+            formData.append("status", "resolved");
+            formData.append("resolutionTitle", resolutionForm.title);
+            formData.append("resolutionDescription", resolutionForm.description);
+            resolutionForm.screenshots.forEach(file => {
+                formData.append("screenshots", file);
+            });
+
+            await api.put(`/reports/${reportId}/status`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            setResolutionModal({ open: false, reportId: null });
+            fetchReports();
+        } catch (err) {
+            alert("Failed to resolve issue: " + (err.response?.data?.message || err.message));
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
+    const handleFileChange = (e) => {
+        const files = Array.from(e.target.files);
+        setResolutionForm(prev => ({ ...prev, screenshots: [...prev.screenshots, ...files] }));
+        const newPreviews = files.map(file => URL.createObjectURL(file));
+        setResolutionPreviews(prev => [...prev, ...newPreviews]);
     };
 
     if (loading) return <div style={{ padding: '20px' }}><TableSkeleton rows={5} columns={4} /></div>;
@@ -288,18 +332,7 @@ const BugReportsList = () => {
             {/* Carousel Modal (Lightbox) */}
             {selectedImages && (
                 <div
-                    style={{
-                        position: 'fixed',
-                        top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(15, 23, 42, 0.69)',
-                        zIndex: 2000,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backdropFilter: 'blur(12px)',
-                        animation: 'fadeIn 0.3s ease'
-                    }}
+                    style={overlayStyle}
                     onClick={() => setSelectedImages(null)}
                 >
                     {/* Header: Close / Index Indicator */}
@@ -312,7 +345,7 @@ const BugReportsList = () => {
                         alignItems: 'center',
                         background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)',
                         zIndex: 10,
-                        
+
                     }}>
                         <div style={{ color: 'rgba(0,0,0,1)', fontSize: '16px', fontWeight: '500', opacity: 0.8, backgroundColor: 'hsla(237, 100%, 96%, 1.00)', padding: '5px 20px', borderRadius: '999px', }}>
                             Screenshot {currentImgIndex + 1} / {selectedImages.length}
@@ -463,18 +496,144 @@ const BugReportsList = () => {
                             ))}
                         </div>
                     )}
-
-                    <style>{`
-                        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-                        @keyframes slideIn { 
-                            from { transform: translateY(20px); opacity: 0; } 
-                            to { transform: translateY(0); opacity: 1; } 
-                        }
-                    `}</style>
                 </div>
             )}
+
+            {/* Resolution Modal */}
+            {resolutionModal.open && (
+                <div style={overlayStyle} onClick={() => setResolutionModal({ open: false, reportId: null })}>
+                    <div style={modalBoxStyle} onClick={e => e.stopPropagation()}>
+                        <div className="filter-modal-header">
+                            <h3>Resolve Issue</h3>
+                            <button className="filter-close-btn" onClick={() => setResolutionModal({ open: false, reportId: null })}><FaTimes /></button>
+                        </div>
+                        <form onSubmit={handleResolveSubmit}>
+                            <div className="filter-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '20px' }}>
+                                <div>
+                                    <label className="filter-label">Resolution Summary *</label>
+                                    <input
+                                        type="text"
+                                        className="report-input-styled"
+                                        style={inputStyle}
+                                        placeholder="E.g., Fixed logo upload bug"
+                                        value={resolutionForm.title}
+                                        onChange={e => setResolutionForm(prev => ({ ...prev, title: e.target.value }))}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="filter-label">Technical Details / Description *</label>
+                                    <textarea
+                                        className="report-input-styled"
+                                        style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }}
+                                        placeholder="Explain what was fixed..."
+                                        value={resolutionForm.description}
+                                        onChange={e => setResolutionForm(prev => ({ ...prev, description: e.target.value }))}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="filter-label">Proof of Fix (Screenshots)</label>
+                                    <div style={{
+                                        border: '2px dashed #e2e8f0',
+                                        borderRadius: '12px',
+                                        padding: '20px',
+                                        textAlign: 'center',
+                                        background: '#f8fafc',
+                                        cursor: 'pointer'
+                                    }} onClick={() => document.getElementById('res-screenshot-input').click()}>
+                                        <input
+                                            id="res-screenshot-input"
+                                            type="file" multiple accept="image/*"
+                                            onChange={handleFileChange}
+                                            style={{ display: 'none' }}
+                                        />
+                                        <p style={{ fontSize: '13px', color: '#64748b' }}>Click to upload proof screenshots</p>
+                                    </div>
+                                    {resolutionPreviews.length > 0 && (
+                                        <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+                                            {resolutionPreviews.map((url, i) => (
+                                                <img key={i} src={url} alt="preview" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="filter-modal-footer" style={{ padding: '20px' }}>
+                                <button type="button" className="action-btn" onClick={() => setResolutionModal({ open: false, reportId: null })}>Cancel</button>
+                                <button type="submit" className="filter-btn-primary" disabled={updatingId === resolutionModal.reportId}>
+                                    {updatingId === resolutionModal.reportId ? <FaSpinner className="fa-spin" /> : 'Confirm Resolution'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            <style>{`
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes slideIn { 
+                    from { transform: translateY(20px); opacity: 0; } 
+                    to { transform: translateY(0); opacity: 1; } 
+                }
+                .report-input-styled {
+                    width: 100%;
+                    padding: 10px 14px;
+                    border: 1.5px solid #e2e8f0;
+                    borderRadius: 8px;
+                    fontSize: 14px;
+                    outline: none;
+                    transition: border-color 0.2s;
+                    box-sizing: border-box;
+                    margin-top: 4px;
+                }
+                .report-input-styled:focus { border-color: #6366f1; }
+                .action-btn {
+                    padding: 8px 18px;
+                    border: 1px solid #e2e8f0;
+                    background: white;
+                    color: #64748b;
+                    border-radius: 10px;
+                    font-weight: 600;
+                    font-size: 13px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .action-btn:hover {
+                    background: #f8fafc;
+                    color: #1e293b;
+                    border-color: #cbd5e1;
+                }
+                .filter-modal-footer {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 12px;
+                    border-top: 1px solid #f1f5f9;
+                }
+            `}</style>
         </div>
     );
+};
+
+const overlayStyle = {
+    position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+    background: 'rgba(15, 23, 42, 0.69)', backdropFilter: "blur(12px)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    zIndex: 2000,
+};
+
+const modalBoxStyle = {
+    background: "white", borderRadius: "20px",
+    width: "100%", maxWidth: "500px",
+    boxShadow: "0 20px 25px -5px rgba(0,0,0,0.12)",
+    animation: 'slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+    overflow: 'hidden'
+};
+
+const inputStyle = {
+    width: "100%", padding: "10px 14px", border: "1.5px solid #e2e8f0",
+    borderRadius: "8px", fontSize: "14px", outline: "none",
+    transition: "border-color 0.2s", boxSizing: "border-box",
 };
 
 export default BugReportsList;

@@ -12,7 +12,6 @@ import { useModal } from "../../../context/ModalContext";
 
 const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) => {
   const { showAlert } = useModal();
-  const [form, setForm] = useState(data);
   const [groups, setGroups] = useState([]);
   const [tags, setTags] = useState([]);
   const [errors, setErrors] = useState({});
@@ -27,9 +26,22 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
     fetchTags();
   }, []);
 
+  const [form, setForm] = useState({
+    name: "",
+    file_no: "",
+    gstin: "",
+    pan: "",
+    type: "Individual",
+    customType: "",
+    group: "",
+    tags: [],
+    photo: null,
+    ...data
+  });
+
   useEffect(() => {
     if (data) {
-      setForm(data);
+      setForm(prev => ({ ...prev, ...data }));
     }
   }, [data]);
 
@@ -125,12 +137,19 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
         const newGroup = resp.data.data;
         setGroups(prev => [...prev, newGroup]);
         handleChange("group", newGroup._id);
-      } else {
+      } else if (inputModal.type === "tag") {
         const resp = await createTag({ name });
         const newTag = resp.data.data;
         setTags(prev => [...prev, newTag]);
         const currentTags = Array.isArray(form.tags) ? form.tags : [];
         handleChange("tags", [...currentTags, newTag._id]);
+      } else if (inputModal.type === "client_type") {
+        // For custom client type, set type to "Other" and customType to name
+        setForm(prev => ({
+          ...prev,
+          type: "Other",
+          customType: name
+        }));
       }
       setInputModal({ open: false, type: "", value: "", loading: false, error: "" });
     } catch (e) {
@@ -146,7 +165,27 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
     setInputModal({ open: false, type: "", value: "", loading: false, error: "" });
   };
 
-  const modalLabel = inputModal.type === "group" ? "Group" : "Tag";
+  const modalLabel = inputModal.type === "group" ? "Group" : inputModal.type === "tag" ? "Tag" : "Client Type";
+
+  const clientTypes = [
+    { _id: "Individual", name: "Individual" },
+    { _id: "Sole Proprietorship", name: "Sole Proprietorship" },
+    { _id: "Partnership", name: "Partnership" },
+    { _id: "LLP", name: "LLP" },
+    { _id: "HUF", name: "HUF" },
+    { _id: "Private Limited", name: "Private Limited" },
+    { _id: "Limited Company", name: "Limited Company" },
+    { _id: "One-Person Company", name: "One-Person Company" },
+    { _id: "NGO", name: "NGO" },
+    { _id: "Trust", name: "Trust" },
+    { _id: "Government Entity", name: "Government Entity" },
+    { _id: "Other", name: "Other" }
+  ];
+
+  // If currently "Other" with a customType, add it to the list temporarily for selection display
+  if (form.type === "Other" && form.customType && !clientTypes.find(t => t.name === form.customType)) {
+    clientTypes.push({ _id: form.customType, name: form.customType });
+  }
 
   return (
     <div className={`step-container ${isTransitioning ? "slide-down-active" : ""}`}>
@@ -192,6 +231,27 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
                 value={form.pan}
                 onChange={(e) => handleChange("pan", e.target.value.toUpperCase())}
                 placeholder="Enter PAN"
+              />
+            </FormField>
+
+            <FormField label="Client Type" required>
+              <SearchableDropdown
+                options={clientTypes}
+                value={form.type === "Other" ? form.customType : form.type}
+                onChange={(val) => {
+                  const isStandard = clientTypes.find(t => t._id === val && t._id !== "Other");
+                  if (isStandard && val !== form.customType) {
+                    setForm(prev => ({ ...prev, type: val, customType: "" }));
+                  } else if (val === "Other") {
+                    setInputModal({ open: true, type: "client_type", value: "", loading: false, error: "" });
+                  } else {
+                    // It's the custom type
+                    setForm(prev => ({ ...prev, type: "Other", customType: val }));
+                  }
+                }}
+                placeholder="Select client type"
+                onAddNew={(search) => setInputModal({ open: true, type: "client_type", value: search, loading: false, error: "" })}
+                addNewLabel="Add New Type"
               />
             </FormField>
 
@@ -294,7 +354,7 @@ const ClientDetailsForm = ({ data, onNext, onPrev, isEdit, isTransitioning }) =>
               value={inputModal.value}
               onChange={(e) => setInputModal(prev => ({ ...prev, value: e.target.value, error: "" }))}
               onKeyDown={(e) => { if (e.key === "Enter") handleInputModalConfirm(); if (e.key === "Escape") handleInputModalClose(); }}
-              placeholder={`e.g. ${inputModal.type === "group" ? "Corporate Clients" : "VIP"}`}
+              placeholder={`e.g. ${inputModal.type === "group" ? "Corporate Clients" : inputModal.type === "tag" ? "VIP" : "Private Trust"}`}
               style={inputStyle}
             />
             {inputModal.error && (

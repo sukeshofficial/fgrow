@@ -44,7 +44,7 @@ const ClientTable = ({ clients, loading }) => {
                     <span className="client-name">{client.name}</span>
                   </div>
                 </td>
-                <td>{client.type}</td>
+                <td>{client.type === "Other" ? client.customType : client.type}</td>
                 <td>{client.group?.name || "-"}</td>
                 <td>
                   <div style={{ fontSize: '12px' }}>

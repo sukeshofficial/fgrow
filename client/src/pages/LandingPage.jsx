@@ -10,10 +10,12 @@ import Toast from "../components/ui/Toast";
 import { api } from "../api/api";
 import { checkAuth } from "../features/auth/auth.actions";
 
-const PlaceholderNotice = () => (
-    <span className="placeholder-tooltip">
+const PlaceholderNotice = ({ className = "" }) => (
+    <span className={`placeholder-tooltip ${className}`}>
         <FaInfoCircle size={14} />
-        <span className="tooltip-text">Notice: Content on this landing page are placeholders right now.</span>
+        <span className="tooltip-text">
+            Notice: Content on this landing page are placeholders right now.
+        </span>
     </span>
 );
 
@@ -556,6 +558,7 @@ const LandingPage = () => {
         .tooltip-text { visibility: hidden; opacity: 0; width: max-content; max-width: 220px; background: var(--navy); color: white; text-align: center; border-radius: 6px; padding: 6px 10px; position: absolute; z-index: 1000; bottom: 140%; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 500; font-family: 'Sora',sans-serif; letter-spacing: normal; text-transform: none; line-height: 1.4; box-shadow: var(--shadow-lg); transition: opacity 0.2s,bottom 0.2s; white-space: normal; }
         .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: var(--navy) transparent transparent transparent; }
         .placeholder-tooltip:hover .tooltip-text { visibility: visible; opacity: 1; bottom: 150%; }
+        .tooltip-wall-of-love { color: var(--blue) !important; }
 
         /* FINAL CTA */
         .final-cta { background: var(--final-cta-bg); padding: 120px 0; text-align: center; position: relative; overflow: hidden; }
@@ -1011,8 +1014,13 @@ const LandingPage = () => {
                 <section className="testi">
                     <div className="wrap" style={{ textAlign: "center" }}>
                         <div className="reveal">
-                            <span className="section-tag" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>Wall of Love <PlaceholderNotice /></span>
-                            <h2 className="section-h2">Trusted by India's leading consultants</h2>
+                            <span
+                                className="section-tag"
+                                style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                            >
+                                Wall of Love
+                                <PlaceholderNotice className="tooltip-wall-of-love" />
+                            </span>                            <h2 className="section-h2">Trusted by India's leading consultants</h2>
                             <p className="section-sub" style={{ margin: "0 auto 64px" }}>Real stories from firms that run their operations on FG GROW.</p>
                         </div>
                         <div className="testi-grid">

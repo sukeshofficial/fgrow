@@ -7,6 +7,6 @@ const router = express.Router();
 
 router.post("/", authMiddleware, upload.array('screenshots', 10), createReport);
 router.get("/", authMiddleware, getReports);
-router.put("/:id/status", authMiddleware, updateReportStatus);
+router.put("/:id/status", authMiddleware, upload.array('screenshots', 10), updateReportStatus);
 
 export default router;

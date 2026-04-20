@@ -34,7 +34,13 @@ const reportSchema = new mongoose.Schema(
         },
         screenshots: [{
             type: String
-        }]
+        }],
+        resolution: {
+            title: { type: String, trim: true },
+            description: { type: String },
+            screenshots: [{ type: String }],
+            resolvedAt: { type: Date }
+        }
     },
     { timestamps: true }
 );
