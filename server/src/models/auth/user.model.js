@@ -139,11 +139,17 @@ const userSchema = new mongoose.Schema(
       default: 0,
       select: false,
     },
-    
+
     // Remote logout tracking
     token_version: {
       type: Number,
       default: 0,
+    },
+
+    // Release Notes Tracking
+    last_seen_release_version: {
+      type: String,
+      default: "0.0.0",
     },
   },
   {

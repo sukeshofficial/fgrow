@@ -82,6 +82,7 @@ import { setupInterceptors } from "./api/api";
 import GlobalModal from "./components/ui/GlobalModal";
 import ReportIssueModal from "./components/ui/ReportIssueModal";
 import { useModal } from "./context/ModalContext";
+import ReleaseNotesLoader from "./components/ui/ReleaseNotesLoader";
 
 const App = () => {
   const { user, dispatch, isLoading } = useAuth();
@@ -122,6 +123,7 @@ const App = () => {
     <Suspense fallback={<PageLoader />}>
       <GlobalModal />
       <ReportIssueModal isOpen={isReportModalOpen} onClose={closeReportModal} />
+      <ReleaseNotesLoader />
       <Routes>
 
         {/* Default */}
@@ -171,12 +173,12 @@ const App = () => {
               <Route path="/finance/receipts/edit/:id" element={<EditReceiptWizard />} />
               <Route path="/finance/receipts/:id" element={<ReceiptDetail />} />
               <Route path="/finance" element={<Navigate to="/finance/invoices" replace />} />
-              
+
               <Route path="/documents/in-out" element={<DocumentInOut />} />
               <Route path="/documents/dsc" element={<DscManagement />} />
               <Route path="/documents/collection" element={<DocumentCollection />} />
               <Route path="/documents" element={<Navigate to="/documents/in-out" replace />} />
-              
+
               <Route path="/reports" element={<Tasks />} />
               <Route path="/users" element={<Users />} />
               <Route path="/notifications" element={<NotificationPage />} />

@@ -11,6 +11,7 @@ import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import BugReportsList from "./BugReportsList";
 import LaunchManagement from "./LaunchManagement";
 import SuperAdminUsersList from "./SuperAdminUsersList";
+import ReleaseNotesManagement from "./ReleaseNotesManagement";
 
 import "../../styles/welcome.css";
 import "../../styles/admin-dashboard.css";
@@ -85,14 +86,14 @@ const AdminDashboard = () => {
         <h1 className="dashboard-title">Super Admin Dashboard</h1>
 
         <div className="filter-tabs" style={{ margin: 0 }}>
-          {['tenants', 'reports', 'launch', 'users'].map(tab => (
+          {['tenants', 'reports', 'launch', 'release-notes', 'users'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`filter-tabs-btn ${activeTab === tab ? 'active' : ''}`}
               style={{ textTransform: 'capitalize' }}
             >
-              {tab === 'reports' ? 'Bug Reports' : tab === 'launch' ? 'Launch' : tab === 'users' ? 'Users' : 'Tenants'}
+              {tab === 'reports' ? 'Bug Reports' : tab === 'launch' ? 'Launch' : tab === 'users' ? 'Users' : tab === 'release-notes' ? 'Release Notes' : 'Tenants'}
             </button>
           ))}
         </div>
@@ -247,6 +248,8 @@ const AdminDashboard = () => {
         <BugReportsList />
       ) : activeTab === 'launch' ? (
         <LaunchManagement />
+      ) : activeTab === 'release-notes' ? (
+        <ReleaseNotesManagement />
       ) : (
         <SuperAdminUsersList />
       )}
