@@ -99,12 +99,19 @@ const RegisterForm = ({ onSuccess }) => {
         err?.response?.data?.message || "Registration failed";
 
       if (status === 409) {
-        setError(message);
+        const isPendingVerification = err?.response?.data?.pendingVerification;
+        const email = err?.response?.data?.email || form.email;
 
+        if (isPendingVerification) {
+          // Account exists but wasn't verified — the backend resent the OTP, take them to verify
+          onSuccess(email);
+          return;
+        }
+
+        setError(message);
         setTimeout(() => {
           navigate("/login", { replace: true });
-        }, 5000);
-
+        }, 3000);
         return;
       }
 

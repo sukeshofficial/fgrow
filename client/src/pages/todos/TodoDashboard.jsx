@@ -127,7 +127,7 @@ const TodoDashboard = () => {
               <input
                 type="text"
                 className="todo-search-input"
-                placeholder="Search tasks..."
+                placeholder="Search todo..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />

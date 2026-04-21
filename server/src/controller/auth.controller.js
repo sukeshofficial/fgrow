@@ -43,9 +43,9 @@ const COOKIE_OPTIONS = {
  * Helper: issue JWT cookie and return safe user payload
  */
 const sendAuthSuccess = (res, user, payload = {}) => {
-  const token = generateToken({ 
-    userId: user._id, 
-    token_version: user.token_version ?? 0 
+  const token = generateToken({
+    userId: user._id,
+    token_version: user.token_version ?? 0
   });
 
   res.cookie("auth_token", token, COOKIE_OPTIONS);
@@ -84,6 +84,35 @@ export const registerUser = async (req, res) => {
     }).lean();
 
     if (existing) {
+      // If the account exists but email isn't verified, resend the OTP
+      if (!existing.emailVerified) {
+        const rawOtp = createNumericOtp();
+        const hashedOtp = crypto.createHash("sha256").update(rawOtp).digest("hex");
+
+        await User.findByIdAndUpdate(existing._id, {
+          reset_token: hashedOtp,
+          reset_token_expiry: Date.now() + 5 * 60 * 1000,
+        });
+
+        await sendEmail({
+          to: existing.email,
+          subject: "Complete your FGrow registration — Verification Code",
+          text: `Hello ${existing.name}, your verification code is ${rawOtp}. It expires in 5 minutes.`,
+          html: `<div style="font-family:'Poppins',sans-serif;max-width:500px;margin:40px auto;background:#fff;padding:40px;border-radius:20px;border:1px solid #e2e8f0;">
+            <h2 style="color:#2563eb;text-align:center;">Complete your registration</h2>
+            <p style="color:#475569;text-align:center;">You started signing up but didn't verify your email. Use the code below to finish.</p>
+            <div style="font-size:32px;font-weight:800;color:#2563eb;letter-spacing:12px;text-align:center;padding:24px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:16px;">${rawOtp}</div>
+            <p style="color:#94a3b8;font-size:12px;text-align:center;margin-top:12px;">Expires in <strong>5 minutes</strong></p>
+          </div>`,
+        });
+
+        return res.status(409).json({
+          message: "account already exists",
+          pendingVerification: true,
+          email: existing.email,
+        });
+      }
+
       return res.status(409).json({ message: "account already exists" });
     }
 
@@ -122,7 +151,7 @@ export const registerUser = async (req, res) => {
     if (!invitation) {
       // 1. Check for previously accepted invitations (staff)
       invitation = await UserInvitation.findOne({ email }).sort({ createdAt: -1 });
-      
+
       if (!invitation) {
         // 2. Check if this user owns a tenant (owner)
         const ownedTenant = await Tenant.findOne({ companyEmail: email });
@@ -517,11 +546,8 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "email and password required" });
     }
 
-    const user = await User.findOne({
-      email,
-      reset_token: null,
-      reset_token_expiry: null,
-    }).select(
+    // Find the user regardless of OTP token state
+    const user = await User.findOne({ email }).select(
       "+password_hash +failed_login_attempts +locked_until +lockout_level",
     );
 
@@ -529,9 +555,21 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "invalid credentials" });
     }
 
+    // If user registered but never verified email, give informative message
     if (!user.emailVerified) {
       return res.status(403).json({
         message: "Please verify your email before logging in",
+        pendingVerification: true,
+        email: user.email,
+      });
+    }
+
+    // Reject login if a reset/OTP token is still active (non-verified state)
+    if (user.reset_token && user.reset_token_expiry > Date.now()) {
+      return res.status(403).json({
+        message: "Please verify your email before logging in",
+        pendingVerification: true,
+        email: user.email,
       });
     }
 
