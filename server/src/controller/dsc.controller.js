@@ -32,9 +32,14 @@ export const createDscController = async (req, res) => {
 export const listDscController = async (req, res) => {
   try {
     const tenant_id = req.user.tenant_id;
+    const { page, limit, search, class_type } = req.query;
 
     const result = await listDscService({
-      tenant_id
+      tenant_id,
+      page: parseInt(page) || 1,
+      limit: parseInt(limit) || 20,
+      search,
+      class_type,
     });
 
     res.json({

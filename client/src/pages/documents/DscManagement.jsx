@@ -1,15 +1,24 @@
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useCallback } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import SideBar from "../../components/SideBar";
 import { listDsc, createDsc, updateDsc, deleteDsc } from "../../api/dsc.api";
 import { listClientsByTenantId } from "../../api/client.api";
-import { FaPlus, FaEdit, FaTrash, FaEye } from "react-icons/fa";
-import { FiUser, FiTag, FiCalendar, FiLock, FiCopy, FiCheck } from "react-icons/fi";
+import { Eye, Pencil, Trash2, Lock, Copy, Check } from "lucide-react";
 import SearchableDropdown from "../../components/ui/SearchableDropdown";
+import DscFilterBar from "./components/DscFilterBar";
 
 import "../../styles/Documents.css";
+import "../quotations/quotations.css";
 
 const DeleteModal = React.lazy(() => import("../../components/ui/DeleteModal"));
+
+const debounce = (func, wait) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
 
 const DscViewModal = ({ isOpen, onClose, dsc }) => {
   const [copied, setCopied] = useState(false);
@@ -33,41 +42,41 @@ const DscViewModal = ({ isOpen, onClose, dsc }) => {
         <div className="doc-modal-body">
           <div className="doc-view-grid">
             <div className="doc-view-item">
-               <span className="doc-view-label">Client</span>
-               <div className="doc-view-value"><FiUser className="doc-view-icon" /> {dsc.client?.name || "N/A"}</div>
+              <span className="doc-view-label">Client</span>
+              <div className="doc-view-value">{dsc.client?.name || "N/A"}</div>
             </div>
             <div className="doc-view-item">
-               <span className="doc-view-label">Class</span>
-               <div className="doc-view-value"><FiTag className="doc-view-icon" /> {dsc.class_type || "N/A"}</div>
+              <span className="doc-view-label">Class</span>
+              <div className="doc-view-value">{dsc.class_type || "N/A"}</div>
             </div>
             <div className="doc-view-item">
-               <span className="doc-view-label">Issue Date</span>
-               <div className="doc-view-value"><FiCalendar className="doc-view-icon" /> {dsc.issue_date ? new Date(dsc.issue_date).toLocaleDateString() : "N/A"}</div>
+              <span className="doc-view-label">Issue Date</span>
+              <div className="doc-view-value">{dsc.issue_date ? new Date(dsc.issue_date).toLocaleDateString() : "N/A"}</div>
             </div>
             <div className="doc-view-item">
-               <span className="doc-view-label">Expiry Date</span>
-               <div className="doc-view-value"><FiCalendar className="doc-view-icon" /> {dsc.expiry_date ? new Date(dsc.expiry_date).toLocaleDateString() : "N/A"}</div>
+              <span className="doc-view-label">Expiry Date</span>
+              <div className="doc-view-value">{dsc.expiry_date ? new Date(dsc.expiry_date).toLocaleDateString() : "N/A"}</div>
             </div>
             <div className="doc-view-item">
-               <span className="doc-view-label">Password</span>
-               <div className="doc-view-value" style={{ fontFamily: "monospace", letterSpacing: "1px" }}>
-                 <FiLock className="doc-view-icon" /> 
-                 <span>{dsc.password || "N/A"}</span>
-                 {dsc.password && (
-                   <button 
-                     onClick={handleCopy} 
-                     style={{ background: 'none', border: 'none', cursor: 'pointer', outline: 'none', display: 'flex', alignItems: 'center', padding: '4px', marginLeft: 'auto', borderRadius: '4px' }}
-                     title="Copy Password"
-                   >
-                     {copied ? <FiCheck style={{ color: '#10b981', fontSize: '16px' }} /> : <FiCopy style={{ color: '#94a3b8', fontSize: '16px' }} />}
-                   </button>
-                 )}
-               </div>
+              <span className="doc-view-label">Password</span>
+              <div className="doc-view-value" style={{ fontFamily: "monospace", letterSpacing: "1px" }}>
+                <Lock size={16} style={{ marginRight: '8px', color: '#94a3b8' }} />
+                <span>{dsc.password || "N/A"}</span>
+                {dsc.password && (
+                  <button
+                    onClick={handleCopy}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', outline: 'none', display: 'flex', alignItems: 'center', padding: '4px', marginLeft: 'auto', borderRadius: '4px' }}
+                    title="Copy Password"
+                  >
+                    {copied ? <Check size={16} style={{ color: '#10b981' }} /> : <Copy size={16} style={{ color: '#94a3b8' }} />}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-          <div className="doc-view-item no-border">
-             <span className="doc-view-label">Notes</span>
-             <div className="doc-view-value notes-box">{dsc.notes || "None"}</div>
+          <div className="doc-view-item no-border" style={{ marginTop: '16px' }}>
+            <span className="doc-view-label">Notes</span>
+            <div className="doc-view-value" style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', borderLeft: '4px solid var(--primary-accent)' }}>{dsc.notes || "None"}</div>
           </div>
         </div>
       </div>
@@ -92,9 +101,10 @@ const DscModal = ({ isOpen, onClose, dsc, onSave }) => {
       return res.data.data.items || res.data.data || [];
     }
   });
+
   const handleSave = () => {
     if (!formData.client || !formData.class_type || !formData.issue_date || !formData.expiry_date) {
-      alert("Please fill in all required fields.");
+      alert("Please fill in all required fields (Client, Class, Issue Date, Expiry Date).");
       return;
     }
     onSave(formData);
@@ -123,9 +133,9 @@ const DscModal = ({ isOpen, onClose, dsc, onSave }) => {
             <div className="doc-form-group">
               <label>Class <span className="required-asterisk">*</span></label>
               <select value={formData.class_type} onChange={e => setFormData({ ...formData, class_type: e.target.value })} className="doc-form-input">
-                 <option value="Class 1">Class 1</option>
-                 <option value="Class 2">Class 2</option>
-                 <option value="Class 3">Class 3</option>
+                <option value="Class 1">Class 1</option>
+                <option value="Class 2">Class 2</option>
+                <option value="Class 3">Class 3</option>
               </select>
             </div>
             <div className="doc-form-group">
@@ -166,12 +176,32 @@ const DscManagement = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dscToDelete, setDscToDelete] = useState(null);
 
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+  const [filters, setFilters] = useState({
+    search: "",
+    classType: "all"
+  });
+
+  const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
+
+  const handleDebounceSearch = useCallback(
+    debounce((value) => setDebouncedSearch(value), 500),
+    []
+  );
+
   const { data, isLoading } = useQuery({
-    queryKey: ["dsc"],
+    queryKey: ["dsc", { ...filters, search: debouncedSearch }, pagination.page],
     queryFn: async () => {
-      const res = await listDsc({ limit: 100 });
-      return res.data.data.items || res.data.data || [];
-    }
+      const params = {
+        page: pagination.page,
+        limit: pagination.limit,
+        search: debouncedSearch || undefined,
+        class_type: filters.classType === 'all' ? undefined : filters.classType
+      };
+      const res = await listDsc(params);
+      return res.data.data;
+    },
+    placeholderData: (previousData) => previousData,
   });
 
   const saveMutation = useMutation({
@@ -185,10 +215,6 @@ const DscManagement = () => {
       queryClient.invalidateQueries(["dsc"]);
       setIsModalOpen(false);
       setEditingDsc(null);
-    },
-    onError: (err) => {
-      console.error(err);
-      alert(err?.response?.data?.message || err.message || "Failed to save DSC");
     }
   });
 
@@ -201,26 +227,43 @@ const DscManagement = () => {
     }
   });
 
-  const dscs = data || [];
+  const dscs = data?.items || (Array.isArray(data) ? data : []);
+  const meta = data?.pagination || {};
+  const total_pages = meta.total_pages || 0;
+  const total = meta.total || (Array.isArray(data) ? data.length : 0);
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setPagination(prev => ({ ...prev, page: 1 }));
+    if (key === 'search') {
+      handleDebounceSearch(value);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, page: newPage }));
+  };
 
   return (
     <>
       <SideBar />
-      <div className="documents-page">
-        <div className="documents-container">
-          <div className="documents-header">
-            <h1 className="documents-title">DSC Management</h1>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button className="doc-cancel-btn" style={{ borderRadius: '999px', display: 'flex', alignItems: 'center', gap: '8px' }}>Import</button>
-              <button className="doc-cancel-btn" style={{ borderRadius: '999px', display: 'flex', alignItems: 'center', gap: '8px' }}>Export</button>
-              <button className="doc-create-btn" onClick={() => { setEditingDsc(null); setIsModalOpen(true); }}>
-                <FaPlus /> New
-              </button>
+      <div className="clients">
+        <div className="quotation-list-container">
+          <div className="quotation-list-header">
+            <div>
+              <h1 className="quotation-list-title">DSC Management</h1>
+              <p className="quotation-list-subtitle">Manage and track digital signature certificates</p>
             </div>
           </div>
-          
-          <div className="doc-table-container">
-            <table className="doc-table">
+
+          <DscFilterBar
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onCreateNew={() => { setEditingDsc(null); setIsModalOpen(true); }}
+          />
+
+          <div className="table-container">
+            <table className="modern-table">
               <thead>
                 <tr>
                   <th>CLIENT</th>
@@ -228,36 +271,78 @@ const DscManagement = () => {
                   <th>ISSUE DATE</th>
                   <th>PASSWORD</th>
                   <th>EXPIRY DATE</th>
-                  <th>NOTES</th>
-                  <th>ACTIONS</th>
+                  <th style={{ textAlign: 'right' }}>ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
-                {isLoading ? <tr><td colSpan="7" style={{ textAlign: "center", padding: "20px" }}>Loading...</td></tr> : 
-                 dscs.length === 0 ? <tr><td colSpan="7" style={{ textAlign: "center", padding: "20px" }}>No DSCs found</td></tr> :
-                 dscs.map(dsc => (
-                  <tr key={dsc._id} onClick={() => { setViewingDsc(dsc); setIsViewModalOpen(true); }} style={{ cursor: "pointer" }}>
-                    <td>{dsc.client?.name}</td>
-                    <td>{dsc.class_type}</td>
-                    <td>{new Date(dsc.issue_date).toLocaleDateString()}</td>
-                    <td>{dsc.password || "-"}</td>
-                    <td>{new Date(dsc.expiry_date).toLocaleDateString()}</td>
-                    <td>{dsc.notes}</td>
-                    <td>
-                      <div className="doc-action-buttons" style={{ display: 'flex', gap: '10px' }}>
-                         <button className="doc-action-btn" onClick={(e) => { e.stopPropagation(); setViewingDsc(dsc); setIsViewModalOpen(true); }} title="View Details"><FaEye /></button>
-                         <button className="doc-action-btn" onClick={(e) => { e.stopPropagation(); setEditingDsc(dsc); setIsModalOpen(true); }} title="Edit"><FaEdit /></button>
-                         <button className="doc-action-btn delete" onClick={(e) => { e.stopPropagation(); setDscToDelete(dsc); setIsDeleteModalOpen(true); }} style={{ color: "red" }} title="Delete"><FaTrash /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {isLoading ? (
+                  <tr><td colSpan="6" style={{ textAlign: "center", padding: "40px", color: '#94a3b8' }}>Loading DSCs...</td></tr>
+                ) : dscs.length === 0 ? (
+                  <tr><td colSpan="6" style={{ textAlign: "center", padding: "40px", color: '#94a3b8' }}>No DSCs found</td></tr>
+                ) : (
+                  dscs.map(dsc => (
+                    <tr key={dsc._id} onClick={() => { setViewingDsc(dsc); setIsViewModalOpen(true); }} style={{ cursor: 'pointer' }}>
+                      <td style={{ fontWeight: '600' }}>{dsc.client?.name}</td>
+                      <td><span className={`doc-status-badge ${dsc.class_type?.replace(" ", "_") || ''}`}>{dsc.class_type}</span></td>
+                      <td style={{ color: '#64748b' }}>{new Date(dsc.issue_date).toLocaleDateString()}</td>
+                      <td style={{ color: '#475569', fontFamily: 'monospace' }}>{dsc.password || "-"}</td>
+                      <td style={{ color: '#64748b' }}>{new Date(dsc.expiry_date).toLocaleDateString()}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                          <button className="action-icon-btn" onClick={(e) => { e.stopPropagation(); setViewingDsc(dsc); setIsViewModalOpen(true); }} title="View">
+                            <Eye size={16} color="#64748b" />
+                          </button>
+                          <button className="action-icon-btn edit-btn-list" onClick={(e) => { e.stopPropagation(); setEditingDsc(dsc); setIsModalOpen(true); }} title="Edit">
+                            <Pencil size={16} color="#7c3aed" />
+                          </button>
+                          <button className="action-icon-btn" onClick={(e) => { e.stopPropagation(); setDscToDelete(dsc); setIsDeleteModalOpen(true); }} title="Delete">
+                            <Trash2 size={16} color="#ef4444" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {!isLoading && dscs.length > 0 && (
+            <div className="pagination">
+              <span className="pagination-info">
+                Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, total)} of {total} entries
+              </span>
+              <div className="pagination-controls">
+                <button
+                  className="page-btn"
+                  disabled={pagination.page === 1}
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                >
+                  &lt;
+                </button>
+                {[...Array(total_pages || 0)].map((_, i) => (
+                  <button
+                    key={i}
+                    className={`page-btn ${pagination.page === i + 1 ? 'active' : ''}`}
+                    onClick={() => handlePageChange(i + 1)}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button
+                  className="page-btn"
+                  disabled={pagination.page === (total_pages || 1) || total_pages === 0}
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                >
+                  &gt;
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      
+
       {isModalOpen && (
         <DscModal
           isOpen={isModalOpen}
@@ -274,7 +359,7 @@ const DscManagement = () => {
           dsc={viewingDsc}
         />
       )}
-      
+
       {isDeleteModalOpen && (
         <Suspense fallback={null}>
           <DeleteModal
@@ -291,3 +376,4 @@ const DscManagement = () => {
 };
 
 export default DscManagement;
+

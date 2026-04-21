@@ -2,7 +2,8 @@
 
 .expense-list-container {
     padding: 32px;
-    background-color: #f8fafc;
+    /* background-color: var(--bg-light); */
+    background-color: #ffffff;
     min-height: calc(100vh - 64px);
     display: flex;
     flex-direction: column;
@@ -11,7 +12,7 @@
 
 .expense-header {
     display: flex;
-    margin-top: 80px !important;
+    /* margin-top: 80px !important; */
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;

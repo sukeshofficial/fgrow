@@ -35,8 +35,15 @@ export const createDocumentController = async (req, res) => {
 export const listDocumentsController = async (req, res) => {
   try {
     const tenant_id = req.user.tenant_id;
+    const { page, limit, search, category } = req.query;
 
-    const result = await listDocumentsService({ tenant_id });
+    const result = await listDocumentsService({
+      tenant_id,
+      page: parseInt(page) || 1,
+      limit: parseInt(limit) || 20,
+      search,
+      category,
+    });
 
     res.json({
       success: true,

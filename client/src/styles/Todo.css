@@ -308,7 +308,8 @@
 }
 
 .todo-dashboard-container {
-  background: var(--bg-light);
+  /* background: var(--bg-light); */
+  background: #ffffff;
   padding: 32px;
   min-height: calc(100vh - 50px);
 }

@@ -1,18 +1,27 @@
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useCallback } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import SideBar from "../../components/SideBar";
 import { listDocuments, createDocument, updateDocument, deleteDocument, returnDocument } from "../../api/document.api";
 import { listClientsByTenantId } from "../../api/client.api";
 import { listDocumentTypes, createDocumentType, deleteDocumentType } from "../../api/documentType.api";
-import { FaPlus } from "react-icons/fa";
-import { FiEdit, FiTrash, FiEye, FiCalendar, FiFileText, FiUser, FiMapPin, FiCornerUpLeft, FiCheckCircle, FiXCircle } from "react-icons/fi";
-import { IoIosReturnLeft } from "react-icons/io";
+import { Eye, Pencil, Trash2, RotateCcw } from "lucide-react";
 import GlobalModal from "../../components/ui/GlobalModal";
 import SearchableDropdown from "../../components/ui/SearchableDropdown";
+import DocumentFilterBar from "./components/DocumentFilterBar";
 
+// Use shared styles from quotations
 import "../../styles/Documents.css";
+import "../quotations/quotations.css";
 
 const DeleteModal = React.lazy(() => import("../../components/ui/DeleteModal"));
+
+const debounce = (func, wait) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
 
 const DocumentViewModal = ({ isOpen, onClose, document }) => {
   if (!isOpen || !document) return null;
@@ -26,45 +35,43 @@ const DocumentViewModal = ({ isOpen, onClose, document }) => {
         <div className="doc-modal-body">
           <div className="doc-view-grid">
             <div className="doc-view-item">
-               <span className="doc-view-label">Date</span>
-               <div className="doc-view-value"><FiCalendar className="doc-view-icon" /> {document.date ? new Date(document.date).toLocaleDateString() : "N/A"}</div>
+              <span className="doc-view-label">Date</span>
+              <div className="doc-view-value">{document.date ? new Date(document.date).toLocaleDateString() : "N/A"}</div>
             </div>
             <div className="doc-view-item">
-               <span className="doc-view-label">Category</span>
-               <div className="doc-view-value">
-                 <span className={`doc-status-badge ${document.category || ''}`} style={{ textTransform: "capitalize" }}>{document.category || "N/A"}</span>
-               </div>
+              <span className="doc-view-label">Category</span>
+              <div className="doc-view-value">
+                <span className={`doc-status-badge ${document.category || ''}`} style={{ textTransform: "capitalize" }}>{document.category || "N/A"}</span>
+              </div>
             </div>
             <div className="doc-view-item">
-               <span className="doc-view-label">Document Type</span>
-               <div className="doc-view-value"><FiFileText className="doc-view-icon" /> {document.document_type?.name || "N/A"}</div>
+              <span className="doc-view-label">Document Type</span>
+              <div className="doc-view-value">{document.document_type?.name || "N/A"}</div>
             </div>
             <div className="doc-view-item">
-               <span className="doc-view-label">Client</span>
-               <div className="doc-view-value"><FiUser className="doc-view-icon" /> {document.client?.name || "N/A"}</div>
+              <span className="doc-view-label">Client</span>
+              <div className="doc-view-value">{document.client?.name || "N/A"}</div>
             </div>
             <div className="doc-view-item full-width">
-               <span className="doc-view-label">Location</span>
-               <div className="doc-view-value"><FiMapPin className="doc-view-icon" /> {document.location || "N/A"}</div>
+              <span className="doc-view-label">Location</span>
+              <div className="doc-view-value">{document.location || "N/A"}</div>
             </div>
             <div className="doc-view-item">
-               <span className="doc-view-label">Returnable</span>
-               <div className="doc-view-value">
-                 {document.is_returnable ? <FiCornerUpLeft className="doc-view-icon" style={{color: '#3b82f6'}}/> : <FiXCircle className="doc-view-icon" />} 
-                 {document.is_returnable ? "Yes" : "No"}
-               </div>
+              <span className="doc-view-label">Returnable</span>
+              <div className="doc-view-value">
+                {document.is_returnable ? "Yes" : "No"}
+              </div>
             </div>
             <div className="doc-view-item">
-               <span className="doc-view-label">Returned</span>
-               <div className="doc-view-value">
-                 {document.returned ? <FiCheckCircle className="doc-view-icon" style={{color: '#10b981'}}/> : <FiXCircle className="doc-view-icon" />}
-                 {document.returned ? `Yes (On ${document.returned_on ? new Date(document.returned_on).toLocaleDateString() : 'N/A'})` : "No"}
-               </div>
+              <span className="doc-view-label">Returned</span>
+              <div className="doc-view-value">
+                {document.returned ? `Yes (On ${document.returned_on ? new Date(document.returned_on).toLocaleDateString() : 'N/A'})` : "No"}
+              </div>
             </div>
           </div>
-          <div className="doc-view-item no-border">
-             <span className="doc-view-label">Notes</span>
-             <div className="doc-view-value notes-box">{document.notes || "None"}</div>
+          <div className="doc-view-item no-border" style={{ marginTop: '16px' }}>
+            <span className="doc-view-label">Notes</span>
+            <div className="doc-view-value" style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', borderLeft: '4px solid var(--primary-accent)' }}>{document.notes || "None"}</div>
           </div>
         </div>
       </div>
@@ -104,7 +111,7 @@ const DocumentInOutModal = ({ isOpen, onClose, document, onSave }) => {
       const res = await createDocumentType({ name });
       await refetchDocumentTypes();
       setFormData({ ...formData, document_type: res.data.data._id });
-    } catch(err) {
+    } catch (err) {
       console.error("Failed to create document type", err);
     }
   };
@@ -149,8 +156,8 @@ const DocumentInOutModal = ({ isOpen, onClose, document, onSave }) => {
             <div className="doc-form-group">
               <label>Category <span className="required-asterisk">*</span></label>
               <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="doc-form-input">
-                 <option value="given">Given</option>
-                 <option value="received">Received</option>
+                <option value="given">Given</option>
+                <option value="received">Received</option>
               </select>
             </div>
           </div>
@@ -211,12 +218,32 @@ const DocumentInOut = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [docToDelete, setDocToDelete] = useState(null);
 
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+  const [filters, setFilters] = useState({
+    search: "",
+    category: "all"
+  });
+
+  const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
+
+  const handleDebounceSearch = useCallback(
+    debounce((value) => setDebouncedSearch(value), 500),
+    []
+  );
+
   const { data, isLoading } = useQuery({
-    queryKey: ["documents"],
+    queryKey: ["documents", { ...filters, search: debouncedSearch }, pagination.page],
     queryFn: async () => {
-      const res = await listDocuments({ limit: 100 });
-      return res.data.data.items || res.data.data || [];
-    }
+      const params = {
+        page: pagination.page,
+        limit: pagination.limit,
+        search: debouncedSearch || undefined,
+        category: filters.category === 'all' ? undefined : filters.category
+      };
+      const res = await listDocuments(params);
+      return res.data.data;
+    },
+    placeholderData: (previousData) => previousData,
   });
 
   const saveMutation = useMutation({
@@ -230,10 +257,6 @@ const DocumentInOut = () => {
       queryClient.invalidateQueries(["documents"]);
       setIsModalOpen(false);
       setEditingDoc(null);
-    },
-    onError: (err) => {
-      console.error(err);
-      alert(err?.response?.data?.message || err.message || "Failed to save Document In/Out");
     }
   });
 
@@ -250,34 +273,46 @@ const DocumentInOut = () => {
     mutationFn: (id) => returnDocument(id),
     onSuccess: () => {
       queryClient.invalidateQueries(["documents"]);
-    },
-    onError: (err) => {
-      console.error(err);
-      alert(err?.response?.data?.message || err.message || "Failed to return Document");
     }
   });
 
-  const documents = data || [];
+  const documents = data?.items || (Array.isArray(data) ? data : []);
+  const meta = data?.pagination || {};
+  const total_pages = meta.total_pages || 0;
+  const total = meta.total || (Array.isArray(data) ? data.length : 0);
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setPagination(prev => ({ ...prev, page: 1 }));
+    if (key === 'search') {
+      handleDebounceSearch(value);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, page: newPage }));
+  };
 
   return (
     <>
       <SideBar />
-      <div className="documents-page">
-        <div className="documents-container">
-          <div className="documents-header">
-            <h1 className="documents-title">Documents In-Out Register</h1>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button className="doc-cancel-btn" style={{ borderRadius: '999px', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => returnMutation.mutate('export')}>
-                Export
-              </button>
-              <button className="doc-create-btn" onClick={() => { setEditingDoc(null); setIsModalOpen(true); }}>
-                <FaPlus /> New
-              </button>
+      <div className="clients">
+        <div className="quotation-list-container">
+          <div className="quotation-list-header">
+            <div>
+              <h1 className="quotation-list-title">Documents In-Out</h1>
+              <p className="quotation-list-subtitle">Manage and track your physical documents register</p>
             </div>
           </div>
-          
-          <div className="doc-table-container">
-            <table className="doc-table">
+
+          <DocumentFilterBar
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onCreateNew={() => { setEditingDoc(null); setIsModalOpen(true); }}
+          />
+
+          <div className="table-container">
+            <table className="modern-table">
               <thead>
                 <tr>
                   <th>DATE</th>
@@ -287,39 +322,85 @@ const DocumentInOut = () => {
                   <th>LOCATION</th>
                   <th>RETURNABLE</th>
                   <th>RETURNED</th>
-                  <th>ACTIONS</th>
+                  <th style={{ textAlign: 'right' }}>ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
-                {isLoading ? <tr><td colSpan="8" style={{ textAlign: "center", padding: "20px" }}>Loading...</td></tr> : 
-                 documents.length === 0 ? <tr><td colSpan="8" style={{ textAlign: "center", padding: "20px" }}>No documents found</td></tr> :
-                 documents.map(doc => (
-                  <tr key={doc._id} onClick={() => { setViewingDoc(doc); setIsViewModalOpen(true); }} style={{ cursor: "pointer" }}>
-                    <td>{new Date(doc.date).toLocaleDateString()}</td>
-                    <td>{doc.document_type?.name}</td>
-                    <td><span className={`doc-status-badge ${doc.category || ''}`} style={{ textTransform: "capitalize" }}>{doc.category}</span></td>
-                    <td>{doc.client?.name}</td>
-                    <td>{doc.location}</td>
-                    <td>{doc.is_returnable ? "Yes" : "No"}</td>
-                    <td>{doc.returned ? "Yes" : "No"}</td>
-                    <td>
-                      <div className="doc-action-buttons" style={{ display: 'flex', gap: '10px' }}>
-                         <button className="doc-action-btn" onClick={(e) => { e.stopPropagation(); setViewingDoc(doc); setIsViewModalOpen(true); }} title="View Details"><FiEye /></button>
-                         <button className="doc-action-btn" onClick={(e) => { e.stopPropagation(); setEditingDoc(doc); setIsModalOpen(true); }} title="Edit"><FiEdit /></button>
-                         {doc.is_returnable && !doc.returned && (
-                           <button className="doc-action-btn " onClick={(e) => { e.stopPropagation(); returnMutation.mutate(doc._id); }} title="Return Document"><IoIosReturnLeft /></button>
-                         )}
-                         <button className="doc-action-btn delete" onClick={(e) => { e.stopPropagation(); setDocToDelete(doc); setIsDeleteModalOpen(true); }} style={{ color: "red" }} title="Delete"><FiTrash /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {isLoading ? (
+                  <tr><td colSpan="8" style={{ textAlign: "center", padding: "40px", color: '#94a3b8' }}>Loading documents...</td></tr>
+                ) : documents.length === 0 ? (
+                  <tr><td colSpan="8" style={{ textAlign: "center", padding: "40px", color: '#94a3b8' }}>No documents found</td></tr>
+                ) : (
+                  documents.map(doc => (
+                    <tr key={doc._id} onClick={() => { setViewingDoc(doc); setIsViewModalOpen(true); }} style={{ cursor: 'pointer' }}>
+                      <td style={{ color: '#64748b', fontSize: '13px' }}>{new Date(doc.date).toLocaleDateString()}</td>
+                      <td style={{ fontWeight: '600' }}>{doc.document_type?.name}</td>
+                      <td><span className={`doc-status-badge ${doc.category || ''}`} style={{ textTransform: "capitalize" }}>{doc.category}</span></td>
+                      <td style={{ color: '#475569' }}>{doc.client?.name}</td>
+                      <td style={{ color: '#64748b' }}>{doc.location}</td>
+                      <td style={{ color: '#64748b' }}>{doc.is_returnable ? "Yes" : "No"}</td>
+                      <td style={{ color: '#64748b' }}>{doc.returned ? "Yes" : "No"}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                          <button className="action-icon-btn" onClick={(e) => { e.stopPropagation(); setViewingDoc(doc); setIsViewModalOpen(true); }} title="View">
+                            <Eye size={16} color="#64748b" />
+                          </button>
+                          <button className="action-icon-btn edit-btn-list" onClick={(e) => { e.stopPropagation(); setEditingDoc(doc); setIsModalOpen(true); }} title="Edit">
+                            <Pencil size={16} color="#7c3aed" />
+                          </button>
+                          {doc.is_returnable && !doc.returned && (
+                            <button className="action-icon-btn" onClick={(e) => { e.stopPropagation(); returnMutation.mutate(doc._id); }} title="Return">
+                              <RotateCcw size={16} color="#3b82f6" />
+                            </button>
+                          )}
+                          <button className="action-icon-btn" onClick={(e) => { e.stopPropagation(); setDocToDelete(doc); setIsDeleteModalOpen(true); }} title="Delete">
+                            <Trash2 size={16} color="#ef4444" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {!isLoading && documents.length > 0 && (
+            <div className="pagination">
+              <span className="pagination-info">
+                Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, total)} of {total} entries
+              </span>
+              <div className="pagination-controls">
+                <button
+                  className="page-btn"
+                  disabled={pagination.page === 1}
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                >
+                  &lt;
+                </button>
+                {[...Array(total_pages || 0)].map((_, i) => (
+                  <button
+                    key={i}
+                    className={`page-btn ${pagination.page === i + 1 ? 'active' : ''}`}
+                    onClick={() => handlePageChange(i + 1)}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button
+                  className="page-btn"
+                  disabled={pagination.page === (total_pages || 1) || total_pages === 0}
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                >
+                  &gt;
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      
+
       {isModalOpen && (
         <DocumentInOutModal
           isOpen={isModalOpen}
@@ -328,7 +409,7 @@ const DocumentInOut = () => {
           onSave={(data) => saveMutation.mutate(data)}
         />
       )}
-      
+
       {isViewModalOpen && (
         <DocumentViewModal
           isOpen={isViewModalOpen}
@@ -336,7 +417,7 @@ const DocumentInOut = () => {
           document={viewingDoc}
         />
       )}
-      
+
       {isDeleteModalOpen && (
         <Suspense fallback={null}>
           <DeleteModal
@@ -353,3 +434,4 @@ const DocumentInOut = () => {
 };
 
 export default DocumentInOut;
+

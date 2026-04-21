@@ -522,7 +522,8 @@
 /* Quotation List Layout */
 .quotation-list-container {
     padding: 32px;
-    background-color: var(--bg-light);
+    /* background-color: var(--bg-light); */
+    background-color: #ffffff;
     min-height: 100vh;
 }
 

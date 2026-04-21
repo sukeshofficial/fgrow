@@ -81,19 +81,14 @@ input:checked + .slider:before {
 
 .documents-container {
   padding: 32px;
-  padding-top: 80px;
-  background-color: var(--bg-light);
+  background-color: #ffffff;
   min-height: 100vh;
   border-radius: 12px;
   box-sizing: border-box;
 }
 
 .documents-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-  margin-top: 20px;
+  display: none; /* Replaced by quotation-style header */
 }
 
 .documents-title {
@@ -405,10 +400,13 @@ textarea.doc-form-input {
 .doc-status-badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 10px;
-  border-radius: 12px;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
+  min-width: 80px;
+  text-align: center;
 }
 
 .doc-status-badge.open {
@@ -439,6 +437,22 @@ textarea.doc-form-input {
 .doc-status-badge.received {
   background: #dcfce7;
   color: #15803d;
+}
+
+/* DSC Class Badges */
+.doc-status-badge.Class_1 {
+  background: #f0f9ff;
+  color: #0369a1;
+}
+
+.doc-status-badge.Class_2 {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.doc-status-badge.Class_3 {
+  background: #f5f3ff;
+  color: #6d28d9;
 }
 
 /* Responsive Overrides */

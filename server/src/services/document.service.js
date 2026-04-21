@@ -29,14 +29,82 @@ export const createDocumentService = async ({ tenant_id, user_id, payload }) => 
   return doc.toObject();
 };
 
-export const listDocumentsService = async ({ tenant_id }) => {
+export const listDocumentsService = async ({
+  tenant_id,
+  page = 1,
+  limit = 20,
+  search,
+  category
+}) => {
+  const skip = (page - 1) * limit;
+  const pipeline = [
+    { $match: { tenant_id: new Types.ObjectId(tenant_id), archived: false } }
+  ];
 
-  return await Document
-    .find({ tenant_id, archived: false })
-    .populate("document_type", "name")
-    .populate("client", "name")
-    .sort({ date: -1 })
-    .lean();
+  if (category && category !== "all") {
+    pipeline.push({ $match: { category } });
+  }
+
+  // Joins
+  pipeline.push(
+    {
+      $lookup: {
+        from: "clients",
+        localField: "client",
+        foreignField: "_id",
+        as: "client"
+      }
+    },
+    { $unwind: "$client" },
+    {
+      $lookup: {
+        from: "documenttypes",
+        localField: "document_type",
+        foreignField: "_id",
+        as: "document_type"
+      }
+    },
+    { $unwind: "$document_type" }
+  );
+
+  // Search
+  if (search) {
+    const searchRegex = new RegExp(search, "i");
+    pipeline.push({
+      $match: {
+        $or: [
+          { "client.name": searchRegex },
+          { "document_type.name": searchRegex },
+          { location: searchRegex },
+          { notes: searchRegex }
+        ]
+      }
+    });
+  }
+
+  pipeline.push({ $sort: { date: -1 } });
+
+  const facetPipeline = [
+    {
+      $facet: {
+        items: [{ $skip: skip }, { $limit: limit }],
+        totalCount: [{ $count: "count" }]
+      }
+    }
+  ];
+
+  const [result] = await Document.aggregate([...pipeline, ...facetPipeline]);
+  const total = result.totalCount[0]?.count || 0;
+
+  return {
+    items: result.items,
+    pagination: {
+      total,
+      page,
+      limit,
+      total_pages: Math.ceil(total / limit)
+    }
+  };
 };
 
 export const getDocumentService = async ({ tenant_id, document_id }) => {
