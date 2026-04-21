@@ -8,19 +8,19 @@ const ReleaseNotesModal = ({ release, onClose }) => {
 
     const getIcon = () => {
         switch (release.type) {
-            case 'major': return <MdRocketLaunch size={30} />;
-            case 'minor': return <FaMagic size={30} />;
-            case 'patch': return <FaTools size={30} />;
-            default: return <MdRocketLaunch size={30} />;
+            case 'major': return <MdRocketLaunch size={20} />;
+            case 'minor': return <FaMagic size={20} />;
+            case 'patch': return <FaTools size={20} />;
+            default: return <MdRocketLaunch size={20} />;
         }
     };
 
     const getGradient = () => {
         switch (release.type) {
-            case 'major': return 'linear-gradient(135deg, #2563eb, #7c3aed)';
-            case 'minor': return 'linear-gradient(135deg, #10b981, #059669)';
-            case 'patch': return 'linear-gradient(135deg, #64748b, #475569)';
-            default: return 'linear-gradient(135deg, #2563eb, #7c3aed)';
+            case 'major': return '#2563eb';
+            case 'minor': return '#0d9488';
+            case 'patch': return '#475569';
+            default: return '#2563eb';
         }
     };
 
@@ -98,28 +98,27 @@ const ReleaseNotesModal = ({ release, onClose }) => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
+                                boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
                                 border: '3px solid #fff',
                                 zIndex: 10
                             }}>
-                                <div style={{ transform: 'scale(0.8)' }}>{getIcon()}</div>
+                                {getIcon()}
                             </div>
                         </div>
                     ) : (
                         <div style={{ padding: '32px 32px 0' }}>
                             <div style={{
-                                width: '64px',
-                                height: '64px',
+                                width: '58px',
+                                height: '58px',
                                 background: getGradient(),
                                 color: '#fff',
-                                borderRadius: '18px',
+                                borderRadius: '16px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                marginBottom: '0',
-                                boxShadow: '0 8px 16px rgba(0,0,0,0.15)'
+                                boxShadow: '0 6px 18px rgba(0,0,0,0.2)'
                             }}>
-                                <div style={{ transform: 'scale(0.8)' }}>{getIcon()}</div>
+                                {getIcon()}
                             </div>
                         </div>
                     )}
@@ -150,7 +149,7 @@ const ReleaseNotesModal = ({ release, onClose }) => {
                         }}>
                             {release.type}
                         </span>
-                        <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600 }}>v{release.version}</span>
+                        <span style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 600 }}>v {release.version}</span>
                     </div>
 
                     <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '12px', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
@@ -198,7 +197,7 @@ const ReleaseNotesModal = ({ release, onClose }) => {
                                 fontSize: '0.9rem',
                                 fontWeight: 700,
                                 background: getGradient(),
-                                borderRadius: '14px',
+                                borderRadius: '999px',
                                 boxShadow: '0 8px 16px -4px rgba(37, 99, 235, 0.25)',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -218,7 +217,7 @@ const ReleaseNotesModal = ({ release, onClose }) => {
                                     padding: '14px',
                                     fontSize: '0.9rem',
                                     fontWeight: 600,
-                                    borderRadius: '14px',
+                                    borderRadius: '999px',
                                     color: '#64748b',
                                     background: '#f1f5f9',
                                     border: 'none'
@@ -230,7 +229,7 @@ const ReleaseNotesModal = ({ release, onClose }) => {
                     </div>
                     {release.changelogUrl && (
                         <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                            <a href={release.changelogUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#3b82f6', textDecoration: 'none' }}>
+                            <a href={release.changelogUrl} rel="noopener noreferrer" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#3b82f6', textDecoration: 'none' }}>
                                 View full changelog
                             </a>
                         </div>

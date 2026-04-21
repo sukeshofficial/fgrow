@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../../api/api";
 import { Button } from "../../components/ui/Button";
-import { FaPlus, FaTrash, FaCheck, FaTimes, FaEye, FaClone, FaArchive, FaClock, FaUsers, FaGlobe, FaTag, FaImage, FaLink, FaListUl } from "react-icons/fa";
-import { MdRocketLaunch, MdSettings, MdHistory, MdDescription, MdOutlineCampaign } from "react-icons/md";
+import { FaPlus, FaTrash, FaCheck, FaTimes, FaEye, FaClone, FaArchive, FaClock, FaUsers, FaGlobe, FaTag, FaImage, FaLink, FaListUl, FaMagic, FaTools, FaBoxOpen } from "react-icons/fa";
+import { MdRocketLaunch, MdSettings, MdHistory, MdDescription, MdOutlineCampaign, MdSchedule, MdPublish, MdDrafts } from "react-icons/md";
 import { Spinner } from "../../components/ui/Spinner";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import ReleaseNotesModal from "../../components/ui/ReleaseNotesModal";
@@ -225,7 +225,7 @@ const ReleaseNotesManagement = () => {
                                                         justifyContent: 'center',
                                                         color: '#475569'
                                                     }}>
-                                                        {release.type === 'major' ? '🚀' : release.type === 'minor' ? '✨' : '🛠'}
+                                                        {release.type === 'major' ? <MdRocketLaunch size={16} color="#2563eb" /> : release.type === 'minor' ? <FaMagic size={14} color="#0d9488" /> : <FaTools size={13} color="#475569" />}
                                                     </div>
                                                     <div>
                                                         <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.925rem' }}>{release.title}</div>
@@ -368,7 +368,15 @@ const ReleaseNotesManagement = () => {
                                         </div>
                                         <div className="form-group">
                                             <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>Primary CTA Label</label>
-                                            <input type="text" value={form.ctaLabel} onChange={e => setForm({ ...form, ctaLabel: e.target.value })} className="tenant-input" style={{ width: '100%' }} placeholder="Explode what's new" />
+                                            <input type="text" value={form.ctaLabel} onChange={e => setForm({ ...form, ctaLabel: e.target.value })} className="tenant-input" style={{ width: '100%' }} placeholder="Got it, thanks!" />
+                                        </div>
+                                        <div className="form-group">
+                                            <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>CTA Link URL <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                                            <input type="url" value={form.ctaLink} onChange={e => setForm({ ...form, ctaLink: e.target.value })} className="tenant-input" style={{ width: '100%' }} placeholder="https://..." />
+                                        </div>
+                                        <div className="form-group">
+                                            <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>Changelog URL <span style={{ color: '#94a3b8', fontWeight: 400 }}>(shows "View full changelog" link)</span></label>
+                                            <input type="url" value={form.changelogUrl} onChange={e => setForm({ ...form, changelogUrl: e.target.value })} className="tenant-input" style={{ width: '100%' }} placeholder="https://..." />
                                         </div>
                                     </div>
                                 </div>
@@ -383,10 +391,10 @@ const ReleaseNotesManagement = () => {
                                     <div className="form-group" style={{ marginBottom: '16px' }}>
                                         <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Workflow Status</label>
                                         <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="tenant-input" style={{ width: '100%', appearance: 'auto', background: '#fff' }}>
-                                            <option value="draft">📁 Draft</option>
-                                            <option value="published">🚀 Published</option>
-                                            <option value="scheduled">🕒 Scheduled</option>
-                                            <option value="archived">📦 Archived</option>
+                                            <option value="draft">Draft</option>
+                                            <option value="published">Published</option>
+                                            <option value="scheduled">Scheduled</option>
+                                            <option value="archived">Archived</option>
                                         </select>
                                     </div>
                                     <div className="form-group" style={{ marginBottom: '16px' }}>
