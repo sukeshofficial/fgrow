@@ -13,7 +13,9 @@ export const cacheMiddleware = (ttl) => (req, res, next) => {
         return next();
     }
 
-    const key = req.originalUrl || req.url;
+    // Include userId in key to prevent cross-user cache pollution
+    const userId = req.user?._id || req.user?.id || "anonymous";
+    const key = `${userId}:${req.originalUrl || req.url}`;
     const cachedResponse = cache.get(key);
 
     if (cachedResponse) {

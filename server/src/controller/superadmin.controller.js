@@ -15,17 +15,22 @@ export const getAllUsersAdmin = async (req, res) => {
       if (!grouped[tenantName]) {
         grouped[tenantName] = {
           tenant: user.tenant_id,
+          seen: new Set(),
           users: [],
         };
       }
-      grouped[tenantName].users.push(user);
+      // Deduplicate by email — skip if we've already added this email for this tenant
+      if (!grouped[tenantName].seen.has(user.email)) {
+        grouped[tenantName].seen.add(user.email);
+        grouped[tenantName].users.push(user);
+      }
     });
 
     const groupedArray = Object.entries(grouped).map(([name, data]) => {
       data.users.sort((a, b) => {
         if (a.tenant_role === "owner" && b.tenant_role !== "owner") return -1;
         if (b.tenant_role === "owner" && a.tenant_role !== "owner") return 1;
-        
+
         const nameA = a.name ? a.name.toLowerCase() : "";
         const nameB = b.name ? b.name.toLowerCase() : "";
         if (nameA < nameB) return -1;

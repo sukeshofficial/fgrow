@@ -223,8 +223,14 @@ export const getTenantStaff = async (req, res) => {
   try {
     const { User } = await import("../models/auth/user.model.js");
 
-    const users = await User.find({ tenant_id: req.user.tenant_id })
-      .sort({ joined_at: -1 });
+    // Deduplicate by email — keep only the most recently joined record per email
+    const users = await User.aggregate([
+      { $match: { tenant_id: req.user.tenant_id } },
+      { $sort: { joined_at: -1 } },
+      { $group: { _id: "$email", doc: { $first: "$$ROOT" } } },
+      { $replaceRoot: { newRoot: "$doc" } },
+      { $sort: { joined_at: -1 } }
+    ]);
 
     return res.status(200).json({
       success: true,
@@ -299,10 +305,22 @@ export const getTenantById = async (req, res) => {
 export const getTenantStaffAdmin = async (req, res) => {
   try {
     const { tenantId } = req.params;
+    const { Types } = await import("mongoose");
 
-    const users = await User.find({ tenant_id: tenantId })
-      .select("name email username tenant_role status joined_at profile_avatar")
-      .sort({ joined_at: -1 });
+    // Deduplicate by email — keep only the most recently joined record per email
+    const users = await User.aggregate([
+      { $match: { tenant_id: new Types.ObjectId(tenantId) } },
+      { $sort: { joined_at: -1 } },
+      { $group: { _id: "$email", doc: { $first: "$$ROOT" } } },
+      { $replaceRoot: { newRoot: "$doc" } },
+      {
+        $project: {
+          name: 1, email: 1, username: 1,
+          tenant_role: 1, status: 1, joined_at: 1, profile_avatar: 1
+        }
+      },
+      { $sort: { joined_at: -1 } }
+    ]);
 
     return res.status(200).json({
       success: true,
