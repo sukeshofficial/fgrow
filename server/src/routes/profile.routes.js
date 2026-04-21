@@ -5,7 +5,8 @@ import {
     requestPasswordOTP,
     verifyPasswordOTP,
     unlinkTenant,
-    updateAvatar
+    updateAvatar,
+    removeAvatar
 } from "../controller/profile.controller.js";
 import { upload } from "../middleware/upload.middleware.js";
 
@@ -18,5 +19,6 @@ router.post("/request-password-otp", requestPasswordOTP);
 router.post("/verify-password-otp", verifyPasswordOTP);
 router.post("/unlink-tenant", unlinkTenant);
 router.put("/avatar", upload.single("avatar"), updateAvatar);
+router.delete("/avatar", removeAvatar);
 
 export default router;

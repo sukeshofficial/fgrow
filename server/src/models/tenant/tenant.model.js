@@ -107,6 +107,12 @@ const tenantSchema = new mongoose.Schema(
       default: null,
     },
 
+    emailChangeLog: [
+      {
+        type: Date,
+        default: Date.now,
+      },
+    ],
   },
   { timestamps: true },
 );

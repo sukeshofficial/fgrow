@@ -16,10 +16,10 @@ const Stepper = ({ steps, currentStep, onStepClick }) => {
             style={{ cursor: onStepClick ? 'pointer' : 'default' }}
           >
             <div className="step-circle">
-              {isCompleted ? (
-                "✓"
-              ) : step.icon ? (
+              {step.icon ? (
                 <span className="step-icon">{step.icon}</span>
+              ) : isCompleted ? (
+                "✓"
               ) : (
                 index + 1
               )}

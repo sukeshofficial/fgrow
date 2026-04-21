@@ -166,3 +166,29 @@ export const updateAvatar = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
+/**
+ * Remove Profile Avatar
+ */
+export const removeAvatar = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        if (user.profile_avatar?.public_id) {
+            try {
+                await cloudinary.uploader.destroy(user.profile_avatar.public_id);
+            } catch (err) {
+                logger.error("Error deleting avatar from cloud:", err);
+            }
+        }
+
+        user.profile_avatar = undefined;
+        await user.save();
+
+        res.json({ message: "Avatar removed successfully" });
+    } catch (err) {
+        logger.error("Error removing avatar:", err);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};

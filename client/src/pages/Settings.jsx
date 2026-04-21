@@ -8,7 +8,7 @@ import { Spinner } from "../components/ui/Spinner";
 import { checkAuth } from "../features/auth/auth.actions";
 import Sidebar from "../components/SideBar";
 import Stepper from "../components/ui/Stepper";
-import { FaUser, FaLock, FaCreditCard, FaUsers, FaUserCircle } from "react-icons/fa";
+import { FaUser, FaLock, FaCreditCard, FaUsers, FaUserCircle, FaBuilding } from "react-icons/fa";
 import "../styles/settings.css";
 
 const Settings = () => {
@@ -35,11 +35,33 @@ const Settings = () => {
     // Team State
     const [team, setTeam] = useState([]);
 
+    // Organization State
+    const [orgData, setOrgData] = useState({
+        name: "",
+        companyEmail: "",
+        companyPhone: "",
+        timezone: "",
+        currency: "",
+        gstNumber: "",
+        registrationNumber: "",
+        officialAddress: "",
+        companyAddress: {
+            street: "",
+            city: "",
+            state: "",
+            postalCode: "",
+            country: ""
+        }
+    });
+
+    const isOwner = user?.tenant_role === 'owner';
+
     const steps = [
         { label: "Profile", icon: <FaUser /> },
         { label: "Security", icon: <FaLock /> },
         { label: "Subscription", icon: <FaCreditCard /> },
-        { label: "Team", icon: <FaUsers /> }
+        { label: "Team", icon: <FaUsers /> },
+        ...(isOwner ? [{ label: "Organization", icon: <FaBuilding /> }] : [])
     ];
 
     const addToast = (message, type = "success") => {
@@ -76,12 +98,23 @@ const Settings = () => {
         }
     };
 
+    const fetchOrganization = async () => {
+        if (!isOwner || !user?.tenant_id) return;
+        try {
+            const res = await api.get(`/tenant/detail/${user.tenant_id}`);
+            setOrgData(res.data.data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     useEffect(() => {
         if (currentStep === 2) {
             fetchBilling();
             fetchHistory();
         }
         if (currentStep === 3) fetchTeam();
+        if (currentStep === 4 && isOwner) fetchOrganization();
     }, [currentStep]);
 
     const handleAvatarUpload = async (e) => {
@@ -108,6 +141,26 @@ const Settings = () => {
             addToast("Profile picture updated");
         } catch (err) {
             addToast("Upload failed", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRemoveAvatar = async () => {
+        const confirmed = await showConfirm(
+            "Remove Photo",
+            "Are you sure you want to remove your profile photo?",
+            "delete"
+        );
+        if (!confirmed) return;
+
+        setLoading(true);
+        try {
+            await api.delete("/profile/avatar");
+            await checkAuth(dispatch);
+            addToast("Profile photo removed");
+        } catch (err) {
+            addToast("Action failed", "error");
         } finally {
             setLoading(false);
         }
@@ -216,6 +269,81 @@ const Settings = () => {
         }
     };
 
+    const handleLogoUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+            return addToast("File too large (max 2MB)", "error");
+        }
+
+        const formData = new FormData();
+        formData.append("logo", file);
+
+        setLoading(true);
+        try {
+            const res = await api.patch("/tenant/update", formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+
+            setOrgData(res.data.data);
+            addToast("Organization logo updated");
+        } catch (err) {
+            addToast("Upload failed", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdateOrganization = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await api.patch("/tenant/update", orgData);
+            addToast("Organization details updated successfully");
+        } catch (err) {
+            addToast(err.response?.data?.message || "Update failed", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRemoveLogo = async () => {
+        const confirmed = await showConfirm(
+            "Remove Logo",
+            "Are you sure you want to remove the organization logo?",
+            "delete"
+        );
+        if (!confirmed) return;
+
+        setLoading(true);
+        try {
+            const res = await api.delete("/tenant/logo");
+            setOrgData(res.data.data);
+            addToast("Organization logo removed");
+        } catch (err) {
+            addToast("Action failed", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleOrgChange = (e) => {
+        const { name, value } = e.target;
+        if (name.includes(".")) {
+            const [parent, child] = name.split(".");
+            setOrgData(prev => ({
+                ...prev,
+                [parent]: {
+                    ...prev[parent],
+                    [child]: value
+                }
+            }));
+        } else {
+            setOrgData(prev => ({ ...prev, [name]: value }));
+        }
+    };
+
     const renderStepContent = () => {
         switch (currentStep) {
             case 0:
@@ -229,7 +357,7 @@ const Settings = () => {
                                     <img src={user.profile_avatar.secure_url} alt="Profile" className="avatar-preview" />
                                 ) : (
                                     <div className="avatar-initials">
-                                        <FaUserCircle size={40}/>
+                                        <FaUserCircle size={40} />
                                     </div>
                                 )}
                                 <label className="avatar-edit-overlay">
@@ -239,7 +367,27 @@ const Settings = () => {
                             </div>
                             <div className="avatar-meta">
                                 <h4>Profile Picture</h4>
-                                <p>JPG, GIF or PNG. Max size of 2MB.</p>
+                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    <p style={{ margin: 0 }}>JPG, GIF or PNG. Max size of 2MB.</p>
+                                    {user?.profile_avatar?.secure_url && (
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveAvatar}
+                                            disabled={loading}
+                                            style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                color: '#ef4444',
+                                                fontSize: '12px',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                padding: '0'
+                                            }}
+                                        >
+                                            Remove Photo
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -258,7 +406,11 @@ const Settings = () => {
                                 <input type="text" value={user?.username} disabled className="disabled-input" />
                             </div>
                             <button type="submit" disabled={loading} className="btn-save">
-                                {loading ? "Saving..." : "Save Changes"}
+                                {loading ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <Spinner /> Saving...
+                                    </div>
+                                ) : "Save Changes"}
                             </button>
                         </form>
                     </div>
@@ -453,6 +605,126 @@ const Settings = () => {
                         </div>
                     </div>
                 );
+            case 4:
+                return isOwner ? (
+                    <div className="tab-pane fade-in">
+                        <h3>Organization Details</h3>
+
+                        <div className="profile-avatar-section">
+                            <div className="avatar-wrapper">
+                                {orgData.logoUrl ? (
+                                    <img src={orgData.logoUrl} alt="Logo" className="avatar-preview" />
+                                ) : (
+                                    <div className="avatar-initials">
+                                        <FaBuilding size={40} />
+                                    </div>
+                                )}
+                                <label className="avatar-edit-overlay">
+                                    <input type="file" accept="image/*" onChange={handleLogoUpload} hidden />
+                                    <span>{loading ? "..." : "Edit"}</span>
+                                </label>
+                            </div>
+                            <div className="avatar-meta">
+                                <h4>Organization Logo</h4>
+                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    <p style={{ margin: 0 }}>JPG, GIF or PNG. Max size of 2MB.</p>
+                                    {orgData.logoUrl && (
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveLogo}
+                                            disabled={loading}
+                                            style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                color: '#ef4444',
+                                                fontSize: '12px',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                padding: '0'
+                                            }}
+                                        >
+                                            Remove Logo
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleUpdateOrganization}>
+                            <div className="form-row" style={{ display: 'flex', gap: '20px' }}>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label>Organization Name</label>
+                                    <input type="text" name="name" value={orgData.name} onChange={handleOrgChange} required />
+                                </div>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label>Company Email</label>
+                                    <input type="email" name="companyEmail" value={orgData.companyEmail} onChange={handleOrgChange} required />
+                                </div>
+                            </div>
+
+                            <div className="form-row" style={{ display: 'flex', gap: '20px' }}>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label>Company Phone</label>
+                                    <input type="text" name="companyPhone" value={orgData.companyPhone} onChange={handleOrgChange} />
+                                </div>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label>GST Number</label>
+                                    <input type="text" name="gstNumber" value={orgData.gstNumber} onChange={handleOrgChange} />
+                                </div>
+                            </div>
+
+                            <div className="form-row" style={{ display: 'flex', gap: '20px' }}>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label>Registration Number</label>
+                                    <input type="text" name="registrationNumber" value={orgData.registrationNumber} onChange={handleOrgChange} />
+                                </div>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label>Timezone</label>
+                                    <input type="text" name="timezone" value={orgData.timezone} onChange={handleOrgChange} />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Official Address</label>
+                                <input type="text" name="officialAddress" value={orgData.officialAddress} onChange={handleOrgChange} />
+                            </div>
+
+                            <h4 style={{ margin: '20px 0 10px 0', fontSize: '16px' }}>Company Address</h4>
+                            <div className="form-group">
+                                <label>Street</label>
+                                <input type="text" name="companyAddress.street" value={orgData.companyAddress?.street} onChange={handleOrgChange} />
+                            </div>
+                            <div className="form-row" style={{ display: 'flex', gap: '20px' }}>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label>City</label>
+                                    <input type="text" name="companyAddress.city" value={orgData.companyAddress?.city} onChange={handleOrgChange} />
+                                </div>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label>State</label>
+                                    <input type="text" name="companyAddress.state" value={orgData.companyAddress?.state} onChange={handleOrgChange} />
+                                </div>
+                            </div>
+                            <div className="form-row" style={{ display: 'flex', gap: '20px' }}>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label>Postal Code</label>
+                                    <input type="text" name="companyAddress.postalCode" value={orgData.companyAddress?.postalCode} onChange={handleOrgChange} />
+                                </div>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label>Country</label>
+                                    <input type="text" name="companyAddress.country" value={orgData.companyAddress?.country} onChange={handleOrgChange} />
+                                </div>
+                            </div>
+
+                            <button type="submit" disabled={loading} className="btn-save">
+                                {loading ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <Spinner /> Saving...
+                                    </div>
+                                ) : "Save Changes"}
+                            </button>
+                        </form>
+                    </div>
+                ) : null;
             default:
                 return null;
         }

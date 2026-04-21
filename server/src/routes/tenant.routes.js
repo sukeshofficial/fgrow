@@ -15,6 +15,8 @@ import {
   getTenantStaffAdmin,
   getTenantClientsAdmin,
   removeUserFromTenant,
+  updateTenant,
+  removeLogo,
 } from "../controller/tenant.controller.js";
 import { upload } from "../middleware/upload.middleware.js";
 import { cacheMiddleware, clearCacheMiddleware } from "../middleware/cache.js";
@@ -28,6 +30,10 @@ const authStandard = [authMiddleware, billingMiddleware];
 
 // Create tenant (public endpoint guarded by auth + upload)
 router.post("/create", authMiddleware, clearCacheMiddleware("v0/tenant"), upload.single("companyLogo"), createTenant);
+
+// Update tenant (owner only)
+router.patch("/update", ...authOwner, upload.single("logo"), clearCacheMiddleware("v0/tenant"), updateTenant);
+router.delete("/logo", ...authOwner, clearCacheMiddleware("v0/tenant"), removeLogo);
 
 
 // GET ALL tenants (super-admin only)

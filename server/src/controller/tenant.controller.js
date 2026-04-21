@@ -374,3 +374,64 @@ export const removeUserFromTenant = async (req, res) => {
     res.status(500).json({ message: "Internal server error", error: err.message });
   }
 };
+
+// --------------------------------------------------
+// 11️ Update Tenant (Owner Only)
+// --------------------------------------------------
+export const updateTenant = async (req, res) => {
+  try {
+    const { tenant_id: tenantId } = req.user;
+    const updates = req.body;
+
+    // Handle Logo Upload if present
+    if (req.file) {
+      const uploadResult = await uploadBufferToCloud(req.file.buffer, "tenants");
+      if (!uploadResult.success) {
+        return res.status(500).json({ message: "Logo upload failed", error: uploadResult.error });
+      }
+      updates.logoUrl = uploadResult.secure_url;
+    }
+
+    const { updateTenantService } = await import("../services/tenant.service.js");
+    const tenant = await updateTenantService(tenantId, updates);
+
+    return res.status(200).json({
+      success: true,
+      message: "Organization details updated successfully",
+      data: tenant,
+    });
+  } catch (err) {
+    logger.error("Update Tenant Error:", err);
+    return res.status(400).json({
+      message: err.message || "Failed to update organization details",
+    });
+  }
+};
+
+/**
+ * Remove Organization Logo
+ */
+export const removeLogo = async (req, res) => {
+  try {
+    const { tenant_id: tenantId } = req.user;
+    const Tenant = (await import("../models/tenant/tenant.model.js")).default;
+
+    const tenant = await Tenant.findById(tenantId);
+    if (!tenant) return res.status(404).json({ message: "Tenant not found" });
+
+    if (tenant.logoUrl) {
+      // If it's a Cloudinary URL, we'd ideally delete it, but Cloudinary deletion 
+      // usually requires the public_id. In createTenant, we don't seem to store the public_id for logoUrl.
+      // Let's check if we can extract it or if we should just clear the URL.
+      // For now, we'll just clear the URL as per createTenant's pattern of only storing logoUrl.
+    }
+
+    tenant.logoUrl = undefined;
+    await tenant.save();
+
+    res.json({ message: "Organization logo removed successfully", data: tenant });
+  } catch (err) {
+    logger.error("Error removing logo:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

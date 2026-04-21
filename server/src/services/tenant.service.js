@@ -183,7 +183,7 @@ export const fetchAllTenantsService = async (status) => {
   if (status) {
     query.verificationStatus = status;
   }
-  
+
   return await Tenant.find(query)
     .populate("ownerUserId", "name email username")
     .sort({ createdAt: -1 });
@@ -196,4 +196,48 @@ export const fetchTenantByIdService = async (tenantId) => {
   return await Tenant.findById(tenantId)
     .populate("ownerUserId", "name email username")
     .populate("verifiedBy", "name email");
-};
+};
+
+// --------------------------------------------------
+// 7️⃣ Update Tenant
+// --------------------------------------------------
+export const updateTenantService = async (tenantId, updates) => {
+  const tenant = await Tenant.findById(tenantId);
+
+  if (!tenant) {
+    throw new Error("Tenant not found");
+  }
+
+  // If name is being updated, update the domain slug as well
+  if (updates.name && updates.name !== tenant.name) {
+    tenant.name = updates.name;
+    tenant.domain = slugify(updates.name, { lower: true });
+  }
+
+  // Update other fields if provided
+  if (updates.companyEmail && updates.companyEmail !== tenant.companyEmail) {
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+    const recentChanges = (tenant.emailChangeLog || []).filter(date => new Date(date) > threeMonthsAgo);
+
+    if (recentChanges.length >= 3) {
+      throw new Error("You can only change the company email 3 times every 3 months");
+    }
+
+    tenant.companyEmail = updates.companyEmail;
+    tenant.emailChangeLog.push(new Date());
+  }
+
+  if (updates.companyPhone) tenant.companyPhone = updates.companyPhone;
+  if (updates.timezone) tenant.timezone = updates.timezone;
+  if (updates.currency) tenant.currency = updates.currency;
+  if (updates.gstNumber) tenant.gstNumber = updates.gstNumber;
+  if (updates.registrationNumber) tenant.registrationNumber = updates.registrationNumber;
+  if (updates.officialAddress) tenant.officialAddress = updates.officialAddress;
+  if (updates.companyAddress) tenant.companyAddress = updates.companyAddress;
+  if (updates.logoUrl) tenant.logoUrl = updates.logoUrl;
+
+  await tenant.save();
+  return tenant;
+};
