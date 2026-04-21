@@ -96,6 +96,22 @@ const ReleaseNotesManagement = () => {
     const handleAddFeature = () => setForm({ ...form, features: [...form.features, ""] });
     const handleRemoveFeature = (index) => setForm({ ...form, features: form.features.filter((_, i) => i !== index) });
 
+    // Paste multiple lines at once — each line becomes its own highlight
+    const handleFeaturePaste = (e, index) => {
+        const text = e.clipboardData.getData('text');
+        const lines = text
+            .split(/\n/)
+            .map(l => l.replace(/^[-•*\d.]+\s*/, '').trim()) // strip leading bullets/numbers
+            .filter(l => l.length > 0);
+
+        if (lines.length <= 1) return; // single line — let the browser handle it normally
+        e.preventDefault();
+
+        const updated = [...form.features];
+        updated.splice(index, 1, ...lines); // replace current slot with all split lines
+        setForm({ ...form, features: updated });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
@@ -342,7 +358,16 @@ const ReleaseNotesManagement = () => {
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                         {form.features.map((f, i) => (
                                             <div key={i} style={{ display: 'flex', gap: '12px' }}>
-                                                <input type="text" value={f} onChange={e => handleFeatureChange(i, e.target.value)} required className="tenant-input" style={{ flex: 1 }} placeholder="Feature description..." />
+                                                <input
+                                                    type="text"
+                                                    value={f}
+                                                    onChange={e => handleFeatureChange(i, e.target.value)}
+                                                    onPaste={e => handleFeaturePaste(e, i)}
+                                                    required
+                                                    className="tenant-input"
+                                                    style={{ flex: 1 }}
+                                                    placeholder={i === 0 ? 'Paste multiple lines or type one…' : 'Feature description...'}
+                                                />
                                                 {form.features.length > 1 && (
                                                     <button type="button" onClick={() => handleRemoveFeature(i)} style={{ width: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fef2f2', border: 'none', color: '#ef4444', borderRadius: '12px', cursor: 'pointer' }}>
                                                         <FaTrash size={14} />

@@ -186,8 +186,24 @@ const ReleaseNotesModal = ({ release, onClose }) => {
                             ))}
                         </div>
                     </div>
+                    {/* Scrollable content ends here — no buttons inside */}
+                </div>
 
-                    <div style={{ display: 'flex', gap: '12px', position: 'sticky', bottom: 0, background: '#fff', paddingTop: '16px' }}>
+                {/* Fixed Footer — always visible at the bottom of the modal */}
+                <div style={{
+                    padding: '16px 32px 28px',
+                    borderTop: '1px solid #f1f5f9',
+                    flexShrink: 0,
+                    background: '#fff'
+                }}>
+                    {release.changelogUrl && (
+                        <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+                            <a href={release.changelogUrl} rel="noopener noreferrer" style={{ fontSize: '0.8rem', fontWeight: 600, color: '#3b82f6', textDecoration: 'none' }}>
+                                View full changelog
+                            </a>
+                        </div>
+                    )}
+                    <div style={{ display: 'flex', gap: '12px' }}>
                         <Button
                             variant="primary"
                             onClick={handleCTA}
@@ -227,13 +243,6 @@ const ReleaseNotesModal = ({ release, onClose }) => {
                             </Button>
                         )}
                     </div>
-                    {release.changelogUrl && (
-                        <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                            <a href={release.changelogUrl} rel="noopener noreferrer" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#3b82f6', textDecoration: 'none' }}>
-                                View full changelog
-                            </a>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
