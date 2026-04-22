@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { FiChevronDown } from "react-icons/fi";
 import "../../styles/Tasks.css";
 
-const StatusDropdown = ({ value, onChange }) => {
+const StatusDropdown = ({ value, onChange, disabled }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -29,8 +29,8 @@ const StatusDropdown = ({ value, onChange }) => {
     return (
         <div className={`status-custom-dropdown ${isOpen ? "open" : ""}`} ref={dropdownRef}>
             <div
-                className="status-dropdown-toggle"
-                onClick={() => setIsOpen(!isOpen)}
+                className={`status-dropdown-toggle ${disabled ? "disabled" : ""}`}
+                onClick={() => !disabled && setIsOpen(!isOpen)}
             >
                 <div className="status-selected">
                     <span className="status-dot" style={{ backgroundColor: selectedOption.color }}></span>

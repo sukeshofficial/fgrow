@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "./Button";
 import { FaTimes, FaMagic, FaTools, FaExternalLinkAlt, FaChevronRight } from "react-icons/fa";
 import { MdRocketLaunch } from "react-icons/md";
+import MarkdownText from "./MarkdownText";
 
 const ReleaseNotesModal = ({ release, onClose }) => {
     if (!release) return null;
@@ -181,7 +182,10 @@ const ReleaseNotesModal = ({ release, onClose }) => {
                                     }}>
                                         <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#3b82f6' }} />
                                     </div>
-                                    <span style={{ fontSize: '0.9rem', color: '#1e293b', fontWeight: 500, lineHeight: 1.4 }}>{feature}</span>
+                                    <MarkdownText
+                                        text={feature}
+                                        style={{ fontSize: '0.9rem', color: '#1e293b', fontWeight: 500, lineHeight: 1.4 }}
+                                    />
                                 </div>
                             ))}
                         </div>

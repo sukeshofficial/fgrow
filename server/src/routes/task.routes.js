@@ -35,17 +35,17 @@ router.delete("/:id", ...authStaff, clearCacheMiddleware("v0/tasks"), deleteTask
 
 
 // task status
-router.patch("/:id/status", ...authStaff, updateStatusController);
+router.patch("/:id/status", ...authStaff, clearCacheMiddleware("v0/tasks"), updateStatusController);
 
 // checklist management
-router.post("/:id/checklist", ...authStaff, addChecklistItemController);
-router.patch("/:id/checklist/:idx", ...authStaff, updateChecklistItemController);
-router.delete("/:id/checklist/:idx", ...authStaff, deleteChecklistItemController);
+router.post("/:id/checklist", ...authStaff, clearCacheMiddleware("v0/tasks"), addChecklistItemController);
+router.patch("/:id/checklist/:idx", ...authStaff, clearCacheMiddleware("v0/tasks"), updateChecklistItemController);
+router.delete("/:id/checklist/:idx", ...authStaff, clearCacheMiddleware("v0/tasks"), deleteChecklistItemController);
 
 // time log management
-router.post("/:id/timelogs/start", ...authStaff, startTimelogController);
-router.post("/:id/timelogs/stop", ...authStaff, stopTimelogController);
-router.post("/:id/timelogs", ...authStaff, addTimelogController);
+router.post("/:id/timelogs/start", ...authStaff, clearCacheMiddleware("v0/tasks"), startTimelogController);
+router.post("/:id/timelogs/stop", ...authStaff, clearCacheMiddleware("v0/tasks"), stopTimelogController);
+router.post("/:id/timelogs", ...authStaff, clearCacheMiddleware("v0/tasks"), addTimelogController);
 
 // task activity
 router.get("/:id/activities", ...authStaff, getActivitiesController);

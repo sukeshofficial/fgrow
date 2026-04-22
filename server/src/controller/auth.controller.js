@@ -948,8 +948,8 @@ export const getMe = async (req, res) => {
           tenant: {
             id: tenant._id,
             name: tenant.name,
-            plan: req.user.platformRole === "super_admin" ? "pro" : tenant.plan,
-            trialEndDate: req.user.platformRole === "super_admin" ? null : tenant.trialEndDate,
+            plan: req.user.platform_role === "super_admin" ? "pro" : tenant.plan,
+            trialEndDate: req.user.platform_role === "super_admin" ? null : tenant.trialEndDate,
           },
         });
 
@@ -964,8 +964,8 @@ export const getMe = async (req, res) => {
             name: tenant.name,
             verificationStatus: tenant.verificationStatus,
             createdAt: tenant.createdAt,
-            plan: req.user.platformRole === "super_admin" ? "pro" : tenant.plan,
-            trialEndDate: req.user.platformRole === "super_admin" ? null : tenant.trialEndDate,
+            plan: req.user.platform_role === "super_admin" ? "pro" : tenant.plan,
+            trialEndDate: req.user.platform_role === "super_admin" ? null : tenant.trialEndDate,
           },
         });
 

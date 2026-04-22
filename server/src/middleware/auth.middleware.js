@@ -78,7 +78,7 @@ export default async function authMiddleware(req, res, next) {
     req.user = {
       id: user._id,
       tenant_id: user.tenant_id,
-      platformRole: isSuperAdmin ? "super_admin" : user.platform_role,
+      platform_role: isSuperAdmin ? "super_admin" : user.platform_role,
       tenant_role: user.tenant_role,
       status: user.status,
       data: user,

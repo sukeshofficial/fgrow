@@ -96,7 +96,7 @@ export default function NotificationDropdown() {
                                     <div className="notification-actions">
                                         {!notification.is_read && (
                                             <button
-                                                onClick={() => handleMarkAsRead(notification._id)}
+                                                onClick={(e) => handleMarkAsRead(notification._id, e)}
                                                 title="Mark as read"
                                             >
                                                 <Check size={16} />

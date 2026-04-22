@@ -22,7 +22,12 @@ const ReleaseNotesLoader = () => {
             const res = await api.get("/release-notes/latest");
             const release = res.data;
 
-            if (release && release.version !== user.last_seen_release_version) {
+            // Robust version comparison: normalize strings by stripping 'v', whitespace, and case
+            const normalizeVersion = (v) => v ? v.toString().toLowerCase().replace(/^v\s*/, '').replace(/\s+/g, '').trim() : "";
+            const currentVersion = normalizeVersion(release?.version);
+            const userSeenVersion = normalizeVersion(user?.last_seen_version);
+
+            if (release && currentVersion !== userSeenVersion) {
                 if (!release.showAsModal) return;
 
                 if (release.autoOpenDelaySeconds > 0) {

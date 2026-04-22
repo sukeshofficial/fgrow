@@ -119,10 +119,16 @@ const TaskDetails = () => {
    */
   const isReadOnly = useMemo(() => {
     if (!task || !user) return true;
+
+    // Check for super admin or tenant owner
     if (user.platform_role === "super_admin") return false;
     if (user.tenant_role === "owner") return false;
-    const assignedIds = task.users?.map(u => u._id?.toString() || u.toString()) || [];
-    return !assignedIds.includes(user._id?.toString() || user.id);
+
+    // Standard string-based ID comparison
+    const userId = (user._id || user.id)?.toString();
+    const assignedIds = task.users?.map(u => (u._id || u).toString()) || [];
+
+    return !assignedIds.includes(userId);
   }, [task, user]);
 
   const handleStatusChange = async (newStatus) => {

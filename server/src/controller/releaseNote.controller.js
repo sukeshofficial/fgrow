@@ -136,10 +136,10 @@ export const markAsSeen = async (req, res) => {
         const user = await User.findById(req.user.id);
         if (!user) return res.status(404).json({ message: "User not found" });
 
-        user.last_seen_release_version = version;
+        user.last_seen_version = version;
         await user.save();
 
-        res.json({ message: "Version marked as seen", last_seen_release_version: user.last_seen_release_version });
+        res.json({ message: "Version marked as seen", last_seen_version: user.last_seen_version });
     } catch (err) {
         logger.error("Error marking version as seen:", err);
         res.status(500).json({ message: "Internal server error" });
@@ -186,11 +186,11 @@ export const toggleReleaseActive = async (req, res) => {
 
 /**
  * Reset Release History for Everyone (Admin only)
- * Sets last_seen_release_version to "" for all users
+ * Sets last_seen_version to "" for all users
  */
 export const resetAllUsersVersion = async (req, res) => {
     try {
-        await User.updateMany({}, { last_seen_release_version: "" });
+        await User.updateMany({}, { last_seen_version: "" });
         res.json({ message: "Release history reset for all users successfully" });
     } catch (err) {
         logger.error("Error resetting all users version:", err);

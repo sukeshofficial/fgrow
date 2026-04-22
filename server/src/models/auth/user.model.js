@@ -147,7 +147,7 @@ const userSchema = new mongoose.Schema(
     },
 
     // Release Notes Tracking
-    last_seen_release_version: {
+    last_seen_version: {
       type: String,
       default: "0.0.0",
     },

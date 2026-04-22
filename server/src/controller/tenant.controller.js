@@ -272,7 +272,7 @@ export const getTenantById = async (req, res) => {
     const { tenantId } = req.params;
 
     // Authorization: Super Admin can see any; Owner/Staff only their own.
-    const isSuperAdmin = req.user.platformRole === "super_admin";
+    const isSuperAdmin = req.user.platform_role === "super_admin";
     const isOwnerOrStaffOfThisTenant = req.user.tenant_id?.toString() === tenantId;
 
     if (!isSuperAdmin && !isOwnerOrStaffOfThisTenant) {

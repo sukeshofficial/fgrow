@@ -91,11 +91,11 @@ export const verifyManualPayment = async (req, res) => {
     try {
         const { utr } = req.body;
         const { tenant_id } = req.user;
-        
+
         if (!utr) return res.status(400).json({ message: "UTR/Transaction ID is required" });
 
         const amount = parseFloat(process.env.SUBSCRIPTION_AMOUNT || "1");
-        
+
         const payment = new Payment({
             tenant_id,
             amount,
@@ -104,7 +104,7 @@ export const verifyManualPayment = async (req, res) => {
             razorpay_payment_id: utr,
             status: "paid",
         });
-        
+
         await payment.save();
         await activateSubscriptionWithTrial(tenant_id, payment);
 
@@ -178,7 +178,7 @@ export const getBillingStatus = async (req, res) => {
         const subscription = await Subscription.findOne({ tenant_id }).populate("plan_id");
         const tenant = await Tenant.findById(tenant_id).populate("ownerUserId");
 
-        const isSuperAdminTenant = req.user.platformRole === "super_admin" || (tenant?.ownerUserId?.platform_role === "super_admin");
+        const isSuperAdminTenant = req.user.platform_role === "super_admin" || (tenant?.ownerUserId?.platform_role === "super_admin");
 
         res.status(200).json({
             subscription,

@@ -127,7 +127,7 @@ export const createReport = async (req, res, next) => {
 export const getReports = async (req, res, next) => {
     try {
         // Only Super Admins should be able to get these
-        if (req.user.platformRole !== "super_admin") {
+        if (req.user.platform_role !== "super_admin") {
             return res.status(403).json({ message: "Forbidden: Super Admin only" });
         }
 
@@ -145,7 +145,7 @@ export const getReports = async (req, res, next) => {
 
 export const updateReportStatus = async (req, res, next) => {
     try {
-        if (req.user.platformRole !== "super_admin") {
+        if (req.user.platform_role !== "super_admin") {
             return res.status(403).json({ message: "Forbidden: Super Admin only" });
         }
 

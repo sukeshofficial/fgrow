@@ -12,7 +12,7 @@ import logger from "../utils/logger.js";
 export default async function billingMiddleware(req, res, next) {
     try {
         // 1. Skip check for non-tenant routes or super_admin
-        if (!req.user || !req.user.tenant_id || req.user.platformRole === "super_admin") {
+        if (!req.user || !req.user.tenant_id || req.user.platform_role === "super_admin") {
             return next();
         }
 

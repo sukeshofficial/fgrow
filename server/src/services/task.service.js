@@ -86,7 +86,7 @@ const isUserAuthorized = (task, user) => {
 
   // Check if user is in assigned list
   const assignedUserIds = task.users?.map((u) => u._id?.toString() || u.toString()) || [];
-  return assignedUserIds.includes(user.id);
+  return assignedUserIds.includes(user.id?.toString());
 };
 
 /* ------------------ create task ------------------ */
