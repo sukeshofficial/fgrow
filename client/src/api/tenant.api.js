@@ -73,3 +73,10 @@ export const getTenantStaffAdmin = (tenantId) => {
 export const getTenantClientsAdmin = (tenantId) => {
   return api.get(`/tenant/detail/${tenantId}/clients`);
 };
+
+/**
+ * Verify GSTIN (Real-time lookup)
+ */
+export const verifyGSTIN = (gstin) => {
+  return api.get(`/tenant/verify-gstin/${gstin}`);
+};

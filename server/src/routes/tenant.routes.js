@@ -18,6 +18,7 @@ import {
   updateTenant,
   removeLogo,
 } from "../controller/tenant.controller.js";
+import { verifyGSTIN } from "../controller/gstin_verify.controller.js";
 import { upload } from "../middleware/upload.middleware.js";
 import { cacheMiddleware, clearCacheMiddleware } from "../middleware/cache.js";
 
@@ -59,6 +60,9 @@ router.patch("/:tenantId/reject", ...authSuperAdmin, clearCacheMiddleware("v0/te
 
 // Re-appeal tenant (owner)
 router.patch("/re-appeal", ...authOwner, clearCacheMiddleware("v0/tenant"), reAppealTenant);
+
+// GSTIN Verification (authenticated users)
+router.get("/verify-gstin/:gstin", authMiddleware, verifyGSTIN);
 
 
 // Get tenant staff (owner and staff)

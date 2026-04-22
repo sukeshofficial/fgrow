@@ -6,7 +6,7 @@ import {
   FaArrowLeft, FaCheck, FaTimes, FaUsers, FaUserTie, FaBuilding,
   FaEnvelope, FaPhone, FaGlobe, FaFileInvoice, FaMapMarkerAlt,
   FaClock, FaCoins, FaCalendarAlt, FaRedoAlt, FaInfoCircle, FaShieldAlt,
-  FaUserCircle
+  FaUserCircle, FaCheckCircle
 } from "react-icons/fa";
 import Sidebar from "../../components/SideBar";
 import Toast from "../../components/ui/Toast";
@@ -26,13 +26,14 @@ const sectionLabel = {
 };
 
 // Reusable row: icon + optional label + value
-const InfoRow = ({ icon, label, value }) => (
+const InfoRow = ({ icon, label, value, children }) => (
   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: '#64748b', fontSize: '0.8125rem' }}>
     <span style={{ opacity: 0.7, flexShrink: 0, marginTop: '2px' }}>{icon}</span>
-    <span>
+    <div style={{ flex: 1 }}>
       {label && <span style={{ color: '#94a3b8', marginRight: '4px' }}>{label}:</span>}
       {value}
-    </span>
+      {children}
+    </div>
   </div>
 );
 
@@ -114,6 +115,40 @@ const TenantDetailView = () => {
     }
   };
 
+  const [verifyingDetails, setVerifyingDetails] = useState(false);
+  const [gstData, setGstData] = useState(null);
+
+  const handleVerifyGSTIN = async () => {
+    const gst = tenant.gstNumber;
+    if (!gst) {
+      addToast("No GSTIN provided for this tenant.", "error");
+      return;
+    }
+
+    const gstClean = gst.trim().toUpperCase();
+    const re = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/i;
+
+    if (!re.test(gstClean)) {
+      addToast("Invalid GSTIN format.", "error");
+      return;
+    }
+
+    setVerifyingDetails(true);
+    setGstData(null);
+    try {
+      const { verifyGSTIN } = await import("../../api/tenant.api");
+      const resp = await verifyGSTIN(gstClean);
+      if (resp.data.success) {
+        setGstData(resp.data.data);
+        addToast("GSTIN details fetched successfully!", "success");
+      }
+    } catch (err) {
+      addToast(err.response?.data?.message || "Failed to verify GSTIN. Check with official portal.", "error");
+    } finally {
+      setVerifyingDetails(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="staff-loading" style={{ display: 'flex', justifyContent: 'center', padding: '100px 0' }}>
@@ -166,12 +201,12 @@ const TenantDetailView = () => {
               <img src={tenant.logoUrl} alt="logo" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 0.75rem', display: 'block' }} />
             ) : (
               <div className="staff-avatar-placeholder" style={{ width: 72, height: 72, fontSize: '2rem', margin: '0 auto 0.75rem' }}>
-                <FaBuilding size={40}/>
+                <FaBuilding size={40} />
               </div>
             )}
             <h3 style={{ margin: '0 0 0.5rem' }}>{tenant.name}</h3>
             <span className={`staff-role-badge ${tenant.verificationStatus === 'verified' ? 'role-staff' :
-                tenant.verificationStatus === 'rejected' ? '' : 'role-owner'
+              tenant.verificationStatus === 'rejected' ? '' : 'role-owner'
               }`} style={tenant.verificationStatus === 'rejected' ? { background: '#fee2e2', color: '#ef4444' } : {}}>
               {tenant.verificationStatus}
             </span>
@@ -191,7 +226,121 @@ const TenantDetailView = () => {
           <div style={{ padding: '1rem 0', borderBottom: '1px solid #f8fafc' }}>
             <p style={sectionLabel}>Business</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-              <InfoRow icon={<FaFileInvoice />} label="GSTIN" value={tenant.gstNumber || '—'} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                <InfoRow icon={<FaFileInvoice />} label="GSTIN" value={tenant.gstNumber || '—'} />
+                {tenant.gstNumber && tenant.gstNumber !== '—' && (
+                  <Button
+                    variant="outline"
+                    onClick={handleVerifyGSTIN}
+                    disabled={verifyingDetails}
+                    style={{ fontSize: '0.65rem', padding: '1px 6px', height: '1.4rem', minWidth: 'auto', border: '1px solid #e2e8f0', color: verifyingDetails ? '#94a3b8' : '#6366f1', fontWeight: 700 }}
+                  >
+                    {verifyingDetails ? "Verifying..." : "Verify"}
+                  </Button>
+                )}
+              </div>
+
+              {/* GSTIN Official Record Card - High Density */}
+              {gstData && (
+                <div style={{
+                  margin: '12px 0',
+                  padding: '16px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6366f1', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <FaCheckCircle /> OFFICIAL RECORD (EXPRESSGST)
+                  </div>
+
+                  {/* ── Primary Info ── */}
+                  <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div style={{ gridColumn: 'span 2' }}>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Legal Name of Business</div>
+                        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1e293b' }}>{gstData.details?.legalName || '—'}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Trade Name</div>
+                        <div style={{ fontWeight: 600, color: '#475569' }}>{gstData.details?.tradeName || '—'}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>GSTIN Status</div>
+                        <div style={{ fontWeight: 700, color: gstData.details?.status === 'Active' ? '#10b981' : '#ef4444' }}>{gstData.details?.status || '—'}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Registration & Authentication ── */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                    <div>
+                      <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Taxpayer Type</div>
+                      <div style={{ fontWeight: 600, color: '#475569' }}>{gstData.details?.taxpayerType || '—'}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Reg. Date</div>
+                      <div style={{ fontWeight: 600, color: '#475569' }}>{gstData.details?.registrationDate || '—'}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Aadhaar Auth</div>
+                      <div style={{ fontWeight: 700, color: gstData.details?.aadhaarAuthenticated === 'Yes' ? '#10b981' : '#94a3b8' }}>{gstData.details?.aadhaarAuthenticated || '—'}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>e-KYC Verified</div>
+                      <div style={{ fontWeight: 700, color: gstData.details?.ekycVerified === 'Yes' ? '#10b981' : '#94a3b8' }}>{gstData.details?.ekycVerified || '—'}</div>
+                    </div>
+                  </div>
+
+                  {/* ── Offices ── */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', marginBottom: '2px' }}>Admin Office</div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                        <div><strong style={{ color: '#94a3b8' }}>Zone:</strong> {gstData.details?.administrativeOffice?.zone}</div>
+                        <div><strong style={{ color: '#94a3b8' }}>Circle:</strong> {gstData.details?.administrativeOffice?.circle}</div>
+                        <div><strong style={{ color: '#94a3b8' }}>Div:</strong> {gstData.details?.administrativeOffice?.division}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', marginBottom: '2px' }}>Other Office</div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                        <div><strong style={{ color: '#94a3b8' }}>Zone:</strong> {gstData.details?.otherOffice?.zone}</div>
+                        <div><strong style={{ color: '#94a3b8' }}>Range:</strong> {gstData.details?.otherOffice?.range}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Principal Place ── */}
+                  <div style={{ paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', marginBottom: '4px' }}>Principal Place of Business</div>
+                    <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.5, fontWeight: 500 }}>{gstData.address}</div>
+                  </div>
+
+                  {/* ── Business Activities ── */}
+                  <div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Core Activity</div>
+                        <div style={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem' }}>{gstData.details?.natureOfCoreActivity || '—'}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Activities</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
+                          {gstData.details?.natureOfBusinessActivities?.map((act, i) => (
+                            <span key={i} style={{ background: '#eef2ff', color: '#6366f1', padding: '2px 8px', borderRadius: '4px', fontSize: '0.6rem', fontWeight: 700 }}>
+                              {act}
+                            </span>
+                          )) || '—'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
               <InfoRow icon={<FaShieldAlt />} label="Reg. No" value={tenant.registrationNumber || '—'} />
               <InfoRow icon={<FaGlobe />} label="Domain" value={tenant.domain || '—'} />
               <InfoRow icon={<FaInfoCircle />} label="Plan" value={tenant.plan || '—'} />

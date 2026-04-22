@@ -44,7 +44,15 @@ export const validatePAN = (pan) => {
 
 export const validateGSTIN = (gst) => {
   if (!gst) return true;
-  // GSTIN: 15 chars. Basic pattern - 2 digits (state), 10-char PAN, 1 entity code, 1 'Z', 1 checksum
+  const gstClean = gst.trim().toUpperCase();
+
+  // Basic format check: 15 characters, standard regex
   const re = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/i;
-  return re.test(gst.trim());
+  return re.test(gstClean);
+
+  /**
+   * NOTE: Robust checksum validation (MOD 36) can be added here, 
+   * but is currently disabled to avoid blocking valid edge-case GSTINs.
+   * Total verification is handled by the external GSTIN API.
+   */
 };
