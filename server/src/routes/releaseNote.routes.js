@@ -9,7 +9,8 @@ import {
     deleteReleaseNote,
     toggleReleaseActive,
     resetAllUsersVersion,
-    updateReleaseNote
+    updateReleaseNote,
+    getReleaseNotesHistory
 } from "../controller/releaseNote.controller.js";
 
 const router = express.Router();
@@ -18,6 +19,7 @@ const authSuperAdmin = [authMiddleware, requireSuperAdmin];
 
 // User routes
 router.get("/latest", authMiddleware, getLatestReleaseNote);
+router.get("/history", authMiddleware, getReleaseNotesHistory);
 router.post("/mark-seen", authMiddleware, markAsSeen);
 
 // Admin routes

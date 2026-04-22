@@ -5,7 +5,7 @@ import ReleaseNotesModal from "./ReleaseNotesModal";
 
 const ReleaseNotesLoader = () => {
     const { user } = useAuth();
-    const [latestRelease, setLatestRelease] = useState(null);
+    const [releases, setReleases] = useState([]);
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
@@ -19,22 +19,26 @@ const ReleaseNotesLoader = () => {
             // Initial app-settle delay
             await new Promise(resolve => setTimeout(resolve, 1500));
 
-            const res = await api.get("/release-notes/latest");
-            const release = res.data;
+            const res = await api.get("/release-notes/history");
+            const fetchedReleases = res.data;
+
+            if (!fetchedReleases || fetchedReleases.length === 0) return;
+
+            const latest = fetchedReleases[0];
 
             // Robust version comparison: normalize strings by stripping 'v', whitespace, and case
             const normalizeVersion = (v) => v ? v.toString().toLowerCase().replace(/^v\s*/, '').replace(/\s+/g, '').trim() : "";
-            const currentVersion = normalizeVersion(release?.version);
+            const currentVersion = normalizeVersion(latest?.version);
             const userSeenVersion = normalizeVersion(user?.last_seen_version);
 
-            if (release && currentVersion !== userSeenVersion) {
-                if (!release.showAsModal) return;
+            if (latest && currentVersion !== userSeenVersion) {
+                if (!latest.showAsModal) return;
 
-                if (release.autoOpenDelaySeconds > 0) {
-                    await new Promise(resolve => setTimeout(resolve, release.autoOpenDelaySeconds * 1000));
+                if (latest.autoOpenDelaySeconds > 0) {
+                    await new Promise(resolve => setTimeout(resolve, latest.autoOpenDelaySeconds * 1000));
                 }
 
-                setLatestRelease(release);
+                setReleases(fetchedReleases);
                 setShowModal(true);
             }
         } catch (err) {
@@ -46,7 +50,9 @@ const ReleaseNotesLoader = () => {
 
     const handleClose = async () => {
         try {
-            await api.post("/release-notes/mark-seen", { version: latestRelease.version });
+            if (releases.length > 0) {
+                await api.post("/release-notes/mark-seen", { version: releases[0].version });
+            }
             setShowModal(false);
         } catch (err) {
             console.error("Failed to mark release as seen:", err);
@@ -54,9 +60,9 @@ const ReleaseNotesLoader = () => {
         }
     };
 
-    if (!showModal || !latestRelease) return null;
+    if (!showModal || releases.length === 0) return null;
 
-    return <ReleaseNotesModal release={latestRelease} onClose={handleClose} />;
+    return <ReleaseNotesModal releases={releases} onClose={handleClose} />;
 };
 
 export default ReleaseNotesLoader;

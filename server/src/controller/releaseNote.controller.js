@@ -197,3 +197,36 @@ export const resetAllUsersVersion = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
+/**
+ * Get Published Release Notes History (User)
+ */
+export const getReleaseNotesHistory = async (req, res) => {
+    try {
+        const now = new Date();
+
+        const query = {
+            status: { $in: ["published", "scheduled"] },
+            publishAt: { $lte: now },
+            $or: [
+                { expireAt: { $exists: false } },
+                { expireAt: null },
+                { expireAt: { $gt: now } }
+            ]
+        };
+
+        if (req.user.platform_role !== "super_admin") {
+            query.audience = { $in: ["all", "users"] };
+        }
+
+        const releaseNotes = await ReleaseNote.find(query).sort({ priority: -1, publishAt: -1 });
+
+        if (!releaseNotes || releaseNotes.length === 0) {
+            return res.status(404).json({ message: "No active release notes found" });
+        }
+        res.json(releaseNotes);
+    } catch (err) {
+        logger.error("Error fetching release notes history:", err);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
