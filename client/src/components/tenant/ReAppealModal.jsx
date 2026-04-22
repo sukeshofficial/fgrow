@@ -4,6 +4,18 @@ import { verifyGSTIN } from "../../api/tenant.api.js";
 import "../../styles/tenant-gate.css";
 import "../../styles/reappeal-modal.css";
 
+const InputWrapper = ({ icon: Icon, label, required, children }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <Icon size={12} style={{ color: '#7c3aed' }} />
+      <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>
+        {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
+      </label>
+    </div>
+    {children}
+  </div>
+);
+
 const ReAppealModal = ({ tenant, onConfirm, onCancel, submitting }) => {
   const [form, setForm] = useState({
     name: tenant?.name || "",
@@ -77,17 +89,7 @@ const ReAppealModal = ({ tenant, onConfirm, onCancel, submitting }) => {
     });
   };
 
-  const InputWrapper = ({ icon: Icon, label, required, children }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <Icon size={12} style={{ color: '#7c3aed' }} />
-        <label style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>
-          {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
-        </label>
-      </div>
-      {children}
-    </div>
-  );
+
 
   return (
     <div className="tenant-modal-overlay" style={{ backdropFilter: 'blur(12px)', backgroundColor: 'rgba(15, 23, 42, 0.65)' }}>

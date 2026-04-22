@@ -14,6 +14,18 @@ export const TENANT_REQUIRED_FIELDS = [
   { id: "tenant-companyPhone", key: "companyPhone", label: "Contact No" },
 ];
 
+const InputWrapper = ({ icon: Icon, label, required, children }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <Icon size={14} style={{ color: '#7c3aed' }} />
+      <label style={{ fontSize: '13px', fontWeight: 700, color: '#475569' }}>
+        {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
+      </label>
+    </div>
+    {children}
+  </div>
+);
+
 export const CreateTenantModal = ({ onClose }) => {
   const { user, dispatch } = useAuth();
 
@@ -136,17 +148,7 @@ export const CreateTenantModal = ({ onClose }) => {
     }
   };
 
-  const InputWrapper = ({ icon: Icon, label, required, children }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <Icon size={14} style={{ color: '#7c3aed' }} />
-        <label style={{ fontSize: '13px', fontWeight: 700, color: '#475569' }}>
-          {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
-        </label>
-      </div>
-      {children}
-    </div>
-  );
+
 
   return (
     <div className="tenant-modal-overlay" style={{ backdropFilter: 'blur(12px)', backgroundColor: 'rgba(15, 23, 42, 0.65)' }}>
@@ -196,9 +198,9 @@ export const CreateTenantModal = ({ onClose }) => {
                     onClick={handleVerifyGSTIN}
                     disabled={verifying || !form.gstin}
                     style={{
-                      padding: '0 16px', borderRadius: '999px', background: form.gstin ? '#efe6ffff' : '#e2e8f0',
-                      color: '#8843ffff', border: 'none', fontWeight: 700, fontSize: '11px', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', height: '38px', border: '1px solid #c4a2ffff'
+                      padding: '0 16px', borderRadius: '999px', background: form.gstin ? '#efe6ffff' : '#e3e3e3ff',
+                      color: form.gstin ? '#8843ffff' : '#686868ff', border: 'none', fontWeight: 700, fontSize: '11px', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', height: '38px', border: form.gstin ? '1px solid #c4a2ffff' : '1px solid #cacacaff'
                     }}
                   >
                     {verifying ? "Verifying..." : "Verify"}
