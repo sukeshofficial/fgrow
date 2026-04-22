@@ -17,6 +17,7 @@ import {
   removeUserFromTenant,
   updateTenant,
   removeLogo,
+  verifyGstAdmin,
 } from "../controller/tenant.controller.js";
 import { verifyGSTIN } from "../controller/gstin_verify.controller.js";
 import { upload } from "../middleware/upload.middleware.js";
@@ -57,6 +58,7 @@ router.get("/pending", ...authSuperAdmin, getPendingTenants);
 // Approve / reject tenant (super-admin only)
 router.patch("/:tenantId/approve", ...authSuperAdmin, clearCacheMiddleware("v0/tenant"), approveTenant);
 router.patch("/:tenantId/reject", ...authSuperAdmin, clearCacheMiddleware("v0/tenant"), rejectTenant);
+router.patch("/:id/verify-gst-admin", ...authSuperAdmin, clearCacheMiddleware("v0/tenant"), verifyGstAdmin);
 
 // Re-appeal tenant (owner)
 router.patch("/re-appeal", ...authOwner, clearCacheMiddleware("v0/tenant"), reAppealTenant);

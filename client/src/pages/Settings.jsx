@@ -8,7 +8,8 @@ import { Spinner } from "../components/ui/Spinner";
 import { checkAuth } from "../features/auth/auth.actions";
 import Sidebar from "../components/SideBar";
 import Stepper from "../components/ui/Stepper";
-import { FaUser, FaLock, FaCreditCard, FaUsers, FaUserCircle, FaBuilding } from "react-icons/fa";
+import { FaUser, FaLock, FaCreditCard, FaUsers, FaUserCircle, FaBuilding, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
+import { verifyGSTIN } from "../api/tenant.api";
 import "../styles/settings.css";
 
 const Settings = () => {
@@ -43,6 +44,7 @@ const Settings = () => {
         timezone: "",
         currency: "",
         gstNumber: "",
+        isGstVerified: false,
         registrationNumber: "",
         officialAddress: "",
         companyAddress: {
@@ -55,6 +57,8 @@ const Settings = () => {
     });
 
     const isOwner = user?.tenant_role === 'owner';
+    const [verifyingGST, setVerifyingGST] = useState(false);
+    const [gstData, setGstData] = useState(null);
 
     const steps = [
         { label: "Profile", icon: <FaUser /> },
@@ -308,6 +312,29 @@ const Settings = () => {
         }
     };
 
+    const handleVerifyGST = async () => {
+        if (!orgData.gstNumber || orgData.gstNumber === "—") {
+            addToast("Please enter a valid GST number", "error");
+            return;
+        }
+
+        setVerifyingGST(true);
+        setGstData(null);
+
+        try {
+            const res = await verifyGSTIN(orgData.gstNumber);
+            if (res.data.success) {
+                setGstData(res.data.data);
+                setOrgData(prev => ({ ...prev, isGstVerified: true }));
+                addToast("GSTIN verified successfully");
+            }
+        } catch (err) {
+            addToast(err.response?.data?.message || "Failed to verify GSTIN", "error");
+        } finally {
+            setVerifyingGST(false);
+        }
+    };
+
     const handleRemoveLogo = async () => {
         const confirmed = await showConfirm(
             "Remove Logo",
@@ -340,7 +367,11 @@ const Settings = () => {
                 }
             }));
         } else {
-            setOrgData(prev => ({ ...prev, [name]: value }));
+            setOrgData(prev => ({
+                ...prev,
+                [name]: value,
+                ...(name === 'gstNumber' ? { isGstVerified: false } : {})
+            }));
         }
     };
 
@@ -668,10 +699,148 @@ const Settings = () => {
                                     <input type="text" name="companyPhone" value={orgData.companyPhone} onChange={handleOrgChange} />
                                 </div>
                                 <div className="form-group" style={{ flex: 1 }}>
-                                    <label>GST Number</label>
+                                    <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            GST Number
+                                            {orgData.isGstVerified && (
+                                                <span style={{
+                                                    background: '#dcfce7',
+                                                    color: '#15803d',
+                                                    fontSize: '9px',
+                                                    padding: '1px 6px',
+                                                    borderRadius: '4px',
+                                                    fontWeight: 800,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '3px'
+                                                }}>
+                                                    <FaCheckCircle size={8} /> Verified
+                                                </span>
+                                            )}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleVerifyGST}
+                                            disabled={verifyingGST}
+                                            style={{
+                                                fontSize: '10px',
+                                                padding: '2px 8px',
+                                                background: verifyingGST ? '#f1f5f9' : '#e0f2fe',
+                                                color: verifyingGST ? '#94a3b8' : '#0369a1',
+                                                border: '1px solid #bae6fd',
+                                                borderRadius: '4px',
+                                                fontWeight: 700,
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            {verifyingGST ? "Verifying..." : "Verify"}
+                                        </button>
+                                    </label>
                                     <input type="text" name="gstNumber" value={orgData.gstNumber} onChange={handleOrgChange} />
                                 </div>
                             </div>
+
+                            {/* Official Record Card - High Density */}
+                            {gstData && (
+                                <div style={{
+                                    margin: '0 0 24px 0',
+                                    padding: '16px',
+                                    background: '#f8fafc',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: '16px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '16px',
+                                    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+                                    animation: 'slideDown 0.3s ease-out'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6366f1', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        <FaCheckCircle /> OFFICIAL RECORD (EXPRESSGST)
+                                    </div>
+
+                                    {/* ── Primary Info ── */}
+                                    <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                            <div style={{ gridColumn: 'span 2' }}>
+                                                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Legal Name of Business</div>
+                                                <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1e293b' }}>{gstData.details?.legalName || '—'}</div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Trade Name</div>
+                                                <div style={{ fontWeight: 600, color: '#475569' }}>{gstData.details?.tradeName || '—'}</div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>GSTIN Status</div>
+                                                <div style={{ fontWeight: 700, color: gstData.details?.status === 'Active' ? '#10b981' : '#ef4444' }}>{gstData.details?.status || '—'}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* ── Registration & Authentication ── */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                                        <div>
+                                            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Taxpayer Type</div>
+                                            <div style={{ fontWeight: 600, color: '#475569' }}>{gstData.details?.taxpayerType || '—'}</div>
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Reg. Date</div>
+                                            <div style={{ fontWeight: 600, color: '#475569' }}>{gstData.details?.registrationDate || '—'}</div>
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Aadhaar Auth</div>
+                                            <div style={{ fontWeight: 700, color: gstData.details?.aadhaarAuthenticated === 'Yes' ? '#10b981' : '#94a3b8' }}>{gstData.details?.aadhaarAuthenticated || '—'}</div>
+                                        </div>
+                                        <div>
+                                            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>e-KYC Verified</div>
+                                            <div style={{ fontWeight: 700, color: gstData.details?.ekycVerified === 'Yes' ? '#10b981' : '#94a3b8' }}>{gstData.details?.ekycVerified || '—'}</div>
+                                        </div>
+                                    </div>
+
+                                    {/* ── Offices ── */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', marginBottom: '2px' }}>Admin Office</div>
+                                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                                                <div><strong style={{ color: '#94a3b8' }}>Zone:</strong> {gstData.details?.administrativeOffice?.zone}</div>
+                                                <div><strong style={{ color: '#94a3b8' }}>Div:</strong> {gstData.details?.administrativeOffice?.division}</div>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', marginBottom: '2px' }}>Other Office</div>
+                                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                                                <div><strong style={{ color: '#94a3b8' }}>Zone:</strong> {gstData.details?.otherOffice?.zone}</div>
+                                                <div><strong style={{ color: '#94a3b8' }}>Range:</strong> {gstData.details?.otherOffice?.range}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* ── Principal Place ── */}
+                                    <div style={{ paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                                        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', marginBottom: '4px' }}>Principal Place of Business</div>
+                                        <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.5, fontWeight: 500 }}>{gstData.address}</div>
+                                    </div>
+
+                                    {/* ── Business Activities ── */}
+                                    <div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            <div>
+                                                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Core Activity</div>
+                                                <div style={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem' }}>{gstData.details?.natureOfCoreActivity || '—'}</div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Activities</div>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
+                                                    {gstData.details?.natureOfBusinessActivities?.map((act, i) => (
+                                                        <span key={i} style={{ background: '#eef2ff', color: '#6366f1', padding: '2px 8px', borderRadius: '4px', fontSize: '0.6rem', fontWeight: 700 }}>
+                                                            {act}
+                                                        </span>
+                                                    )) || '—'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="form-row" style={{ display: 'flex', gap: '20px' }}>
                                 <div className="form-group" style={{ flex: 1 }}>

@@ -12,6 +12,7 @@ export const createTenantService = async (data) => {
     gstin,
     officialAddress,
     gstCertificate,
+    isGstVerified,
   } = data;
 
   // 1️⃣ Find user
@@ -55,6 +56,7 @@ export const createTenantService = async (data) => {
     domain: slugify(companyName, { lower: true }),
     logoUrl,
     gstNumber: gstin,
+    isGstVerified: isGstVerified === "true" || isGstVerified === true,
     officialAddress,
     gstCertificate,
   });
@@ -132,6 +134,20 @@ export const rejectTenantService = async (tenantId, reason, adminId) => {
 };
 
 // --------------------------------------------------
+// Mark GST Verified by Admin
+// --------------------------------------------------
+export const verifyGstAdminService = async (tenantId) => {
+  const tenant = await Tenant.findById(tenantId);
+  if (!tenant) throw new Error("Tenant not found");
+
+  tenant.isAdminGstVerified = true;
+  tenant.adminGstVerifiedAt = new Date();
+  await tenant.save();
+
+  return tenant;
+};
+
+// --------------------------------------------------
 // 4️⃣ Re-appeal Tenant
 // --------------------------------------------------
 export const reAppealTenantService = async (tenantId, userId, updates = {}) => {
@@ -162,6 +178,7 @@ export const reAppealTenantService = async (tenantId, userId, updates = {}) => {
   if (updates.timezone) tenant.timezone = updates.timezone;
   if (updates.currency) tenant.currency = updates.currency;
   if (updates.companyAddress) tenant.companyAddress = updates.companyAddress;
+  if (updates.isGstVerified !== undefined) tenant.isGstVerified = updates.isGstVerified;
 
   tenant.verificationStatus = "pending";
   tenant.rejection_reason = null;
@@ -237,6 +254,7 @@ export const updateTenantService = async (tenantId, updates) => {
   if (updates.officialAddress) tenant.officialAddress = updates.officialAddress;
   if (updates.companyAddress) tenant.companyAddress = updates.companyAddress;
   if (updates.logoUrl) tenant.logoUrl = updates.logoUrl;
+  if (updates.isGstVerified !== undefined) tenant.isGstVerified = updates.isGstVerified;
 
   await tenant.save();
   return tenant;

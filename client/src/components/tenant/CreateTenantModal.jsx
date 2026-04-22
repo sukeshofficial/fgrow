@@ -35,6 +35,7 @@ export const CreateTenantModal = ({ onClose }) => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+  const [gstData, setGstData] = useState(null);
 
   useEffect(() => {
     try {
@@ -64,10 +65,10 @@ export const CreateTenantModal = ({ onClose }) => {
     try {
       const resp = await verifyGSTIN(form.gstin);
       if (resp.data.success) {
-        const { companyName, officialAddress } = resp.data.data;
+        setGstData(resp.data.data);
         setForm(prev => ({
           ...prev,
-          companyName: resp.data.data.organizationName || prev.companyName,
+          companyName: resp.data.data.details?.legalName || resp.data.data.organizationName || prev.companyName,
           officialAddress: resp.data.data.address || prev.officialAddress
         }));
         setIsGstinVerified(true);
@@ -123,6 +124,7 @@ export const CreateTenantModal = ({ onClose }) => {
       });
       formData.append("email", user?.email);
       if (logoFile) formData.append("companyLogo", logoFile);
+      formData.append("isGstVerified", isGstinVerified);
 
       await createTenant(formData);
       window.localStorage.removeItem(DRAFT_KEY);
@@ -185,8 +187,8 @@ export const CreateTenantModal = ({ onClose }) => {
                   style={{ flex: 1, height: '38px', borderRadius: '10px', fontSize: '13px' }}
                 />
                 {isGstinVerified ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981', fontWeight: 700, fontSize: '12px', padding: '0 8px' }}>
-                    <FiCheckCircle size={16} /> Verified
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981', fontWeight: 700, fontSize: '11px', padding: '0 8px' }}>
+                    <FiCheckCircle size={14} /> VERIFIED
                   </div>
                 ) : (
                   <button
@@ -203,6 +205,45 @@ export const CreateTenantModal = ({ onClose }) => {
                   </button>
                 )}
               </div>
+
+              {/* Exhaustive GSTIN Official Record Card */}
+              {gstData && (
+                <div style={{
+                  margin: '12px 0',
+                  padding: '14px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+                  animation: 'slideDown 0.3s ease-out'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6366f1', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <FiCheckCircle /> OFFICIAL RECORD (EXPRESSGST)
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Legal Name</div>
+                      <div style={{ fontWeight: 700, fontSize: '0.8rem', color: '#1e293b' }}>{gstData.details?.legalName || '—'}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Status</div>
+                      <div style={{ fontWeight: 700, fontSize: '0.75rem', color: gstData.details?.status === 'Active' ? '#10b981' : '#ef4444' }}>{gstData.details?.status || '—'}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Type</div>
+                      <div style={{ fontWeight: 600, fontSize: '0.75rem', color: '#475569' }}>{gstData.details?.taxpayerType || '—'}</div>
+                    </div>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Core Activity</div>
+                      <div style={{ fontWeight: 600, fontSize: '0.7rem', color: '#475569' }}>{gstData.details?.natureOfCoreActivity || '—'}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </InputWrapper>
 
             <InputWrapper icon={FiHome} label="Company Name" required>

@@ -136,11 +136,20 @@ const TenantDetailView = () => {
     setVerifyingDetails(true);
     setGstData(null);
     try {
-      const { verifyGSTIN } = await import("../../api/tenant.api");
+      const { verifyGSTIN, verifyGstAdmin } = await import("../../api/tenant.api");
       const resp = await verifyGSTIN(gstClean);
       if (resp.data.success) {
         setGstData(resp.data.data);
         addToast("GSTIN details fetched successfully!", "success");
+
+        if (!tenant.isAdminGstVerified) {
+          try {
+            await verifyGstAdmin(tenant._id);
+            setTenant(prev => ({ ...prev, isAdminGstVerified: true }));
+          } catch (adminErr) {
+            console.error("Failed to sync admin verification status:", adminErr);
+          }
+        }
       }
     } catch (err) {
       addToast(err.response?.data?.message || "Failed to verify GSTIN. Check with official portal.", "error");
@@ -229,14 +238,20 @@ const TenantDetailView = () => {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                 <InfoRow icon={<FaFileInvoice />} label="GSTIN" value={tenant.gstNumber || '—'} />
                 {tenant.gstNumber && tenant.gstNumber !== '—' && (
-                  <Button
-                    variant="outline"
-                    onClick={handleVerifyGSTIN}
-                    disabled={verifyingDetails}
-                    style={{ fontSize: '0.65rem', padding: '1px 6px', height: '1.4rem', minWidth: 'auto', border: '1px solid #e2e8f0', color: verifyingDetails ? '#94a3b8' : '#6366f1', fontWeight: 700 }}
-                  >
-                    {verifyingDetails ? "Verifying..." : "Verify"}
-                  </Button>
+                  tenant.isAdminGstVerified ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981', fontWeight: 700, fontSize: '0.65rem' }}>
+                      <FaCheckCircle /> Verified
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      onClick={handleVerifyGSTIN}
+                      disabled={verifyingDetails}
+                      style={{ fontSize: '0.65rem', padding: '1px 6px', height: '1.4rem', minWidth: 'auto', border: '1px solid #e2e8f0', color: verifyingDetails ? '#94a3b8' : '#6366f1', fontWeight: 700 }}
+                    >
+                      {verifyingDetails ? "Verifying..." : "Verify"}
+                    </Button>
+                  )
                 )}
               </div>
 

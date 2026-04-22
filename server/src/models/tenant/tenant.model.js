@@ -23,6 +23,18 @@ const tenantSchema = new mongoose.Schema(
       trim: true,
       uppercase: true,
     },
+    isGstVerified: {
+      type: Boolean,
+      default: false,
+    },
+    isAdminGstVerified: {
+      type: Boolean,
+      default: false,
+    },
+    adminGstVerifiedAt: {
+      type: Date,
+      default: null,
+    },
 
     registrationNumber: {
       type: String,

@@ -80,3 +80,10 @@ export const getTenantClientsAdmin = (tenantId) => {
 export const verifyGSTIN = (gstin) => {
   return api.get(`/tenant/verify-gstin/${gstin}`);
 };
+
+/**
+ * Super Admin: Mark GST as verified
+ */
+export const verifyGstAdmin = (id) => {
+  return api.patch(`/tenant/${id}/verify-gst-admin`);
+};

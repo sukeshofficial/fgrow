@@ -6,6 +6,7 @@ import {
   reAppealTenantService,
   fetchAllTenantsService,
   fetchTenantByIdService,
+  verifyGstAdminService,
 } from "../services/tenant.service.js";
 import { User } from "../models/auth/user.model.js";
 import Client from "../models/client/client.model.js";
@@ -451,5 +452,25 @@ export const removeLogo = async (req, res) => {
   } catch (err) {
     logger.error("Error removing logo:", err);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+/**
+ * Verify GST by Admin (Locking verification)
+ */
+export const verifyGstAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const tenant = await verifyGstAdminService(id);
+    res.status(200).json({
+      success: true,
+      message: "GST verified by admin successfully",
+      data: tenant,
+    });
+  } catch (err) {
+    logger.error("Verify GST Admin Error:", err);
+    res.status(400).json({
+      message: err.message || "Failed to verify GST by admin",
+    });
   }
 };
