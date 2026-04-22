@@ -2,136 +2,163 @@ import logger from "../utils/logger.js";
 import { validateGSTIN } from "../utils/helper.js";
 
 /**
- * verifyGSTIN
- * 
- * Attempts to fetch organization details for a given GSTIN.
- * For now, this implements a robust mock that validates the format/checksum
- * and returns data. It highlights where a real API key would be used.
+ * Maps gstincheck.co.in response fields to a clean normalized shape.
+ *
+ * gstincheck wraps data under a `data` key using GST portal short field names:
+ *   lgnm     → legal name
+ *   tradeNam → trade name
+ *   sts      → status (Active / Cancelled)
+ *   ctb      → constitution of business
+ *   dty      → taxpayer type
+ *   rgdt     → registration date
+ *   stj      → state jurisdiction
+ *   ctj      → center jurisdiction
+ *   pradr    → principal address object
+ *   nba      → nature of business activities []
+ *   adhrVFlag→ aadhaar authenticated
+ *   ekycVFlag→ ekyc verified
  */
+const normalizeGstinCheckResponse = (gstin, data) => {
+    const addr = data?.pradr?.addr || {};
+
+    const addressParts = [
+        addr.flno,
+        addr.bno,
+        addr.bnm,
+        addr.st,
+        addr.loc,
+        addr.dst,
+        addr.stcd,
+        addr.pncd,
+    ].filter(Boolean);
+
+    return {
+        gstin:                      gstin.toUpperCase(),
+        legalName:                  data.lgnm      || "",
+        tradeName:                  data.tradeNam  || "",
+        registrationDate:           data.rgdt      || "",
+        cancellationDate:           data.cxdt      || null,
+        status:                     data.sts       || "",
+        constitution:               data.ctb       || "",
+        taxpayerType:               data.dty       || "",
+        aadhaarAuthenticated:       data.adhrVFlag || "N/A",
+        ekycVerified:               data.ekycVFlag || "N/A",
+        pan:                        gstin.substring(2, 12),
+        address:                    data.pradr?.adr || addressParts.join(", "),
+        stateJurisdiction:          data.stj       || "",
+        centerJurisdiction:         data.ctj       || "",
+        natureOfBusinessActivities: data.nba       || [],
+        lastUpdated:                data.lstupdt   || "",
+    };
+};
+
 export const verifyGSTIN = async (req, res) => {
     try {
         const { gstin } = req.params;
 
         if (!gstin) {
-            return res.status(400).json({ message: "GSTIN is required" });
+            return res.status(400).json({ success: false, message: "GSTIN is required" });
         }
 
-        // 1. Validate Checksum/Format first
-        if (!validateGSTIN(gstin)) {
-            return res.status(400).json({ message: "Invalid GSTIN format or checksum" });
+        const normalizedGstin = gstin.trim().toUpperCase();
+
+        // Step 1: Local format + checksum validation before hitting the API
+        if (!validateGSTIN(normalizedGstin)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid GSTIN format or checksum",
+            });
         }
 
-        logger.info(`GSTIN Verification requested for: ${gstin}`);
+        logger.info(`GSTIN verification requested: ${normalizedGstin}`);
 
-        // 2. Integration Point: Here you would call a real GST API
-        // e.g., const response = await fetch(`https://api.gstin.io/v1/search/${gstin}?key=${process.env.GST_API_KEY}`);
-
-        // For demonstration and development, we return a mock success response
-        // if the checksum is valid. In a real scenario, this would be await-ed.
-
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        const stateCode = gstin.substring(0, 2);
-        const panPart = gstin.substring(2, 12);
-
-        const stateMap = {
-            "27": "Maharashtra",
-            "33": "Tamil Nadu",
-            "07": "Delhi",
-            "09": "Uttar Pradesh",
-            "19": "West Bengal",
-            "24": "Gujarat",
-            "29": "Karnataka"
-        };
-
-        const stateName = stateMap[stateCode] || "Other State";
-
-        // Specific user test cases for realistic verification
-        const specialCases = {
-            "33CFHPA3509J1ZS": {
-                legalName: "J ANTONY",
-                tradeName: "ARK PACKERS AND MOVERS",
-                registrationDate: "14/11/2019",
-                status: "Active",
-                constitution: "Proprietorship",
-                taxpayerType: "Regular",
-                aadhaarAuthenticated: "No",
-                ekycVerified: "No",
-                pan: "CFHPA3509J",
-                address: "61/12, S S COLONY, Nanpargal Street, Madurai, Madurai, Tamil Nadu, 625016",
-                administrativeOffice: {
-                    state: "Tamil Nadu",
-                    division: "MADURAI",
-                    zone: "Madurai West",
-                    circle: "MADURAI RURAL (SOUTH)"
-                },
-                otherOffice: {
-                    state: "CBIC",
-                    zone: "CHENNAI",
-                    commissionerate: "MADURAI",
-                    division: "MADURAI - I",
-                    range: "MADURAI WEST RANGE"
-                },
-                natureOfCoreActivity: "Service Provider and Others",
-                natureOfBusinessActivities: ["Supplier of Services"]
-            }
-        };
-
-        const businessNames = [
-            "Advanced Solutions (P) Ltd",
-            "Global Trading Corp",
-            "Apex Logistics & Infra",
-            "Blue Sky Tech Services",
-            "Green Valley Organic Exports"
-        ];
-
-        // Determine the final name and address
-        let finalData;
-
-        if (specialCases[gstin.toUpperCase()]) {
-            const sc = specialCases[gstin.toUpperCase()];
-            finalData = {
-                ...sc,
-                name: sc.legalName, // alias for consistency
-                gstin: gstin.toUpperCase()
-            };
-        } else {
-            // Use a simple hash from PAN to pick a consistent name for same GSTIN
-            const nameIdx = panPart.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % businessNames.length;
-            const finalName = businessNames[nameIdx];
-            finalData = {
-                gstin: gstin.toUpperCase(),
-                legalName: finalName,
-                tradeName: finalName,
-                registrationDate: "2021-06-15",
-                status: "Active",
-                constitution: "Private Limited",
-                taxpayerType: "Regular",
-                aadhaarAuthenticated: "Yes",
-                ekycVerified: "Yes",
-                pan: panPart,
-                address: `B-42, Main Hub Complex, CBD, City Center, ${stateName}, 400001`,
-                administrativeOffice: { state: stateName, division: "DISTRICT-1", zone: "ZONE-A", circle: "CIRCLE-X" },
-                natureOfCoreActivity: "Service Provider",
-                natureOfBusinessActivities: ["Business Services"]
-            };
+        // Step 2: Ensure API key is configured
+        const apiKey = process.env.GST_API_KEY_GSTINCHECK;
+        if (!apiKey) {
+            logger.error("GST_API_KEY_GSTINCHECK is not set in environment variables");
+            return res.status(500).json({
+                success: false,
+                message: "GSTIN verification service is not configured",
+            });
         }
 
-        // Standardized response data
+        // Step 3: Call gstincheck.co.in — API key is part of the URL path
+        const url = `https://sheet.gstincheck.co.in/check/${apiKey}/${normalizedGstin}`;
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            signal: AbortSignal.timeout(10000),
+        });
+
+        if (!response.ok) {
+            logger.error(`gstincheck API error: HTTP ${response.status}`);
+            return res.status(502).json({
+                success: false,
+                message: "GSTIN verification service is unavailable. Please try again.",
+            });
+        }
+
+        const json = await response.json();
+
+        // Step 4: gstincheck returns { flag: false, message: "..." } on failure
+        if (!json?.flag) {
+            logger.warn(`gstincheck rejected GSTIN ${normalizedGstin}: ${json?.message}`);
+            return res.status(404).json({
+                success: false,
+                message: json?.message || "GSTIN not found or not registered under GST",
+            });
+        }
+
+        // Step 5: Validate we actually got data
+        if (!json?.data) {
+            logger.error("Unexpected gstincheck response shape:", json);
+            return res.status(502).json({
+                success: false,
+                message: "Received an unexpected response from the verification service",
+            });
+        }
+
+        // Step 6: Guard against mismatched GSTIN in response (silent fallback protection)
+        const returnedGstin = json.data?.gstin?.toUpperCase();
+        if (returnedGstin && returnedGstin !== normalizedGstin) {
+            logger.warn(
+                `gstincheck GSTIN mismatch — requested: ${normalizedGstin}, got: ${returnedGstin}`
+            );
+            return res.status(404).json({
+                success: false,
+                message: "GSTIN not found or details unavailable for the provided GSTIN",
+            });
+        }
+
+        // Step 7: Normalize and respond
+        const data = normalizeGstinCheckResponse(normalizedGstin, json.data);
+
+        logger.info(`GSTIN verified successfully: ${normalizedGstin} — ${data.legalName}`);
+
         return res.status(200).json({
             success: true,
             data: {
-                organizationName: finalData.tradeName || finalData.legalName,
-                address: finalData.address,
-                details: finalData
-            }
+                organizationName: data.tradeName || data.legalName,
+                address:          data.address,
+                details:          data,
+            },
         });
 
     } catch (err) {
+        if (err.name === "TimeoutError" || err.name === "AbortError") {
+            logger.error(`GSTIN verification timed out for: ${req.params.gstin}`);
+            return res.status(504).json({
+                success: false,
+                message: "GSTIN verification timed out. Please try again.",
+            });
+        }
+
         logger.error("GSTIN Verification Error:", err);
         return res.status(500).json({
+            success: false,
             message: "Failed to verify GSTIN. Internal server error.",
+            ...(process.env.NODE_ENV === "development" && { error: err.message }),
         });
     }
 };
