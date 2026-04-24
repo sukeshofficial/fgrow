@@ -38,7 +38,8 @@ const InvoiceDetail = () => {
 
   const fetchInvoice = async () => {
     try {
-      const response = await getInvoiceById(id);
+      // Add a timestamp to avoid any potential caching
+      const response = await getInvoiceById(`${id}?t=${Date.now()}`);
       setInvoice(response.data);
     } catch (err) {
       logger.error("InvoiceDetail", "Failed to load invoice", err);
@@ -426,7 +427,55 @@ const InvoiceDetail = () => {
                 )}
               </div>
             </div>
+
+            {invoice.notes && (
+              <div className="invoice-notes-paper-section">
+                <h4 className="info-section-title">Notes</h4>
+                <div className="invoice-notes-content">
+                  {invoice.notes}
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Payment History Section */}
+          {(invoice.payments || []).length > 0 && (
+            <div className="payment-history-container">
+              <div className="payment-history-header">
+                <h3 className="section-title">Payment & Activity History</h3>
+                <p className="section-subtitle">Real-time log of all transactions recorded against this invoice.</p>
+              </div>
+
+              <div className="history-table-wrapper">
+                <table className="history-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Method</th>
+                      <th>Reference No.</th>
+                      <th>Amount</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoice.payments.map((payment, idx) => (
+                      <tr key={payment._id || idx}>
+                        <td>{new Date(payment.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                        <td>
+                          <span className={`method-badge ${payment.method}`}>
+                            {payment.method?.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="ref-cell">{payment.reference || '-'}</td>
+                        <td className="amount-cell">₹{payment.amount?.toLocaleString('en-IN')}</td>
+                        <td className="note-cell">{payment.note || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

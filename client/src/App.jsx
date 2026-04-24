@@ -58,6 +58,7 @@ const LaunchTimer = lazy(() => import("./pages/LaunchTimer"));
 const DocumentInOut = lazy(() => import("./pages/documents/DocumentInOut"));
 const DscManagement = lazy(() => import("./pages/documents/DscManagement"));
 const DocumentCollection = lazy(() => import("./pages/documents/DocumentCollection"));
+const InvoiceReport = lazy(() => import("./pages/invoices/InvoiceReport"));
 
 import { Spinner } from "./components/ui/Spinner";
 
@@ -168,6 +169,7 @@ const App = () => {
               <Route path="/finance/invoices/create" element={<CreateInvoiceWizard />} />
               <Route path="/finance/invoices/edit/:id" element={<EditInvoiceWizard />} />
               <Route path="/finance/invoices/:id" element={<InvoiceDetail />} />
+              <Route path="/finance/invoices/report" element={<InvoiceReport />} />
               <Route path="/finance/receipts" element={<ReceiptList />} />
               <Route path="/finance/receipts/create" element={<CreateReceiptWizard />} />
               <Route path="/finance/receipts/edit/:id" element={<EditReceiptWizard />} />

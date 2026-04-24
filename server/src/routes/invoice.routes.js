@@ -21,6 +21,7 @@ router.get("/next-number", ...authStaff, controller.getNextInvoiceNumber);
 router.post("/reset-counter", ...authStaff, controller.resetInvoiceCounter);
 router.get("/export", ...authOwner, validate("export"), controller.exportInvoices);
 router.post("/bulk", ...authOwner, clearCacheMiddleware("v0/invoices"), controller.bulkOperations);
+router.get("/stats", ...authStaff, controller.getInvoiceStats);
 
 
 // Single-invoice CRUD

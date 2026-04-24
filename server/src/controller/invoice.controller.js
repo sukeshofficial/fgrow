@@ -278,3 +278,12 @@ export const reverseInvoice = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getInvoiceStats = async (req, res, next) => {
+  try {
+    const stats = await service.getInvoiceStats(req.user);
+    res.json(stats);
+  } catch (err) {
+    next(err);
+  }
+};

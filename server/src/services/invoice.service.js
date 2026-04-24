@@ -15,6 +15,8 @@ import logger from "../utils/logger.js";
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
+const roundToTwo = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
+
 /**
  * Returns the base filter that always scopes queries to the current tenant.
  * Every DB query MUST include this to prevent cross-tenant data leaks.
@@ -31,9 +33,36 @@ const applyTotals = (inv, totals) => {
   inv.total_amount = totals.total_amount;
   inv.round_off = totals.round_off;
 
-  // Sync balance_due whenever totals change
-  const paid = inv.amount_received || 0;
-  inv.balance_due = Math.max(0, inv.total_amount - paid);
+  // Extremely robust summation of payments
+  let totalReceived = 0;
+  if (inv.payments && Array.isArray(inv.payments)) {
+    for (const p of inv.payments) {
+      const amt = typeof p.get === 'function' ? p.get('amount') : p.amount;
+      totalReceived += Number(amt || 0);
+    }
+  }
+
+  inv.amount_received = roundToTwo(totalReceived);
+  inv.balance_due = Math.max(0, roundToTwo(inv.total_amount - inv.amount_received));
+
+  // Auto-update status if not cancelled
+  if (inv.status !== 'cancelled') {
+    if (inv.balance_due <= 0 && inv.total_amount > 0) {
+      inv.status = 'paid';
+    } else if (inv.amount_received > 0 && inv.balance_due > 0) {
+      inv.status = 'partially_paid';
+    } else if (inv.amount_received === 0 && inv.balance_due === inv.total_amount) {
+      inv.status = 'draft';
+    }
+  }
+
+  // Explicitly flag fields for Mongoose persistence if this is a Mongoose document
+  if (typeof inv.markModified === 'function') {
+    inv.markModified('amount_received');
+    inv.markModified('balance_due');
+    inv.markModified('status');
+    inv.markModified('payments');
+  }
 };
 
 const syncTaskLinks = async (user, invoiceId, items) => {
@@ -308,20 +337,9 @@ export const updateInvoice = async (user, id, payload) => {
     inv.items.splice(0, inv.items.length, ...payload.items);
   }
 
-  // Recalculate totals
+  // Recalculate totals (this now handles items, payments, balance, and status)
   const totals = computeInvoiceTotals(inv.items);
   applyTotals(inv, totals);
-
-  // Sync balance due
-  const paid = inv.amount_received || 0;
-  inv.balance_due = Math.max(0, inv.total_amount - paid);
-
-  // Auto-status update
-  if (inv.balance_due === 0 && inv.total_amount > 0 && inv.status !== 'cancelled') {
-    inv.status = 'paid';
-  } else if (inv.balance_due < inv.total_amount && inv.balance_due > 0) {
-    inv.status = 'partially_paid';
-  }
 
   inv.updated_by = user._id;
   inv.markModified('items');
@@ -501,11 +519,10 @@ export const addPayment = async (user, invoiceId, payload) => {
   };
 
   inv.payments.push(payment);
-  inv.amount_received = (inv.amount_received || 0) + amount;
-  inv.balance_due = Math.max(0, (inv.total_amount || 0) - inv.amount_received);
 
-  if (inv.balance_due <= 0) inv.status = "paid";
-  else if (inv.amount_received > 0) inv.status = "partially_paid";
+  // Deriving all fields from source of truth
+  const totals = computeInvoiceTotals(inv.items);
+  applyTotals(inv, totals);
 
   inv.updated_by = user._id;
   await inv.save();
@@ -549,9 +566,10 @@ export const markPaid = async (user, invoiceId) => {
     note: "Marked as paid by user",
     created_by: user._id,
   });
-  inv.amount_received += remaining;
-  inv.balance_due = 0;
-  inv.status = "paid";
+
+  const totals = computeInvoiceTotals(inv.items);
+  applyTotals(inv, totals);
+
   inv.updated_by = user._id;
   await inv.save();
   return inv.toObject();
@@ -791,6 +809,47 @@ export const bulkOperations = async (user, payload) => {
     return { created };
   }
 
+  if (payload.action === "delete") {
+    if (!Array.isArray(payload.ids) || payload.ids.length === 0) {
+      throw new Error("ids array is required for bulk delete");
+    }
+
+    // Process deletions
+    // 1. Fetch invoices to get their sequence numbers (for correct counter adjustment)
+    const invoices = await mongoose.model("Invoice").find({
+      _id: { $in: payload.ids },
+      ...tenantFilter(user)
+    });
+
+    if (invoices.length === 0) {
+      return { deletedCount: 0 };
+    }
+
+    // 2. Sort by sequence number descending to handle counter decrementing correctly
+    const sortedInvoices = invoices.sort((a, b) => {
+      const getSeq = (no) => {
+        const parts = no.split("/");
+        return parts.length >= 3 ? parseInt(parts[parts.length - 1]) : 0;
+      };
+      return getSeq(b.invoice_no) - getSeq(a.invoice_no);
+    });
+
+    const results = [];
+    for (const inv of sortedInvoices) {
+      try {
+        await deleteInvoice(user, inv._id, payload.force || false);
+        results.push({ id: inv._id, success: true });
+      } catch (err) {
+        results.push({ id: inv._id, success: false, error: err.message });
+      }
+    }
+
+    return {
+      deletedCount: results.filter(r => r.success).length,
+      results
+    };
+  }
+
   throw new Error(`Unsupported bulk action: "${payload.action}"`);
 };
 
@@ -815,4 +874,96 @@ export const reverseInvoice = async (user, invoiceId) => {
   inv.status = "cancelled";
   inv.updated_by = user._id;
   await inv.save();
+};
+
+export const getInvoiceStats = async (user) => {
+  const filter = { ...tenantFilter(user), archived: false };
+
+  const [summary, statusBreakdown, revenueOverTime, clientRevenue] = await Promise.all([
+    // 1. Summary
+    Invoice.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: {
+            $sum: { $cond: [{ $ne: ["$status", "cancelled"] }, "$total_amount", 0] }
+          },
+          pendingAmount: {
+            $sum: { $cond: [{ $ne: ["$status", "cancelled"] }, "$balance_due", 0] }
+          },
+          invoiceCount: { $sum: 1 },
+        },
+      },
+    ]),
+
+    // 2. Status Breakdown
+    Invoice.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+
+    // 3. Revenue Over Time (Last 12 months)
+    Invoice.aggregate([
+      {
+        $match: {
+          ...filter,
+          date: { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 1)) }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$date" },
+            month: { $month: "$date" }
+          },
+          revenue: { $sum: "$total_amount" }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]),
+
+    // 4. Client-wise Revenue (Top 10)
+    Invoice.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: "$client",
+          revenue: { $sum: "$total_amount" }
+        }
+      },
+      { $sort: { revenue: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: "clients",
+          localField: "_id",
+          foreignField: "_id",
+          as: "clientInfo"
+        }
+      },
+      { $unwind: "$clientInfo" },
+      {
+        $project: {
+          name: "$clientInfo.name",
+          revenue: 1
+        }
+      }
+    ])
+  ]);
+
+  return {
+    summary: summary[0] || { totalRevenue: 0, pendingAmount: 0, invoiceCount: 0 },
+    statusBreakdown: statusBreakdown.map(s => ({ status: s._id, count: s.count })),
+    revenueOverTime: revenueOverTime.map(r => ({
+      period: `${r._id.year}-${String(r._id.month).padStart(2, '0')}`,
+      revenue: r.revenue
+    })),
+    clientRevenue
+  };
 };

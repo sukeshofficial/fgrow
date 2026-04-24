@@ -660,7 +660,8 @@ body {
 .reports,
 .users,
 .notifications,
-.settings {
+.settings,
+.invoice-report {
   margin-left: var(--sidebar-w, 260px);
   transition: margin-left 0.3s ease;
 }
@@ -677,7 +678,8 @@ body {
   .reports,
   .users,
   .notifications,
-  .settings {
+  .settings,
+  .invoice-report {
     margin-left: 72px;
   }
 }

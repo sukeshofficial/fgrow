@@ -1,11 +1,11 @@
-import React from "react";
-import { FiSearch, FiFilter, FiPlus } from "react-icons/fi";
+import { FiSearch, FiFilter, FiPlus, FiBarChart2 } from "react-icons/fi";
 
 const FilterBar = ({
   filters,
   onFilterChange,
   onOpenAdvanced,
-  onCreateNew
+  onCreateNew,
+  onOpenReport
 }) => {
   return (
     <div className="filter-bar">
@@ -57,6 +57,11 @@ const FilterBar = ({
         <button className="advanced-filter-btn" onClick={onOpenAdvanced}>
           <FiFilter />
           Filters
+        </button>
+
+        <button className="advanced-filter-btn" onClick={onOpenReport}>
+          <FiBarChart2 />
+          Report
         </button>
 
         <button className="create-btn" onClick={onCreateNew}>

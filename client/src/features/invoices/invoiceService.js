@@ -23,6 +23,10 @@ export const deleteInvoice = async (id, force = false) => {
   return await api.delete(`${BASE_URL}/${id}?force=${force}`);
 };
 
+export const bulkDeleteInvoices = async (ids, force = false) => {
+  return await api.post(`${BASE_URL}/bulk`, { action: "delete", ids, force });
+};
+
 export const getNextInvoiceNumber = async () => {
   return await api.get(`${BASE_URL}/next-number`);
 };
@@ -85,4 +89,8 @@ export const bulkOperations = async (data) => {
 
 export const reverseInvoice = async (id) => {
   return await api.post(`${BASE_URL}/${id}/reverse`);
+};
+
+export const getInvoiceStats = async () => {
+  return await api.get(`${BASE_URL}/stats`);
 };
