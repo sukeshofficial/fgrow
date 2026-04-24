@@ -137,7 +137,7 @@ export const markAsSeen = async (req, res) => {
         if (!user) return res.status(404).json({ message: "User not found" });
 
         user.last_seen_version = version;
-        await user.save();
+        await user.save({ validateBeforeSave: false });
 
         res.json({ message: "Version marked as seen", last_seen_version: user.last_seen_version });
     } catch (err) {

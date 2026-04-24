@@ -478,11 +478,11 @@ const ReleaseNotesManagement = () => {
             {/* Live Preview Modal */}
             {isPreviewOpen && (
                 <ReleaseNotesModal
-                    release={{
+                    releases={[{
                         ...form,
                         features: form.features.filter(f => f.trim() !== ""),
                         status: 'published' // Ensure it shows in preview
-                    }}
+                    }]}
                     onClose={() => setIsPreviewOpen(false)}
                 />
             )}
