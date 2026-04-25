@@ -113,7 +113,7 @@ export const getLatestReleaseNote = async (req, res) => {
         }
 
         // Get the most recent one by publishAt or priority
-        const releaseNote = await ReleaseNote.findOne(query).sort({ priority: -1, publishAt: -1 });
+        const releaseNote = await ReleaseNote.findOne(query).sort({ priority: -1, publishAt: -1, createdAt: -1 });
 
         if (!releaseNote) {
             return res.status(404).json({ message: "No active release notes found" });
@@ -219,7 +219,7 @@ export const getReleaseNotesHistory = async (req, res) => {
             query.audience = { $in: ["all", "users"] };
         }
 
-        const releaseNotes = await ReleaseNote.find(query).sort({ priority: -1, publishAt: -1 });
+        const releaseNotes = await ReleaseNote.find(query).sort({ priority: -1, publishAt: -1, createdAt: -1 });
 
         if (!releaseNotes || releaseNotes.length === 0) {
             return res.status(404).json({ message: "No active release notes found" });

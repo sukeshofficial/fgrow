@@ -61,14 +61,15 @@ export const ModalProvider = ({ children }) => {
 
     const openFeedbackModal = useCallback(() => {
         return new Promise((resolve) => {
-            setFeedbackResolve(() => resolve);
+            // Carefully wrap resolve in an anonymous function so React doesn't instantly evaluate it
+            setFeedbackResolve(() => () => resolve());
             setIsFeedbackModalOpen(true);
         });
     }, []);
 
     const closeFeedbackModal = useCallback(() => {
         setIsFeedbackModalOpen(false);
-        if (feedbackResolve) {
+        if (typeof feedbackResolve === "function") {
             feedbackResolve();
             setFeedbackResolve(null);
         }
