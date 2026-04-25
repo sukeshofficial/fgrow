@@ -16,6 +16,7 @@ import {
     CheckCircle2,
     Clock,
     Trash2,
+    Settings,
 } from "lucide-react";
 import TableSkeleton from "../../components/skeletons/TableSkeleton";
 import "../../styles/AdvancedFilters.css";
@@ -119,6 +120,31 @@ const FeedbackList = () => {
 
     // Popover menu
     const [openMenuId, setOpenMenuId] = useState(null);
+
+    // Settings
+    const [showSettings, setShowSettings] = useState(false);
+    const [intervalValue, setIntervalValue] = useState(10);
+    const [savingSettings, setSavingSettings] = useState(false);
+
+    useEffect(() => {
+        api.get("/system/settings/public").then(res => {
+            if (res.data?.data?.feedback_logout_interval !== undefined) {
+                setIntervalValue(res.data.data.feedback_logout_interval);
+            }
+        }).catch(() => { });
+    }, []);
+
+    const handleSaveSettings = async () => {
+        try {
+            setSavingSettings(true);
+            await api.patch("/system/settings", { feedback_logout_interval: parseInt(intervalValue, 10) });
+            setShowSettings(false);
+        } catch (err) {
+            alert("Failed to save setting");
+        } finally {
+            setSavingSettings(false);
+        }
+    };
 
     useEffect(() => {
         fetchFeedbacks();
@@ -255,8 +281,29 @@ const FeedbackList = () => {
                                 <X size={14} strokeWidth={2.5} /> Clear
                             </button>
                         )}
+                        <button onClick={() => setShowSettings(!showSettings)} style={{ ...clearBtnStyle, color: "#64748b" }}>
+                            <Settings size={14} strokeWidth={2.5} style={{ color: "#64748b" }} /> Settings
+                        </button>
                     </div>
                 </div>
+
+                {/* ── Settings Panel ── */}
+                {showSettings && (
+                    <div style={{ padding: "16px 20px", background: "#f8fafc", borderBottom: "1px solid #f1f5f9", display: "flex", gap: "16px", alignItems: "flex-end", flexWrap: "wrap" }}>
+                        <div>
+                            <label style={{ fontSize: "12px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px", display: "block" }}>Logout Feedback Interval</label>
+                            <input type="number" min="0" value={intervalValue} onChange={e => setIntervalValue(e.target.value)} style={{ ...searchInputStyle, width: "120px" }} />
+                        </div>
+                        <div style={{ paddingBottom: "2px" }}>
+                            <button onClick={handleSaveSettings} disabled={savingSettings} style={{ background: "#6366f1", color: "white", padding: "8px 16px", borderRadius: "8px", border: "none", fontSize: "13px", fontWeight: "600", cursor: savingSettings ? "not-allowed" : "pointer", transition: "all 0.2s" }}>
+                                {savingSettings ? "Saving..." : "Save"}
+                            </button>
+                        </div>
+                        <div style={{ paddingBottom: "10px", fontSize: "12px", color: "#94a3b8", flex: 1, minWidth: "250px" }}>
+                            Set the number of manual logouts required after the 1st before showing the feedback modal again (e.g., 10 means 10th, 20th... checkout).
+                        </div>
+                    </div>
+                )}
 
                 {/* ── Table ── */}
                 <div>

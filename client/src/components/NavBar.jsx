@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth.js";
+import { useLogoutWithFeedback } from "../hooks/useLogoutWithFeedback.js";
 
 import "../styles/navbar.css";
 import logo from "/ForgeGrid.svg";
@@ -17,7 +18,8 @@ export default function Navbar() {
    * Mobile menu state
    */
   const [menuOpen, setMenuOpen] = useState(false);
-  const { user, avatar, logout } = useAuth();
+  const { user, avatar } = useAuth();
+  const logout = useLogoutWithFeedback();
 
   /**
    * Close mobile menu on ESC key

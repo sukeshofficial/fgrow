@@ -2,13 +2,15 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../../hooks/useAuth.js";
 import { checkAuth } from "../../features/auth/auth.actions.js";
+import { useLogoutWithFeedback } from "../../hooks/useLogoutWithFeedback.js";
 import { getTenantById } from "../../api/tenant.api.js";
 import { FiRefreshCcw, FiLogOut, FiCheckCircle, FiInfo, FiClock, FiBriefcase } from "react-icons/fi";
 
 import "../../styles/tenant-pending.css";
 
 export const TenantPendingScreen = () => {
-  const { user, dispatch, logout } = useAuth();
+  const { user, dispatch } = useAuth();
+  const logout = useLogoutWithFeedback();
   const [refreshing, setRefreshing] = useState(false);
 
   /**

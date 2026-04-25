@@ -57,9 +57,22 @@ export const ModalProvider = ({ children }) => {
     const closeReportModal = useCallback(() => setIsReportModalOpen(false), []);
 
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+    const [feedbackResolve, setFeedbackResolve] = useState(null);
 
-    const openFeedbackModal = useCallback(() => setIsFeedbackModalOpen(true), []);
-    const closeFeedbackModal = useCallback(() => setIsFeedbackModalOpen(false), []);
+    const openFeedbackModal = useCallback(() => {
+        return new Promise((resolve) => {
+            setFeedbackResolve(() => resolve);
+            setIsFeedbackModalOpen(true);
+        });
+    }, []);
+
+    const closeFeedbackModal = useCallback(() => {
+        setIsFeedbackModalOpen(false);
+        if (feedbackResolve) {
+            feedbackResolve();
+            setFeedbackResolve(null);
+        }
+    }, [feedbackResolve]);
 
     return (
         <ModalContext.Provider value={{

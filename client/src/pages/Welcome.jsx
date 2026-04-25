@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
+import { useLogoutWithFeedback } from "../hooks/useLogoutWithFeedback";
 import { Spinner } from "../components/ui/Spinner";
 
 import WelcomeCard from "../components/tenant/WelcomeCard";
@@ -14,7 +15,8 @@ import logger from "../utils/logger.js";
 import "../styles/welcome.css";
 
 export const WelcomePage = () => {
-  const { user, meState, isLoading, invitation, logout } = useAuth();
+  const { user, meState, isLoading, invitation } = useAuth();
+  const logout = useLogoutWithFeedback();
 
   const [activeFlow, setActiveFlow] = useState(null);
   const [toast, setToast] = useState(null);

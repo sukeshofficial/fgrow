@@ -22,6 +22,7 @@ import {
 } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 
+import { useLogoutWithFeedback } from "../hooks/useLogoutWithFeedback.js";
 import { useAuth } from "../hooks/useAuth.js";
 import logo from "/FGrow.png";
 import { useModal } from "../context/ModalContext";
@@ -161,7 +162,8 @@ export default function Sidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const { user, avatar, logout, tenant } = useAuth();
+  const { user, avatar, tenant } = useAuth();
+  const logout = useLogoutWithFeedback();
 
   // Show upgrade banner if owner and trial is expired or no plan
   const showUpgradeBanner = user?.tenant_role === "owner" && (
