@@ -12,6 +12,9 @@ import BugReportsList from "./BugReportsList";
 import LaunchManagement from "./LaunchManagement";
 import SuperAdminUsersList from "./SuperAdminUsersList";
 import ReleaseNotesManagement from "./ReleaseNotesManagement";
+import FeedbackList from "./FeedbackList";
+import { useAuth } from "../../hooks/useAuth";
+import { Building2, Bug, MessageSquare, Rocket, FileText, Users } from "lucide-react";
 
 import "../../styles/welcome.css";
 import "../../styles/admin-dashboard.css";
@@ -27,6 +30,7 @@ const AdminDashboard = () => {
   const [rejectingTenant, setRejectingTenant] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("tenants");
+  const { user, avatar } = useAuth();
 
   useEffect(() => {
     fetchTenants();
@@ -82,20 +86,60 @@ const AdminDashboard = () => {
     <div className="dashboard">
       <Sidebar />
 
-      <div className="dashboard-header-row">
-        <h1 className="dashboard-title">Super Admin Dashboard</h1>
+      <div className="dashboard-header-row" style={{ alignItems: "flex-start" }}>
+        <div>
+          <h1 className="dashboard-title">Super Admin Dashboard</h1>
 
-        <div className="filter-tabs" style={{ margin: 0 }}>
-          {['tenants', 'reports', 'launch', 'release-notes', 'users'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`filter-tabs-btn ${activeTab === tab ? 'active' : ''}`}
-              style={{ textTransform: 'capitalize' }}
-            >
-              {tab === 'reports' ? 'Bug Reports' : tab === 'launch' ? 'Launch' : tab === 'users' ? 'Users' : tab === 'release-notes' ? 'Release Notes' : 'Tenants'}
-            </button>
-          ))}
+          <div className="filter-tabs" style={{ margin: "16px 0 0 0", gap: "8px", background: "transparent", padding: 0 }}>
+            {[
+              { id: 'tenants', label: 'Tenants', icon: Building2 },
+              { id: 'reports', label: 'Bug Reports', icon: Bug },
+              { id: 'feedback', label: 'Feedback', icon: MessageSquare },
+              { id: 'launch', label: 'Launch', icon: Rocket },
+              { id: 'release-notes', label: 'Release Notes', icon: FileText },
+              { id: 'users', label: 'Users', icon: Users }
+            ].map(tab => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`filter-tabs-btn ${isActive ? 'active' : ''}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    borderRadius: '999px',
+                    background: isActive ? 'white' : 'transparent',
+                    boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                    fontWeight: isActive ? '600' : '500',
+                    border: '1px solid transparent',
+                    borderColor: isActive ? '#e2e8f0' : 'transparent'
+                  }}
+                >
+                  <Icon size={16} style={{ color: isActive ? '#4f46e5' : '#64748b' }} />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Profile Avatar */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", background: "white", padding: "6px 16px 6px 6px", borderRadius: "999px", border: "1px solid #e2e8f0", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
+          {avatar ? (
+            <img src={avatar} alt="Profile" style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }} />
+          ) : (
+            <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700" }}>
+              {user?.name?.[0]?.toUpperCase() || "?"}
+            </div>
+          )}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: "14px", fontWeight: "600", color: "#0f172a", lineHeight: "1.2" }}>{user?.name || "Admin"}</span>
+            <span style={{ fontSize: "12px", color: "#64748b" }}>Super Admin</span>
+          </div>
         </div>
       </div>
 
@@ -246,6 +290,8 @@ const AdminDashboard = () => {
         </>
       ) : activeTab === 'reports' ? (
         <BugReportsList />
+      ) : activeTab === 'feedback' ? (
+        <FeedbackList />
       ) : activeTab === 'launch' ? (
         <LaunchManagement />
       ) : activeTab === 'release-notes' ? (

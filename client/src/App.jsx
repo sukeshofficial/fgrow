@@ -82,6 +82,7 @@ import { useError } from "./context/ErrorContext";
 import { setupInterceptors } from "./api/api";
 import GlobalModal from "./components/ui/GlobalModal";
 import ReportIssueModal from "./components/ui/ReportIssueModal";
+import FeedbackModal from "./components/ui/FeedbackModal";
 import { useModal } from "./context/ModalContext";
 import ReleaseNotesLoader from "./components/ui/ReleaseNotesLoader";
 
@@ -101,7 +102,7 @@ const App = () => {
     checkAuth(dispatch);
   }, [dispatch, setError]);
 
-  const { isReportModalOpen, closeReportModal } = useModal();
+  const { isReportModalOpen, closeReportModal, isFeedbackModalOpen, closeFeedbackModal } = useModal();
 
   // 1. Show loader while checking auth
   if (isLoading) {
@@ -124,6 +125,7 @@ const App = () => {
     <Suspense fallback={<PageLoader />}>
       <GlobalModal />
       <ReportIssueModal isOpen={isReportModalOpen} onClose={closeReportModal} />
+      <FeedbackModal isOpen={isFeedbackModalOpen} onClose={closeFeedbackModal} />
       <ReleaseNotesLoader />
       <Routes>
 

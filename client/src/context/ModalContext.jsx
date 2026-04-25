@@ -56,6 +56,11 @@ export const ModalProvider = ({ children }) => {
     const openReportModal = useCallback(() => setIsReportModalOpen(true), []);
     const closeReportModal = useCallback(() => setIsReportModalOpen(false), []);
 
+    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+
+    const openFeedbackModal = useCallback(() => setIsFeedbackModalOpen(true), []);
+    const closeFeedbackModal = useCallback(() => setIsFeedbackModalOpen(false), []);
+
     return (
         <ModalContext.Provider value={{
             showAlert,
@@ -65,7 +70,10 @@ export const ModalProvider = ({ children }) => {
             handleCancel,
             isReportModalOpen,
             openReportModal,
-            closeReportModal
+            closeReportModal,
+            isFeedbackModalOpen,
+            openFeedbackModal,
+            closeFeedbackModal
         }}>
             {children}
         </ModalContext.Provider>

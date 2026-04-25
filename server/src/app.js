@@ -31,6 +31,7 @@ import notificationRoutes from "./routes/notification.routes.js";
 import launchRoutes from "./routes/launch.routes.js";
 import superAdminRoutes from "./routes/superadmin.routes.js";
 import releaseNoteRoutes from "./routes/releaseNote.routes.js";
+import feedbackRoutes from "./routes/feedback.routes.js";
 
 import { errorMiddleware } from "./middleware/error.middleware.js";
 
@@ -124,6 +125,7 @@ app.use("/api/v0/notifications", notificationRoutes);
 app.use("/api/v0/launch", launchRoutes);
 app.use("/api/v0/superadmin", superAdminRoutes);
 app.use("/api/v0/release-notes", releaseNoteRoutes);
+app.use("/api/v0/feedback", feedbackRoutes);
 
 
 

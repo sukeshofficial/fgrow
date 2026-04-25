@@ -17,7 +17,8 @@ import {
   FaPlus,
   FaBug,
   FaCrown,
-  FaUserCircle
+  FaUserCircle,
+  FaSmile
 } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 
@@ -178,7 +179,7 @@ export default function Sidebar() {
   const [flyout, setFlyout] = useState(null);
   // tooltip: { label, top } | null
   const [tooltip, setTooltip] = useState(null);
-  const { openReportModal } = useModal();
+  const { openReportModal, openFeedbackModal } = useModal();
   const navigate = useNavigate();
 
   /* ----------------------------- Menu Helpers ------------------------------ */
@@ -385,6 +386,17 @@ export default function Sidebar() {
             >
               <span className="menu-icon"><FaBug /></span>
               <span className="menu-label">Report Issue</span>
+            </button>
+
+            <button
+              onClick={openFeedbackModal}
+              className="menu-item"
+              style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', color: '#64748b' }}
+              onMouseEnter={(e) => handleMouseEnter(e, "Share Feedback")}
+              onMouseLeave={handleMouseLeave}
+            >
+              <span className="menu-icon"><FaSmile /></span>
+              <span className="menu-label">Feedback</span>
             </button>
 
             {/* User Section */}
