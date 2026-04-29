@@ -22,9 +22,10 @@ export const Spinner = ({
     if (!showTimer) return;
     const interval = setInterval(() => {
       setSeconds((prev) => prev + 1);
-    }, 1000);
+    }, 10);
     return () => clearInterval(interval);
   }, [showTimer]);
+
 
   const sizeMap = {
     sm: '32px',
@@ -62,9 +63,10 @@ export const Spinner = ({
           {text && <span className="spinner-text">{text}</span>}
           {showTimer && (
             <div className="loading-timer-chip">
-              {seconds}s
+              {(seconds / 100).toFixed(2)}s
             </div>
           )}
+
         </div>
       )}
     </div>
