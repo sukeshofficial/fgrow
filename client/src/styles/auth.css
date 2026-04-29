@@ -99,6 +99,7 @@
 .star-red {
   color: rgb(255, 57, 57);
 }
+
 /* -------------------------
    Checkbox and small row
    ------------------------- */
@@ -243,11 +244,9 @@
   content: "";
   flex: 1;
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    rgba(15, 23, 42, 0.04),
-    rgba(15, 23, 42, 0.02)
-  );
+  background: linear-gradient(90deg,
+      rgba(15, 23, 42, 0.04),
+      rgba(15, 23, 42, 0.02));
 }
 
 /* -------------------------
@@ -512,11 +511,13 @@
    Layout: Auth page (desktop split view)
    ------------------------- */
 .auth-page {
-  height: 100vh; /* lock to viewport */
+  height: 100vh;
+  /* lock to viewport */
   display: grid;
   grid-template-columns: 1fr 420px;
   align-items: center;
-  overflow: hidden; /* ❌ no scroll */
+  overflow: hidden;
+  /* ❌ no scroll */
   padding: 24px 32px;
 }
 
@@ -530,7 +531,8 @@
 .auth-left .illustration {
   border-radius: 18px;
   border: 2px dashed rgba(174, 174, 174, 0.329);
-  max-height: 90vh; /* prevent overflow */
+  max-height: 90vh;
+  /* prevent overflow */
   max-width: 90%;
   box-shadow: 0 12px 40px rgba(20, 23, 28, 0.06);
   object-fit: contain;
@@ -569,7 +571,8 @@
   }
 
   .auth-left {
-    display: none; /* hide illustration */
+    display: none;
+    /* hide illustration */
   }
 
   .auth-right {

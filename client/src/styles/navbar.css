@@ -188,7 +188,8 @@
   position: fixed;
   inset: 0;
   backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px); /* Safari support */
+  -webkit-backdrop-filter: blur(3px);
+  /* Safari support */
   z-index: 998;
 }
 
@@ -325,18 +326,22 @@
   .mobile-menu {
     display: none;
   }
+
   .menu-overlay {
     display: none;
   }
 }
+
 /* 1909 */
 @media (max-width: 1024px) {
   .navbar-links {
     display: none;
   }
+
   .desktop-only {
     display: none;
   }
+
   .hamburger {
     display: flex;
   }
@@ -347,6 +352,7 @@
     top: 18px;
     width: 94%;
   }
+
   /* .logo-text {
     display: none;
   } */
@@ -406,8 +412,12 @@
 .glass-navbar,
 .mobile-links,
 .glass-navbar * {
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* Old Edge */
-  user-select: none; /* Standard */
+  -webkit-user-select: none;
+  /* Safari */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Old Edge */
+  user-select: none;
+  /* Standard */
 }

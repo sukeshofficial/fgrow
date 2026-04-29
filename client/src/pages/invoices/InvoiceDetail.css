@@ -425,118 +425,133 @@
   font-size: 26px;
   font-weight: 900;
 }
+
 /* Invoice Notes in Paper */
 .invoice-notes-paper-section {
-    margin-top: 60px;
-    padding-top: 20px;
+  margin-top: 60px;
+  padding-top: 20px;
 }
 
 .invoice-notes-content {
-    font-size: 13px;
-    color: #475569;
-    line-height: 1.6;
-    white-space: pre-wrap;
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.6;
+  white-space: pre-wrap;
 }
 
 /* Payment History Section */
 .payment-history-container {
-    max-width: 900px;
-    margin: 40px auto 100px;
-    background: white;
-    border-radius: 24px;
-    padding: 40px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  max-width: 900px;
+  margin: 40px auto 100px;
+  background: white;
+  border-radius: 24px;
+  padding: 40px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .payment-history-header {
-    margin-bottom: 32px;
+  margin-bottom: 32px;
 }
 
 .section-title {
-    font-family: "Space Mono", monospace !important;
-    font-size: 20px;
-    font-weight: 800;
-    color: #1e293b;
-    margin-bottom: 8px;
+  font-family: "Space Mono", monospace !important;
+  font-size: 20px;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 8px;
 }
 
 .section-subtitle {
-    font-family: "Space Mono", monospace !important;
-    font-size: 13px;
-    color: #64748b;
+  font-family: "Space Mono", monospace !important;
+  font-size: 13px;
+  color: #64748b;
 }
 
 .history-table-wrapper {
-    overflow-x: auto;
+  overflow-x: auto;
 }
 
 .history-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: "Space Mono", monospace !important;
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Space Mono", monospace !important;
 }
 
 .history-table th {
-    text-align: left;
-    padding: 12px 16px;
-    background: #f8fafc;
-    color: #64748b;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    border-bottom: 2px solid #e2e8f0;
+  text-align: left;
+  padding: 12px 16px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .history-table td {
-    padding: 16px;
-    border-bottom: 1px solid #f1f5f9;
-    font-size: 13px;
-    color: #1e293b;
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 13px;
+  color: #1e293b;
 }
 
 .history-table tr:last-child td {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .method-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    background: #f1f5f9;
-    color: #475569;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #f1f5f9;
+  color: #475569;
 }
 
-.method-badge.bank_transfer { background: #eff6ff; color: #1d4ed8; }
-.method-badge.cash { background: #ecfdf5; color: #059669; }
-.method-badge.cheque { background: #fef3c7; color: #d97706; }
-.method-badge.online { background: #f5f3ff; color: #7c3aed; }
+.method-badge.bank_transfer {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.method-badge.cash {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.method-badge.cheque {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.method-badge.online {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
 
 .ref-cell {
-    font-weight: 600;
-    color: #64748b;
+  font-weight: 600;
+  color: #64748b;
 }
 
 .amount-cell {
-    font-weight: 800;
-    color: #10b981;
+  font-weight: 800;
+  color: #10b981;
 }
 
 .note-cell {
-    color: #64748b;
-    font-style: italic;
-    max-width: 250px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  color: #64748b;
+  font-style: italic;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .note-cell:hover {
-    white-space: normal;
-    overflow: visible;
+  white-space: normal;
+  overflow: visible;
 }
-
