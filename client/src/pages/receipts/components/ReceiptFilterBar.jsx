@@ -1,7 +1,6 @@
-import React from "react";
-import { Search, Plus, Filter } from "lucide-react";
+import { Search, Plus, Filter, BarChart2 } from "lucide-react";
 
-const ReceiptFilterBar = ({ filters, onFilterChange, onCreateNew, onOpenFilters }) => {
+const ReceiptFilterBar = ({ filters, onFilterChange, onCreateNew, onOpenFilters, onViewReport }) => {
     return (
         <div className="filter-bar">
             <div className="search-wrapper">
@@ -31,6 +30,10 @@ const ReceiptFilterBar = ({ filters, onFilterChange, onCreateNew, onOpenFilters 
                 <button className="advanced-filter-btn" onClick={onOpenFilters}>
                     <Filter size={18} />
                     Filters
+                </button>
+                <button className="view-report-btn" onClick={onViewReport}>
+                    <BarChart2 size={18} />
+                    Report
                 </button>
 
                 <button className="create-btn" onClick={onCreateNew}>

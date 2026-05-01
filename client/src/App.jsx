@@ -59,6 +59,7 @@ const DocumentInOut = lazy(() => import("./pages/documents/DocumentInOut"));
 const DscManagement = lazy(() => import("./pages/documents/DscManagement"));
 const DocumentCollection = lazy(() => import("./pages/documents/DocumentCollection"));
 const InvoiceReport = lazy(() => import("./pages/invoices/InvoiceReport"));
+const ReceiptReport = lazy(() => import("./pages/receipts/ReceiptReport"));
 
 import { Spinner } from "./components/ui/Spinner";
 
@@ -176,6 +177,7 @@ const App = () => {
               <Route path="/finance/receipts/create" element={<CreateReceiptWizard />} />
               <Route path="/finance/receipts/edit/:id" element={<EditReceiptWizard />} />
               <Route path="/finance/receipts/:id" element={<ReceiptDetail />} />
+              <Route path="/finance/receipts/report" element={<ReceiptReport />} />
               <Route path="/finance" element={<Navigate to="/finance/invoices" replace />} />
 
               <Route path="/documents/in-out" element={<DocumentInOut />} />

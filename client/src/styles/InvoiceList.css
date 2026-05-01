@@ -124,6 +124,26 @@
   gap: 8px;
 }
 
+.view-report-btn {
+  background: #f5f3ff;
+  color: #7c3aed;
+  border: 1px solid #ddd6fe;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-report-btn:hover {
+  background: #ede9fe;
+  transform: translateY(-1px);
+}
+
 /* Table Styles */
 .table-container {
   background: white;
@@ -326,9 +346,20 @@
   justify-content: center;
 }
 
-.summary-icon.revenue { background: #eff6ff; color: #3b82f6; }
-.summary-icon.count { background: #ecfdf5; color: #10b981; }
-.summary-icon.avg { background: #fffbeb; color: #f59e0b; }
+.summary-icon.revenue {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.summary-icon.count {
+  background: #ecfdf5;
+  color: #10b981;
+}
+
+.summary-icon.avg {
+  background: #fffbeb;
+  color: #f59e0b;
+}
 
 .summary-label {
   font-size: 13px;
@@ -389,8 +420,15 @@
 }
 
 @keyframes slideInDown {
-  from { transform: translateY(-10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .selected-count {
@@ -413,9 +451,17 @@
 }
 
 @keyframes pulseDelete {
-  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
 }
 
 .bulk-delete-btn {
@@ -523,6 +569,7 @@
   background: #e0e7ff !important;
   border-color: #a5b4fc !important;
 }
+
 /* Header Icons */
 .header-icon-wrapper {
   display: flex;
@@ -578,4 +625,3 @@
   white-space: nowrap !important;
   min-width: fit-content;
 }
-

@@ -59,7 +59,7 @@ const FilterBar = ({
           Filters
         </button>
 
-        <button className="advanced-filter-btn" onClick={onOpenReport}>
+        <button className="view-report-btn" onClick={onOpenReport}>
           <FiBarChart2 />
           Report
         </button>

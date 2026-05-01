@@ -1,4 +1,4 @@
-.invoice-report {
+.receipt-report {
   padding: 2rem 2.5rem;
   background-color: #f8fafc;
   min-height: 100vh;
@@ -42,18 +42,6 @@
   box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
 }
 
-.breadcrumb-sep {
-  color: #94a3b8;
-  font-size: 1.2rem;
-  font-weight: 300;
-}
-
-.breadcrumb-current {
-  color: #64748b;
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
 .header-main-row {
   display: flex;
   justify-content: space-between;
@@ -84,15 +72,7 @@
   margin: 0;
 }
 
-.header-right {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: flex-end;
-}
-
-.export-btn,
-.back-btn {
+.export-btn {
   padding: 0.625rem 1.25rem;
   border-radius: 999px;
   font-weight: 600;
@@ -102,20 +82,10 @@
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s;
-}
-
-.export-btn {
   background: white;
   border: 1px solid #e2e8f0;
   color: #0f172a;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-
-.back-btn {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
-  width: fit-content;
 }
 
 .export-btn:hover {
@@ -123,11 +93,6 @@
   color: white;
   border-color: #0f172a;
   transform: translateY(-2px);
-}
-
-.back-btn:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
 }
 
 /* Metric Cards Row */
@@ -168,12 +133,12 @@
   justify-content: center;
 }
 
-.m-icon.revenue {
+.m-icon.received {
   background: #eff6ff;
   color: #3b82f6;
 }
 
-.m-icon.count {
+.m-icon.tds {
   background: #ecfdf5;
   color: #10b981;
 }
@@ -183,7 +148,7 @@
   color: #f59e0b;
 }
 
-.m-icon.pending {
+.m-icon.count {
   background: #fef2f2;
   color: #ef4444;
 }
@@ -212,14 +177,6 @@
 
 .m-trend.positive {
   color: #10b981;
-}
-
-.m-trend.negative {
-  color: #ef4444;
-}
-
-.m-trend.neutral {
-  color: #94a3b8;
 }
 
 .m-vs {
@@ -413,12 +370,11 @@
 
 .pie-legend {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 0.75rem;
 }
 
 .legend-item {
-  border-color: #d8d8d8 !important;
   background-color: #f1f5f9;
   padding: 6px 12px;
   border-radius: 8px;
@@ -442,11 +398,6 @@
 
 .legend-item .count {
   color: #0f172a;
-}
-
-/* Top List Panel */
-.list-panel .panel-header {
-  margin-bottom: 1.5rem;
 }
 
 .top-list {
@@ -505,41 +456,6 @@
   color: #0f172a;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .main-content-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .invoice-report {
-    padding: 1.5rem;
-  }
-
-  .report-header-section {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-}
-
-/* Aggressive Chart Focus Reset */
-.recharts-wrapper:focus,
-.recharts-wrapper *:focus,
-.recharts-surface:focus,
-.recharts-sector:focus,
-.recharts-curve:focus,
-.recharts-rectangle:focus,
-.recharts-responsive-container:focus {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Also target the SVG directly */
-.invoice-report svg:focus {
-  outline: none !important;
-}
-
 .refresh-btn {
   background: #fff;
   border: 1px solid #e2e8f0;
@@ -560,16 +476,6 @@
   border-color: #cbd5e1;
   color: #3b82f6;
   transform: translateY(-1px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.refresh-btn:active {
-  transform: translateY(0);
-}
-
-.refresh-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
 }
 
 .spin {
@@ -583,5 +489,17 @@
 
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1200px) {
+  .main-content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .receipt-report {
+    padding: 1.5rem;
   }
 }

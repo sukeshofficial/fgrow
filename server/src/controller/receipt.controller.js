@@ -9,6 +9,7 @@ import {
     unapplyReceiptService,
     listUnpaidInvoicesForClient,
     sendReceiptService,
+    getReceiptStatsService,
 } from "../services/receipt.service.js";
 
 import { generateReceiptPdfBuffer } from "../utils/pdf.helper.js"; // see helper below
@@ -171,6 +172,15 @@ export const printReceiptController = async (req, res) => {
         const filename = `receipt-${receipt.receipt_no || receipt._id}.pdf`;
         res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
         return res.send(buffer);
+    } catch (e) {
+        return res.status(500).json({ success: false, message: e.message });
+    }
+};
+
+export const getReceiptStatsController = async (req, res) => {
+    try {
+        const stats = await getReceiptStatsService({ tenant_id: req.user.tenant_id });
+        return res.json({ success: true, data: stats });
     } catch (e) {
         return res.status(500).json({ success: false, message: e.message });
     }

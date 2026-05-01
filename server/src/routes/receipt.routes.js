@@ -13,6 +13,7 @@ import {
   sendReceiptController,
   getNextReceiptNumberController,
   resetReceiptCounterController,
+  getReceiptStatsController,
 } from "../controller/receipt.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
@@ -32,6 +33,7 @@ router.get("/", ...authStaff, cacheMiddleware(300), listReceiptsController);
 
 // Utility (must be before /:id to avoid conflicts)
 router.get("/next-number", ...authStaff, getNextReceiptNumberController);
+router.get("/stats", ...authStaff, cacheMiddleware(300), getReceiptStatsController);
 router.post("/reset-counter", ...authStaff, resetReceiptCounterController);
 router.get("/client/:clientId/unpaid-invoices", ...authStaff, unpaidInvoicesForClientController);
 

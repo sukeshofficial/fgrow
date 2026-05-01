@@ -1031,3 +1031,92 @@ export const getReceiptPdfStream = async (user, receiptId) => {
   rs.end(buffer);
   return rs;
 };
+
+export const getReceiptStatsService = async ({ tenant_id }) => {
+  const filter = { tenant_id, archived: false };
+
+  const [summary, statusBreakdown, receiptsOverTime, clientReceipts] = await Promise.all([
+    // 1. Summary details
+    Receipt.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: null,
+          totalReceived: { $sum: "$received_amount" },
+          tdsAmount: { $sum: "$tds_amount" },
+          totalAmount: { $sum: "$total_amount" },
+          receiptCount: { $sum: 1 },
+        },
+      },
+    ]),
+
+    // 2. Status Breakdown
+    Receipt.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+
+    // 3. Receipts over time (last 12 months)
+    Receipt.aggregate([
+      {
+        $match: {
+          ...filter,
+          date: { $gte: new Date(new Date().setFullYear(new Date().getFullYear() - 1)) }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$date" },
+            month: { $month: "$date" }
+          },
+          received: { $sum: "$received_amount" }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]),
+
+    // 4. Client-wise Receipts (Top 10)
+    Receipt.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: "$client",
+          received: { $sum: "$received_amount" }
+        }
+      },
+      { $sort: { received: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: "clients",
+          localField: "_id",
+          foreignField: "_id",
+          as: "clientInfo"
+        }
+      },
+      { $unwind: "$clientInfo" },
+      {
+        $project: {
+          name: "$clientInfo.name",
+          received: 1
+        }
+      }
+    ])
+  ]);
+
+  return {
+    summary: summary[0] || { totalReceived: 0, tdsAmount: 0, totalAmount: 0, receiptCount: 0 },
+    statusBreakdown: statusBreakdown.map(s => ({ status: s._id, count: s.count })),
+    receiptsOverTime: receiptsOverTime.map(r => ({
+      period: `${r._id.year}-${String(r._id.month).padStart(2, '0')}`,
+      received: r.received
+    })),
+    clientReceipts
+  };
+};

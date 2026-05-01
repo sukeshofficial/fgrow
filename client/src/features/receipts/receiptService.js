@@ -108,6 +108,14 @@ const receiptService = {
         const response = await api.post(`${BASE_URL}/${id}/send`, data);
         return response.data;
     },
+
+    /**
+     * Get statistics for receipts
+     */
+    getReceiptStats: async () => {
+        const response = await api.get(`${BASE_URL}/stats`);
+        return response.data;
+    },
 };
 
 export default receiptService;
