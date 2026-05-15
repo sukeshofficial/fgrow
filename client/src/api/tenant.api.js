@@ -87,3 +87,30 @@ export const verifyGSTIN = (gstin) => {
 export const verifyGstAdmin = (id) => {
   return api.patch(`/tenant/${id}/verify-gst-admin`);
 };
+
+/**
+ * Super Admin: Restrict or lift access for a tenant
+ * @param {string} tenantId
+ * @param {{ restricted: boolean, gracePeriodDays?: number }} data
+ */
+export const setTenantRestriction = (tenantId, data) => {
+  return api.patch(`/tenant/${tenantId}/restrict`, data);
+};
+
+/**
+ * Super Admin: Update grace period days for a tenant
+ * @param {string} tenantId
+ * @param {number} gracePeriodDays
+ */
+export const updateTenantGracePeriod = (tenantId, gracePeriodDays) => {
+  return api.patch(`/tenant/${tenantId}/grace-period`, { gracePeriodDays });
+};
+
+/**
+ * Super Admin: Update billing details for a tenant
+ * @param {string} tenantId
+ * @param {object} data { paymentStatus, lastPaymentAmount, lastPaymentDate }
+ */
+export const updateTenantBilling = (tenantId, data) => {
+  return api.patch(`/tenant/${tenantId}/billing`, data);
+};

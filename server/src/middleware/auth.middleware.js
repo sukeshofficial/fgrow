@@ -16,6 +16,7 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/auth/user.model.js";
 import logger from "../utils/logger.js";
+import tenantAccessMiddleware from "./tenantAccess.middleware.js";
 
 export default async function authMiddleware(req, res, next) {
   try {
@@ -84,7 +85,9 @@ export default async function authMiddleware(req, res, next) {
       data: user,
     };
 
-    next();
+    // ─── Tenant Access Restriction Check ──────────────────────────────────────
+    // This ensures it runs AFTER req.user is set.
+    return tenantAccessMiddleware(req, res, next);
   } catch (err) {
     logger.error("Auth middleware error:", err);
     // Common misconfiguration: JWT_SECRET not set in environment

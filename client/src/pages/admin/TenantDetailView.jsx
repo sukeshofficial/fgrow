@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getTenantById, getTenantStaffAdmin, getTenantClientsAdmin, approveTenant, rejectTenant } from "../../api/tenant.api";
+import {
+  getTenantById, getTenantStaffAdmin, getTenantClientsAdmin,
+  approveTenant, rejectTenant, setTenantRestriction,
+  updateTenantGracePeriod, updateTenantBilling
+} from "../../api/tenant.api";
 import { Button } from "../../components/ui/Button";
 import {
   FaArrowLeft, FaCheck, FaTimes, FaUsers, FaUserTie, FaBuilding,
@@ -11,6 +15,7 @@ import {
 import Sidebar from "../../components/SideBar";
 import Toast from "../../components/ui/Toast";
 import RejectionModal from "../../components/tenant/RejectionModal";
+import RestrictionModal from "../../components/tenant/RestrictionModal";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import "../../styles/welcome.css";
 import { Spinner } from "../../components/ui/Spinner";
@@ -51,9 +56,22 @@ const TenantDetailView = () => {
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
+  // Access control state
+  const [showRestrictModal, setShowRestrictModal] = useState(false);
+  const [restrictTarget, setRestrictTarget] = useState(false);
+  const [accessLoading, setAccessLoading] = useState(false);
+  const [gracePeriodInput, setGracePeriodInput] = useState("");
+  const [gracePeriodSaving, setGracePeriodSaving] = useState(false);
+
   useEffect(() => {
     fetchData();
   }, [tenantId]);
+
+  useEffect(() => {
+    if (tenant?.accessGracePeriodDays !== undefined) {
+      setGracePeriodInput(String(tenant.accessGracePeriodDays));
+    }
+  }, [tenant?.accessGracePeriodDays]);
 
   const addToast = (message, type = "success") => {
     const id = Date.now();
@@ -114,6 +132,70 @@ const TenantDetailView = () => {
       setActionLoading(false);
     }
   };
+
+  // ── Access control handlers ──────────────────────────────────────────────
+  const handleToggleRestriction = (wantRestrict) => {
+    setRestrictTarget(wantRestrict);
+    setShowRestrictModal(true);
+  };
+
+  const handleRestrictConfirm = async (reason) => {
+    try {
+      setAccessLoading(true);
+      await setTenantRestriction(tenantId, {
+        restricted: restrictTarget,
+        reason: restrictTarget ? reason : undefined
+      });
+      addToast(
+        restrictTarget
+          ? `${tenant.name}'s access has been restricted.`
+          : `${tenant.name}'s access has been restored.`,
+        restrictTarget ? "error" : "success"
+      );
+      setShowRestrictModal(false);
+      fetchData();
+    } catch (err) {
+      addToast(err.response?.data?.message || "Operation failed.", "error");
+    } finally {
+      setAccessLoading(false);
+    }
+  };
+
+  const handleSaveGracePeriod = async () => {
+    const days = parseInt(gracePeriodInput, 10);
+    if (!days || days < 1) {
+      addToast("Enter a valid number of days (minimum 1).", "error");
+      return;
+    }
+    try {
+      setGracePeriodSaving(true);
+      await updateTenantGracePeriod(tenantId, days);
+      addToast(`Grace period updated to ${days} days.`, "success");
+      fetchData();
+    } catch (err) {
+      addToast(err.response?.data?.message || "Failed to update grace period.", "error");
+    } finally {
+      setGracePeriodSaving(false);
+    }
+  };
+
+  // Compute live access status for the header pill & sidebar
+  const getAccessStatus = () => {
+    if (!tenant || tenant.verificationStatus !== "verified") return null;
+    if (tenant.accessRestricted) return { label: "Restricted", color: "#ef4444", bg: "#fef2f2" };
+    if (tenant.verifiedAt) {
+      const graceDays = tenant.accessGracePeriodDays ?? 30;
+      const elapsed = Date.now() - new Date(tenant.verifiedAt).getTime();
+      if (elapsed > graceDays * 24 * 60 * 60 * 1000) {
+        const over = Math.floor((elapsed - graceDays * 24 * 60 * 60 * 1000) / (24 * 60 * 60 * 1000));
+        return { label: `Expired (${over}d ago)`, color: "#f59e0b", bg: "#fffbeb" };
+      }
+    }
+    return { label: "Active", color: "#10b981", bg: "#f0fdf4" };
+  };
+
+  const accessStatus = getAccessStatus();
+
 
   const [verifyingDetails, setVerifyingDetails] = useState(false);
   const [gstData, setGstData] = useState(null);
@@ -196,6 +278,34 @@ const TenantDetailView = () => {
                 <FaTimes style={{ marginRight: '8px' }} /> Reject
               </Button>
             </>
+          )}
+          {/* Access control — verified tenants only */}
+          {tenant.verificationStatus === 'verified' && accessStatus && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{
+                background: accessStatus.bg,
+                color: accessStatus.color,
+                border: `1px solid ${accessStatus.color}44`,
+                borderRadius: '999px',
+                padding: '3px 12px',
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                letterSpacing: '0.03em',
+              }}>
+                {accessStatus.label}
+              </span>
+              {tenant.accessRestricted ? (
+                <Button variant="primary" onClick={() => handleToggleRestriction(false)}
+                  disabled={accessLoading} style={{ backgroundColor: '#10b981', fontSize: '0.8rem' }}>
+                  Lift Restriction
+                </Button>
+              ) : (
+                <Button variant="secondary" onClick={() => handleToggleRestriction(true)}
+                  disabled={accessLoading} style={{ color: '#ef4444', fontSize: '0.8rem' }}>
+                  Restrict Access
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -383,6 +493,132 @@ const TenantDetailView = () => {
             </div>
           )}
 
+          {/* ── Access Control (Super Admin) ── */}
+          {tenant.verificationStatus === 'verified' && (
+            <div style={{ padding: '1rem 0', borderBottom: '1px solid #f8fafc' }}>
+              <p style={sectionLabel}>Access Control</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {accessStatus && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8125rem' }}>
+                    <span style={{ opacity: 0.6, fontSize: '0.75rem' }}>Status:</span>
+                    <span style={{ fontWeight: 700, color: accessStatus.color }}>{accessStatus.label}</span>
+                  </div>
+                )}
+                {/* Grace period editor */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.78rem', color: '#64748b', whiteSpace: 'nowrap' }}>Grace period</span>
+                  <input
+                    id="grace-period-input"
+                    type="number" min="1"
+                    value={gracePeriodInput}
+                    onChange={(e) => setGracePeriodInput(e.target.value)}
+                    style={{ width: '58px', padding: '4px 8px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '0.8rem', color: '#1e293b', background: '#f8fafc' }}
+                  />
+                  <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>days</span>
+                  <Button variant="outline" onClick={handleSaveGracePeriod} disabled={gracePeriodSaving}
+                    style={{ fontSize: '0.7rem', padding: '3px 10px', height: '1.75rem', minWidth: 'auto', border: '1px solid #e2e8f0', color: '#6366f1', fontWeight: 700 }}>
+                    {gracePeriodSaving ? 'Saving…' : 'Save'}
+                  </Button>
+                </div>
+                {/* Toggle */}
+                {tenant.accessRestricted ? (
+                  <Button variant="primary" onClick={() => handleToggleRestriction(false)} disabled={accessLoading}
+                    style={{ backgroundColor: '#10b981', fontSize: '0.8rem', padding: '6px 14px' }}>
+                    Lift Restriction
+                  </Button>
+                ) : (
+                  <Button variant="secondary" onClick={() => handleToggleRestriction(true)} disabled={accessLoading}
+                    style={{ color: '#ef4444', fontSize: '0.8rem', padding: '6px 14px' }}>
+                    Restrict Access
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── Manual Billing Management (Super Admin) ── */}
+          {tenant.verificationStatus === 'verified' && (
+            <div style={{ padding: '1rem 0', borderBottom: '1px solid #f8fafc' }}>
+              <p style={sectionLabel}>Billing Management</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8' }}>PAYMENT STATUS</label>
+                  <select
+                    value={tenant.paymentStatus || 'active'}
+                    onChange={async (e) => {
+                      try {
+                        const status = e.target.value;
+                        await updateTenantBilling(tenantId, { paymentStatus: status });
+                        addToast(`Payment status updated to ${status}`, "success");
+                        fetchData();
+                      } catch (err) { addToast("Failed to update status", "error"); }
+                    }}
+                    style={{ padding: '6px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.875rem' }}
+                  >
+                    <option value="active">Active</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="pending_verification">Pending Verification</option>
+                  </select>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8' }}>USER SEAT LIMIT</label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      type="number"
+                      defaultValue={tenant.userLimit || 0}
+                      onBlur={async (e) => {
+                        const val = parseInt(e.target.value, 10);
+                        if (val !== tenant.userLimit) {
+                          try {
+                            await updateTenantBilling(tenantId, { userLimit: val });
+                            addToast("User limit updated", "success");
+                            fetchData();
+                          } catch (err) { addToast("Update failed", "error"); }
+                        }
+                      }}
+                      style={{ flex: 1, padding: '6px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.875rem' }}
+                    />
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center' }}>
+                      (Active: {staff.length})
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8' }}>LAST PAYMENT</label>
+                  <div style={{ fontSize: '0.8125rem', color: '#475569', background: '#f8fafc', padding: '8px', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
+                    {tenant.lastPaymentDate ? (
+                      <>₹{tenant.lastPaymentAmount} on {new Date(tenant.lastPaymentDate).toLocaleDateString()}</>
+                    ) : (
+                      "No payment recorded"
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      const amount = prompt("Enter payment amount:", staff.length * 99);
+                      if (!amount) return;
+                      try {
+                        await updateTenantBilling(tenantId, {
+                          lastPaymentAmount: Number(amount),
+                          lastPaymentDate: new Date(),
+                          paymentStatus: 'active'
+                        });
+                        addToast("Payment recorded & access activated", "success");
+                        fetchData();
+                      } catch (err) { addToast("Failed to record payment", "error"); }
+                    }}
+                    style={{ marginTop: '4px', fontSize: '0.75rem' }}
+                  >
+                    Record New Payment
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ── Timeline ── */}
           <div style={{ padding: '1rem 0', borderBottom: '1px solid #f8fafc' }}>
             <p style={sectionLabel}>Timeline</p>
@@ -392,6 +628,7 @@ const TenantDetailView = () => {
               {tenant.verifiedAt && <InfoRow icon={<FaClock />} label="Reviewed on" value={new Date(tenant.verifiedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} />}
             </div>
           </div>
+
 
           {/* ── Appeals ── */}
           {(tenant.appealCount > 0 || tenant.lastAppealedAt) && (
@@ -496,6 +733,28 @@ const TenantDetailView = () => {
           onConfirm={handleRejectConfirm}
           submitting={actionLoading}
         />
+      )}
+
+      {/* Restrict / Lift Confirm Modal */}
+      {showRestrictModal && (
+        restrictTarget ? (
+          <RestrictionModal
+            tenantName={tenant.name}
+            onCancel={() => setShowRestrictModal(false)}
+            onConfirm={handleRestrictConfirm}
+            submitting={accessLoading}
+          />
+        ) : (
+          <ConfirmModal
+            title="Lift Access Restriction"
+            message={`This will restore full platform access for ${tenant.name}. Continue?`}
+            confirmLabel="Yes, Lift Restriction"
+            confirmColor="#10b981"
+            onCancel={() => setShowRestrictModal(false)}
+            onConfirm={() => handleRestrictConfirm()}
+            submitting={accessLoading}
+          />
+        )
       )}
 
       <div className="toast-container">

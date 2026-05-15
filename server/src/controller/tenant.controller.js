@@ -455,6 +455,102 @@ export const removeLogo = async (req, res) => {
   }
 };
 
+// --------------------------------------------------
+// 12️ Set Tenant Access Restriction (Super Admin)
+// --------------------------------------------------
+export const setTenantRestriction = async (req, res) => {
+  try {
+    const { tenantId } = req.params;
+    const { restricted, gracePeriodDays, reason } = req.body;
+
+    if (typeof restricted !== "boolean") {
+      return res.status(400).json({
+        message: "Field 'restricted' (boolean) is required",
+      });
+    }
+
+    const Tenant = (await import("../models/tenant/tenant.model.js")).default;
+    const tenant = await Tenant.findById(tenantId);
+    if (!tenant) {
+      return res.status(404).json({ message: "Tenant not found" });
+    }
+
+    tenant.accessRestricted = restricted;
+    tenant.accessRestrictedAt = new Date();
+
+    if (restricted && reason) {
+      tenant.accessRestrictionReason = reason;
+    } else if (!restricted) {
+      // Clear reason when lifting restriction
+      tenant.accessRestrictionReason = null;
+    }
+
+    if (typeof gracePeriodDays === "number" && gracePeriodDays > 0) {
+      tenant.accessGracePeriodDays = gracePeriodDays;
+    }
+
+    await tenant.save();
+
+    logger.info(
+      `Tenant ${tenantId} access restriction set to ${restricted} by admin ${req.user?.id}`
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Tenant access ${restricted ? "restricted" : "lifted"} successfully`,
+      data: {
+        tenantId: tenant._id,
+        accessRestricted: tenant.accessRestricted,
+        accessGracePeriodDays: tenant.accessGracePeriodDays,
+        accessRestrictedAt: tenant.accessRestrictedAt,
+      },
+    });
+  } catch (err) {
+    logger.error("Set Tenant Restriction Error:", err);
+    return res.status(500).json({ message: "internal server error" });
+  }
+};
+
+// --------------------------------------------------
+// 13️ Update Grace Period Only (Super Admin)
+// --------------------------------------------------
+export const updateTenantGracePeriod = async (req, res) => {
+  try {
+    const { tenantId } = req.params;
+    const { gracePeriodDays } = req.body;
+
+    if (typeof gracePeriodDays !== "number" || gracePeriodDays < 1) {
+      return res.status(400).json({
+        message: "Field 'gracePeriodDays' must be a positive number",
+      });
+    }
+
+    const Tenant = (await import("../models/tenant/tenant.model.js")).default;
+    const tenant = await Tenant.findByIdAndUpdate(
+      tenantId,
+      { accessGracePeriodDays: gracePeriodDays },
+      { new: true, select: "accessGracePeriodDays accessRestricted accessRestrictedAt" }
+    );
+
+    if (!tenant) {
+      return res.status(404).json({ message: "Tenant not found" });
+    }
+
+    logger.info(
+      `Tenant ${tenantId} grace period updated to ${gracePeriodDays} days by admin ${req.user?.id}`
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Grace period updated successfully",
+      data: tenant,
+    });
+  } catch (err) {
+    logger.error("Update Tenant Grace Period Error:", err);
+    return res.status(500).json({ message: "internal server error" });
+  }
+};
+
 /**
  * Verify GST by Admin (Locking verification)
  */
@@ -472,5 +568,44 @@ export const verifyGstAdmin = async (req, res) => {
     res.status(400).json({
       message: err.message || "Failed to verify GST by admin",
     });
+  }
+};
+
+/**
+ * Update Billing Details (Super Admin)
+ */
+export const updateTenantBilling = async (req, res) => {
+  try {
+    const { tenantId } = req.params;
+    const { paymentStatus, lastPaymentAmount, lastPaymentDate, userLimit } = req.body;
+
+    const Tenant = (await import("../models/tenant/tenant.model.js")).default;
+    const updateData = {};
+
+    if (paymentStatus) updateData.paymentStatus = paymentStatus;
+    if (lastPaymentAmount !== undefined) updateData.lastPaymentAmount = lastPaymentAmount;
+    if (lastPaymentDate) updateData.lastPaymentDate = lastPaymentDate;
+    if (userLimit !== undefined) updateData.userLimit = userLimit;
+
+    const tenant = await Tenant.findByIdAndUpdate(
+      tenantId,
+      { $set: updateData },
+      { new: true }
+    );
+
+    if (!tenant) {
+      return res.status(404).json({ message: "Tenant not found" });
+    }
+
+    logger.info(`Billing updated for tenant ${tenantId} by admin ${req.user?.id}`);
+
+    res.status(200).json({
+      success: true,
+      message: "Billing details updated successfully",
+      data: tenant,
+    });
+  } catch (err) {
+    logger.error("Update Tenant Billing Error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

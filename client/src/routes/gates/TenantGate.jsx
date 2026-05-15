@@ -108,7 +108,11 @@ export const TenantGate = ({ children }) => {
   ) {
     const isOwner = user?.tenant_role === "owner";
     if (isOwner) {
-      // Hard redirect owners to subscription page — no dashboard access
+      // Don't redirect or block if we are already on a payment-related page
+      const currentPath = window.location.pathname;
+      if (currentPath === "/subscription" || currentPath === "/billing") {
+        return children;
+      }
       return <Navigate to="/subscription" replace />;
     }
     // Staff just see a block screen

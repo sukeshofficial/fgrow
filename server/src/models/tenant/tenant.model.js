@@ -119,6 +119,49 @@ const tenantSchema = new mongoose.Schema(
       default: null,
     },
 
+    // Access Restriction (Super Admin controlled)
+    accessRestricted: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Grace period (days from verifiedAt) before auto-restriction kicks in
+    accessGracePeriodDays: {
+      type: Number,
+      default: 30,
+    },
+
+    // Audit timestamp – when restriction was last toggled by super admin
+    accessRestrictedAt: {
+      type: Date,
+      default: null,
+    },
+    // Reason provided by super admin for manual restriction
+    accessRestrictionReason: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+
+    // Billing & Payments
+    userLimit: {
+      type: Number,
+      default: 0, // 0 means no explicit limit, or use it to track paid seats
+    },
+    lastPaymentAmount: {
+      type: Number,
+      default: 0,
+    },
+    lastPaymentDate: {
+      type: Date,
+      default: null,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["active", "overdue", "pending_verification"],
+      default: "active",
+    },
+
     emailChangeLog: [
       {
         type: Date,

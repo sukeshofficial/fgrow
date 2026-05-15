@@ -61,6 +61,17 @@ export const createTenantService = async (data) => {
     gstCertificate,
   });
 
+  // Automated Free Trial Logic: Set 1 month trial immediately upon creation
+  // Since new tenants start with only the owner (1 staff), they qualify for the ₹0 trial.
+  const oneMonthFromNow = new Date();
+  oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+
+  tenant.plan = "free_trial";
+  tenant.trialEndDate = oneMonthFromNow;
+  tenant.paymentStatus = "active";
+  tenant.lastPaymentAmount = 0;
+  tenant.lastPaymentDate = new Date();
+
   // 5️⃣ Attach user to tenant
   user.tenant_id = tenant._id;
   user.tenant_role = "owner";
@@ -103,6 +114,22 @@ export const approveTenantService = async (tenantId, adminId) => {
   tenant.verifiedBy = adminId;
   tenant.verifiedAt = new Date();
   tenant.rejection_reason = null;
+
+  // Automated Free Trial Logic (User requested: created today & staff < 5)
+  // We check staff count. Owner is always 1.
+  const userCount = await User.countDocuments({ tenant_id: tenantId });
+
+  if (userCount < 5) {
+    const oneMonthFromNow = new Date();
+    oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+
+    tenant.plan = "free_trial";
+    tenant.trialEndDate = oneMonthFromNow;
+    tenant.paymentStatus = "active";
+    tenant.lastPaymentAmount = 0;
+    tenant.lastPaymentDate = new Date();
+    tenant.accessRestricted = false;
+  }
 
   await tenant.save();
 

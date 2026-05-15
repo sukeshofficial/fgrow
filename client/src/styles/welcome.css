@@ -452,6 +452,8 @@
 
 .staff-table-container {
   overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
 }
 
 .staff-table {
@@ -475,6 +477,10 @@
   border-bottom: 1px solid #f1f5f9;
   color: #334155;
   font-size: 0.9375rem;
+}
+
+.staff-table tr:last-child td {
+  border-bottom: none;
 }
 
 .staff-member-cell {

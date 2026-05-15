@@ -11,10 +11,11 @@ import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 import BugReportsList from "./BugReportsList";
 import LaunchManagement from "./LaunchManagement";
 import SuperAdminUsersList from "./SuperAdminUsersList";
-import ReleaseNotesManagement from "./ReleaseNotesManagement";
 import FeedbackList from "./FeedbackList";
+import AdminRequestsView from "./AdminRequestsView";
+import ReleaseNotesManagement from "./ReleaseNotesManagement";
 import { useAuth } from "../../hooks/useAuth";
-import { Building2, Bug, MessageSquare, Rocket, FileText, Users } from "lucide-react";
+import { Building2, Bug, MessageSquare, Rocket, FileText, Users, HelpCircle } from "lucide-react";
 
 import "../../styles/welcome.css";
 import "../../styles/admin-dashboard.css";
@@ -97,6 +98,7 @@ const AdminDashboard = () => {
               { id: 'feedback', label: 'Feedback', icon: MessageSquare },
               { id: 'launch', label: 'Launch', icon: Rocket },
               { id: 'release-notes', label: 'Release Notes', icon: FileText },
+              { id: 'requests', label: 'Help Requests', icon: HelpCircle },
               { id: 'users', label: 'Users', icon: Users }
             ].map(tab => {
               const Icon = tab.icon;
@@ -292,6 +294,8 @@ const AdminDashboard = () => {
         <BugReportsList />
       ) : activeTab === 'feedback' ? (
         <FeedbackList />
+      ) : activeTab === 'requests' ? (
+        <AdminRequestsView />
       ) : activeTab === 'launch' ? (
         <LaunchManagement />
       ) : activeTab === 'release-notes' ? (

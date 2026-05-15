@@ -15,12 +15,15 @@ const Subscription = () => {
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [billingStatus, setBillingStatus] = useState(null);
+    const [staffCount, setStaffCount] = useState(1);
     const [error, setError] = useState(null);
     const [toasts, setToasts] = useState([]);
-    
+
     // GPay / UPI State
     const [showGpayModal, setShowGpayModal] = useState(false);
     const [utr, setUtr] = useState("");
+    const [screenshot, setScreenshot] = useState(null);
+    const [preview, setPreview] = useState(null);
 
     const addToast = (message, type = "success") => {
         const id = Date.now();
@@ -32,8 +35,15 @@ const Subscription = () => {
     };
 
     useEffect(() => {
-        fetchBillingStatus();
-    }, []);
+        const init = async () => {
+            if (user) {
+                await Promise.all([fetchBillingStatus(), fetchStaffCount()]);
+            } else {
+                setLoading(false);
+            }
+        };
+        init();
+    }, [user]);
 
     const fetchBillingStatus = async () => {
         try {
@@ -41,7 +51,18 @@ const Subscription = () => {
             setBillingStatus(response.data);
         } catch (err) {
             console.error("Error fetching billing status:", err);
-            setError("Failed to load subscription details.");
+            // Don't set error if logged out
+            if (user) setError("Failed to load subscription details.");
+        }
+    };
+
+    const fetchStaffCount = async () => {
+        try {
+            const response = await api.get("/tenant/staff");
+            setStaffCount(response.data.data?.length || response.data.length || 1);
+        } catch (err) {
+            console.error("Error fetching staff count:", err);
+            setStaffCount(1);
         } finally {
             setLoading(false);
         }
@@ -59,23 +80,50 @@ const Subscription = () => {
 
     const handleGpaySubmit = async (e) => {
         e.preventDefault();
-        if (!utr) {
-            addToast("Please enter UTR/Reference number", "error");
+        if (!utr || !screenshot) {
+            addToast("Please enter UTR number and upload a screenshot", "error");
             return;
         }
         setProcessing(true);
         try {
-            await api.post("/billing/verify-manual", { utr });
-            await fetchBillingStatus();
-            await checkAuth(dispatch);
-            addToast("Payment recorded! Your subscription is active.", "success");
+            const data = new FormData();
+            data.append("type", "payment_proof");
+            data.append("title", `GPay Payment: ₹${staffCount * 99}`);
+            data.append("body", `Manual GPay payment verification request for ${staffCount} staff members.`);
+            data.append("transactionId", utr);
+            data.append("screenshot", screenshot);
+
+            await api.post("/support", data, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
+            addToast("Proof submitted! Your access is restored for 30 days while we verify.", "success");
+
+            // Refresh billing status and auth to reflect new access dates
+            fetchBillingStatus();
+            if (dispatch) checkAuth(dispatch);
+
             setShowGpayModal(false);
             setUtr("");
+            setScreenshot(null);
+            setPreview(null);
         } catch (err) {
-            console.error("GPay verification failed:", err);
-            setError("GPay verification failed. Please try again or contact support.");
+            console.error("GPay submission failed:", err);
+            setError("Failed to submit payment proof. Please try again or contact support.");
         } finally {
             setProcessing(false);
+        }
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                addToast("File size too large (max 5MB)", "error");
+                return;
+            }
+            setScreenshot(file);
+            setPreview(URL.createObjectURL(file));
         }
     };
 
@@ -180,7 +228,9 @@ const Subscription = () => {
         ? superAdminEndDate
         : (billingStatus?.trialEndDate ? new Date(billingStatus.trialEndDate) : null);
 
-    const isTrialActive = isSuperAdmin || (effectiveEndDate && effectiveEndDate > new Date());
+    const isTrialActive = isSuperAdmin ||
+        (effectiveEndDate && effectiveEndDate > new Date()) ||
+        (billingStatus?.plan === "free_trial" && staffCount < 5);
     const daysLeft = isTrialActive && effectiveEndDate
         ? Math.ceil((effectiveEndDate - new Date()) / (1000 * 60 * 60 * 24))
         : 0;
@@ -502,95 +552,96 @@ const Subscription = () => {
                     z-index: 1000; display: flex; align-items: center; justify-content: center;
                 }
                 .gpay-modal {
-                    background: white; border-radius: var(--radius); padding: 32px;
-                    width: 90%; max-width: 400px; text-align: center; box-shadow: var(--shadow-lg);
+                    background: white; border-radius: var(--radius); padding: 40px;
+                    width: 95%; max-width: 750px; text-align: center; box-shadow: var(--shadow-lg);
+                    max-height: 85vh; overflow-y: auto;
                 }
-                .gpay-qr-img { width: 220px; max-width: 100%; border-radius: 8px; margin: 16px auto; display: block; border: 1px solid var(--border); box-shadow: var(--shadow); }
-                .utr-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin: 16px 0; font-family: var(--font); font-size: 15px; }
-                .price-btn-secondary { background: var(--off); color: var(--text); padding: 10px; width: 100%; border-radius: 8px; margin-top: 8px; transition: 0.2s; border: none; cursor: pointer; }
+                .gpay-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1.2fr;
+                    gap: 40px;
+                    text-align: left;
+                    margin-top: 24px;
+                }
+                @media (max-width: 640px) {
+                    .gpay-grid { grid-template-columns: 1fr; gap: 24px; }
+                }
+                .gpay-qr-img { width: 100%; max-width: 280px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 12px; }
+                .utr-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin: 12px 0; font-family: var(--font); font-size: 15px; }
+                .price-btn-secondary { background: var(--off); color: var(--text); padding: 10px; width: 100%; border-radius: 8px; margin-top: 16px; transition: 0.2s; border: none; cursor: pointer; font-weight: 600; }
                 .price-btn-secondary:hover { background: #e2e8f0; }
             `}</style>
 
             {showGpayModal && (
                 <div className="gpay-overlay">
                     <div className="gpay-modal">
-                        <h3 style={{fontSize: 22, fontWeight: 800, marginBottom: 8}}>Pay securely with GPay</h3>
-                        <p style={{fontSize: 14, color: 'var(--muted)', marginBottom: 24}}>Use the official Google Pay button to process your payment.</p>
-                        
-                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
-                            <GooglePayButton
-                                environment="TEST"
-                                paymentRequest={{
-                                    apiVersion: 2,
-                                    apiVersionMinor: 0,
-                                    allowedPaymentMethods: [
-                                        {
-                                            type: 'CARD',
-                                            parameters: {
-                                                allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
-                                                allowedCardNetworks: ['MASTERCARD', 'VISA'],
-                                            },
-                                            tokenizationSpecification: {
-                                                type: 'PAYMENT_GATEWAY',
-                                                parameters: {
-                                                    gateway: 'razorpay',
-                                                    gatewayMerchantId: 'rzp_test_placeholder',
-                                                },
-                                            },
-                                        },
-                                    ],
-                                    merchantInfo: {
-                                        merchantId: '12345678901234567890',
-                                        merchantName: 'ForgeGrid',
-                                    },
-                                    transactionInfo: {
-                                        totalPriceStatus: 'FINAL',
-                                        totalPriceLabel: 'Total',
-                                        totalPrice: (billingStatus?.currentAmount || 1).toString(),
-                                        currencyCode: 'INR',
-                                        countryCode: 'IN',
-                                    },
-                                }}
-                                onLoadPaymentData={async (paymentData) => {
-                                    setProcessing(true);
-                                    try {
-                                        // Mock backend resolution using the token data payload
-                                        const mockUtr = paymentData.paymentMethodData?.tokenizationData?.token?.substring(0, 12) || "gpay_auth_ok";
-                                        await api.post("/billing/verify-manual", { utr: mockUtr });
-                                        await fetchBillingStatus();
-                                        await checkAuth(dispatch);
-                                        addToast("Payment successful via Google Pay API!", "success");
-                                        setShowGpayModal(false);
-                                    } catch (err) {
-                                        console.error("GPay processing failed", err);
-                                        setError("Payment failed. Please try again.");
-                                    } finally {
-                                        setProcessing(false);
-                                    }
-                                }}
-                                onCancel={() => addToast("Payment cancelled", "error")}
-                                buttonColor="black"
-                                buttonType="pay"
-                            />
+                        <h3 style={{ fontSize: 26, fontWeight: 800, marginBottom: 8 }}>Pay securely with Google Pay</h3>
+                        <p style={{ fontSize: 15, color: 'var(--muted)', marginBottom: 0 }}>Scan the QR code and enter your Transaction ID for verification.</p>
+
+                        <div className="gpay-grid">
+                            {/* Left: QR Code */}
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <img
+                                    src="/gpay-upi-id-sukesh.png"
+                                    alt="GPay QR Code"
+                                    className="gpay-qr-img"
+                                />
+                                <p style={{ fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 600, marginTop: 12 }}>
+                                    Scan to pay <span style={{ color: 'var(--blue)' }}>₹{staffCount * 99}</span>
+                                </p>
+                            </div>
+
+                            {/* Right: Verification Form */}
+                            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                <form onSubmit={handleGpaySubmit}>
+                                    <p style={{ fontSize: 14, color: 'var(--text)', fontWeight: 700, marginBottom: 12 }}>Already Paid?</p>
+
+                                    <label style={{ fontSize: 13, color: 'var(--muted)', display: 'block', marginBottom: 6 }}>Transaction ID / UTR No.</label>
+                                    <input
+                                        type="text"
+                                        className="utr-input"
+                                        placeholder="e.g. 412389654210"
+                                        value={utr}
+                                        onChange={e => setUtr(e.target.value)}
+                                        required
+                                    />
+
+                                    <label style={{ fontSize: 13, color: 'var(--muted)', display: 'block', marginBottom: 6 }}>Payment Screenshot</label>
+                                    <div style={{
+                                        border: '2px dashed var(--border)',
+                                        borderRadius: '8px',
+                                        padding: '12px',
+                                        textAlign: 'center',
+                                        cursor: 'pointer',
+                                        marginBottom: '16px',
+                                        background: '#f8fafc',
+                                        position: 'relative'
+                                    }}>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleFileChange}
+                                            style={{ position: 'absolute', opacity: 0, top: 0, left: 0, right: 0, bottom: 0, cursor: 'pointer' }}
+                                        />
+                                        {preview ? (
+                                            <img src={preview} alt="Proof" style={{ maxHeight: '80px', borderRadius: '4px' }} />
+                                        ) : (
+                                            <span style={{ fontSize: '13px', color: 'var(--lighter)' }}>Click to upload proof</span>
+                                        )}
+                                    </div>
+
+                                    <p style={{ fontSize: 12, color: 'var(--lighter)', marginBottom: 20, lineHeight: 1.4 }}>
+                                        Verification takes up to 24 hours. Your subscription will be activated once confirmed.
+                                    </p>
+                                    <button type="submit" className="price-btn price-btn-solid" disabled={processing} style={{ width: '100%' }}>
+                                        {processing ? "Submitting..." : "Submit Proof"}
+                                    </button>
+                                </form>
+                                <button type="button" className="price-btn-secondary" onClick={() => setShowGpayModal(false)}>
+                                    Cancel & Go Back
+                                </button>
+                            </div>
                         </div>
-
-                        <hr style={{border: 'none', borderTop: '1px solid var(--border)', margin: '24px 0'}} />
-
-                        <form onSubmit={handleGpaySubmit}>
-                            <p style={{fontSize: 13, color: 'var(--text)', fontWeight: 600, textAlign: 'left'}}>Already Paid?</p>
-                            <input 
-                                type="text"
-                                className="utr-input"
-                                placeholder="Enter 12-digit UTR No. / Transaction ID" 
-                                value={utr}
-                                onChange={e => setUtr(e.target.value)}
-                                required
-                            />
-                            <button type="submit" className="price-btn price-btn-solid" disabled={processing}>
-                                {processing ? "Verifying..." : "Verify Payment"}
-                            </button>
-                        </form>
-                        <button type="button" className="price-btn-secondary" onClick={() => setShowGpayModal(false)}>Cancel</button>
                     </div>
                 </div>
             )}
@@ -618,15 +669,26 @@ const Subscription = () => {
                                 <li className="price-feat" key={f}><span className="pf-check">✓</span>{f}</li>
                             ))}
                         </ul>
-                        <button className="price-btn price-btn-outline" disabled>Current Plan</button>
+                        <button className="price-btn price-btn-outline" disabled={billingStatus?.plan === "free"}>
+                            {billingStatus?.plan === "free" ? "Current Plan" : "Starter Plan"}
+                        </button>
                     </div>
 
                     {/* PRO (FEATURED) */}
                     <div className="price-card featured">
                         <div className="popular">Limited Offer</div>
                         <div className="price-tier">Pro Trial</div>
-                        <div className="price-amount">₹{billingStatus?.currentAmount || "1"}<span>/30 days</span></div>
-                        <p className="price-desc">Experience the full power of FGROW</p>
+                        <div className="price-amount">
+                            {user
+                                ? ((billingStatus?.plan === "free_trial" && staffCount < 5) ? "₹0" : `₹${staffCount * 99}`)
+                                : "₹99"}
+                            <span>/{user ? "30 days" : "user"}</span>
+                        </div>
+                        <p className="price-desc">
+                            {user
+                                ? `Billed for ${staffCount} ${staffCount === 1 ? 'member' : 'members'}`
+                                : "Experience the full power of FGROW"}
+                        </p>
                         <ul className="price-features">
                             {["Unlimited Clients", "Up to 50 Staff Members", "Recurring Task Automation", "Full Invoicing & Billing", "Priority Support"].map(f => (
                                 <li className="price-feat" key={f}><span className="pf-check">✓</span>{f}</li>
@@ -641,9 +703,9 @@ const Subscription = () => {
                             {processing ? "Processing..." : "Pay with GPay"}
                         </button>
 
-                        <button 
-                            type="button" 
-                            style={{marginTop: 16, background: 'none', border: 'none', color: 'var(--muted)', fontSize: 13, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline'}}
+                        <button
+                            type="button"
+                            style={{ marginTop: 16, background: 'none', border: 'none', color: 'var(--muted)', fontSize: 13, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
                             onClick={handleRazorpayPayment}
                             disabled={processing}
                         >
@@ -656,9 +718,13 @@ const Subscription = () => {
                                     {isTrialActive ? 'Active' : 'Expired'}
                                 </div>
                                 {isTrialActive ? (
-                                    <p>Trial ends <strong>{effectiveEndDate.toLocaleDateString()}</strong> ({daysLeft} days remaining)</p>
+                                    effectiveEndDate ? (
+                                        <p>Trial ends <strong>{effectiveEndDate.toLocaleDateString()}</strong> ({daysLeft} days remaining)</p>
+                                    ) : (
+                                        <p>Trial period is active</p>
+                                    )
                                 ) : (
-                                    <p>Your trial ended on <strong>{effectiveEndDate?.toLocaleDateString()}</strong></p>
+                                    <p>Your trial {effectiveEndDate ? `ended on ${effectiveEndDate.toLocaleDateString()}` : 'has ended'}</p>
                                 )}
                             </div>
                         )}

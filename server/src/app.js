@@ -33,8 +33,10 @@ import launchRoutes from "./routes/launch.routes.js";
 import superAdminRoutes from "./routes/superadmin.routes.js";
 import releaseNoteRoutes from "./routes/releaseNote.routes.js";
 import feedbackRoutes from "./routes/feedback.routes.js";
+import supportRoutes from "./routes/support.routes.js";
 
 import { errorMiddleware } from "./middleware/error.middleware.js";
+import tenantAccessMiddleware from "./middleware/tenantAccess.middleware.js";
 
 const app = express();
 
@@ -100,6 +102,9 @@ app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 // Note: /uploads static route removed — all files are served from Cloudinary.
 
+// ─── Global Tenant Access Gate ────────────────────────────────────────────
+// Note: This was moved inside authMiddleware.js to ensure req.user is populated.
+
 app.use("/api/v0/auth", authRoutes);
 app.use("/api/v0/tenant", tenantRoutes);
 app.use("/api/v0/invitation", invitationRoutes);
@@ -128,6 +133,7 @@ app.use("/api/v0/notifications", notificationRoutes);
 app.use("/api/v0/launch", launchRoutes);
 app.use("/api/v0/superadmin", superAdminRoutes);
 app.use("/api/v0/release-notes", releaseNoteRoutes);
+app.use("/api/v0/support", supportRoutes);
 app.use("/api/v0/feedback", feedbackRoutes);
 
 

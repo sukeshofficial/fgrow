@@ -54,6 +54,8 @@ const Settings = lazy(() => import("./pages/Settings"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const NotificationPage = lazy(() => import("./pages/Notifications/NotificationPage"));
 const LaunchTimer = lazy(() => import("./pages/LaunchTimer"));
+const AccessRestricted = lazy(() => import("./pages/AccessRestricted"));
+const Billing = lazy(() => import("./pages/Billing"));
 
 const DocumentInOut = lazy(() => import("./pages/documents/DocumentInOut"));
 const DscManagement = lazy(() => import("./pages/documents/DscManagement"));
@@ -137,6 +139,8 @@ const App = () => {
         {/* Public */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        {/* Access blocked screen — always reachable (no auth guard) */}
+        <Route path="/access-restricted" element={<AccessRestricted />} />
 
         {/* ---------------- ADMIN PORTAL ---------------- */}
         <Route element={<ProtectedRoute />}>
@@ -190,6 +194,7 @@ const App = () => {
               <Route path="/notifications" element={<NotificationPage />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/subscription" element={<Subscription />} />
+              <Route path="/billing" element={<Billing />} />
               <Route path="/finance/quotations" element={<QuotationList />} />
               <Route path="/finance/quotations/create" element={<QuotationForm />} />
               <Route path="/finance/quotations/edit/:id" element={<QuotationForm />} />

@@ -43,6 +43,19 @@ const InviteUserModal = ({ onClose, onSuccess }) => {
           Send an invitation link to a colleague to join your organization.
         </p>
 
+        <div style={{
+          background: "rgba(99, 102, 241, 0.05)",
+          padding: "1rem",
+          borderRadius: "12px",
+          border: "1px solid rgba(99, 102, 241, 0.1)",
+          marginBottom: "1.5rem",
+          fontSize: "0.85rem",
+          color: "#4f46e5",
+          lineHeight: "1.4"
+        }}>
+          <strong>Billing Notice:</strong> Adding a new member will increase your monthly subscription by <strong>₹99</strong>. Please ensure payment is made via GPay to activate this seat.
+        </div>
+
         {error && <div className="tenant-form-error" style={{ marginBottom: "1rem" }}>{error}</div>}
         {success && <div className="tenant-form-success" style={{ marginBottom: "1rem", color: "#166534", backgroundColor: "#dcfce7", padding: "0.75rem", borderRadius: "8px" }}>{success}</div>}
 

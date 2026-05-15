@@ -29,21 +29,31 @@ export default async function billingMiddleware(req, res, next) {
             return next();
         }
 
-        // 3. Fetch tenant to check trial status
-        const tenant = await Tenant.findById(req.user.tenant_id).select("trialEndDate plan");
+        // 3. Fetch tenant to check trial & payment status
+        const tenant = await Tenant.findById(req.user.tenant_id).select("trialEndDate plan paymentStatus accessGracePeriodDays verifiedAt");
 
         if (!tenant) {
             return res.status(404).json({ message: "Tenant not found" });
         }
 
-        // 4. Check Trial Expiry
-        // If plan is 'free_trial' and trialEndDate has passed
-        if (tenant.plan === "free_trial" || !tenant.plan) {
+        // 4. Check for hard paymentStatus restriction
+        if (tenant.paymentStatus === "overdue") {
+            return res.status(402).json({
+                message: "Your subscription is overdue. Please complete payment to continue.",
+                code: "BILLING_OVERDUE"
+            });
+        }
+
+        // 5. Check Trial / Grace Period Expiry (if not explicitly active)
+        if (tenant.paymentStatus !== "active") {
+            const graceDays = tenant.accessGracePeriodDays ?? 30;
             const now = new Date();
-            if (tenant.trialEndDate && tenant.trialEndDate < now) {
-                logger.warn(`Access denied for tenant ${req.user.tenant_id}: Trial expired on ${tenant.trialEndDate}`);
+            const expirationDate = new Date(tenant.verifiedAt?.getTime() + (graceDays * 24 * 60 * 60 * 1000));
+
+            if (expirationDate < now) {
+                logger.warn(`Access denied for tenant ${req.user.tenant_id}: Grace period expired on ${expirationDate}`);
                 return res.status(402).json({
-                    message: "Your trial has expired. Please upgrade to continue.",
+                    message: "Your initial access period has expired. Please choose a plan to continue.",
                     code: "TRIAL_EXPIRED"
                 });
             }

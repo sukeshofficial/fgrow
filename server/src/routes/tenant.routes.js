@@ -18,6 +18,9 @@ import {
   updateTenant,
   removeLogo,
   verifyGstAdmin,
+  setTenantRestriction,
+  updateTenantGracePeriod,
+  updateTenantBilling,
 } from "../controller/tenant.controller.js";
 import { verifyGSTIN } from "../controller/gstin_verify.controller.js";
 import { upload } from "../middleware/upload.middleware.js";
@@ -59,6 +62,11 @@ router.get("/pending", ...authSuperAdmin, getPendingTenants);
 router.patch("/:tenantId/approve", ...authSuperAdmin, clearCacheMiddleware("v0/tenant"), approveTenant);
 router.patch("/:tenantId/reject", ...authSuperAdmin, clearCacheMiddleware("v0/tenant"), rejectTenant);
 router.patch("/:id/verify-gst-admin", ...authSuperAdmin, clearCacheMiddleware("v0/tenant"), verifyGstAdmin);
+
+// Access restriction control (super-admin only)
+router.patch("/:tenantId/restrict", ...authSuperAdmin, clearCacheMiddleware("v0/tenant"), setTenantRestriction);
+router.patch("/:tenantId/grace-period", ...authSuperAdmin, clearCacheMiddleware("v0/tenant"), updateTenantGracePeriod);
+router.patch("/:tenantId/billing", ...authSuperAdmin, clearCacheMiddleware("v0/tenant"), updateTenantBilling);
 
 // Re-appeal tenant (owner)
 router.patch("/re-appeal", ...authOwner, clearCacheMiddleware("v0/tenant"), reAppealTenant);

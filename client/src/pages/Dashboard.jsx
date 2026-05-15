@@ -12,6 +12,7 @@ import "../styles/tenant-info.css";
 import { useDelayedLoading } from "../hooks/useDelayedLoading";
 import ScrollingCredits from "../components/dashboard/ScrollingCredits";
 import { useModal } from "../context/ModalContext";
+import GracePeriodBanner from "../components/dashboard/GracePeriodBanner";
 
 // Lazy load heavy components
 const InviteUserModal = lazy(() => import("../components/tenant/InviteUserModal"));
@@ -74,6 +75,7 @@ const Dashboard = () => {
       {/* <Navbar /> */}
       <SideBar />
       <div className="dashboard">
+        {tenantDetails && <GracePeriodBanner tenant={tenantDetails} />}
         <ScrollingCredits />
         <div className="dashboard-notice-box">
           <div className="notice-icon">
