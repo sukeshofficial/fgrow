@@ -101,6 +101,7 @@ const LegalLayout = ({ title, children, lastUpdated, sections = [] }) => {
                 <div className="legal-footer-links">
                     <Link to="/terms">Terms</Link>
                     <Link to="/privacy">Privacy</Link>
+                    <Link to="/cookie-policy">Cookie Policy</Link>
                     <Link to="/payment-policy">Payment Policy</Link>
                     <Link to="/refund-policy">Refunds</Link>
                     <Link to="/legal">Legal Contact</Link>

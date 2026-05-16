@@ -1179,6 +1179,7 @@ const LandingPage = () => {
                                 <h4>Legal</h4>
                                 <Link to="/privacy">Privacy Policy</Link>
                                 <Link to="/terms">Terms of Service</Link>
+                                <Link to="/cookie-policy">Cookie Policy</Link>
                                 <Link to="/payment-policy">Payment Policy</Link>
                                 <Link to="/refund-policy">Refund Policy</Link>
                             </div>
