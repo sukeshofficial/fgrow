@@ -1177,10 +1177,10 @@ const LandingPage = () => {
                             </div>
                             <div className="footer-col">
                                 <h4>Legal</h4>
-                                <a href="#">Privacy Policy</a>
-                                <a href="#">Terms of Service</a>
-                                <a href="#">Security</a>
-                                <a href="#">Cookie Policy</a>
+                                <Link to="/privacy">Privacy Policy</Link>
+                                <Link to="/terms">Terms of Service</Link>
+                                <Link to="/payment-policy">Payment Policy</Link>
+                                <Link to="/refund-policy">Refund Policy</Link>
                             </div>
                         </div>
                         <div className="footer-bottom">

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../hooks/useAuth";
 import { checkAuth } from "../features/auth/auth.actions";
 import Toast from "../components/ui/Toast";
 import "../styles/subscription.css";
-import { useNavigate } from "react-router-dom";
 import { Spinner } from "../components/ui/Spinner";
 import { FaShieldAlt } from "react-icons/fa";
 import GooglePayButton from "@google-pay/button-react";
@@ -24,6 +24,7 @@ const Subscription = () => {
     const [utr, setUtr] = useState("");
     const [screenshot, setScreenshot] = useState(null);
     const [preview, setPreview] = useState(null);
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
 
     const addToast = (message, type = "success") => {
         const id = Date.now();
@@ -695,10 +696,36 @@ const Subscription = () => {
                             ))}
                         </ul>
 
+                        {/* Legal Consent */}
+                        <div style={{
+                            display: 'flex',
+                            gap: '14px',
+                            alignItems: 'flex-start',
+                            margin: '24px 0',
+                            textAlign: 'left',
+                            padding: '16px',
+                            background: agreedToTerms ? '#f0f9ff' : '#f8fafc',
+                            border: `1px solid ${agreedToTerms ? '#6366f1' : '#e2e8f0'}`,
+                            borderRadius: '12px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                        }} onClick={() => setAgreedToTerms(!agreedToTerms)}>
+                            <input
+                                type="checkbox"
+                                style={{ width: '20px', height: '20px', marginTop: '2px', cursor: 'pointer', accentColor: '#6366f1' }}
+                                checked={agreedToTerms}
+                                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                            <label style={{ fontSize: '13px', color: '#475569', lineHeight: '1.5', cursor: 'pointer', userSelect: 'none' }}>
+                                I understand and agree to the <Link to="/terms" target="_blank" onClick={(e) => e.stopPropagation()} style={{ color: 'var(--blue)', fontWeight: 700, textDecoration: 'none' }}>Terms & Conditions</Link>, <Link to="/privacy" target="_blank" onClick={(e) => e.stopPropagation()} style={{ color: 'var(--blue)', fontWeight: 700, textDecoration: 'none' }}>Privacy Policy</Link>, and <Link to="/payment-policy" target="_blank" onClick={(e) => e.stopPropagation()} style={{ color: 'var(--blue)', fontWeight: 700, textDecoration: 'none' }}>Payment Policy</Link>.
+                            </label>
+                        </div>
+
                         <button
                             className="price-btn price-btn-solid"
                             onClick={() => setShowGpayModal(true)}
-                            disabled={processing}
+                            disabled={processing || !agreedToTerms}
                         >
                             {processing ? "Processing..." : "Pay with GPay"}
                         </button>
@@ -707,7 +734,7 @@ const Subscription = () => {
                             type="button"
                             style={{ marginTop: 16, background: 'none', border: 'none', color: 'var(--muted)', fontSize: 13, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
                             onClick={handleRazorpayPayment}
-                            disabled={processing}
+                            disabled={processing || !agreedToTerms}
                         >
                             Pay via Card / Netbanking (Razorpay)
                         </button>

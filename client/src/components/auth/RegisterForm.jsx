@@ -56,6 +56,7 @@ const RegisterForm = ({ onSuccess }) => {
     file: null,
   });
 
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState("");
 
   // -----------------------------
@@ -220,11 +221,27 @@ const RegisterForm = ({ onSuccess }) => {
         required
       />
 
+      {/* Legal Consent */}
+      <div className="auth-checkbox-compact" onClick={() => setAgreedToTerms(!agreedToTerms)}>
+        <input
+          type="checkbox"
+          id="terms-consent"
+          className="auth-checkbox-sm"
+          checked={agreedToTerms}
+          onChange={(e) => setAgreedToTerms(e.target.checked)}
+          onClick={(e) => e.stopPropagation()}
+          required
+        />
+        <label htmlFor="terms-consent" className="checkbox-label-sm">
+          Agree to <Link to="/terms" onClick={(e) => e.stopPropagation()}>Terms</Link> & <Link to="/privacy" onClick={(e) => e.stopPropagation()}>Privacy</Link>
+        </label>
+      </div>
+
       {/* Submit */}
       <button
         type="submit"
-        className="btn primary"
-        disabled={isLoading}
+        className="btn primary create-account"
+        disabled={isLoading || !agreedToTerms}
       >
         {isLoading ? (
           <span className="btn-spinner" aria-hidden />

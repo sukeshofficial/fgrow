@@ -3,7 +3,7 @@ import {
     FaCreditCard, FaUsers, FaQrcode, FaCheckCircle,
     FaInfoCircle, FaArrowLeft, FaPlusCircle, FaHistory, FaHeadset, FaShieldAlt
 } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import PaymentProofModal from "../components/billing/PaymentProofModal";
 import SupportModal from "../components/ui/SupportModal";
@@ -22,6 +22,7 @@ const Billing = () => {
     const [loading, setLoading] = useState(true);
     const [isPaymentProofOpen, setIsPaymentProofOpen] = useState(false);
     const [isSupportOpen, setIsSupportOpen] = useState(false);
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -461,8 +462,34 @@ const Billing = () => {
                                 </div>
                             </div>
 
+                            {/* Legal Consent */}
+                            <div style={{
+                                display: 'flex',
+                                gap: '14px',
+                                alignItems: 'flex-start',
+                                margin: '20px 0',
+                                textAlign: 'left',
+                                padding: '16px',
+                                background: agreedToTerms ? 'rgba(99, 102, 241, 0.05)' : 'white',
+                                border: `1px solid ${agreedToTerms ? 'var(--accent)' : '#e2e8f0'}`,
+                                borderRadius: '16px',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }} onClick={() => setAgreedToTerms(!agreedToTerms)}>
+                                <input
+                                    type="checkbox"
+                                    style={{ width: '18px', height: '18px', marginTop: '4px', cursor: 'pointer', accentColor: 'var(--accent)' }}
+                                    checked={agreedToTerms}
+                                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                                <label style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.5', cursor: 'pointer', userSelect: 'none' }}>
+                                    I understand and agree to the <Link to="/terms" target="_blank" onClick={(e) => e.stopPropagation()} style={{ color: 'var(--accent)', fontWeight: 700, textDecoration: 'none' }}>Terms & Conditions</Link>, <Link to="/privacy" target="_blank" onClick={(e) => e.stopPropagation()} style={{ color: 'var(--accent)', fontWeight: 700, textDecoration: 'none' }}>Privacy Policy</Link>, and <Link to="/payment-policy" target="_blank" onClick={(e) => e.stopPropagation()} style={{ color: 'var(--accent)', fontWeight: 700, textDecoration: 'none' }}>Payment Policy</Link>.
+                                </label>
+                            </div>
+
                             <div className="action-row">
-                                <button onClick={() => setIsPaymentProofOpen(true)} className="btn-primary">
+                                <button onClick={() => setIsPaymentProofOpen(true)} className="btn-primary" disabled={!agreedToTerms}>
                                     <FaCheckCircle /> I've Paid
                                 </button>
                                 <button onClick={() => setIsSupportOpen(true)} className="btn-secondary">

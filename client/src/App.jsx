@@ -63,6 +63,14 @@ const DocumentCollection = lazy(() => import("./pages/documents/DocumentCollecti
 const InvoiceReport = lazy(() => import("./pages/invoices/InvoiceReport"));
 const ReceiptReport = lazy(() => import("./pages/receipts/ReceiptReport"));
 
+/* Legal Pages */
+const TermsAndConditions = lazy(() => import("./pages/Legal/TermsAndConditions"));
+const PrivacyPolicy = lazy(() => import("./pages/Legal/PrivacyPolicy"));
+const PaymentPolicy = lazy(() => import("./pages/Legal/PaymentPolicy"));
+const RefundPolicy = lazy(() => import("./pages/Legal/RefundPolicy"));
+const CookiePolicy = lazy(() => import("./pages/Legal/CookiePolicy"));
+const ContactLegal = lazy(() => import("./pages/Legal/ContactLegal"));
+
 import { Spinner } from "./components/ui/Spinner";
 
 /* Loading Spinner for Suspense */
@@ -141,6 +149,14 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         {/* Access blocked screen — always reachable (no auth guard) */}
         <Route path="/access-restricted" element={<AccessRestricted />} />
+
+        {/* Legal Pages - Public */}
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/payment-policy" element={<PaymentPolicy />} />
+        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/cookie-policy" element={<CookiePolicy />} />
+        <Route path="/legal" element={<ContactLegal />} />
 
         {/* ---------------- ADMIN PORTAL ---------------- */}
         <Route element={<ProtectedRoute />}>
