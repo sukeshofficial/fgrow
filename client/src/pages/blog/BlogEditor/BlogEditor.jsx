@@ -123,7 +123,17 @@ const BlogEditor = () => {
             const endpoint = id ? `/admin/blogs/${id}` : "/admin/blogs";
             const method = id ? 'patch' : 'post';
 
-            const res = await api[method](endpoint, formData);
+            const payload = { ...formData };
+            delete payload.slugModified;
+            delete payload._id;
+            delete payload.authorId;
+            delete payload.stats;
+            delete payload.createdAt;
+            delete payload.updatedAt;
+            delete payload.__v;
+            delete payload.userReaction;
+
+            const res = await api[method](endpoint, payload);
             if (res.data.success) {
                 setHasUnsavedChanges(false);
                 setLastSaved(new Date());
@@ -135,6 +145,8 @@ const BlogEditor = () => {
             }
         } catch (err) {
             console.error("Save error:", err);
+            const msg = err.response?.data?.message || err.message;
+            alert(`Failed to save: ${msg}`);
         } finally {
             setSaving(false);
         }

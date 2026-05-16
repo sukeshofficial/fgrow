@@ -9,6 +9,7 @@ export const createBlogSchema = Joi.object({
     content: Joi.string().min(10).required(),
     coverImage: Joi.string().uri().allow("").optional(),
     visibility: Joi.string().valid("public", "members-only").default("public"),
+    status: Joi.string().valid("draft", "pending", "published", "archived").default("draft"),
     tags: Joi.array().items(Joi.string().trim().max(50)).max(10).default([]),
     category: Joi.string().trim().max(100).allow("").optional(),
     readingTime: Joi.number().integer().min(1).max(120).optional(),

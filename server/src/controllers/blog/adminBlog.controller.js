@@ -7,7 +7,7 @@ import { createBlogSchema, updateBlogSchema } from "../../validators/blog.valida
 // @access  SuperAdmin
 export const createBlogPost = async (req, res) => {
     try {
-        const { error, value } = createBlogSchema.validate(req.body, { abortEarly: false });
+        const { error, value } = createBlogSchema.validate(req.body, { abortEarly: false, stripUnknown: true });
         if (error) {
             return res.status(400).json({ success: false, message: error.details.map(d => d.message).join(", ") });
         }
@@ -21,7 +21,7 @@ export const createBlogPost = async (req, res) => {
             ...value,
             authorId: req.user.id,
             authorType: "admin",
-            status: "draft",
+            status: value.status || "draft",
         });
 
         await newPost.save();
@@ -39,7 +39,7 @@ export const updateBlogPost = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const { error, value } = updateBlogSchema.validate(req.body, { abortEarly: false });
+        const { error, value } = updateBlogSchema.validate(req.body, { abortEarly: false, stripUnknown: true });
         if (error) {
             return res.status(400).json({ success: false, message: error.details.map(d => d.message).join(", ") });
         }
