@@ -1,0 +1,70 @@
+// client/src/styles/blog/base.module.scss
+@use "./tokens.module.scss" as *;
+
+.blogContainer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.typography {
+    h1 {
+        font-size: clamp(2.5rem, 5vw, 4.5rem);
+        font-weight: 900;
+        line-height: 1.1;
+        letter-spacing: -0.04em;
+        margin-bottom: 1.5rem;
+    }
+
+    h2 {
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 800;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        margin-bottom: 1.25rem;
+    }
+
+    p {
+        font-size: 1.125rem;
+        line-height: 1.6;
+        color: $slate-400;
+        margin-bottom: 1.5rem;
+    }
+}
+
+.glassCard {
+    background: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: $radius-lg;
+    transition: $transition-bounce;
+
+    &:hover {
+        border-color: rgba(99, 102, 241, 0.3);
+        box-shadow: $shadow-premium;
+        transform: translateY(-8px) scale(1.01);
+    }
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: $radius-full;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    &Primary {
+        background: rgba(99, 102, 241, 0.1);
+        color: $primary-indigo;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    &Secondary {
+        background: rgba(0, 0, 0, 0.05);
+        color: $slate-600;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+}

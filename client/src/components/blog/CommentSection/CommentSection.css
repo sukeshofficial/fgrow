@@ -1,0 +1,407 @@
+/* client/src/components/blog/CommentSection/CommentSection.css */
+@import '../../../styles/blog/blog-tokens.css';
+@import '../../../styles/blog/blog-base.css';
+
+.cs-section {
+    margin-top: var(--blog-sp-12);
+    /* Reduced from sp-20 */
+    padding: var(--blog-sp-8);
+    /* Reduced from sp-12 */
+    background: #ffffff;
+    border: 1px solid var(--blog-slate-200);
+    border-radius: var(--blog-radius-xl);
+}
+
+.cs-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--blog-sp-12);
+}
+
+.cs-title {
+    font-size: 1.5rem;
+    /* Reduced from 1.75rem */
+    font-weight: 850;
+    color: var(--blog-slate-900);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -0.02em;
+}
+
+.cs-count {
+    font-size: 0.85rem;
+    color: var(--blog-indigo-400);
+    background: rgba(99, 102, 241, 0.1);
+    padding: 4px 14px;
+    border-radius: var(--blog-radius-full);
+    font-weight: 800;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.cs-sort {
+    background: #ffffff;
+    border: 1px solid var(--blog-slate-300);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--blog-slate-700);
+    outline: none;
+    cursor: pointer;
+    transition: var(--blog-transition);
+}
+
+.cs-sort:hover {
+    border-color: var(--blog-slate-400);
+    color: var(--blog-slate-900);
+    background: var(--blog-slate-50);
+}
+
+.cs-sort:focus {
+    border-color: var(--blog-indigo-500);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Editor */
+.cs-editor {
+    margin-bottom: var(--blog-sp-10);
+    background: #fdfdfd;
+    border: 1px solid var(--blog-slate-200);
+    border-radius: var(--blog-radius-lg);
+    padding: 16px;
+    transition: var(--blog-transition);
+}
+
+.cs-editor:focus-within {
+    border-color: var(--blog-indigo-500);
+    background: rgba(255, 255, 255, 0.02);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08);
+}
+
+.cs-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+/* Comment List */
+.cs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    /* Highly condensed */
+}
+
+.cs-comment-wrap {
+    position: relative;
+}
+
+.cs-yt-comment {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.cs-avatar-col {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.cs-content-col {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Remove old padding boundary that was on .cs-comment */
+
+.cs-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+.cs-username {
+    font-weight: 800;
+    color: var(--blog-slate-900);
+    font-size: 0.85rem;
+}
+
+.cs-time {
+    color: var(--blog-slate-500);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.cs-body {
+    color: var(--blog-slate-800);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+.cs-mention {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--blog-indigo-50);
+    color: var(--blog-indigo-600);
+    font-weight: 700;
+    padding: 0px 6px 0px 2px;
+    border-radius: var(--blog-radius-full);
+    box-shadow: inset 0 0 0 1px var(--blog-indigo-200);
+    vertical-align: middle;
+    margin-top: -2px;
+    font-size: 0.85rem;
+}
+
+.cs-mention-initial {
+    background: var(--blog-indigo-500);
+    color: white;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cs-mention-img {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.cs-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    margin-bottom: 0;
+}
+
+.cs-action-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* Override ReactionBar in comments to be borderless and text-only like YouTube */
+.cs-actions .rb-wrap {
+    margin-bottom: 0;
+    gap: 0;
+}
+
+.cs-actions .rb-btn {
+    border: none;
+    background: transparent;
+    padding: 6px;
+    box-shadow: none;
+}
+
+.cs-actions .rb-btn:hover {
+    background: var(--blog-slate-100);
+}
+
+.cs-actions .rb-like.active,
+.cs-actions .rb-dislike.active {
+    background: transparent;
+    box-shadow: none;
+}
+
+.cs-actions .rb-like.active {
+    color: var(--blog-indigo-600);
+}
+
+.cs-actions .rb-dislike.active {
+    color: #ef4444;
+}
+
+.cs-action-btn {
+    background: transparent;
+    border: none;
+    color: var(--blog-slate-700);
+    padding: 6px 10px;
+    border-radius: var(--blog-radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: var(--blog-transition);
+}
+
+.cs-action-btn:hover {
+    background: var(--blog-slate-100);
+    color: var(--blog-slate-900);
+}
+
+.cs-action-btn.active {
+    color: var(--blog-indigo-400);
+    background: rgba(99, 102, 241, 0.08);
+}
+
+.cs-action-btn-danger:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+}
+
+/* Replies Toggle and Thread */
+.cs-replies-container {
+    margin-top: 4px;
+    position: relative;
+}
+
+.cs-toggle-replies {
+    background: transparent;
+    border: none;
+    color: var(--blog-indigo-600);
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: var(--blog-radius-full);
+    transition: var(--blog-transition);
+    margin-bottom: 4px;
+    margin-left: -8px;
+    /* Slightly offset to align text with body */
+    position: relative;
+    z-index: 2;
+}
+
+.cs-toggle-replies:hover {
+    background: var(--blog-indigo-50);
+}
+
+.y-chevron {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.y-chevron.open {
+    transform: rotate(180deg);
+}
+
+/* Thread Path System */
+.cs-replies {
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--blog-sp-6);
+    position: relative;
+}
+
+.cs-comment-wrap::before {
+    content: '';
+    position: absolute;
+    top: 40px;
+    /* Start below the avatar */
+    bottom: 0;
+    left: 20px;
+    /* Center of a 40px avatar */
+    width: 20px;
+    /* How far it bends in */
+    border-left: 2px solid var(--blog-slate-200);
+    border-bottom: 2px solid var(--blog-slate-200);
+    border-bottom-left-radius: 16px;
+    z-index: 1;
+    pointer-events: none;
+    /* This connects the parent to the nested block visually */
+}
+
+/* Specific styling for nested comments so they sit at the end of the curve */
+.cs-replies .cs-comment-wrap {
+    margin-left: 42px;
+    /* Pull it right to meet the curve */
+    position: relative;
+}
+
+/* Don't draw curves on leaves */
+.cs-replies .cs-comment-wrap::before {
+    display: none;
+}
+
+.cs-reply-editor,
+.cs-edit-mode {
+    margin-top: 12px;
+    background: #fdfdfd;
+    border: 1px solid var(--blog-slate-200);
+    border-radius: var(--blog-radius-lg);
+    padding: 16px;
+    transition: var(--blog-transition);
+    animation: blog-fade-up 0.3s ease;
+}
+
+.cs-reply-editor:focus-within,
+.cs-edit-mode:focus-within {
+    border-color: var(--blog-indigo-500);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px var(--blog-indigo-50);
+}
+
+
+/* Auth Prompt */
+.cs-auth-prompt {
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px dashed rgba(99, 102, 241, 0.2);
+    border-radius: var(--blog-radius-lg);
+    padding: 24px;
+    text-align: center;
+    margin-bottom: var(--blog-sp-12);
+}
+
+.cs-auth-prompt p {
+    color: var(--blog-slate-400);
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+}
+
+/* Loading */
+.cs-loading {
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+}
+
+/* Empty State */
+.cs-empty {
+    text-align: center;
+    padding: 60px 40px;
+    color: var(--blog-slate-500);
+    background: rgba(255, 255, 255, 0.01);
+    border-radius: var(--blog-radius-xl);
+    border: 1px dashed var(--blog-dark-border);
+    margin-top: 20px;
+}
+
+.cs-empty svg {
+    margin-bottom: 20px;
+    color: var(--blog-indigo-500);
+    opacity: 0.5;
+}
+
+.cs-empty h3 {
+    color: var(--blog-slate-800);
+    font-size: 1.125rem;
+    font-weight: 850;
+    margin-bottom: 8px;
+}
+
+.cs-empty p {
+    font-size: 0.95rem;
+    max-width: 360px;
+    margin: 0 auto;
+    line-height: 1.6;
+}

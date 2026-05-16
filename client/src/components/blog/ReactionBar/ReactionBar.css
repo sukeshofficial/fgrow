@@ -1,0 +1,84 @@
+/* client/src/components/blog/ReactionBar/ReactionBar.css */
+@import '../../../styles/blog/blog-tokens.css';
+
+.rb-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--blog-sp-3);
+    margin-bottom: var(--blog-sp-4);
+}
+
+.rb-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    /* Condensed from 8px 18px */
+    border-radius: var(--blog-radius-full);
+    border: 1.5px solid var(--blog-slate-200);
+    background: #fff;
+    color: var(--blog-slate-500);
+    font-size: 0.8rem;
+    /* Condensed from 0.875rem */
+    font-weight: 750;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: var(--blog-font-sans);
+    user-select: none;
+}
+
+.rb-btn:not(:disabled):hover {
+    transform: translateY(-1px);
+    border-color: var(--blog-indigo-300);
+    color: var(--blog-indigo-500);
+    background: var(--blog-indigo-50);
+}
+
+.rb-btn:not(:disabled):active {
+    transform: scale(0.97);
+}
+
+.rb-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.rb-like.active {
+    border-color: var(--blog-indigo-500);
+    background: var(--blog-indigo-500);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+}
+
+.rb-like:not(.active):hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    color: var(--blog-indigo-400);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.rb-dislike.active {
+    border-color: #ef4444;
+    background: #ef4444;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+}
+
+.rb-dislike:not(.active):hover {
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.rb-count {
+    font-weight: 800;
+    font-size: 0.9rem;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Small variant (for comment reactions) */
+.rb-wrap.rb-sm .rb-btn {
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    gap: 5px;
+}

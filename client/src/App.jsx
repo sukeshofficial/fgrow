@@ -57,6 +57,11 @@ const LaunchTimer = lazy(() => import("./pages/LaunchTimer"));
 const AccessRestricted = lazy(() => import("./pages/AccessRestricted"));
 const Billing = lazy(() => import("./pages/Billing"));
 
+const BlogListing = lazy(() => import("./pages/blog/BlogListing"));
+const BlogDetail = lazy(() => import("./pages/blog/BlogDetail"));
+const BlogManagement = lazy(() => import("./pages/admin/BlogManagement"));
+const BlogEditor = lazy(() => import("./pages/blog/BlogEditor/BlogEditor"));
+
 const DocumentInOut = lazy(() => import("./pages/documents/DocumentInOut"));
 const DscManagement = lazy(() => import("./pages/documents/DscManagement"));
 const DocumentCollection = lazy(() => import("./pages/documents/DocumentCollection"));
@@ -150,6 +155,10 @@ const App = () => {
         {/* Access blocked screen — always reachable (no auth guard) */}
         <Route path="/access-restricted" element={<AccessRestricted />} />
 
+        {/* Public Blog */}
+        <Route path="/blog" element={<BlogListing />} />
+        <Route path="/blog/:slug" element={<BlogDetail />} />
+
         {/* Legal Pages - Public */}
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -164,6 +173,9 @@ const App = () => {
 
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/tenants/:tenantId" element={<TenantDetailView />} />
+            <Route path="/admin/blogs" element={<BlogManagement />} />
+            <Route path="/blog/write" element={<BlogEditor />} />
+            <Route path="/blog/edit/:id" element={<BlogEditor />} />
 
           </Route>
         </Route>

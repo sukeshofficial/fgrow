@@ -1,0 +1,93 @@
+// client/src/pages/blog/BlogListing.module.scss
+@use "../../styles/blog/tokens.module.scss" as *;
+@use "../../styles/blog/base.module.scss" as *;
+
+.page {
+    min-height: 100vh;
+    background-color: #f8fafc;
+    color: $slate-900;
+    padding-bottom: 100px;
+}
+
+.hero {
+    padding: 80px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+
+    .badge {
+        @extend .badgePrimary;
+        margin-bottom: 24px;
+    }
+
+    h1 {
+        @extend h1;
+        background: linear-gradient(to right, $slate-900, $slate-600);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    p {
+        @extend p;
+        max-width: 650px;
+        margin: 0 auto 48px;
+    }
+}
+
+.searchContainer {
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+
+    .searchIcon {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $slate-500;
+    }
+
+    input {
+        width: 100%;
+        padding: 20px 24px 20px 60px;
+        border-radius: $radius-md;
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        color: $slate-900;
+        font-size: 1.125rem;
+        outline: none;
+        transition: $transition-smooth;
+
+        &:focus {
+            border-color: $primary-indigo;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+    }
+}
+
+.contentSection {
+    @extend .blogContainer;
+    margin-top: 60px;
+}
+
+.featuredSection {
+    margin-bottom: 80px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 48px;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero h1 {
+        font-size: 3rem;
+    }
+}

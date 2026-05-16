@@ -1,0 +1,159 @@
+// client/src/pages/blog/BlogDetail.module.scss
+@use "../../styles/blog/tokens.module.scss" as *;
+@use "../../styles/blog/base.module.scss" as *;
+
+.page {
+    min-height: 100vh;
+    background-color: $slate-950;
+    color: $slate-50;
+    background: radial-gradient(circle at 50% 0%, $slate-900 0%, $slate-950 100%);
+}
+
+.mainLayout {
+    @extend .blogContainer;
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    gap: 64px;
+    padding-top: 140px;
+    padding-bottom: 100px;
+}
+
+.contentColumn {
+    min-width: 0; // Prevent flex/grid breakout
+}
+
+.header {
+    margin-bottom: 64px;
+
+    .category {
+        @extend .badgePrimary;
+        margin-bottom: 24px;
+    }
+
+    h1 {
+        @extend h1;
+        margin-bottom: 24px;
+    }
+
+    .summary {
+        font-size: 1.5rem;
+        color: $slate-400;
+        line-height: 1.5;
+        margin-bottom: 48px;
+    }
+}
+
+.authorMeta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 48px;
+
+    .authorInfo {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, $primary-indigo, $accent-pink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 800;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .nameDetails {
+            .name {
+                font-weight: 700;
+                font-size: 1.125rem;
+            }
+
+            .sub {
+                font-size: 0.85rem;
+                color: $slate-500;
+                display: flex;
+                gap: 8px;
+            }
+        }
+    }
+}
+
+.reader {
+    font-size: 1.25rem;
+    line-height: 1.8;
+    color: $slate-300;
+
+    // Markdown styling
+    h2 {
+        @extend h2;
+        margin-top: 3rem;
+    }
+
+    h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: white;
+        margin-top: 2.5rem;
+    }
+
+    p {
+        margin-bottom: 1.5rem;
+    }
+
+    pre {
+        background: #0f172a;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 24px;
+        border-radius: 16px;
+        margin: 32px 0;
+        overflow-x: auto;
+    }
+
+    blockquote {
+        border-left: 4px solid $primary-indigo;
+        padding: 24px 32px;
+        background: rgba(99, 102, 241, 0.03);
+        border-radius: 0 16px 16px 0;
+        font-style: italic;
+        color: $slate-400;
+        margin: 48px 0;
+    }
+}
+
+.sidebarRight {
+    position: sticky;
+    top: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+@media (max-width: 1200px) {
+    .mainLayout {
+        grid-template-columns: 200px 1fr;
+        gap: 40px;
+    }
+
+    .sidebarRight {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .mainLayout {
+        grid-template-columns: 1fr;
+        padding-top: 100px;
+    }
+
+    .tocColumn {
+        display: none;
+    }
+}

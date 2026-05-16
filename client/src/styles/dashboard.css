@@ -1,5 +1,5 @@
 .dashboard {
-  margin-top: 50px;
+  /* margin-top: 50px; */
   margin-left: var(--sidebar-w, 260px);
   padding: 20px;
   display: block;
@@ -74,7 +74,7 @@
 @media (max-width: 980px) {
   .dashboard {
     margin-left: 72px !important;
-    margin-top: 60px;
+    /* margin-top: 60px; */
     padding: 15px;
   }
 

@@ -34,6 +34,9 @@ import superAdminRoutes from "./routes/superadmin.routes.js";
 import releaseNoteRoutes from "./routes/releaseNote.routes.js";
 import feedbackRoutes from "./routes/feedback.routes.js";
 import supportRoutes from "./routes/support.routes.js";
+import adminBlogRoutes from "./routes/adminBlog.routes.js";
+import blogPublicRoutes from "./routes/blogPublic.routes.js";
+import blogSocialRoutes from "./routes/blog/social.routes.js";
 
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import tenantAccessMiddleware from "./middleware/tenantAccess.middleware.js";
@@ -135,6 +138,10 @@ app.use("/api/v0/superadmin", superAdminRoutes);
 app.use("/api/v0/release-notes", releaseNoteRoutes);
 app.use("/api/v0/support", supportRoutes);
 app.use("/api/v0/feedback", feedbackRoutes);
+
+app.use("/api/v0/admin/blogs", adminBlogRoutes);
+app.use("/api/v0/blogs", blogPublicRoutes);
+app.use("/api/v0/blog-social", blogSocialRoutes);
 
 
 

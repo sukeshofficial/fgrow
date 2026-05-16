@@ -1,0 +1,169 @@
+/* client/src/components/blog/MentionInput/MentionInput.css */
+@import '../../../styles/blog/blog-tokens.css';
+
+.mi-container {
+    position: relative;
+    width: 100%;
+}
+
+.mi-text-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.mi-highlights {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 16px;
+    font-family: var(--blog-font-sans);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--blog-slate-900);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    pointer-events: none;
+    z-index: 1;
+    overflow-y: hidden;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--blog-dark-border);
+    border-radius: var(--blog-radius-md);
+    transition: var(--blog-transition);
+}
+
+.mi-textarea {
+    width: 100%;
+    min-height: 80px;
+    resize: vertical;
+    padding: 16px;
+    font-family: var(--blog-font-sans);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    outline: none;
+    position: relative;
+    z-index: 2;
+    color: transparent !important;
+    caret-color: var(--blog-slate-900) !important;
+    background: transparent !important;
+    border: 1px solid transparent;
+    border-radius: var(--blog-radius-md);
+    margin: 0;
+}
+
+.mi-textarea:focus+.mi-highlights {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.mi-chip {
+    background: var(--blog-indigo-50);
+    color: var(--blog-indigo-600);
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 0;
+    box-shadow: 0 0 0 2px var(--blog-indigo-50);
+    /* Fake padding so it doesn't offset cursor */
+}
+
+/* Obsolete in overlay, but keeping for dropdown usage if any (though dropdown uses generic mi-avatar) */
+
+.mi-chip-img,
+.mi-chip-initial {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.mi-chip-initial {
+    background: var(--blog-indigo-500);
+    color: white;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Mention Dropdown */
+.mi-dropdown {
+    position: absolute;
+    z-index: var(--blog-z-dropdown);
+    background: rgba(13, 17, 23, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--blog-dark-border);
+    border-radius: var(--blog-radius-lg);
+    box-shadow: var(--blog-shadow-xl);
+    max-height: 240px;
+    overflow-y: auto;
+    width: 280px;
+    padding: 6px;
+    animation: blog-fade-up 0.2s ease;
+}
+
+.mi-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: var(--blog-radius-sm);
+    cursor: pointer;
+    transition: var(--blog-transition);
+}
+
+.mi-item:hover,
+.mi-item.active {
+    background: rgba(99, 102, 241, 0.15);
+}
+
+.mi-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blog-indigo-500), var(--blog-violet-500));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.mi-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mi-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.mi-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mi-email {
+    font-size: 0.75rem;
+    color: var(--blog-slate-500);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mi-empty {
+    padding: 16px;
+    text-align: center;
+    color: var(--blog-slate-500);
+    font-size: 0.85rem;
+}

@@ -1173,7 +1173,7 @@ const LandingPage = () => {
                                 <a href="#">About Us</a>
                                 <a href="#">Contact</a>
                                 <a href="#">Careers</a>
-                                <a href="#">Blog</a>
+                                <a href="/blog">Blog</a>
                             </div>
                             <div className="footer-col">
                                 <h4>Legal</h4>

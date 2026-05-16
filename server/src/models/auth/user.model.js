@@ -151,6 +151,18 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "0.0.0",
     },
+
+    // Blog Engagement Tracking
+    likedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "BlogPost" }],
+    likedComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+    dislikedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "BlogPost" }],
+    dislikedComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+    viewedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "BlogPost" }],
+    readingProgress: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
   },
   {
     timestamps: true,

@@ -107,6 +107,7 @@ const MENU = [
 
 const ADMIN_MENU = [
   { label: "Admin Dashboard", path: "/admin/dashboard", icon: <FaTachometerAlt />, isBottom: true },
+  { label: "Insights Hub", path: "/admin/blogs", icon: <FaFileAlt />, isBottom: true },
 ];
 
 /* -------------------------------------------------------------------------- */

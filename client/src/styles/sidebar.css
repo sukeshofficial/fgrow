@@ -662,7 +662,8 @@ body {
 .notifications,
 .settings,
 .invoice-report,
-.receipt-report {
+.receipt-report,
+.bm-page {
   margin-left: var(--sidebar-w, 260px);
   transition: margin-left 0.3s ease;
 }
@@ -681,7 +682,8 @@ body {
   .notifications,
   .settings,
   .invoice-report,
-  .receipt-report {
+  .receipt-report,
+  .bm-page {
     margin-left: 72px;
   }
 }
